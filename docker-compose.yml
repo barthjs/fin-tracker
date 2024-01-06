@@ -1,0 +1,25 @@
+version: "3"
+services:
+    web:
+        image: "webdevops/php-apache-dev:8.3"
+        ports:
+            - "80:80"
+        environment:
+            - WEB_DOCUMENT_ROOT=/app/public
+            - PHP_DEBUGGER=xdebug
+            - XDEBUG_START_WITH_REQUEST=yes
+            - XDEBUG_DISCOVER_CLIENT_HOST=1
+            - XDEBUG_CLIENT_PORT=9003
+            - XDEBUG_CLIENT_HOST=host.docker.internal
+            - PHP_DISPLAY_ERRORS=1
+            - PHP_IDE_CONFIG=serverName=fin-tracker
+        volumes:
+            - '.:/app'
+    mariadb:
+        image: mariadb
+        ports:
+            - "3306:3306"
+        environment:
+            - MARIADB_ROOT_PASSWORD=root
+            - MARIADB_DATABASE=fin-tracker
+
