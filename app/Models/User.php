@@ -13,6 +13,13 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'user_id';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -38,6 +45,22 @@ class User extends Authenticatable
     ];
 
     /**
+     * @return HasMany
+     */
+    public function bankAccounts(): HasMany
+    {
+        return $this->hasMany(BankAccount::class, 'user_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function transactionCategory(): HasMany
+    {
+        return $this->hasMany(TransactionCategory::class, 'user_id');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -49,21 +72,5 @@ class User extends Authenticatable
             'password' => 'hashed',
             'api_key' => 'hashed'
         ];
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function BankAccounts(): HasMany
-    {
-        return $this->hasMany(related: BankAccount::class, foreignKey: 'user_id');
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function TransactionCategories(): HasMany
-    {
-        return $this->hasMany(related: TransactionCategory::class, foreignKey: 'user_id');
     }
 }

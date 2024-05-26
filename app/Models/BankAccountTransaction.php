@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class BankAccountTransaction extends Model
 {
     use HasFactory;
+
     public $timestamps = false;
 
     /**
@@ -28,16 +29,16 @@ class BankAccountTransaction extends Model
     /**
      * @return BelongsTo
      */
-    public function BankAccount(): BelongsTo
+    public function bankAccount(): BelongsTo
     {
-        return $this->belongsTo(related: BankAccount::class, foreignKey: 'bank_account_id');
+        return $this->belongsTo(BankAccount::class, 'bank_account_id');
     }
 
     /**
      * @return BelongsTo
      */
-    public function TransactionCategory(): BelongsTo
+    public function transactionCategory(): BelongsTo
     {
-        return $this->belongsTo(related: TransactionCategory::class, foreignKey: 'category_id');
+        return $this->belongsTo(TransactionCategory::class, 'category_id');
     }
 }

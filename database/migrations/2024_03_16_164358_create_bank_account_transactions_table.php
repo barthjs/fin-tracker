@@ -23,7 +23,6 @@ return new class extends Migration {
 
             $table->unsignedInteger('category_id')->nullable()->index();
             $table->foreign('category_id')->references('category_id')->on('transaction_categories');
-
         });
     }
 

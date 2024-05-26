@@ -28,16 +28,16 @@ class TransactionCategory extends Model
     /**
      * @return BelongsTo
      */
-    public function User(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(related: User::class, foreignKey: 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
      * @return HasMany
      */
-    public function BankAccountTransactions(): HasMany
+    public function bankAccountTransaction(): HasMany
     {
-        return $this->hasMany(related: BankAccountTransaction::class, foreignKey: 'category_id');
+        return $this->hasMany(BankAccountTransaction::class, 'category_id');
     }
 }

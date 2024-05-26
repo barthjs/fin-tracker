@@ -28,7 +28,7 @@ class BankAccount extends Model
     /**
      * @return BelongsTo
      */
-    public function User(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(related: User::class, foreignKey: 'user_id');
     }
@@ -36,8 +36,8 @@ class BankAccount extends Model
     /**
      * @return HasMany
      */
-    public function BankAccountTransactions(): HasMany
+    public function bankAccountTransaction(): HasMany
     {
-        return $this->hasMany(related: BankAccountTransaction::class, foreignKey: 'bank_account_id');
+        return $this->hasMany(BankAccountTransaction::class, 'bank_account_id');
     }
 }
