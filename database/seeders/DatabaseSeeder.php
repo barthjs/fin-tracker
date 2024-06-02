@@ -7,6 +7,7 @@ use App\Models\BankAccountTransaction;
 use App\Models\TransactionCategory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +16,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::factory(3)->create();
-        foreach ($users as $user) {
-            TransactionCategory::factory(10)->create(['user_id' => $user->user_id]);
-            BankAccount::factory(5)->create(['user_id' => $user->user_id]);
-            BankAccountTransaction::factory(100)->create();
-        }
+        $user = User::firstOrCreate([
+            'first_name' => 'Admin',
+            'last_name' => 'Admin',
+            'email' => 'admin@example.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('12345678'),
+            'remember_token' => null,
+            'username' => 'admin'
+        ]);
+        $bank = BankAccount::factory(3)->create(['user_id' => $user->user_id]);
+        $cat = TransactionCategory::factory(10)->create(['user_id' => $user->user_id]);
+        BankAccountTransaction::factory(10)->create(['bank_account_id' => $bank->random()->bank_account_id, 'category_id' => $cat->random()->category_id]);
     }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasName
 {
     use HasFactory, Notifiable;
 
@@ -45,6 +45,20 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'api_key' => 'hashed'
+        ];
+    }
+
+    /**
      * @return HasMany
      */
     public function bankAccounts(): HasMany
@@ -60,17 +74,8 @@ class User extends Authenticatable
         return $this->hasMany(TransactionCategory::class, 'user_id');
     }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function getFilamentName(): string
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'api_key' => 'hashed'
-        ];
+        return $this->username;
     }
 }

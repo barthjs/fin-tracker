@@ -2,9 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\BankAccount;
 use App\Models\BankAccountTransaction;
-use App\Models\TransactionCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,16 +19,11 @@ class BankAccountTransactionFactory extends Factory
      */
     public function definition(): array
     {
-        $bankAccount = BankAccount::all()->random();
-        $categoryId = TransactionCategory::whereUserId($bankAccount->user_id)->get(['category_id'])->random();
         return [
             'date' => fake()->date(),
             'amount' => $this->faker->randomFloat(2, 0, 1000000),
             'destination' => fake()->company(),
             'notes' => fake()->text(),
-
-            'bank_account_id' => $bankAccount->bank_account_id,
-            'category_id' => $categoryId,
         ];
     }
 }
