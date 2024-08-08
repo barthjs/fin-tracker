@@ -1,0 +1,16 @@
+services:
+  app:
+    extends:
+      file: .docker/compose.base.yaml
+      service: app
+    restart: unless-stopped
+  db:
+    extends:
+      file: .docker/compose.base.yaml
+      service: db
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/mysql
+volumes:
+  db:
+    driver: local

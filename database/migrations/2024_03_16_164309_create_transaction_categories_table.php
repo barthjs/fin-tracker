@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('type')->nullable()->index();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();
-            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->foreign('user_id')->references('user_id')->on('sys_users');
 
             $table->timestamps();
         });

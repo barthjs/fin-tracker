@@ -1,20 +1,22 @@
 {
-    "name": "laravel/laravel",
+    "name": "barthjs/fin-tracker",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Finance tracking web app",
+    "homepage": "https://github.com/barthjs/fin-tracker",
+    "keywords": [
+        "laravel",
+        "finance"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",
         "filament/filament": "^3.2",
-        "guzzlehttp/guzzle": "^7.8",
-        "laravel/framework": "^11.0",
+        "guzzlehttp/guzzle": "^7.9",
+        "laravel/framework": "^11.21",
         "laravel/tinker": "^2.9"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "laravel/pint": "^1.14",
-        "laravel/sail": "^1.29",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
         "pestphp/pest": "^2.34",

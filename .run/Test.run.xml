@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Test" type="PestRunConfigurationType">
+    <CommandLine>
+      <PhpTestInterpreterSettings>
+        <option name="interpreterName" value="Docker" />
+      </PhpTestInterpreterSettings>
+    </CommandLine>
+    <option name="pestRunnerSettings">
+      <PestRunner configuration_file="$PROJECT_DIR$/phpunit.xml" method="" scope="ConfigurationFile" use_alternative_configuration_file="true" />
+    </option>
+    <option name="runnerSettings">
+      <PhpTestRunnerSettings configuration_file="$PROJECT_DIR$/phpunit.xml" method="" scope="ConfigurationFile" use_alternative_configuration_file="true" />
+    </option>
+    <method v="2" />
+  </configuration>
+</component>

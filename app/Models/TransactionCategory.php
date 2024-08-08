@@ -13,23 +13,9 @@ class TransactionCategory extends Model
 {
     use HasFactory;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'transaction_categories';
-
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
     protected $primaryKey = 'category_id';
 
-    /**
-     * The "booted" method of the model.
-     */
     protected static function booted(): void
     {
         static::addGlobalScope(new TransactionCategoryScope());
@@ -41,17 +27,11 @@ class TransactionCategory extends Model
         });
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function bankAccountTransaction(): HasMany
     {
         return $this->hasMany(BankAccountTransaction::class, 'category_id');

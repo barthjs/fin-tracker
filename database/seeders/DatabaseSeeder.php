@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
             'last_name' => 'Admin',
             'email' => 'admin@example.com',
             'email_verified_at' => now(),
-            'password' => Hash::make('12345678'),
+            'password' => Hash::make('admin'),
             'remember_token' => null,
-            'username' => 'admin'
+            'name' => 'admin'
         ]);
         $bank = BankAccount::factory(3)->create(['user_id' => $user->user_id]);
         $cat = TransactionCategory::factory(10)->create(['user_id' => $user->user_id]);

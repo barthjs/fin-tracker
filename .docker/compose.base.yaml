@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fin-tracker-app
+    ports:
+      - "${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80"
+    volumes:
+      - '../:/app'
+    environment:
+      - WEB_DOCUMENT_ROOT=/app/public
+  db:
+    image: mariadb
+    container_name: fin-tracker-db
+    ports:
+      - "${DB_FORWARD_HOST:-127.0.0.1}:${DB_FORWARD_PORT:-3306}:3306"
+    environment:
+      - MARIADB_DATABASE=fin-tracker
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}

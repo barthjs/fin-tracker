@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->decimal('balance')->nullable();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();
-            $table->foreign('user_id')->references('user_id')->on('users')->cascadeOnDelete();
+            $table->foreign('user_id')->references('user_id')->on('sys_users')->cascadeOnDelete();
 
             $table->timestamps();
         });
