@@ -23,7 +23,7 @@ class BankAccountTransactionFactory extends Factory
             'date' => fake()->date(),
             'amount' => $this->faker->randomFloat(2, 0, 1000000),
             'destination' => fake()->company(),
-            'notes' => fake()->text(),
+            'notes' => fake()->sentence(),
         ];
     }
 }

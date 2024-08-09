@@ -15,7 +15,15 @@ class BankAccountTransaction extends Model
     public $timestamps = false;
 
     protected $table = 'bank_account_transactions';
-    protected $primaryKey = 'transaction_id';
+
+    protected $fillable = [
+        'date',
+        'amount',
+        'destination',
+        'notes',
+        'bank_account_id',
+        'category_id'
+    ];
 
     protected static function booted(): void
     {

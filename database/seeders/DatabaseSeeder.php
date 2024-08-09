@@ -7,6 +7,7 @@ use App\Models\BankAccountTransaction;
 use App\Models\TransactionCategory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -19,14 +20,22 @@ class DatabaseSeeder extends Seeder
         $user = User::firstOrCreate([
             'first_name' => 'Admin',
             'last_name' => 'Admin',
+            'name' => 'admin',
             'email' => 'admin@example.com',
             'email_verified_at' => now(),
             'password' => Hash::make('admin'),
             'remember_token' => null,
-            'name' => 'admin'
         ]);
-        $bank = BankAccount::factory(3)->create(['user_id' => $user->user_id]);
-        $cat = TransactionCategory::factory(10)->create(['user_id' => $user->user_id]);
-        BankAccountTransaction::factory(10)->create(['bank_account_id' => $bank->random()->bank_account_id, 'category_id' => $cat->random()->category_id]);
+
+        if (App::environment() === 'local') {
+            $bank = BankAccount::factory(3)->create(['user_id' => $user->id]);
+            $cat = TransactionCategory::factory(10)->create(['user_id' => $user->id]);
+            foreach ($bank as $item) {
+                for ($i = 0; $i < 10; $i++) {
+                    $categoryId = $cat->random()->id;
+                    BankAccountTransaction::factory()->create(['bank_account_id' => $item->id, 'category_id' => $categoryId]);
+                }
+            }
+        }
     }
 }

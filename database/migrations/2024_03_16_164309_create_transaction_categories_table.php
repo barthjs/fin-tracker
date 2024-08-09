@@ -11,15 +11,14 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('transaction_categories', function (Blueprint $table) {
-            $table->unsignedInteger('category_id')->autoIncrement();
+            $table->unsignedInteger('id')->autoIncrement();
+            $table->timestamps();
 
             $table->string('name')->index();
             $table->string('type')->nullable()->index();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();
-            $table->foreign('user_id')->references('user_id')->on('sys_users');
-
-            $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 
@@ -28,6 +27,5 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaction_categories');
     }
 };

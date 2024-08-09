@@ -10,8 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BankAccountTransactionResource extends Resource
 {
@@ -24,25 +22,24 @@ class BankAccountTransactionResource extends Resource
         return $form
             ->schema([
                 Forms\Components\DatePicker::make('date')
-                    ->required()
                     ->autofocus()
-                    ->default(today()),
+                    ->default(today())
+                    ->required(),
                 Forms\Components\TextInput::make('amount')
-                    ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->required(),
                 Forms\Components\TextInput::make('destination')
-                    ->required()
-                    ->maxLength(255),
+                    ->string()
+                    ->maxLength(255)
+                    ->required(),
                 Forms\Components\Textarea::make('notes')
                     ->columnSpanFull(),
                 Forms\Components\Select::make('bank_account_id')
                     ->relationship('bankAccount', 'name')
-                    ->required()
-                    ->default('NULL'),
+                    ->required(),
                 Forms\Components\Select::make('category_id')
                     ->relationship('transactionCategory', 'name')
-                    ->required()
-                    ->default('NULL'),
+                    ->required(),
             ]);
     }
 
@@ -59,17 +56,17 @@ class BankAccountTransactionResource extends Resource
                 Tables\Columns\TextColumn::make('destination')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('bankAccount.name')
-                    ->numeric()
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('transactionCategory.name')
+                    ->searchable()
                     ->sortable(),
             ])
+            ->defaultSort('date', 'desc')
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -91,7 +88,6 @@ class BankAccountTransactionResource extends Resource
         return [
             'index' => Pages\ListBankAccountTransactions::route('/'),
             'create' => Pages\CreateBankAccountTransaction::route('/create'),
-            'view' => Pages\ViewBankAccountTransaction::route('/{record}'),
             'edit' => Pages\EditBankAccountTransaction::route('/{record}/edit'),
         ];
     }

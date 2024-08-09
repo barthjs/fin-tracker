@@ -22,8 +22,9 @@ class BankAccountResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required()
+                    ->string()
                     ->maxLength(255)
+                    ->required()
             ]);
     }
 
@@ -50,13 +51,7 @@ class BankAccountResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -72,7 +67,6 @@ class BankAccountResource extends Resource
         return [
             'index' => Pages\ListBankAccounts::route('/'),
             'create' => Pages\CreateBankAccount::route('/create'),
-            'view' => Pages\ViewBankAccount::route('/{record}'),
             'edit' => Pages\EditBankAccount::route('/{record}/edit'),
         ];
     }

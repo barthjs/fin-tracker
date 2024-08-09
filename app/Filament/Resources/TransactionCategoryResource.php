@@ -24,11 +24,13 @@ class TransactionCategoryResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('type')
+                    ->string()
                     ->maxLength(255)
-                    ->default('NULL'),
+                    ->required(),
+                Forms\Components\TextInput::make('type')
+                    ->string()
+                    ->maxLength(255)
+                    ->required(),
             ]);
     }
 
@@ -51,17 +53,12 @@ class TransactionCategoryResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('name', 'asc')
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -77,7 +74,6 @@ class TransactionCategoryResource extends Resource
         return [
             'index' => Pages\ListTransactionCategories::route('/'),
             'create' => Pages\CreateTransactionCategory::route('/create'),
-            'view' => Pages\ViewTransactionCategory::route('/{record}'),
             'edit' => Pages\EditTransactionCategory::route('/{record}/edit'),
         ];
     }

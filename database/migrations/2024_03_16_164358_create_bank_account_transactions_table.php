@@ -11,18 +11,18 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('bank_account_transactions', function (Blueprint $table) {
-            $table->unsignedInteger('transaction_id')->autoIncrement();
-
+            $table->unsignedInteger('id')->autoIncrement();
             $table->date('date');
+
             $table->decimal('amount');
             $table->string('destination')->nullable()->index();
             $table->text('notes')->nullable()->index();
 
             $table->unsignedSmallInteger('bank_account_id')->nullable()->index();
-            $table->foreign('bank_account_id')->references('bank_account_id')->on('bank_accounts');
+            $table->foreign('bank_account_id')->references('id')->on('bank_accounts')->cascadeOnDelete()->cascadeOnUpdate();;
 
             $table->unsignedInteger('category_id')->nullable()->index();
-            $table->foreign('category_id')->references('category_id')->on('transaction_categories');
+            $table->foreign('category_id')->references('id')->on('transaction_categories')->cascadeOnDelete()->cascadeOnUpdate();;
         });
     }
 
@@ -31,6 +31,5 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('bank_account_transactions');
     }
 };

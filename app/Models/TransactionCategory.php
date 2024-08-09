@@ -14,7 +14,10 @@ class TransactionCategory extends Model
     use HasFactory;
 
     protected $table = 'transaction_categories';
-    protected $primaryKey = 'category_id';
+    protected $fillable = [
+        'name',
+        'type',
+    ];
 
     protected static function booted(): void
     {

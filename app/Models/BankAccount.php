@@ -13,10 +13,11 @@ class BankAccount extends Model
     use HasFactory;
 
     protected $table = 'bank_accounts';
-    protected $primaryKey = 'bank_account_id';
 
     protected $fillable = [
-        'name'
+        'name',
+        'balance',
+        'user_id'
     ];
 
     protected static function booted(): void
