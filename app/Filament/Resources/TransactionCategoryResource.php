@@ -2,16 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\RelationManagers\BankAccountTransactionRelationManager;
 use App\Filament\Resources\TransactionCategoryResource\Pages;
-use App\Filament\Resources\TransactionCategoryResource\RelationManagers;
 use App\Models\TransactionCategory;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TransactionCategoryResource extends Resource
 {
@@ -24,13 +22,13 @@ class TransactionCategoryResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->string()
                     ->maxLength(255)
-                    ->required(),
+                    ->required()
+                    ->string(),
                 Forms\Components\TextInput::make('type')
-                    ->string()
                     ->maxLength(255)
-                    ->required(),
+                    ->required()
+                    ->string()
             ]);
     }
 
@@ -53,7 +51,7 @@ class TransactionCategoryResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('name', 'asc')
+            ->defaultSort('name')
             ->filters([
                 //
             ])
@@ -65,7 +63,7 @@ class TransactionCategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            BankAccountTransactionRelationManager::class
         ];
     }
 

@@ -27,7 +27,10 @@ docker compose exec app bash -c "
     npm run build
 
     php artisan migrate --force
+    php artisan optimize:clear
     php artisan optimize
+    php artisan filament:optimize-clear
+    php artisan filament:optimize
 
     php artisan up
 "

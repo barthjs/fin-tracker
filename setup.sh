@@ -38,6 +38,7 @@ function setup_prod_commands {
     php artisan db:seed --force
     php artisan storage:link
     php artisan optimize
+    php artisan filament:optimize
 }
 
 function setup_dev {

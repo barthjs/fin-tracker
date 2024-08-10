@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\RelationManagers\BankAccountTransactionRelationManager;
 use App\Filament\Resources\BankAccountResource\Pages;
-use App\Filament\Resources\BankAccountResource\RelationManagers;
 use App\Models\BankAccount;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,16 +15,16 @@ class BankAccountResource extends Resource
 {
     protected static ?string $model = BankAccount::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'tabler-bank-building';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->string()
                     ->maxLength(255)
                     ->required()
+                    ->string(),
             ]);
     }
 
@@ -47,6 +47,7 @@ class BankAccountResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('name')
             ->filters([
                 //
             ])
@@ -58,7 +59,7 @@ class BankAccountResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            BankAccountTransactionRelationManager::class
         ];
     }
 

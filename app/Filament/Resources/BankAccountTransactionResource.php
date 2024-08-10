@@ -3,8 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BankAccountTransactionResource\Pages;
-use App\Filament\Resources\BankAccountTransactionResource\RelationManagers;
 use App\Models\BankAccountTransaction;
+use Exception;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -29,26 +29,44 @@ class BankAccountTransactionResource extends Resource
                     ->numeric()
                     ->required(),
                 Forms\Components\TextInput::make('destination')
-                    ->string()
                     ->maxLength(255)
-                    ->required(),
-                Forms\Components\Textarea::make('notes')
-                    ->columnSpanFull(),
+                    ->required()
+                    ->string(),
+                Forms\Components\Textarea::make('notes'),
                 Forms\Components\Select::make('bank_account_id')
                     ->relationship('bankAccount', 'name')
-                    ->required(),
+                    ->required()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->maxLength(255)
+                            ->required()
+                            ->string()
+                    ]),
                 Forms\Components\Select::make('category_id')
                     ->relationship('transactionCategory', 'name')
-                    ->required(),
+                    ->required()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->maxLength(255)
+                            ->required()
+                            ->string(),
+                        Forms\Components\TextInput::make('type')
+                            ->maxLength(255)
+                            ->required()
+                            ->string(),
+                    ]),
             ]);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('date')
-                    ->date()
+                    ->date('Y.m.d')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->numeric()
@@ -64,23 +82,21 @@ class BankAccountTransactionResource extends Resource
             ])
             ->defaultSort('date', 'desc')
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('name')
+                    ->multiple()
+                    ->preload()
+                    ->relationship('bankAccount', 'name')
             ])
+            ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
