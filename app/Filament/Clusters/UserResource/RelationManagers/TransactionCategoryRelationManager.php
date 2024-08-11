@@ -1,24 +1,18 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Clusters\UserResource\RelationManagers;
 
-use App\Filament\RelationManagers\BankAccountTransactionRelationManager;
-use App\Filament\Resources\TransactionCategoryResource\Pages;
-use App\Models\TransactionCategory;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class TransactionCategoryResource extends Resource
+class TransactionCategoryRelationManager extends RelationManager
 {
-    protected static ?string $model = TransactionCategory::class;
+    protected static string $relationship = 'transactionCategory';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?int $navigationSort = 3;
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -33,7 +27,7 @@ class TransactionCategoryResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
             ->columns([
@@ -53,27 +47,9 @@ class TransactionCategoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('name')
-            ->filters([
-                //
-            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            BankAccountTransactionRelationManager::class
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListTransactionCategories::route('/'),
-            'create' => Pages\CreateTransactionCategory::route('/create'),
-            'edit' => Pages\EditTransactionCategory::route('/{record}/edit'),
-        ];
     }
 }

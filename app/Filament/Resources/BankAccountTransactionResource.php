@@ -14,6 +14,7 @@ use Filament\Tables\Table;
 class BankAccountTransactionResource extends Resource
 {
     protected static ?string $model = BankAccountTransaction::class;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 

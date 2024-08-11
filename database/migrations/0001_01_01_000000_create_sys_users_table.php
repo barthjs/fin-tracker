@@ -11,15 +11,16 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('sys_users', function (Blueprint $table) {
-            $table->unsignedTinyInteger('user_id')->autoIncrement();
+            $table->unsignedTinyInteger('id')->autoIncrement();
             $table->timestamps();
 
-            $table->string('first_name');
-            $table->string('last_name');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
             $table->string('name')->nullable()->unique();
             $table->string('email')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->nullable()->index();
             $table->rememberToken();
         });
 

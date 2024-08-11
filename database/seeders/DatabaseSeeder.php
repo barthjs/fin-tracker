@@ -17,24 +17,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::firstOrCreate([
+        $admin = User::firstOrCreate([
             'first_name' => 'Admin',
             'last_name' => 'Admin',
             'name' => 'admin',
             'email' => 'admin@example.com',
             'email_verified_at' => now(),
             'password' => Hash::make('admin'),
-            'remember_token' => null,
+            'role' => 'admin',
         ]);
 
         if (App::environment() === 'local') {
-            $bank = BankAccount::factory(3)->create(['user_id' => $user->id]);
-            $cat = TransactionCategory::factory(10)->create(['user_id' => $user->id]);
-            foreach ($bank as $item) {
-                for ($i = 0; $i < 10; $i++) {
-                    $categoryId = $cat->random()->id;
-                    BankAccountTransaction::factory()->create(['bank_account_id' => $item->id, 'category_id' => $categoryId]);
-                }
+            $this->createTestValues($admin);
+            for ($i = 1; $i <= 3; $i++) {
+                $user = User::factory()->create(['email' => "test$i@example.com"]);
+                $this->createTestValues($user);
+            }
+        }
+    }
+
+    /**
+     * @param User $user
+     * @return void
+     */
+    private function createTestValues(User $user): void
+    {
+        $bank = BankAccount::factory(3)->create(['user_id' => $user->id]);
+        $cat = TransactionCategory::factory(10)->create(['user_id' => $user->id]);
+        foreach ($bank as $item) {
+            for ($i = 0; $i < 10; $i++) {
+                $categoryId = $cat->random()->id;
+                BankAccountTransaction::factory()->create(['bank_account_id' => $item->id, 'category_id' => $categoryId]);
             }
         }
     }

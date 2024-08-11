@@ -13,6 +13,9 @@ class BankAccountScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->where('user_id', auth()->id());
+        $user = auth()->user();
+        if (!$user->isAdmin()) {
+            $builder->where('user_id', $user->id);
+        }
     }
 }
