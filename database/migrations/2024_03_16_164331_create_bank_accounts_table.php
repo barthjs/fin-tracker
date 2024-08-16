@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Currency;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,9 +17,12 @@ return new class extends Migration {
 
             $table->string('name')->index();
             $table->decimal('balance')->nullable();
+            $currencies = array_column(Currency::cases(), 'value');
+            $table->enum('currency', $currencies)->nullable()->index();
+            $table->text('description')->nullable();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();
-            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();;
+            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 

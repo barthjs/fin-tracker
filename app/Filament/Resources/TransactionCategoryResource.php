@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\RelationManagers\BankAccountTransactionRelationManager;
 use App\Filament\Resources\TransactionCategoryResource\Pages;
 use App\Models\TransactionCategory;
 use Filament\Forms;
@@ -53,18 +52,20 @@ class TransactionCategoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('name')
+            ->persistSortInSession()
+            ->striped()
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->iconButton(),
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            BankAccountTransactionRelationManager::class
+            //TransactionRelationManager::class
         ];
     }
 
@@ -72,8 +73,6 @@ class TransactionCategoryResource extends Resource
     {
         return [
             'index' => Pages\ListTransactionCategories::route('/'),
-            'create' => Pages\CreateTransactionCategory::route('/create'),
-            'edit' => Pages\EditTransactionCategory::route('/{record}/edit'),
         ];
     }
 }

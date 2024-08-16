@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Currency;
 use App\Models\Scopes\BankAccountScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,13 @@ class BankAccount extends Model
     protected $fillable = [
         'name',
         'balance',
+        'currency',
+        'description',
         'user_id'
+    ];
+
+    protected $casts = [
+        'currency' => Currency::class,
     ];
 
     protected static function booted(): void
@@ -33,16 +40,16 @@ class BankAccount extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(related: User::class, foreignKey: 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function bankAccountTransaction(): HasMany
+    public function transactions(): HasMany
     {
         return $this->hasMany(BankAccountTransaction::class, 'bank_account_id');
     }
 
     public function getBalanceAttribute(): mixed
     {
-        return $this->bankAccountTransaction()->sum('amount');
+        return $this->transactions()->sum('amount');
     }
 }

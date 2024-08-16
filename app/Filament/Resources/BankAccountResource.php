@@ -2,14 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\RelationManagers\BankAccountTransactionRelationManager;
+use App\Enums\Currency;
 use App\Filament\Resources\BankAccountResource\Pages;
+use App\Filament\Resources\BankAccountResource\RelationManagers\TransactionRelationManager;
 use App\Models\BankAccount;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class BankAccountResource extends Resource
 {
@@ -26,6 +28,16 @@ class BankAccountResource extends Resource
                     ->maxLength(255)
                     ->required()
                     ->string(),
+                Forms\Components\Select::make('currency')
+                    ->options(Currency::class)
+                    ->required()
+                    ->searchable(),
+                Forms\Components\Textarea::make('description')
+                    ->autosize()
+                    ->columnSpanFull()
+                    ->maxLength(1000)
+                    ->rows(1)
+                    ->string()
             ]);
     }
 
@@ -37,7 +49,21 @@ class BankAccountResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('balance')
-                    ->numeric()
+                    ->numeric(2)
+                    ->badge()
+                    ->color(function ($record) {
+                        $balance = $record->balance;
+                        return match (true) {
+                            floatval($balance) == 0 => 'gray',
+                            floatval($balance) < 0 => 'danger',
+                            default => 'success',
+                        };
+                    })
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('currency')
+                    ->toggleable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('description')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('Y.m.d H:i:s')
@@ -48,19 +74,22 @@ class BankAccountResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->recordUrl(fn(Model $record): string => Pages\ViewBankAccount::getUrl([$record->id]))
             ->defaultSort('name')
+            ->persistSortInSession()
+            ->striped()
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->iconButton(),
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            BankAccountTransactionRelationManager::class
+            TransactionRelationManager::class
         ];
     }
 
@@ -68,8 +97,7 @@ class BankAccountResource extends Resource
     {
         return [
             'index' => Pages\ListBankAccounts::route('/'),
-            'create' => Pages\CreateBankAccount::route('/create'),
-            'edit' => Pages\EditBankAccount::route('/{record}/edit'),
+            'view' => Pages\ViewBankAccount::route('/{record}'),
         ];
     }
 }

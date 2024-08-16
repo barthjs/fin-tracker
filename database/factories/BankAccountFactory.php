@@ -22,6 +22,8 @@ class BankAccountFactory extends Factory
         return [
             'name' => fake()->word(),
             'balance' => $this->faker->randomFloat(2, 0, 1000000),
+            'currency' => 'EUR',
+            'description' => fake()->sentence(),
         ];
     }
 }
