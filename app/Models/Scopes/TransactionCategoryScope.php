@@ -13,9 +13,6 @@ class TransactionCategoryScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $user = auth()->user();
-        if (!$user->isAdmin()) {
-            $builder->where('user_id', $user->id);
-        }
+        $builder->where('user_id', auth()->user()->id);
     }
 }

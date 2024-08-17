@@ -16,13 +16,13 @@ return new class extends Migration {
 
             $table->decimal('amount');
             $table->string('destination')->nullable()->index();
-            $table->text('notes')->nullable()->index();
+            $table->string('notes')->nullable();
 
             $table->unsignedSmallInteger('bank_account_id')->nullable()->index();
-            $table->foreign('bank_account_id')->references('id')->on('bank_accounts')->cascadeOnDelete()->cascadeOnUpdate();;
+            $table->foreign('bank_account_id')->references('id')->on('bank_accounts')->cascadeOnDelete()->cascadeOnUpdate();
 
             $table->unsignedInteger('category_id')->nullable()->index();
-            $table->foreign('category_id')->references('id')->on('transaction_categories')->cascadeOnDelete()->cascadeOnUpdate();;
+            $table->foreign('category_id')->references('id')->on('transaction_categories')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 
