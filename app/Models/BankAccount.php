@@ -20,11 +20,13 @@ class BankAccount extends Model
         'balance',
         'currency',
         'description',
+        'active',
         'user_id'
     ];
 
     protected $casts = [
         'currency' => Currency::class,
+        'active' => 'boolean',
     ];
 
     protected static function booted(): void
@@ -46,10 +48,5 @@ class BankAccount extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(BankAccountTransaction::class, 'bank_account_id');
-    }
-
-    public function getBalanceAttribute(): mixed
-    {
-        return $this->transactions()->sum('amount');
     }
 }

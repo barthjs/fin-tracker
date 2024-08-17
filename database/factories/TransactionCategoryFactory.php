@@ -2,12 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Enums\TransactionGroup;
+use App\Enums\TransactionType;
 use App\Models\TransactionCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<TransactionCategory>
- */
 class TransactionCategoryFactory extends Factory
 {
     protected $model = TransactionCategory::class;
@@ -19,9 +18,17 @@ class TransactionCategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $group = fake()->randomElement(TransactionGroup::cases())->value;
+        $type = match ($group) {
+            "Transfers" => TransactionType::Transfers,
+            "Inc" => TransactionType::Revenue,
+            default => TransactionType::Expenses,
+        };
+
         return [
-            'type' => fake()->word(),
             'name' => fake()->word(),
+            'type' => $type,
+            'group' => $group,
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Models\Scopes\BankAccountScope;
 use App\Models\Scopes\BankAccountTransactionScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,6 @@ class BankAccountTransaction extends Model
     use HasFactory;
 
     public $timestamps = false;
-
     protected $table = 'bank_account_transactions';
 
     protected $fillable = [
@@ -28,6 +28,11 @@ class BankAccountTransaction extends Model
     protected static function booted(): void
     {
         static::addGlobalScope(new BankAccountTransactionScope());
+        static::created(callback: function (BankAccountTransaction $transaction) {
+            $sum = BankAccountTransaction::whereBankAccountId($transaction->bank_account_id)->withoutGlobalScopes([BankAccountTransactionScope::class])->sum('amount');
+            BankAccount::whereId($transaction->bank_account_id)->withoutGlobalScopes([BankAccountScope::class])->update(['balance' => $sum]);
+        });
+
     }
 
     public function bankAccount(): BelongsTo

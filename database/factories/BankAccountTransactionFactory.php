@@ -5,9 +5,6 @@ namespace Database\Factories;
 use App\Models\BankAccountTransaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<BankAccountTransaction>
- */
 class BankAccountTransactionFactory extends Factory
 {
     protected $model = BankAccountTransaction::class;
@@ -21,7 +18,7 @@ class BankAccountTransactionFactory extends Factory
     {
         return [
             'date' => fake()->date(),
-            'amount' => $this->faker->randomFloat(2, 0, 1000000),
+            'amount' => fake()->randomFloat(2, -10000, 10000),
             'destination' => fake()->company(),
             'notes' => fake()->sentence(),
         ];

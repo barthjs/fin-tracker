@@ -37,7 +37,13 @@ class DatabaseSeeder extends Seeder
     }
 
     /**
-     * @param User $user
+     * Generates test data for a given user, including transaction categories, bank accounts, and transactions.
+     *
+     * - Creates 10 transaction categories for the user.
+     * - Creates 3 bank accounts for the user.
+     * - Generates 100 transactions for each bank account, assigning them randomly to the transaction categories.
+     *
+     * @param User $user The user for whom the test data is generated.
      * @return void
      */
     private function createTestValues(User $user): void
@@ -45,9 +51,11 @@ class DatabaseSeeder extends Seeder
         $bank = BankAccount::factory(3)->create(['user_id' => $user->id]);
         $cat = TransactionCategory::factory(10)->create(['user_id' => $user->id]);
         foreach ($bank as $item) {
-            for ($i = 0; $i < 10; $i++) {
-                $categoryId = $cat->random()->id;
-                BankAccountTransaction::factory()->create(['bank_account_id' => $item->id, 'category_id' => $categoryId]);
+            for ($i = 0; $i < 100; $i++) {
+                $category = $cat->random();
+                $amount = fake()->randomFloat(2, 0, 10000);
+                $amount *= ($category->type->value == "Expenses") ? -1 : 1;
+                BankAccountTransaction::factory()->create(['bank_account_id' => $item->id, 'amount' => $amount, 'category_id' => $category->id]);
             }
         }
     }

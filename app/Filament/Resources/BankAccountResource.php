@@ -6,10 +6,12 @@ use App\Enums\Currency;
 use App\Filament\Resources\BankAccountResource\Pages;
 use App\Filament\Resources\BankAccountResource\RelationManagers\TransactionRelationManager;
 use App\Models\BankAccount;
+use Exception;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,13 +36,20 @@ class BankAccountResource extends Resource
                     ->searchable(),
                 Forms\Components\Textarea::make('description')
                     ->autosize()
-                    ->columnSpanFull()
                     ->maxLength(1000)
                     ->rows(1)
                     ->string()
-            ]);
+                    ->grow(),
+                Forms\Components\Toggle::make('active')
+                    ->default(true)
+                    ->inline(false)
+            ])
+            ->columns(4);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -64,7 +73,13 @@ class BankAccountResource extends Resource
                     ->toggleable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable()
+                    ->wrap(),
+                Tables\Columns\IconColumn::make('active')
+                    ->boolean()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('Y.m.d H:i:s')
                     ->sortable()
@@ -79,10 +94,14 @@ class BankAccountResource extends Resource
             ->persistSortInSession()
             ->striped()
             ->filters([
-                //
+                Filter::make('active')
+                    ->query(fn($query) => $query->where('active', true))
             ])
+            ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\EditAction::make()->iconButton(),
+                Tables\Actions\DeleteAction::make()->iconButton()
+                    ->disabled(fn($record) => $record->transactions()->count() > 0)
             ]);
     }
 

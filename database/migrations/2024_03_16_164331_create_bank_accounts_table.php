@@ -16,10 +16,11 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->string('name')->index();
-            $table->decimal('balance')->nullable();
+            $table->decimal('balance')->default(0.00)->index();
             $currencies = array_column(Currency::cases(), 'value');
             $table->enum('currency', $currencies)->nullable()->index();
             $table->text('description')->nullable();
+            $table->boolean('active')->default(true)->index();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();
             $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
