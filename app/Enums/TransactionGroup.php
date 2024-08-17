@@ -4,8 +4,8 @@ namespace App\Enums;
 
 enum TransactionGroup: string
 {
-    case VarExp = 'VarExp';
-    case FixExp = 'FixExp';
-    case Inc = 'Inc';
-    case Transfers = 'Transfers';
+    case VariableExpense = 'Variable Expense';
+    case FixedExpense = 'Fixed Expense';
+    case Income = 'Income';
+    case Transfer = 'Transfer';
 }

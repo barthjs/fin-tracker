@@ -26,19 +26,9 @@ class TransactionRelationManager extends RelationManager
                         ->autofocus()
                         ->default(today())
                         ->required(),
-                    Forms\Components\TextInput::make('amount')
-                        ->suffix(fn() => $this->getOwnerRecord()->currency->value)
-                        ->numeric()
-                        ->inputMode('decimal')
-                        ->required(),
-                    Forms\Components\TextInput::make('destination')
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                ])->columns(3),
-                Forms\Components\Section::make()->schema([
                     Forms\Components\Select::make('bank_account_id')
                         ->relationship('bankAccount', 'name')
+                        ->default(fn() => $this->getOwnerRecord()->id)
                         ->required()
                         ->searchable()
                         ->preload()
@@ -64,36 +54,13 @@ class TransactionRelationManager extends RelationManager
                                     ->grow(),
                             ])->columns(3),
                         ]),
-                    Forms\Components\Select::make('category_id')
-                        ->relationship('transactionCategory', 'name')
-                        ->required()
-                        ->searchable()
-                        ->preload()
-                        ->createOptionForm([
-                            Forms\Components\Section::make()->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->autofocus()
-                                    ->maxLength(255)
-                                    ->required()
-                                    ->string(),
-                                Forms\Components\Toggle::make('active')
-                                    ->default(true)
-                                    ->inline(false),
-                                Forms\Components\Select::make('type')
-                                    ->options(TransactionType::class)
-                                    ->required(),
-                                Forms\Components\Select::make('group')
-                                    ->options(TransactionGroup::class)
-                                    ->required(),
-                            ])->columns(2)
-                        ]),
-                    Forms\Components\Textarea::make('notes')
-                        ->autosize()
-                        ->columnSpanFull()
-                        ->maxLength(255)
-                        ->rows(1)
-                        ->string(),
-                ])->columns(2),
+                    Forms\Components\TextInput::make('amount')
+                        ->suffix(fn() => $this->getOwnerRecord()->currency->value)
+                        ->numeric()
+                        ->inputMode('decimal')
+                        ->required(),
+                ])->columns(3),
+                self::descriptionFormPart()
             ]);
     }
 
@@ -111,6 +78,23 @@ class TransactionRelationManager extends RelationManager
                     ->fontFamily('mono')
                     ->toggleable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('amount')
+                    ->copyable()
+                    ->copyMessage('Copied!')
+                    ->label(fn() => 'Amount in ' . $this->getOwnerRecord()->currency->value)
+                    ->fontFamily('mono')
+                    ->numeric(2)
+                    ->sortable()
+                    ->toggleable()
+                    ->badge()
+                    ->color(function ($record) {
+                        $type = $record->transactionCategory()->first()->type->value;
+                        return match (true) {
+                            $type == 'Expense' => 'danger',
+                            $type == 'Revenue' => 'success',
+                            default => 'gray',
+                        };
+                    }),
                 Tables\Columns\TextColumn::make('destination')
                     ->copyable()
                     ->copyMessage('Copied!')
@@ -125,26 +109,11 @@ class TransactionRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable()
                     ->wrap(),
-                Tables\Columns\TextColumn::make('transactionCategory.type')
-                    ->copyable()
-                    ->copyMessage('Copied!')
-                    ->label('Type')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
                 Tables\Columns\TextColumn::make('transactionCategory.group')
                     ->label('Group')
                     ->copyable()
                     ->copyMessage('Copied!')
                     ->searchable()
-                    ->sortable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('amount')
-                    ->copyable()
-                    ->copyMessage('Copied!')
-                    ->label(fn() => 'Amount in ' . $this->getOwnerRecord()->currency->value)
-                    ->fontFamily('mono')
-                    ->numeric(2)
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('notes')
@@ -161,17 +130,11 @@ class TransactionRelationManager extends RelationManager
                     ->multiple()
                     ->preload()
                     ->searchable(),
-                SelectFilter::make('type')
-                    ->options(TransactionType::class)
-                    ->multiple(),
-                SelectFilter::make('group')
-                    ->options(TransactionGroup::class)
-                    ->multiple()
             ])
             ->persistFiltersInSession()
-            ->filtersFormColumns(3)
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->iconButton(),
@@ -189,5 +152,44 @@ class TransactionRelationManager extends RelationManager
     public function isReadOnly(): bool
     {
         return false;
+    }
+
+    public static function descriptionFormPart(): Forms\Components\Section
+    {
+        return Forms\Components\Section::make()->schema([
+            Forms\Components\TextInput::make('destination')
+                ->maxLength(255)
+                ->required()
+                ->string(),
+            Forms\Components\Select::make('category_id')
+                ->relationship('transactionCategory', 'name')
+                ->required()
+                ->searchable()
+                ->preload()
+                ->createOptionForm([
+                    Forms\Components\Section::make()->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->autofocus()
+                            ->maxLength(255)
+                            ->required()
+                            ->string(),
+                        Forms\Components\Toggle::make('active')
+                            ->default(true)
+                            ->inline(false),
+                        Forms\Components\Select::make('type')
+                            ->options(TransactionType::class)
+                            ->required(),
+                        Forms\Components\Select::make('group')
+                            ->options(TransactionGroup::class)
+                            ->required(),
+                    ])->columns(2)
+                ]),
+            Forms\Components\Textarea::make('notes')
+                ->autosize()
+                ->columnSpanFull()
+                ->maxLength(255)
+                ->rows(1)
+                ->string(),
+        ])->columns(2);
     }
 }

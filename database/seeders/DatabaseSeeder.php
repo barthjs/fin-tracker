@@ -22,9 +22,9 @@ class DatabaseSeeder extends Seeder
             'last_name' => 'Admin',
             'name' => 'admin',
             'email' => 'admin@example.com',
-            'email_verified_at' => now(),
             'password' => Hash::make('admin'),
-            'role' => 'admin',
+            'is_admin' => true,
+            'active' => true,
         ]);
 
         if (App::environment() === 'local') {

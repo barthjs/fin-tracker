@@ -22,7 +22,8 @@ class User extends Authenticatable implements FilamentUser, HasName
         'name',
         'email',
         'password',
-        'role'
+        'is_admin',
+        'active',
     ];
 
     protected $hidden = [
@@ -33,8 +34,9 @@ class User extends Authenticatable implements FilamentUser, HasName
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'active' => 'boolean',
         ];
     }
 
@@ -50,23 +52,11 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // TODO: Implement canAccessPanel() method.
-        return true;
+        return $this->active == true;
     }
 
-    /**
-     * @return string
-     */
     public function getFilamentName(): string
     {
         return "{$this->first_name} {$this->last_name}";
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAdmin(): bool
-    {
-        return $this->role == 'admin';
     }
 }

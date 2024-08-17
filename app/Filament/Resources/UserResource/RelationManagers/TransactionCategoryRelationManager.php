@@ -1,28 +1,24 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Enums\TransactionGroup;
 use App\Enums\TransactionType;
-use App\Filament\Resources\TransactionCategoryResource\Pages;
-use App\Models\TransactionCategory;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class TransactionCategoryResource extends Resource
+class TransactionCategoryRelationManager extends RelationManager
 {
-    protected static ?string $model = TransactionCategory::class;
+    protected static string $relationship = 'transactionCategory';
+    protected static ?string $icon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationIcon = 'tabler-category';
-    protected static ?string $navigationGroup = 'System';
-    protected static ?int $navigationSort = 2;
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -47,14 +43,13 @@ class TransactionCategoryResource extends Resource
     /**
      * @throws Exception
      */
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable()
-                    ->wrap(),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('type')
                     ->searchable()
                     ->sortable(),
@@ -84,15 +79,8 @@ class TransactionCategoryResource extends Resource
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\EditAction::make()->iconButton(),
-                Tables\Actions\DeleteAction::make()->iconButton()
-                    ->disabled(fn($record) => $record->transactions()->count() > 0),
-            ]);
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListTransactionCategories::route('/'),
-        ];
+                Tables\Actions\DeleteAction::make()->iconButton(),
+            ])
+            ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes());
     }
 }
