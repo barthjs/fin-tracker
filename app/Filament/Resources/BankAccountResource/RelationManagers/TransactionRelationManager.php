@@ -5,6 +5,7 @@ namespace App\Filament\Resources\BankAccountResource\RelationManagers;
 use App\Enums\Currency;
 use App\Enums\TransactionGroup;
 use App\Enums\TransactionType;
+use App\Models\BankAccountTransaction;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -22,7 +23,7 @@ class TransactionRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\Section::make()->schema([
-                    Forms\Components\DatePicker::make('date')
+                    Forms\Components\DateTimePicker::make('date')
                         ->autofocus()
                         ->default(today())
                         ->required(),
@@ -57,6 +58,8 @@ class TransactionRelationManager extends RelationManager
                     Forms\Components\TextInput::make('amount')
                         ->suffix(fn() => $this->getOwnerRecord()->currency->value)
                         ->numeric()
+                        ->minValue(-999999999.9999)
+                        ->maxValue(999999999.9999)
                         ->inputMode('decimal')
                         ->required(),
                 ])->columns(3),
@@ -72,7 +75,7 @@ class TransactionRelationManager extends RelationManager
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('date')
-                    ->date('Y.m.d')
+                    ->date('Y-m-d H:m')
                     ->copyable()
                     ->copyMessage('Copied!')
                     ->fontFamily('mono')
@@ -83,7 +86,13 @@ class TransactionRelationManager extends RelationManager
                     ->copyMessage('Copied!')
                     ->label(fn() => 'Amount in ' . $this->getOwnerRecord()->currency->value)
                     ->fontFamily('mono')
-                    ->numeric(2)
+                    ->numeric(function ($record) {
+                        $numberStr = (string)$record->amount;
+                        $decimalPart = substr($numberStr, strpos($numberStr, '.') + 1);
+                        $decimalPart = rtrim($decimalPart, '0');
+                        $decimalPlaces = strlen($decimalPart);
+                        return max($decimalPlaces, 2);
+                    })
                     ->sortable()
                     ->toggleable()
                     ->badge()
@@ -158,6 +167,12 @@ class TransactionRelationManager extends RelationManager
     {
         return Forms\Components\Section::make()->schema([
             Forms\Components\TextInput::make('destination')
+                ->datalist(BankAccountTransaction::query()
+                    ->select('destination')
+                    ->distinct()
+                    ->orderBy('destination')
+                    ->pluck('destination')
+                    ->toArray())
                 ->maxLength(255)
                 ->required()
                 ->string(),

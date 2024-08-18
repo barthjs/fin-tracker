@@ -25,6 +25,11 @@ class BankAccountTransaction extends Model
         'category_id'
     ];
 
+    protected $casts = [
+        'date' => 'datetime',
+        'amount' => 'decimal:4',
+    ];
+
     protected static function booted(): void
     {
         static::addGlobalScope(new BankAccountTransactionScope());

@@ -25,6 +25,7 @@ class BankAccount extends Model
     ];
 
     protected $casts = [
+        'balance' => 'decimal:4',
         'currency' => Currency::class,
         'active' => 'boolean',
     ];

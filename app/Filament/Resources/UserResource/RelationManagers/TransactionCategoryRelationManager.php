@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 class TransactionCategoryRelationManager extends RelationManager
 {
     protected static string $relationship = 'transactionCategory';
-    protected static ?string $icon = 'heroicon-o-rectangle-stack';
+    protected static ?string $icon = 'tabler-category';
 
     public function form(Form $form): Form
     {
@@ -61,11 +61,11 @@ class TransactionCategoryRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('Y.m.d H:i:s')
+                    ->dateTime('Y-m-d H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime('Y.m.d H:i:s')
+                    ->dateTime('Y-m-d H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

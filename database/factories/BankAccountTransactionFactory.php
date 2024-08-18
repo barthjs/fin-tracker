@@ -17,7 +17,7 @@ class BankAccountTransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'date' => fake()->date(),
+            'date' => fake()->dateTime(),
             'amount' => fake()->randomFloat(2, -10000, 10000),
             'destination' => fake()->company(),
             'notes' => fake()->sentence(),

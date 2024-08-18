@@ -27,7 +27,7 @@ class BankAccountTransactionResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make()->schema([
-                    Forms\Components\DatePicker::make('date')
+                    Forms\Components\DateTimePicker::make('date')
                         ->autofocus()
                         ->default(today())
                         ->required(),
@@ -62,6 +62,8 @@ class BankAccountTransactionResource extends Resource
                     Forms\Components\TextInput::make('amount')
                         ->suffix(fn($get) => BankAccount::whereId($get('bank_account_id'))->first()->currency->value ?? "")
                         ->numeric()
+                        ->minValue(-999999999.9999)
+                        ->maxValue(999999999.9999)
                         ->inputMode('decimal')
                         ->required(),
                 ])->columns(3),
@@ -77,7 +79,7 @@ class BankAccountTransactionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('date')
-                    ->date('Y.m.d')
+                    ->date('Y-m-d H:m')
                     ->copyable()
                     ->copyMessage('Copied!')
                     ->fontFamily('mono')
@@ -91,7 +93,13 @@ class BankAccountTransactionResource extends Resource
                     ->copyMessage('Copied!')
                     ->suffix(fn($record) => " " . $record->bankAccount->currency->value)
                     ->fontFamily('mono')
-                    ->numeric(2)
+                    ->numeric(function ($record) {
+                        $numberStr = (string)$record->amount;
+                        $decimalPart = substr($numberStr, strpos($numberStr, '.') + 1);
+                        $decimalPart = rtrim($decimalPart, '0');
+                        $decimalPlaces = strlen($decimalPart);
+                        return max($decimalPlaces, 2);
+                    })
                     ->sortable()
                     ->toggleable()
                     ->badge()
