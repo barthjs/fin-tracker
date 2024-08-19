@@ -2,8 +2,9 @@
 
 namespace App\Enums;
 
-enum TransactionType: string {
-    case Revenue = 'Revenue';
-    case Expense = 'Expense';
-    case Transfer = 'Transfer';
+enum TransactionType
+{
+    case income;
+    case expense;
+    case transfer;
 }

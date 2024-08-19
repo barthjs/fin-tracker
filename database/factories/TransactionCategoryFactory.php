@@ -18,11 +18,11 @@ class TransactionCategoryFactory extends Factory
      */
     public function definition(): array
     {
-        $group = fake()->randomElement(TransactionGroup::cases())->value;
+        $group = fake()->randomElement(TransactionGroup::cases())->name;
         $type = match ($group) {
-            "Transfer" => TransactionType::Transfer,
-            "Income" => TransactionType::Revenue,
-            default => TransactionType::Expense,
+            "transfer" => TransactionType::transfer->name,
+            "income" => TransactionType::income->name,
+            default => TransactionType::expense->name,
         };
 
         return [

@@ -12,23 +12,32 @@ class EditProfile extends BaseEditProfile
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->label(__('Username'))
-                    ->required()
-                    ->maxLength(255)
-                    ->autofocus(),
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
                 TextInput::make('first_name')
+                    ->label(__('resources.users.table.first_name'))
+                    ->autofocus()
+                    ->maxLength(255)
                     ->required()
-                    ->maxLength(255),
+                    ->string(),
                 TextInput::make('last_name')
+                    ->label(__('resources.users.table.last_name'))
+                    ->maxLength(255)
                     ->required()
-                    ->maxLength(255),
-                $this->getEmailFormComponent(),
-                $this->getPasswordFormComponent(),
-                $this->getPasswordConfirmationFormComponent(),
+                    ->string(),
+                TextInput::make('name')
+                    ->label(__('resources.users.table.name'))
+                    ->maxLength(255)
+                    ->required()
+                    ->string()
+                    ->unique(ignoreRecord: true),
+                TextInput::make('email')
+                    ->label(__('resources.users.table.email'))
+                    ->maxLength(255)
+                    ->email()
+                    ->unique(ignoreRecord: true),
+                $this->getPasswordFormComponent()
+                    ->label(__('resources.users.password')),
+                $this->getPasswordConfirmationFormComponent()
+                    ->label(__('resources.users.password_confirmation')),
             ]);
     }
 }

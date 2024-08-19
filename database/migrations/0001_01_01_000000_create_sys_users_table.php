@@ -14,9 +14,9 @@ return new class extends Migration {
             $table->unsignedTinyInteger('id')->autoIncrement();
             $table->timestamps();
 
-            $table->string('first_name')->nullable();
-            $table->string('last_name')->nullable();
-            $table->string('name')->nullable()->unique();
+            $table->string('first_name')->nullable()->index();
+            $table->string('last_name')->nullable()->index();
+            $table->string('name')->unique();
             $table->string('email')->nullable()->unique();
             $table->string('password');
             $table->boolean('is_admin')->default(false);

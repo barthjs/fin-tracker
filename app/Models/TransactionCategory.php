@@ -3,8 +3,6 @@
 namespace App\Models;
 
 
-use App\Enums\TransactionGroup;
-use App\Enums\TransactionType;
 use App\Models\Scopes\TransactionCategoryScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,8 +23,6 @@ class TransactionCategory extends Model
     ];
 
     protected $casts = [
-        'type' => TransactionType::class,
-        'group' => TransactionGroup::class,
         'active' => 'boolean',
     ];
 

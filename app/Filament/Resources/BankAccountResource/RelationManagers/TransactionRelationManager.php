@@ -3,8 +3,6 @@
 namespace App\Filament\Resources\BankAccountResource\RelationManagers;
 
 use App\Enums\Currency;
-use App\Enums\TransactionGroup;
-use App\Enums\TransactionType;
 use App\Models\BankAccountTransaction;
 use Exception;
 use Filament\Forms;
@@ -24,29 +22,37 @@ class TransactionRelationManager extends RelationManager
             ->schema([
                 Forms\Components\Section::make()->schema([
                     Forms\Components\DateTimePicker::make('date')
+                        ->label(__('resources.bank_account_transactions.table.date'))
                         ->autofocus()
                         ->default(today())
                         ->required(),
                     Forms\Components\Select::make('bank_account_id')
+                        ->label(__('resources.bank_account_transactions.table.account'))
                         ->relationship('bankAccount', 'name')
                         ->default(fn() => $this->getOwnerRecord()->id)
                         ->required()
                         ->searchable()
                         ->preload()
+                        ->placeholder(__('resources.bank_account_transactions.form.account_placeholder'))
                         ->createOptionForm([
                             Forms\Components\Section::make()->schema([
                                 Forms\Components\TextInput::make('name')
+                                    ->label(__('resources.bank_accounts.table.name'))
                                     ->maxLength(255)
                                     ->required()
                                     ->string(),
                                 Forms\Components\Select::make('currency')
+                                    ->label(__('resources.bank_accounts.table.currency'))
+                                    ->placeholder(__('resources.bank_accounts.form.currency_placeholder'))
                                     ->options(Currency::class)
                                     ->required()
                                     ->searchable(),
                                 Forms\Components\Toggle::make('active')
+                                    ->label(__('tables.active'))
                                     ->default(true)
                                     ->inline(false),
                                 Forms\Components\Textarea::make('description')
+                                    ->label(__('tables.description'))
                                     ->autosize()
                                     ->columnSpanFull()
                                     ->maxLength(1000)
@@ -56,6 +62,7 @@ class TransactionRelationManager extends RelationManager
                             ])->columns(3),
                         ]),
                     Forms\Components\TextInput::make('amount')
+                        ->label(__('resources.bank_account_transactions.table.amount'))
                         ->suffix(fn() => $this->getOwnerRecord()->currency->value)
                         ->numeric()
                         ->minValue(-999999999.9999)
@@ -73,18 +80,20 @@ class TransactionRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading(__('resources.bank_account_transactions.navigation_label'))
             ->columns([
                 Tables\Columns\TextColumn::make('date')
+                    ->label(__('resources.bank_account_transactions.table.date'))
                     ->date('Y-m-d H:m')
                     ->copyable()
-                    ->copyMessage('Copied!')
+                    ->copyMessage(__('tables.copied'))
                     ->fontFamily('mono')
                     ->toggleable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->copyable()
-                    ->copyMessage('Copied!')
-                    ->label(fn() => 'Amount in ' . $this->getOwnerRecord()->currency->value)
+                    ->copyMessage(__('tables.copied'))
+                    ->label(fn() => __('resources.bank_account_transactions.table.amount_in') . $this->getOwnerRecord()->currency->value)
                     ->fontFamily('mono')
                     ->numeric(function ($record) {
                         $numberStr = (string)$record->amount;
@@ -97,35 +106,40 @@ class TransactionRelationManager extends RelationManager
                     ->toggleable()
                     ->badge()
                     ->color(function ($record) {
-                        $type = $record->transactionCategory()->first()->type->value;
+                        $type = $record->transactionCategory()->first()->type;
                         return match (true) {
-                            $type == 'Expense' => 'danger',
-                            $type == 'Revenue' => 'success',
+                            $type == 'expense' => 'danger',
+                            $type == 'income' => 'success',
                             default => 'gray',
                         };
                     }),
                 Tables\Columns\TextColumn::make('destination')
+                    ->label(__('resources.bank_account_transactions.table.destination'))
                     ->copyable()
-                    ->copyMessage('Copied!')
+                    ->copyMessage(__('tables.copied'))
                     ->searchable()
                     ->toggleable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('transactionCategory.name')
-                    ->label('Category')
+                    ->label(__('resources.bank_account_transactions.table.category'))
                     ->copyable()
-                    ->copyMessage('Copied!')
+                    ->copyMessage(__('tables.copied'))
                     ->searchable()
                     ->sortable()
                     ->toggleable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('transactionCategory.group')
-                    ->label('Group')
+                    ->label(__('resources.bank_account_transactions.table.group'))
+                    ->formatStateUsing(fn($record): string => __('resources.transaction_categories.groups')[$record->transactionCategory->group])
                     ->copyable()
-                    ->copyMessage('Copied!')
+                    ->copyMessage(__('tables.copied'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('notes')
+                    ->label(__('resources.bank_account_transactions.table.notes'))
+                    ->copyable()
+                    ->copyMessage(__('tables.copied'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
@@ -135,22 +149,30 @@ class TransactionRelationManager extends RelationManager
             ->striped()
             ->filters([
                 SelectFilter::make('name')
+                    ->label(__('resources.bank_account_transactions.table.category'))
                     ->relationship('transactionCategory', 'name')
                     ->multiple()
                     ->preload()
                     ->searchable(),
             ])
             ->persistFiltersInSession()
+            ->emptyStateHeading(__('resources.bank_account_transactions.table.empty'))
+            ->emptyStateDescription('')
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->icon('tabler-plus'),
+                    ->icon('tabler-plus')
+                    ->label(__('resources.bank_account_transactions.create_label'))
+                    ->modalHeading(__('resources.bank_account_transactions.create_heading')),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()->iconButton(),
-                Tables\Actions\DeleteAction::make()->iconButton(),
+                Tables\Actions\EditAction::make()->iconButton()
+                    ->modalHeading(__('resources.bank_account_transactions.edit_heading')),
+                Tables\Actions\DeleteAction::make()->iconButton()
+                    ->modalHeading(__('resources.bank_account_transactions.delete_heading')),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                    ->modalHeading(__('resources.bank_account_transactions.bulk_heading')),
             ])
             ->recordAction(null);
     }
@@ -167,6 +189,7 @@ class TransactionRelationManager extends RelationManager
     {
         return Forms\Components\Section::make()->schema([
             Forms\Components\TextInput::make('destination')
+                ->label(__('resources.bank_account_transactions.table.destination'))
                 ->datalist(BankAccountTransaction::query()
                     ->select('destination')
                     ->distinct()
@@ -177,29 +200,38 @@ class TransactionRelationManager extends RelationManager
                 ->required()
                 ->string(),
             Forms\Components\Select::make('category_id')
+                ->label(__('resources.bank_account_transactions.table.category'))
                 ->relationship('transactionCategory', 'name')
                 ->required()
                 ->searchable()
                 ->preload()
+                ->placeholder(__('resources.bank_account_transactions.form.category_placeholder'))
                 ->createOptionForm([
                     Forms\Components\Section::make()->schema([
                         Forms\Components\TextInput::make('name')
+                            ->label(__('resources.transaction_categories.table.name'))
                             ->autofocus()
                             ->maxLength(255)
                             ->required()
                             ->string(),
                         Forms\Components\Toggle::make('active')
+                            ->label(__('tables.active'))
                             ->default(true)
                             ->inline(false),
                         Forms\Components\Select::make('type')
-                            ->options(TransactionType::class)
+                            ->label(__('resources.transaction_categories.table.type'))
+                            ->placeholder(__('resources.transaction_categories.form.type_placeholder'))
+                            ->options(__('resources.transaction_categories.types'))
                             ->required(),
                         Forms\Components\Select::make('group')
-                            ->options(TransactionGroup::class)
+                            ->label(__('resources.transaction_categories.table.type'))
+                            ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
+                            ->options(__('resources.transaction_categories.groups'))
                             ->required(),
                     ])->columns(2)
                 ]),
             Forms\Components\Textarea::make('notes')
+                ->label(__('resources.bank_account_transactions.table.notes'))
                 ->autosize()
                 ->columnSpanFull()
                 ->maxLength(255)

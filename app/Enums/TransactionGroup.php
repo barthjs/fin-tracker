@@ -2,10 +2,10 @@
 
 namespace App\Enums;
 
-enum TransactionGroup: string
+enum TransactionGroup
 {
-    case VariableExpense = 'Variable Expense';
-    case FixedExpense = 'Fixed Expense';
-    case Income = 'Income';
-    case Transfer = 'Transfer';
+    case var_expense;
+    case fix_expense;
+    case income;
+    case transfer;
 }

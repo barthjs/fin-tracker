@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
+use App\Filament\Pages\Auth\Login;
 use Exception;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -30,14 +31,15 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->path('')
-            ->login()
+            ->login(Login::class)
             ->spa()
             ->maxContentWidth('full')
             ->profile(EditProfile::class, isSimple: false)
             ->unsavedChangesAlerts()
             ->colors(config('colors'))
-            ->defaultThemeMode(ThemeMode::Dark)
             ->font('Poppins')
+            ->breadcrumbs(false)
+            ->defaultThemeMode(ThemeMode::Dark)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

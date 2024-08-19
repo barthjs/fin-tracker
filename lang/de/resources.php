@@ -1,0 +1,117 @@
+<?php
+
+return [
+
+    "bank_accounts" => [
+        "navigation_label" => "Konten",
+        "create_label" => "Neues Konto",
+        "create_heading" => "Neues Konto erstellen",
+        "edit_heading" => "Konto bearbeiten",
+        "delete_heading" => "Konto löschen",
+
+        "table" => [
+            'name' => 'Konto',
+            'balance' => 'Kontostand',
+            'currency' => 'Währung',
+            'empty' => 'Keine Konten gefunden'
+        ],
+
+        "form" => [
+            'currency_placeholder' => 'Währung wählen',
+        ]
+    ],
+
+    "transaction_categories" => [
+        "navigation_label" => "Transaktionskategorien",
+        "create_label" => "Neue Transaktionskategorie",
+        "create_heading" => "Neue Transaktionskategorie erstellen",
+        "edit_heading" => "Transaktionskategorie bearbeiten",
+        "delete_heading" => "Transaktionskategorie löschen",
+
+        "table" => [
+            'name' => 'Name',
+            'type' => 'Typ',
+            'group' => 'Gruppe',
+            'empty' => 'Keine Kategorien gefunden'
+        ],
+
+        "form" => [
+            'type_placeholder' => 'Typ wählen',
+            'group_placeholder' => 'Gruppe wählen',
+        ],
+
+        "types" => [
+            'expense' => 'Ausgabe',
+            'income' => 'Einnahme',
+            'transfer' => 'Umbuchung'
+        ],
+
+        "groups" => [
+            "fix_expense" => "Fixe Ausgabe",
+            'var_expense' => 'Variable Ausgabe',
+            'income' => 'Einnahme',
+            'transfer' => 'Umbuchung',
+        ]
+    ],
+
+    "bank_account_transactions" => [
+        "navigation_label" => "Kontoumsätze",
+        "create_label" => "Neuer Umsatz",
+        "create_heading" => "Neuen Umsatz erstellen",
+        "edit_heading" => "Umsatz bearbeiten",
+        "delete_heading" => "Umsatz löschen",
+        "bulk_heading" => "Ausgewählte Umsätze löschen",
+
+        "table" => [
+            'date' => 'Datum',
+            'account' => 'Konto',
+            'amount' => 'Betrag',
+            'amount_in' => 'Betrag in ',
+            'destination' => 'Ziel',
+            'category' => 'Kategorie',
+            'group' => 'Gruppe',
+            'notes' => 'Notizen',
+            'empty' => 'Keine Umsätze gefunden',
+        ],
+
+        "form" => [
+            'category_placeholder' => 'Kategorie wählen',
+            'account_placeholder' => 'Konto wählen',
+        ],
+
+        "filter" => [
+            'all' => 'Alle',
+            'expenses' => 'Alle Ausgaben',
+            'var_expenses' => 'Variable Ausgaben',
+            'fix_expenses' => 'Fixe Ausgaben',
+            'rev' => 'Einnahmen',
+        ]
+    ],
+
+    "users" => [
+        "navigation_label" => "Benutzer",
+        "create_label" => "Neuer Benutzer",
+        "create_heading" => "Neuen Benutzer erstellen",
+        "edit_heading" => "Benutzer bearbeiten",
+        "delete_heading" => "Benutzer löschen",
+        "password" => "Passwort",
+        "password_confirmation" => "Passwort wiederholen",
+        "user_or_email" => "Benutzername oder E-Mail",
+
+        "table" => [
+            'first_name' => 'Vorname',
+            'last_name' => 'Nachname',
+            'email' => 'E-Mail',
+            'name' => 'Benutzername',
+            'is_admin' => 'Administrator',
+            'empty' => 'Keine Benutzer gefunden'
+        ],
+
+        "filter" => [
+            'all' => 'Alle',
+            'admins' => 'Administratoren',
+            'users' => 'Benutzer',
+        ]
+    ]
+
+];

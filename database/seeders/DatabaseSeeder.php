@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
             for ($i = 0; $i < 100; $i++) {
                 $category = $cat->random();
                 $amount = fake()->randomFloat(2, 0, 10000);
-                $amount *= ($category->type->value == "Expenses") ? -1 : 1;
+                $amount *= ($category->type == "expense") ? -1 : 1;
                 BankAccountTransaction::factory()->create(['bank_account_id' => $item->id, 'amount' => $amount, 'category_id' => $category->id]);
             }
         }

@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Hash;
 class UserFactory extends Factory
 {
     protected $model = User::class;
-    protected static ?string $email;
-    protected static ?string $password;
 
     /**
      * Define the model's default state.
@@ -23,8 +21,8 @@ class UserFactory extends Factory
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'name' => fake()->unique()->userName,
-            'email' => static::$email ??= fake()->unique()->safeEmail(),
-            'password' => static::$password ??= Hash::make('password'),
+            'email' => fake()->unique()->safeEmail(),
+            'password' => Hash::make('password'),
             'is_admin' => false,
             'active' => true,
         ];
