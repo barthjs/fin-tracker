@@ -19,8 +19,9 @@ return new class extends Migration {
             $table->string('name')->unique();
             $table->string('email')->nullable()->unique();
             $table->string('password');
-            $table->boolean('is_admin')->default(false);
-            $table->boolean('active')->default(true);
+            $table->boolean('verified')->default(false)->index();
+            $table->boolean('is_admin')->default(false)->index();
+            $table->boolean('active')->default(true)->index();
             $table->rememberToken();
         });
 

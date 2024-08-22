@@ -56,7 +56,7 @@ class UserResource extends Resource
                     Forms\Components\TextInput::make('password')
                         ->label(__('resources.users.password'))
                         ->password()
-                        ->revealable(filament()->arePasswordsRevealable())
+                        ->revealable()
                         ->rule(Password::default())
                         ->autocomplete('new-password')
                         ->dehydrated(fn($state): bool => filled($state))
@@ -66,12 +66,18 @@ class UserResource extends Resource
                     Forms\Components\TextInput::make('passwordConfirmation')
                         ->label(__('resources.users.password_confirmation'))
                         ->password()
-                        ->revealable(filament()->arePasswordsRevealable())
-                        ->required()
+                        ->revealable()
+                        ->required(function (callable $get) {
+                            if (!$get('password')) {
+                                return false;
+                            }
+                            return true;
+                        })
                         ->dehydrated(false),
                     Forms\Components\Toggle::make('is_admin')
                         ->label(__('resources.users.table.is_admin'))
                         ->disabled(function ($record) {
+                            // Prevent current user from removing his admin status
                             if (!$record) {
                                 return false;
                             }
@@ -83,6 +89,7 @@ class UserResource extends Resource
                         ->label(__('tables.active'))
                         ->disabled(function ($record) {
                             if (!$record) {
+                                // Prevent current user from making his account inactive
                                 return false;
                             }
                             return $record->id == auth()->user()->id;

@@ -61,59 +61,14 @@ class BankAccountResource extends Resource
      */
     public static function table(Table $table): Table
     {
+        $columns = self::tableColumns();
         return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label(__('resources.bank_accounts.table.name'))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('balance')
-                    ->label(__('resources.bank_accounts.table.balance'))
-                    ->numeric(2)
-                    ->badge()
-                    ->color(function ($record) {
-                        $balance = $record->balance;
-                        return match (true) {
-                            floatval($balance) == 0 => 'gray',
-                            floatval($balance) < 0 => 'danger',
-                            default => 'success',
-                        };
-                    })
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('currency')
-                    ->label(__('resources.bank_accounts.table.currency'))
-                    ->toggleable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('description')
-                    ->label(__('tables.description'))
-                    ->sortable()
-                    ->toggleable()
-                    ->wrap(),
-                Tables\Columns\IconColumn::make('active')
-                    ->label(__('tables.active'))
-                    ->boolean()
-                    ->sortable()
-                    ->tooltip(fn($state): string => $state ? __('tables.status_active') : 'tables.status_inactive')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('tables.created_at'))
-                    ->dateTime('Y-m-d H:i:s')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('tables.updated_at'))
-                    ->dateTime('Y-m-d H:i:s')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
+            ->columns($columns)
             ->recordUrl(fn(Model $record): string => Pages\ViewBankAccount::getUrl([$record->id]))
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
             ->filters([
-                Filter::make('active')
-                    ->label(__('tables.status_active'))
-                    ->query(fn($query) => $query->where('active', true)),
                 Filter::make('inactive')
                     ->label(__('tables.status_inactive'))
                     ->query(fn($query) => $query->where('active', false))
@@ -127,6 +82,54 @@ class BankAccountResource extends Resource
                     ->modalHeading(__('resources.bank_accounts.delete_heading'))
                     ->disabled(fn($record) => $record->transactions()->count() > 0)
             ]);
+    }
+
+    public static function tableColumns(): array
+    {
+        return [
+            Tables\Columns\TextColumn::make('name')
+                ->label(__('resources.bank_accounts.table.name'))
+                ->searchable()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('balance')
+                ->label(__('resources.bank_accounts.table.balance'))
+                ->numeric(2)
+                ->badge()
+                ->color(function ($record) {
+                    $balance = $record->balance;
+                    return match (true) {
+                        floatval($balance) == 0 => 'gray',
+                        floatval($balance) < 0 => 'danger',
+                        default => 'success',
+                    };
+                })
+                ->sortable(),
+            Tables\Columns\TextColumn::make('currency')
+                ->label(__('resources.bank_accounts.table.currency'))
+                ->toggleable()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('description')
+                ->label(__('tables.description'))
+                ->sortable()
+                ->toggleable()
+                ->wrap(),
+            Tables\Columns\IconColumn::make('active')
+                ->label(__('tables.active'))
+                ->boolean()
+                ->sortable()
+                ->tooltip(fn($state): string => $state ? __('tables.status_active') : 'tables.status_inactive')
+                ->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('created_at')
+                ->label(__('tables.created_at'))
+                ->dateTime('Y-m-d H:i:s')
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('updated_at')
+                ->label(__('tables.updated_at'))
+                ->dateTime('Y-m-d H:i:s')
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
+        ];
     }
 
     public static function getRelations(): array

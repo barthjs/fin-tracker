@@ -9,6 +9,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -68,5 +69,6 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+        Artisan::call('app:create-statistic');
     }
 }
