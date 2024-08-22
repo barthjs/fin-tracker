@@ -46,4 +46,9 @@ class TransactionCategory extends Model
     {
         return $this->hasMany(BankAccountTransaction::class, 'category_id');
     }
+
+    public function statistics(): HasMany
+    {
+        return $this->hasMany(TransactionCategoryStatistic::class, 'category_id');
+    }
 }
