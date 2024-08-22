@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\BankAccountResource\RelationManagers;
+namespace App\Filament\Resources\TransactionCategoryResource\RelationManagers;
+
 
 use App\Filament\Resources\BankAccountTransactionResource;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class TransactionRelationManager extends RelationManager
@@ -16,7 +16,7 @@ class TransactionRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form->schema(BankAccountTransactionResource::formParts(account: $this->ownerRecord));
+        return $form->schema(BankAccountTransactionResource::formParts(category: $this->ownerRecord));
     }
 
     /**
@@ -38,7 +38,6 @@ class TransactionRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('amount')
                     ->copyable()
                     ->copyMessage(__('tables.copied'))
-                    ->label(fn() => __('resources.bank_account_transactions.table.amount_in') . $this->getOwnerRecord()->currency->value)
                     ->fontFamily('mono')
                     ->numeric(function ($record) {
                         $numberStr = (string)$record->amount;
@@ -47,6 +46,7 @@ class TransactionRelationManager extends RelationManager
                         $decimalPlaces = strlen($decimalPart);
                         return max($decimalPlaces, 2);
                     })
+                    ->suffix(fn($record) => " " . $record->bankAccount->currency->value)
                     ->sortable()
                     ->toggleable()
                     ->badge()
@@ -58,6 +58,12 @@ class TransactionRelationManager extends RelationManager
                             default => 'gray',
                         };
                     }),
+                Tables\Columns\TextColumn::make('bankAccount.name')
+                    ->label(__('resources.bank_account_transactions.table.account'))
+                    ->copyable()
+                    ->copyMessage(__('tables.copied'))
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('destination')
                     ->label(__('resources.bank_account_transactions.table.destination'))
                     ->copyable()
@@ -65,22 +71,6 @@ class TransactionRelationManager extends RelationManager
                     ->searchable()
                     ->toggleable()
                     ->wrap(),
-                Tables\Columns\TextColumn::make('transactionCategory.name')
-                    ->label(__('resources.bank_account_transactions.table.category'))
-                    ->copyable()
-                    ->copyMessage(__('tables.copied'))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->wrap(),
-                Tables\Columns\TextColumn::make('transactionCategory.group')
-                    ->label(__('resources.bank_account_transactions.table.group'))
-                    ->formatStateUsing(fn($record): string => __('resources.transaction_categories.groups')[$record->transactionCategory->group])
-                    ->copyable()
-                    ->copyMessage(__('tables.copied'))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
                 Tables\Columns\TextColumn::make('notes')
                     ->label(__('resources.bank_account_transactions.table.notes'))
                     ->copyable()
@@ -93,12 +83,12 @@ class TransactionRelationManager extends RelationManager
             ->persistSortInSession()
             ->striped()
             ->filters([
-                SelectFilter::make('name')
-                    ->label(__('resources.bank_account_transactions.table.category'))
-                    ->relationship('transactionCategory', 'name')
+                Tables\Filters\SelectFilter::make('bankAccount')
+                    ->label(__('resources.bank_account_transactions.table.account'))
+                    ->relationship('bankAccount', 'name')
                     ->multiple()
                     ->preload()
-                    ->searchable(),
+                    ->relationship('bankAccount', 'name'),
             ])
             ->persistFiltersInSession()
             ->emptyStateHeading(__('resources.bank_account_transactions.table.empty'))
@@ -130,3 +120,4 @@ class TransactionRelationManager extends RelationManager
         return false;
     }
 }
+

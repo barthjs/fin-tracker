@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransactionCategoryResource\Pages;
+use App\Filament\Resources\TransactionCategoryResource\RelationManagers\TransactionRelationManager;
 use App\Models\TransactionCategory;
 use Exception;
 use Filament\Forms;
@@ -15,9 +16,8 @@ use Filament\Tables\Table;
 class TransactionCategoryResource extends Resource
 {
     protected static ?string $model = TransactionCategory::class;
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'tabler-category';
-    protected static ?string $navigationGroup = 'System';
 
     public static function getNavigationLabel(): string
     {
@@ -44,7 +44,7 @@ class TransactionCategoryResource extends Resource
                     ->options(__('resources.transaction_categories.types'))
                     ->required(),
                 Forms\Components\Select::make('group')
-                    ->label(__('resources.transaction_categories.table.type'))
+                    ->label(__('resources.transaction_categories.table.group'))
                     ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
                     ->options(__('resources.transaction_categories.groups'))
                     ->required(),
@@ -115,10 +115,18 @@ class TransactionCategoryResource extends Resource
         ];
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            TransactionRelationManager::class
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListTransactionCategories::route('/'),
+            'view' => Pages\ViewTransactionCategory::route('/{record}'),
         ];
     }
 }

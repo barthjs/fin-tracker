@@ -52,6 +52,12 @@ class TransactionCategoryRelationManager extends RelationManager
                 Tables\Actions\DeleteAction::make()->iconButton()
                     ->modalHeading(__('resources.transaction_categories.delete_heading')),
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('resources.transaction_categories.create_label'))
+                    ->modalHeading(__('resources.transaction_categories.create_heading'))
+            ])
             ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes());
     }
 }

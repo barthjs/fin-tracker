@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Enums\Currency;
-use App\Filament\Resources\BankAccountResource\RelationManagers\TransactionRelationManager;
 use App\Filament\Resources\BankAccountTransactionResource\Pages;
 use App\Models\BankAccount;
 use App\Models\BankAccountTransaction;
@@ -18,7 +17,7 @@ use Filament\Tables\Table;
 class BankAccountTransactionResource extends Resource
 {
     protected static ?string $model = BankAccountTransaction::class;
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'tabler-credit-card';
 
     public static function getNavigationLabel(): string
@@ -28,9 +27,14 @@ class BankAccountTransactionResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make()->schema([
+        return $form->schema(self::formParts());
+    }
+
+    public static function formParts($account = null, $category = null): array
+    {
+        return [
+            Forms\Components\Section::make()
+                ->schema([
                     Forms\Components\DateTimePicker::make('date')
                         ->label(__('resources.bank_account_transactions.table.date'))
                         ->autofocus()
@@ -39,49 +43,108 @@ class BankAccountTransactionResource extends Resource
                     Forms\Components\Select::make('bank_account_id')
                         ->label(__('resources.bank_account_transactions.table.account'))
                         ->relationship('bankAccount', 'name')
+                        ->default(fn() => $account->id ?? "")
                         ->required()
                         ->searchable()
                         ->preload()
                         ->live(onBlur: true)
                         ->placeholder(__('resources.bank_account_transactions.form.account_placeholder'))
                         ->createOptionForm([
-                            Forms\Components\Section::make()->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('resources.bank_accounts.table.name'))
-                                    ->maxLength(255)
-                                    ->required()
-                                    ->string(),
-                                Forms\Components\Select::make('currency')
-                                    ->label(__('resources.bank_accounts.table.currency'))
-                                    ->placeholder(__('resources.bank_accounts.form.currency_placeholder'))
-                                    ->options(Currency::class)
-                                    ->required()
-                                    ->searchable(),
-                                Forms\Components\Toggle::make('active')
-                                    ->label(__('tables.active'))
-                                    ->default(true)
-                                    ->inline(false),
-                                Forms\Components\Textarea::make('description')
-                                    ->label(__('tables.description'))
-                                    ->autosize()
-                                    ->columnSpanFull()
-                                    ->maxLength(1000)
-                                    ->rows(1)
-                                    ->string()
-                                    ->grow(),
-                            ])->columns(3),
+                            Forms\Components\Section::make()
+                                ->schema([
+                                    Forms\Components\TextInput::make('name')
+                                        ->label(__('resources.bank_accounts.table.name'))
+                                        ->maxLength(255)
+                                        ->required()
+                                        ->string(),
+                                    Forms\Components\Select::make('currency')
+                                        ->label(__('resources.bank_accounts.table.currency'))
+                                        ->placeholder(__('resources.bank_accounts.form.currency_placeholder'))
+                                        ->options(Currency::class)
+                                        ->required()
+                                        ->searchable(),
+                                    Forms\Components\Toggle::make('active')
+                                        ->label(__('tables.active'))
+                                        ->default(true)
+                                        ->inline(false),
+                                    Forms\Components\Textarea::make('description')
+                                        ->label(__('tables.description'))
+                                        ->autosize()
+                                        ->columnSpanFull()
+                                        ->maxLength(1000)
+                                        ->rows(1)
+                                        ->string()
+                                        ->grow(),
+                                ])
+                                ->columns(3),
                         ]),
                     Forms\Components\TextInput::make('amount')
                         ->label(__('resources.bank_account_transactions.table.amount'))
-                        ->suffix(fn($get) => BankAccount::whereId($get('bank_account_id'))->first()->currency->value ?? "")
+                        ->suffix(fn($get) => $account->currency->value ?? BankAccount::whereId($get('bank_account_id'))->first()->currency->value ?? "")
                         ->numeric()
                         ->minValue(-999999999.9999)
                         ->maxValue(999999999.9999)
                         ->inputMode('decimal')
                         ->required(),
-                ])->columns(3),
-                TransactionRelationManager::descriptionFormPart()
-            ]);
+                ])
+                ->columns(3),
+            Forms\Components\Section::make()
+                ->schema([
+                    Forms\Components\TextInput::make('destination')
+                        ->label(__('resources.bank_account_transactions.table.destination'))
+                        ->datalist(BankAccountTransaction::query()
+                            ->select('destination')
+                            ->distinct()
+                            ->orderBy('destination')
+                            ->pluck('destination')
+                            ->toArray())
+                        ->maxLength(255)
+                        ->required()
+                        ->string(),
+                    Forms\Components\Select::make('category_id')
+                        ->label(__('resources.bank_account_transactions.table.category'))
+                        ->relationship('transactionCategory', 'name')
+                        ->default(fn() => $category->id ?? "")
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->placeholder(__('resources.bank_account_transactions.form.category_placeholder'))
+                        ->createOptionForm([
+                            Forms\Components\Section::make()
+                                ->schema([
+                                    Forms\Components\TextInput::make('name')
+                                        ->label(__('resources.transaction_categories.table.name'))
+                                        ->autofocus()
+                                        ->maxLength(255)
+                                        ->required()
+                                        ->string(),
+                                    Forms\Components\Toggle::make('active')
+                                        ->label(__('tables.active'))
+                                        ->default(true)
+                                        ->inline(false),
+                                    Forms\Components\Select::make('type')
+                                        ->label(__('resources.transaction_categories.table.type'))
+                                        ->placeholder(__('resources.transaction_categories.form.type_placeholder'))
+                                        ->options(__('resources.transaction_categories.types'))
+                                        ->required(),
+                                    Forms\Components\Select::make('group')
+                                        ->label(__('resources.transaction_categories.table.type'))
+                                        ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
+                                        ->options(__('resources.transaction_categories.groups'))
+                                        ->required(),
+                                ])
+                                ->columns(2)
+                        ]),
+                    Forms\Components\Textarea::make('notes')
+                        ->label(__('resources.bank_account_transactions.table.notes'))
+                        ->autosize()
+                        ->columnSpanFull()
+                        ->maxLength(255)
+                        ->rows(1)
+                        ->string(),
+                ])
+                ->columns(2)
+        ];
     }
 
     /**

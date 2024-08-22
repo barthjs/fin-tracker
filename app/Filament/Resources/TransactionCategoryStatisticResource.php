@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 class TransactionCategoryStatisticResource extends Resource
 {
     protected static ?string $model = TransactionCategoryStatistic::class;
-
+    protected static ?int $navigationSort = 1;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
 
