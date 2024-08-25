@@ -52,15 +52,15 @@ class DatabaseSeeder extends Seeder
     {
         $bank = BankAccount::factory(3)->create(['user_id' => $user->id]);
         $cat = TransactionCategory::factory(10)->create(['user_id' => $user->id]);
-        foreach ($bank as $item) {
-            for ($y = 0; $y < 3; $y++) {
-                for ($m = 1; $m <= 12; $m++) {
-                    for ($i = 0; $i < 5; $i++) {
+        for ($y = 0; $y < 3; $y++) {
+            for ($m = 1; $m <= 12; $m++) {
+                foreach ($bank as $item) {
+                    for ($i = 0; $i < 2; $i++) {
                         $category = $cat->random();
                         $amount = fake()->randomFloat(2, 0, 10000);
                         $amount *= ($category->type == "expense") ? -1 : 1;
                         BankAccountTransaction::factory()->create([
-                            'date' => Carbon::today()->subYears($y)->month($m),
+                            'date' => Carbon::now()->subYears($y)->month($m),
                             'amount' => $amount,
                             'bank_account_id' => $item->id,
                             'category_id' => $category->id

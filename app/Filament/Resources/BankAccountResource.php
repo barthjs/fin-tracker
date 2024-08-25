@@ -64,6 +64,7 @@ class BankAccountResource extends Resource
         $columns = self::tableColumns();
         return $table
             ->columns($columns)
+            ->paginated(fn() => BankAccount::all()->count() > 20)
             ->recordUrl(fn(Model $record): string => Pages\ViewBankAccount::getUrl([$record->id]))
             ->defaultSort('name')
             ->persistSortInSession()

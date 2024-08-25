@@ -4,6 +4,7 @@ namespace App\Filament\Resources\BankAccountTransactionResource\Pages;
 
 use App\Enums\TransactionGroup;
 use App\Enums\TransactionType;
+use App\Filament\Imports\BankAccountTransactionImporter;
 use App\Filament\Resources\BankAccountTransactionResource;
 use App\Models\TransactionCategory;
 use Filament\Actions;
@@ -29,7 +30,10 @@ class ListBankAccountTransactions extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->icon('tabler-plus')
-                ->label(__('resources.bank_account_transactions.create_label'))
+                ->label(__('resources.bank_account_transactions.create_label')),
+            Actions\ImportAction::make()
+                ->label('import')
+                ->importer(BankAccountTransactionImporter::class)
         ];
     }
 

@@ -156,7 +156,7 @@ class BankAccountTransactionResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('date')
                     ->label(__('resources.bank_account_transactions.table.date'))
-                    ->date('Y-m-d H:m')
+                    ->dateTime('Y-m-d H:m')
                     ->copyable()
                     ->copyMessage(__('tables.copied'))
                     ->fontFamily('mono')

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TransactionCategoryResource\Pages;
 
+use App\Filament\Imports\TransactionCategoryImporter;
 use App\Filament\Resources\TransactionCategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -26,7 +27,10 @@ class ListTransactionCategories extends ListRecords
             Actions\CreateAction::make()
                 ->icon('tabler-plus')
                 ->label(__('resources.transaction_categories.create_label'))
-                ->modalHeading(__('resources.transaction_categories.create_heading'))
+                ->modalHeading(__('resources.transaction_categories.create_heading')),
+            Actions\ImportAction::make()
+                ->label('import')
+                ->importer(TransactionCategoryImporter::class)
         ];
     }
 }

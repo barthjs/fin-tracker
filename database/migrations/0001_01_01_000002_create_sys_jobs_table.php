@@ -20,6 +20,19 @@ return new class extends Migration {
             $table->unsignedInteger('created_at');
         });
 
+        Schema::create('sys_job_batches', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->string('name');
+            $table->integer('total_jobs');
+            $table->integer('pending_jobs');
+            $table->integer('failed_jobs');
+            $table->longText('failed_job_ids');
+            $table->mediumText('options')->nullable();
+            $table->integer('cancelled_at')->nullable();
+            $table->integer('created_at');
+            $table->integer('finished_at')->nullable();
+        });
+
         Schema::create('sys_failed_jobs', function (Blueprint $table) {
             $table->id();
             $table->timestamp('failed_at')->useCurrent();

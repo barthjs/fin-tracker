@@ -59,6 +59,7 @@ class TransactionCategoryResource extends Resource
         $tableParts = self::tableColumns();
         return $table
             ->columns($tableParts)
+            ->paginated(fn() => TransactionCategory::all()->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
