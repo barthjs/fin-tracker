@@ -40,19 +40,22 @@ class BankAccount extends Model
             }
 
             if (is_null($model->currency)) {
-                $model->currency = self::getDefaultCurrency();
+                $model->currency = self::getCurrency();
             }
         });
     }
 
-    public static function getDefaultCurrency(): string
+    public static function getCurrency(?string $inputCurrency = null): string
     {
-        $currency = Currency::tryFrom(config('app.currency'));
+        $currency = Currency::tryFrom($inputCurrency);
+        if (is_null($currency)) {
+            $currency = Currency::tryFrom(config('app.currency'));
+            return $currency->name;
+        }
         if ($currency) {
             return $currency->name;
-        } else {
-            return Currency::USD->name;
         }
+        return Currency::USD->name;
     }
 
     public function user(): BelongsTo

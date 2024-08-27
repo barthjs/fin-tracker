@@ -42,15 +42,16 @@ return [
 
         "types" => [
             'expense' => 'Ausgabe',
-            'income' => 'Einnahme',
+            'revenue' => 'Einnahme',
             'transfer' => 'Umbuchung'
         ],
 
         "groups" => [
-            "fix_expense" => "Fixe Ausgabe",
-            'var_expense' => 'Variable Ausgabe',
-            'income' => 'Einnahme',
-            'transfer' => 'Umbuchung',
+            'fix_expenses' => 'Fixe Ausgaben',
+            'var_expenses' => 'Variable Ausgaben',
+            'fix_revenues' => 'Fixe Einnahmen',
+            'var_revenues' => 'Variable Einnahmen',
+            'transfers' => 'Umbuchungen',
         ]
     ],
 
@@ -82,9 +83,11 @@ return [
         "filter" => [
             'all' => 'Alle',
             'expenses' => 'Alle Ausgaben',
-            'var_expenses' => 'Variable Ausgaben',
             'fix_expenses' => 'Fixe Ausgaben',
-            'rev' => 'Einnahmen',
+            'var_expenses' => 'Variable Ausgaben',
+            'revenues' => 'Einnahmen',
+            'fix_revenues' => 'Fixe Einnahmen',
+            'var_revenues' => 'Variable Einnahmen',
         ]
     ],
 

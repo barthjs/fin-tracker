@@ -19,7 +19,7 @@ class BankAccountFactory extends Factory
         return [
             'name' => fake()->unique()->word(),
             'balance' => fake()->randomFloat(2, 0, 1000000),
-            'currency' => BankAccount::getDefaultCurrency(),
+            'currency' => BankAccount::getCurrency(),
             'description' => fake()->sentence(),
         ];
     }

@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum TransactionType
 {
-    case income;
+    case revenue;
     case expense;
     case transfer;
 }

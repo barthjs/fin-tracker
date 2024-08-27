@@ -20,7 +20,7 @@ return new class extends Migration {
             $types = array_column(TransactionType::cases(), 'name');
             $table->enum('type', $types)->default(TransactionType::transfer->name)->index();
             $groups = array_column(TransactionGroup::cases(), 'name');
-            $table->enum('group', $groups)->default(TransactionGroup::transfer->name)->index();
+            $table->enum('group', $groups)->default(TransactionGroup::transfers->name)->index();
             $table->boolean('active')->default(true)->index();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();

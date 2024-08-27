@@ -50,7 +50,7 @@ class TransactionCategoryResource extends Resource
                     ->label(__('resources.transaction_categories.table.group'))
                     ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
                     ->options(__('resources.transaction_categories.groups'))
-                    ->default(TransactionGroup::transfer->name)
+                    ->default(TransactionGroup::transfers->name)
                     ->required(),
             ]);
     }

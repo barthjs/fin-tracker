@@ -41,15 +41,16 @@ return [
 
         "types" => [
             'expense' => 'Expense',
-            'income' => 'Income',
+            'revenue' => 'Revenue',
             'transfer' => 'Transfer'
         ],
 
         "groups" => [
-            'var_expense' => 'Variable expense',
-            "fix_expense" => "Fixed expense",
-            'income' => 'Revenue',
-            'transfer' => 'Transfer',
+            'fix_expenses' => 'Fixed expenses',
+            'var_expenses' => 'Variable expenses',
+            'fix_revenues' => 'Fixed Revenues',
+            'var_revenues' => 'Variable Revenues',
+            'transfer' => 'Transfers',
         ]
     ],
 
@@ -81,9 +82,11 @@ return [
         "filter" => [
             'all' => 'All',
             'expenses' => 'All expenses',
-            'var_expenses' => 'Variable expenses',
             'fix_expenses' => 'Fixed expenses',
-            'rev' => 'Revenues',
+            'var_expenses' => 'Variable expenses',
+            'revenues' => 'Revenues',
+            'fix_revenues' => 'Fixed Revenues',
+            'var_revenues' => 'Variable Revenues',
         ]
     ],
 

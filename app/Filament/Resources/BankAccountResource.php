@@ -39,7 +39,7 @@ class BankAccountResource extends Resource
                     ->label(__('resources.bank_accounts.table.currency'))
                     ->placeholder(__('resources.bank_accounts.form.currency_placeholder'))
                     ->options(Currency::class)
-                    ->default(fn() => BankAccount::getDefaultCurrency())
+                    ->default(fn() => BankAccount::getCurrency())
                     ->required()
                     ->searchable(),
                 Forms\Components\Textarea::make('description')

@@ -20,8 +20,8 @@ class TransactionCategoryFactory extends Factory
     {
         $group = fake()->randomElement(TransactionGroup::cases())->name;
         $type = match ($group) {
-            "transfer" => TransactionType::transfer->name,
-            "income" => TransactionType::income->name,
+            "transfers" => TransactionType::transfer->name,
+            "var_revenues", "fix_revenues" => TransactionType::revenue->name,
             default => TransactionType::expense->name,
         };
 

@@ -4,8 +4,9 @@ namespace App\Enums;
 
 enum TransactionGroup
 {
-    case var_expense;
-    case fix_expense;
-    case income;
-    case transfer;
+    case fix_expenses;
+    case var_expenses;
+    case fix_revenues;
+    case var_revenues;
+    case transfers;
 }

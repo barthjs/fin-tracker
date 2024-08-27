@@ -51,19 +51,31 @@ class ListBankAccountTransactions extends ListRecords
             'Variable Expenses' => Tab::make()
                 ->label(__('resources.bank_account_transactions.filter.var_expenses'))
                 ->modifyQueryUsing(function ($query) {
-                    $cat = TransactionCategory::whereGroup(TransactionGroup::var_expense)->get(['id'])->toArray();
+                    $cat = TransactionCategory::whereGroup(TransactionGroup::var_expenses)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
             'Fixed Expenses' => Tab::make()
                 ->label(__('resources.bank_account_transactions.filter.fix_expenses'))
                 ->modifyQueryUsing(function ($query) {
-                    $cat = TransactionCategory::whereGroup(TransactionGroup::fix_expense)->get(['id'])->toArray();
+                    $cat = TransactionCategory::whereGroup(TransactionGroup::fix_expenses)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
             'Revenues' => Tab::make()
-                ->label(__('resources.bank_account_transactions.filter.rev'))
+                ->label(__('resources.bank_account_transactions.filter.revenues'))
                 ->modifyQueryUsing(function ($query) {
-                    $cat = TransactionCategory::whereType(TransactionType::income)->get(['id'])->toArray();
+                    $cat = TransactionCategory::whereType(TransactionType::revenue)->get(['id'])->toArray();
+                    $query->whereIn('category_id', $cat);
+                }),
+            'Fixed Revenues' => Tab::make()
+                ->label(__('resources.bank_account_transactions.filter.fix_revenues'))
+                ->modifyQueryUsing(function ($query) {
+                    $cat = TransactionCategory::whereGroup(TransactionGroup::fix_revenues)->get(['id'])->toArray();
+                    $query->whereIn('category_id', $cat);
+                }),
+            'Variable Revenues' => Tab::make()
+                ->label(__('resources.bank_account_transactions.filter.var_revenues'))
+                ->modifyQueryUsing(function ($query) {
+                    $cat = TransactionCategory::whereGroup(TransactionGroup::var_revenues)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
         ];

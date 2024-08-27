@@ -16,7 +16,30 @@ class TransactionCategoryImporter extends Importer
         return [
             ImportColumn::make('name')
                 ->requiredMapping()
-                ->rules(['required', 'max:255']),
+                ->rules(['max:255']),
+            ImportColumn::make('type')
+                ->rules(['max:255'])
+                ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
+                    $type = match ($state) {
+                        __('resources.transaction_categories.types.income') => 'income',
+                        __('resources.transaction_categories.types.expense') => 'expense',
+                        __('resources.transaction_categories.types.transfer') => 'transfer',
+                        default => "transfer"
+                    };
+                    $record->type = $type;
+                }),
+            ImportColumn::make('group')
+                ->rules(['max:255'])
+                ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
+                    $group = match ($state) {
+                        __('resources.transaction_categories.groups.var_expense') => 'var_expense',
+                        __('resources.transaction_categories.groups.fix_expense') => 'fix_expense',
+                        __('resources.transaction_categories.groups.income') => 'income',
+                        __('resources.transaction_categories.groups.transfer') => 'transfer',
+                        default => "transfer"
+                    };
+                    $record->group = $group;
+                }),
         ];
     }
 
