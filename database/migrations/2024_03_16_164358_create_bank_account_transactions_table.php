@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('bank_account_transactions', function (Blueprint $table) {
             $table->unsignedInteger('id')->autoIncrement();
-            $table->dateTime('date_time')->default(now())->index();
+            $table->dateTime('date_time')->index();
 
             $table->decimal('amount', 14, 4)->default(0.00)->index();
             $table->string('destination')->nullable()->index();

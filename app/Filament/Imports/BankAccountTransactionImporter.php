@@ -5,9 +5,11 @@ namespace App\Filament\Imports;
 use App\Models\BankAccount;
 use App\Models\BankAccountTransaction;
 use App\Models\TransactionCategory;
+use Exception;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Carbon;
 
 class BankAccountTransactionImporter extends Importer
 {
@@ -18,7 +20,15 @@ class BankAccountTransactionImporter extends Importer
         return [
             ImportColumn::make('date_time')
                 ->requiredMapping()
-                ->rules(['required']),
+                ->rules(['required'])
+                ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
+                    try {
+                        $carbon = Carbon::parse($state)->toDateTimeString();
+                    } catch (Exception) {
+                        $carbon = Carbon::now()->toDateTimeString();
+                    }
+                    $record->date_time = $carbon;
+                }),
             ImportColumn::make('bank_account_id')
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
                     $record->bank_account_id = BankAccount::whereName($state)->first()->id ?? null;
@@ -68,17 +78,18 @@ class BankAccountTransactionImporter extends Importer
             ImportColumn::make('category_id')
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state, $data): void {
                     $type = array_key_exists('type', $data) ? match ($data['type']) {
-                        __('resources.transaction_categories.types.income') => 'income',
                         __('resources.transaction_categories.types.expense') => 'expense',
+                        __('resources.transaction_categories.types.revenue') => 'revenue',
                         __('resources.transaction_categories.types.transfer') => 'transfer',
                         default => ''
                     } : '';
 
                     $group = array_key_exists('group', $data) ? match ($data['group']) {
-                        __('resources.transaction_categories.groups.var_expense') => 'var_expense',
                         __('resources.transaction_categories.groups.fix_expense') => 'fix_expense',
-                        __('resources.transaction_categories.groups.income') => 'income',
-                        __('resources.transaction_categories.groups.transfer') => 'transfer',
+                        __('resources.transaction_categories.groups.var_expense') => 'var_expense',
+                        __('resources.transaction_categories.groups.fix_revenues') => 'var_revenues',
+                        __('resources.transaction_categories.groups.var_revenues') => 'fix_revenues',
+                        __('resources.transaction_categories.groups.transfers') => 'transfers',
                         default => ''
                     } : '';
 
@@ -92,7 +103,12 @@ class BankAccountTransactionImporter extends Importer
                         $query->whereGroup($group);
                     }
 
-                    $record->category_id = $query->first()->id ?? null;
+                    $result = $query->get();
+                    if ($result->count() > 1) {
+                        $record->category_id = null;
+                    } else {
+                        $record->category_id = $result->first()->id ?? null;
+                    }
                 }),
             ImportColumn::make('type')
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {

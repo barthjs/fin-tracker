@@ -54,7 +54,7 @@ class TransactionRelationManager extends RelationManager
                         $type = $record->transactionCategory()->first()->type;
                         return match (true) {
                             $type == 'expense' => 'danger',
-                            $type == 'income' => 'success',
+                            $type == 'revenue' => 'success',
                             default => 'gray',
                         };
                     }),

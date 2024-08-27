@@ -21,8 +21,8 @@ class TransactionCategoryImporter extends Importer
                 ->rules(['max:255'])
                 ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
                     $type = match ($state) {
-                        __('resources.transaction_categories.types.income') => 'income',
                         __('resources.transaction_categories.types.expense') => 'expense',
+                        __('resources.transaction_categories.types.revenue') => 'revenue',
                         __('resources.transaction_categories.types.transfer') => 'transfer',
                         default => "transfer"
                     };
@@ -32,11 +32,12 @@ class TransactionCategoryImporter extends Importer
                 ->rules(['max:255'])
                 ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
                     $group = match ($state) {
-                        __('resources.transaction_categories.groups.var_expense') => 'var_expense',
-                        __('resources.transaction_categories.groups.fix_expense') => 'fix_expense',
-                        __('resources.transaction_categories.groups.income') => 'income',
-                        __('resources.transaction_categories.groups.transfer') => 'transfer',
-                        default => "transfer"
+                        __('resources.transaction_categories.groups.fix_expenses') => 'fix_expenses',
+                        __('resources.transaction_categories.groups.var_expenses') => 'var_expenses',
+                        __('resources.transaction_categories.groups.fix_revenues') => 'var_revenues',
+                        __('resources.transaction_categories.groups.var_revenues') => 'fix_revenues',
+                        __('resources.transaction_categories.groups.transfer') => 'transfers',
+                        default => "transfers"
                     };
                     $record->group = $group;
                 }),
