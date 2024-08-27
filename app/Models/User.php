@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\BankAccountScope;
+use App\Models\Scopes\TransactionCategoryScope;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
@@ -38,6 +40,14 @@ class User extends Authenticatable implements FilamentUser, HasName
             'is_admin' => 'boolean',
             'active' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function ($model) {
+            BankAccount::withoutGlobalScopes([BankAccountScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $model->id]);
+            TransactionCategory::withoutGlobalScopes([TransactionCategoryScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $model->id]);
+        });
     }
 
     public function bankAccounts(): HasMany

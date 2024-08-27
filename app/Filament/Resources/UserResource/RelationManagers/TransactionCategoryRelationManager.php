@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Filament\Resources\TransactionCategoryResource;
+use App\Models\TransactionCategory;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -36,6 +37,7 @@ class TransactionCategoryRelationManager extends RelationManager
         return $table
             ->heading('')
             ->columns($tableParts)
+            ->paginated(fn() => TransactionCategory::all()->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()

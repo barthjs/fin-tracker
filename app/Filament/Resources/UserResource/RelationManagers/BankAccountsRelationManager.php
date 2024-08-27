@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Filament\Resources\BankAccountResource;
+use App\Models\BankAccount;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -36,6 +37,7 @@ class BankAccountsRelationManager extends RelationManager
         return $table
             ->heading('')
             ->columns($columns)
+            ->paginated(fn() => BankAccount::all()->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()

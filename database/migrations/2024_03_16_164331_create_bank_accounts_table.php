@@ -16,9 +16,9 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->string('name')->index();
-            $table->decimal('balance', 14 ,4)->default(0.00)->index();
+            $table->decimal('balance', 14, 4)->default(0.00)->index();
             $currencies = array_column(Currency::cases(), 'value');
-            $table->enum('currency', $currencies)->nullable()->index();
+            $table->enum('currency', $currencies)->default(Currency::USD->name)->index();
             $table->text('description')->nullable();
             $table->boolean('active')->default(true)->index();
 

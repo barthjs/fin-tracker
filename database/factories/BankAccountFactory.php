@@ -17,9 +17,9 @@ class BankAccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
+            'name' => fake()->unique()->word(),
             'balance' => fake()->randomFloat(2, 0, 1000000),
-            'currency' => 'EUR',
+            'currency' => BankAccount::getDefaultCurrency(),
             'description' => fake()->sentence(),
         ];
     }

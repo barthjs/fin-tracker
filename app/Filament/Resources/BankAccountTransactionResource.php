@@ -35,7 +35,7 @@ class BankAccountTransactionResource extends Resource
         return [
             Forms\Components\Section::make()
                 ->schema([
-                    Forms\Components\DateTimePicker::make('date')
+                    Forms\Components\DateTimePicker::make('date_time')
                         ->label(__('resources.bank_account_transactions.table.date'))
                         ->autofocus()
                         ->default(today())
@@ -154,7 +154,7 @@ class BankAccountTransactionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('date')
+                Tables\Columns\TextColumn::make('date_time')
                     ->label(__('resources.bank_account_transactions.table.date'))
                     ->dateTime('Y-m-d H:m')
                     ->copyable()
@@ -215,7 +215,7 @@ class BankAccountTransactionResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
             ])
-            ->defaultSort('date', 'desc')
+            ->defaultSort('date_time', 'desc')
             ->persistSortInSession()
             ->striped()
             ->filters([

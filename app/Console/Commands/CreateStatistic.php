@@ -41,7 +41,7 @@ class CreateStatistic extends Command
         foreach ($categoryIds as $categoryId) {
             $oldestRecord = BankAccountTransaction::withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class])
                 ->where('category_id', $categoryId)
-                ->orderBy('date')
+                ->orderBy('date_time')
                 ->first();
 
             if ($oldestRecord) {
@@ -50,8 +50,8 @@ class CreateStatistic extends Command
                     for ($i = 1; $i <= 12; $i++) {
                         $sumPerMonth[$i] = BankAccountTransaction::withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class])
                             ->where('category_id', '=', $categoryId)
-                            ->whereYear('date', $year)
-                            ->whereMonth('date', $i)
+                            ->whereYear('date_time', $year)
+                            ->whereMonth('date_time', $i)
                             ->sum('amount');
 
                     }

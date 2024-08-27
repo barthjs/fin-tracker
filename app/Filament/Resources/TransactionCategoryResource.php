@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TransactionGroup;
+use App\Enums\TransactionType;
 use App\Filament\Resources\TransactionCategoryResource\Pages;
 use App\Filament\Resources\TransactionCategoryResource\RelationManagers\TransactionRelationManager;
 use App\Models\TransactionCategory;
@@ -42,11 +44,13 @@ class TransactionCategoryResource extends Resource
                     ->label(__('resources.transaction_categories.table.type'))
                     ->placeholder(__('resources.transaction_categories.form.type_placeholder'))
                     ->options(__('resources.transaction_categories.types'))
+                    ->default(TransactionType::transfer->name)
                     ->required(),
                 Forms\Components\Select::make('group')
                     ->label(__('resources.transaction_categories.table.group'))
                     ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
                     ->options(__('resources.transaction_categories.groups'))
+                    ->default(TransactionGroup::transfer->name)
                     ->required(),
             ]);
     }

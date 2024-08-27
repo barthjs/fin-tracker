@@ -27,7 +27,7 @@ class TransactionRelationManager extends RelationManager
         return $table
             ->heading(__('resources.bank_account_transactions.navigation_label'))
             ->columns([
-                Tables\Columns\TextColumn::make('date')
+                Tables\Columns\TextColumn::make('date_time')
                     ->label(__('resources.bank_account_transactions.table.date'))
                     ->date('Y-m-d H:m')
                     ->copyable()
@@ -89,7 +89,7 @@ class TransactionRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
             ])
-            ->defaultSort('date', 'desc')
+            ->defaultSort('date_time', 'desc')
             ->persistSortInSession()
             ->striped()
             ->filters([

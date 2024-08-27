@@ -38,7 +38,21 @@ class BankAccount extends Model
             if (is_null($model->user_id)) {
                 $model->user_id = auth()->id();
             }
+
+            if (is_null($model->currency)) {
+                $model->currency = self::getDefaultCurrency();
+            }
         });
+    }
+
+    public static function getDefaultCurrency(): string
+    {
+        $currency = Currency::tryFrom(config('app.currency'));
+        if ($currency) {
+            return $currency->name;
+        } else {
+            return Currency::USD->name;
+        }
     }
 
     public function user(): BelongsTo

@@ -17,7 +17,7 @@ class BankAccountTransaction extends Model
     protected $table = 'bank_account_transactions';
 
     protected $fillable = [
-        'date',
+        'date_time',
         'amount',
         'destination',
         'notes',
@@ -26,18 +26,46 @@ class BankAccountTransaction extends Model
     ];
 
     protected $casts = [
-        'date' => 'datetime',
+        'date_time' => 'datetime',
         'amount' => 'decimal:4',
     ];
 
     protected static function booted(): void
     {
         static::addGlobalScope(new BankAccountTransactionScope());
+
+        static::creating(function ($model) {
+            if (is_null($model->bank_account_id)) {
+                $model->bank_account_id = self::getDefaultBankAccountId();
+            }
+
+            if (is_null($model->category_id)) {
+                $model->category_id = self::getDefaultTransactionCategoryId();
+            }
+        });
+
         static::created(callback: function (BankAccountTransaction $transaction) {
             $sum = BankAccountTransaction::whereBankAccountId($transaction->bank_account_id)->withoutGlobalScopes([BankAccountTransactionScope::class])->sum('amount');
             BankAccount::whereId($transaction->bank_account_id)->withoutGlobalScopes([BankAccountScope::class])->update(['balance' => $sum]);
         });
+    }
 
+    public static function getDefaultBankAccountId(): int
+    {
+        $bankAccount = BankAccount::whereName('Demo')->first();
+        if (!$bankAccount) {
+            $bankAccount = BankAccount::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
+        }
+        return $bankAccount->id;
+    }
+
+    public static function getDefaultTransactionCategoryId(): int
+    {
+        $category = TransactionCategory::whereName('Demo')->first();
+        if (!$category) {
+            $category = TransactionCategory::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
+        }
+        return $category->id;
     }
 
     public function bankAccount(): BelongsTo
