@@ -4,12 +4,17 @@ namespace App\Filament\Resources\BankAccountTransactionResource\Pages;
 
 use App\Enums\TransactionGroup;
 use App\Enums\TransactionType;
+use App\Filament\Exports\BankAccountTransactionExporter;
 use App\Filament\Imports\BankAccountTransactionImporter;
 use App\Filament\Resources\BankAccountTransactionResource;
+use App\Models\Scopes\BankAccountScope;
+use App\Models\Scopes\BankAccountTransactionScope;
+use App\Models\Scopes\TransactionCategoryScope;
 use App\Models\TransactionCategory;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListBankAccountTransactions extends ListRecords
 {
@@ -33,7 +38,12 @@ class ListBankAccountTransactions extends ListRecords
                 ->label(__('resources.bank_account_transactions.create_label')),
             Actions\ImportAction::make()
                 ->label('import')
-                ->importer(BankAccountTransactionImporter::class)
+                ->importer(BankAccountTransactionImporter::class),
+            Actions\ExportAction::make()
+                ->exporter(BankAccountTransactionExporter::class)
+                ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class, TransactionCategoryScope::class])->whereHas('bankAccount', function ($query) {
+                    $query->withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class, TransactionCategoryScope::class])->where('user_id', auth()->id());
+                }))
         ];
     }
 

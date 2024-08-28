@@ -87,8 +87,8 @@ class BankAccountTransactionImporter extends Importer
                     $group = array_key_exists('group', $data) ? match ($data['group']) {
                         __('resources.transaction_categories.groups.fix_expense') => 'fix_expense',
                         __('resources.transaction_categories.groups.var_expense') => 'var_expense',
-                        __('resources.transaction_categories.groups.fix_revenues') => 'var_revenues',
-                        __('resources.transaction_categories.groups.var_revenues') => 'fix_revenues',
+                        __('resources.transaction_categories.groups.fix_revenues') => 'fix_revenues',
+                        __('resources.transaction_categories.groups.var_revenues') => 'var_revenues',
                         __('resources.transaction_categories.groups.transfers') => 'transfers',
                         default => ''
                     } : '';

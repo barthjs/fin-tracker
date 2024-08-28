@@ -93,12 +93,12 @@ class TransactionCategoryResource extends Resource
                 ->wrap(),
             Tables\Columns\TextColumn::make('type')
                 ->label(__('resources.transaction_categories.table.type'))
-                ->formatStateUsing(fn($record): string => __('resources.transaction_categories.types')[$record->type])
+                ->formatStateUsing(fn($record): string => __('resources.transaction_categories.types')[$record->type->name])
                 ->searchable()
                 ->sortable(),
             Tables\Columns\TextColumn::make('group')
                 ->label(__('resources.transaction_categories.table.group'))
-                ->formatStateUsing(fn($record): string => __('resources.transaction_categories.groups')[$record->group])
+                ->formatStateUsing(fn($record): string => __('resources.transaction_categories.groups')[$record->group->name])
                 ->searchable()
                 ->sortable(),
             Tables\Columns\IconColumn::make('active')

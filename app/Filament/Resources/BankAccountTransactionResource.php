@@ -185,7 +185,7 @@ class BankAccountTransactionResource extends Resource
                     ->toggleable()
                     ->badge()
                     ->color(function ($record) {
-                        $type = $record->transactionCategory()->first()->type;
+                        $type = $record->transactionCategory()->first()->type->name;
                         return match (true) {
                             $type == 'expense' => 'danger',
                             $type == 'revenue' => 'success',

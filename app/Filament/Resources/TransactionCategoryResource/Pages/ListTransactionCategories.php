@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\TransactionCategoryResource\Pages;
 
+use App\Filament\Exports\TransactionCategoryExporter;
 use App\Filament\Imports\TransactionCategoryImporter;
 use App\Filament\Resources\TransactionCategoryResource;
+use App\Models\Scopes\TransactionCategoryScope;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListTransactionCategories extends ListRecords
 {
@@ -30,7 +33,10 @@ class ListTransactionCategories extends ListRecords
                 ->modalHeading(__('resources.transaction_categories.create_heading')),
             Actions\ImportAction::make()
                 ->label('import')
-                ->importer(TransactionCategoryImporter::class)
+                ->importer(TransactionCategoryImporter::class),
+            Actions\ExportAction::make()
+                ->exporter(TransactionCategoryExporter::class)
+                ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes([TransactionCategoryScope::class])->where('user_id', auth()->id()))
         ];
     }
 }
