@@ -47,12 +47,14 @@ class BankAccount extends Model
 
     public static function getCurrency(?string $inputCurrency = null): string
     {
-        $currency = Currency::tryFrom($inputCurrency);
-        if (is_null($currency)) {
-            $currency = Currency::tryFrom(config('app.currency'));
-            return $currency->name;
+        if (!is_null($inputCurrency)) {
+            $currency = Currency::tryFrom($inputCurrency);
+            if (!is_null($currency)) {
+                return $currency->name;
+            }
         }
-        if ($currency) {
+        $currency = Currency::tryFrom(config('app.currency'));
+        if (!is_null($currency)) {
             return $currency->name;
         }
         return Currency::USD->name;

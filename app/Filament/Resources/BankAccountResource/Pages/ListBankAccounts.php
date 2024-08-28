@@ -9,6 +9,7 @@ use App\Models\Scopes\BankAccountScope;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\File;
 
 class ListBankAccounts extends ListRecords
 {
@@ -33,7 +34,10 @@ class ListBankAccounts extends ListRecords
                 ->modalHeading(__('resources.bank_accounts.create_heading')),
             Actions\ImportAction::make()
                 ->label('import')
-                ->importer(BankAccountImporter::class),
+                ->importer(BankAccountImporter::class)
+                ->fileRules([
+                    File::types(['csv'])->max(1024),
+                ]),
             Actions\ExportAction::make()
                 ->exporter(BankAccountExporter::class)
                 ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes([BankAccountScope::class])->where('user_id', auth()->id()))

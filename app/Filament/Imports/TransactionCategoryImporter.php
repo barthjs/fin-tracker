@@ -16,30 +16,36 @@ class TransactionCategoryImporter extends Importer
         return [
             ImportColumn::make('name')
                 ->requiredMapping()
-                ->rules(['max:255']),
-            ImportColumn::make('type')
-                ->rules(['max:255'])
-                ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
-                    $type = match ($state) {
-                        __('resources.transaction_categories.types.expense') => 'expense',
-                        __('resources.transaction_categories.types.revenue') => 'revenue',
-                        __('resources.transaction_categories.types.transfer') => 'transfer',
-                        default => "transfer"
-                    };
-                    $record->type = $type;
-                }),
+                ->rules(['required', 'max:255']),
             ImportColumn::make('group')
-                ->rules(['max:255'])
-                ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
+                ->requiredMapping()
+                ->rules(['required'])
+                ->fillRecordUsing(function (TransactionCategory $record, string $state, $data): void {
                     $group = match ($state) {
                         __('resources.transaction_categories.groups.fix_expenses') => 'fix_expenses',
                         __('resources.transaction_categories.groups.var_expenses') => 'var_expenses',
                         __('resources.transaction_categories.groups.fix_revenues') => 'fix_revenues',
                         __('resources.transaction_categories.groups.var_revenues') => 'var_revenues',
-                        __('resources.transaction_categories.groups.transfer') => 'transfers',
-                        default => "transfers"
+                        default => 'transfers'
                     };
+
                     $record->group = $group;
+                    if (!array_key_exists('type', $data)) {
+                        $type = match ($group) {
+                            'fix_expenses', 'var_expenses' => 'expense',
+                            'fix_revenues', 'var_revenues' => 'revenue',
+                            default => 'transfer'
+                        };
+                        $record->type = $type;
+                    }
+                }),
+            ImportColumn::make('type')
+                ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
+                    $record->type = match ($state) {
+                        __('resources.transaction_categories.types.expense') => 'expense',
+                        __('resources.transaction_categories.types.revenue') => 'revenue',
+                        default => 'transfer'
+                    };
                 }),
         ];
     }
@@ -58,5 +64,10 @@ class TransactionCategoryImporter extends Importer
         }
 
         return $body;
+    }
+
+    public function getJobBatchName(): ?string
+    {
+        return 'transaction-category-import';
     }
 }

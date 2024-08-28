@@ -16,9 +16,19 @@ class BankAccountTransactionExporter extends Exporter
         return [
             ExportColumn::make('date_time'),
             ExportColumn::make('bankAccount.name'),
-            ExportColumn::make('amount'),
+            ExportColumn::make('amount')
+                ->formatStateUsing(fn($state) => number_format($state, 2)),
+            ExportColumn::make('currency')
+                ->state(fn($record) => $record->bankAccount->currency->name),
             ExportColumn::make('destination'),
-            ExportColumn::make('category.name'),
+            ExportColumn::make('transactionCategory.name')
+                ->label(__('resources.transaction_categories.table.name')),
+            ExportColumn::make('transactionCategory.type')
+                ->label(__('resources.transaction_categories.table.type'))
+                ->formatStateUsing(fn($state) => __('resources.transaction_categories.types')[$state->name]),
+            ExportColumn::make('transactionCategory.group')
+                ->label(__('resources.transaction_categories.table.group'))
+                ->formatStateUsing(fn($state) => __('resources.transaction_categories.groups')[$state->name]),
             ExportColumn::make('notes'),
         ];
     }
@@ -32,5 +42,10 @@ class BankAccountTransactionExporter extends Exporter
         }
 
         return $body;
+    }
+
+    public function getJobBatchName(): ?string
+    {
+        return 'bank-account-transaction-export';
     }
 }

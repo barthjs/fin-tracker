@@ -41,4 +41,9 @@ class BankAccountImporter extends Importer
 
         return $body;
     }
+
+    public function getJobBatchName(): ?string
+    {
+        return 'bank-account-import';
+    }
 }

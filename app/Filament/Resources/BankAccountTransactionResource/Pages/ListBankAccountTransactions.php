@@ -7,6 +7,7 @@ use App\Enums\TransactionType;
 use App\Filament\Exports\BankAccountTransactionExporter;
 use App\Filament\Imports\BankAccountTransactionImporter;
 use App\Filament\Resources\BankAccountTransactionResource;
+use App\Models\BankAccount;
 use App\Models\Scopes\BankAccountScope;
 use App\Models\Scopes\BankAccountTransactionScope;
 use App\Models\Scopes\TransactionCategoryScope;
@@ -15,6 +16,7 @@ use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\File;
 
 class ListBankAccountTransactions extends ListRecords
 {
@@ -38,12 +40,18 @@ class ListBankAccountTransactions extends ListRecords
                 ->label(__('resources.bank_account_transactions.create_label')),
             Actions\ImportAction::make()
                 ->label('import')
-                ->importer(BankAccountTransactionImporter::class),
+                ->importer(BankAccountTransactionImporter::class)
+                ->fileRules([
+                    File::types(['csv'])->max(1024),
+                ]),
             Actions\ExportAction::make()
                 ->exporter(BankAccountTransactionExporter::class)
-                ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class, TransactionCategoryScope::class])->whereHas('bankAccount', function ($query) {
-                    $query->withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class, TransactionCategoryScope::class])->where('user_id', auth()->id());
-                }))
+                ->modifyQueryUsing(function (Builder $query) {
+                    // Todo improve this
+                    $bankAccounts = BankAccount::whereUserId(auth()->id())->pluck('id')->toArray();
+                    return $query->withoutGlobalScopes([BankAccountScope::class, BankAccountTransactionScope::class, TransactionCategoryScope::class])
+                        ->whereIn('bank_account_id', $bankAccounts);
+                })
         ];
     }
 

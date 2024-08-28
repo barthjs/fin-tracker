@@ -31,7 +31,12 @@ class BankAccountTransactionImporter extends Importer
                 }),
             ImportColumn::make('bank_account_id')
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
-                    $record->bank_account_id = BankAccount::whereName($state)->first()->id ?? null;
+                    $bankAccount = BankAccount::whereName($state);
+                    if ($bankAccount->count() > 1) {
+                        $record->bank_account_id = null;
+                    } else {
+                        $record->bank_account_id = $bankAccount->first()->id ?? null;
+                    }
                 }),
             ImportColumn::make('amount')
                 ->requiredMapping()
@@ -110,14 +115,14 @@ class BankAccountTransactionImporter extends Importer
                         $record->category_id = $result->first()->id ?? null;
                     }
                 }),
-            ImportColumn::make('type')
-                ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
-                }),
             ImportColumn::make('group')
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
                 }),
+            ImportColumn::make('type')
+                ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
+                }),
             ImportColumn::make('notes')
-                ->rules(['max:255']),];
+                ->rules(['max:255'])];
     }
 
     public function resolveRecord(): ?BankAccountTransaction

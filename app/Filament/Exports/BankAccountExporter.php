@@ -3,7 +3,6 @@
 namespace App\Filament\Exports;
 
 use App\Models\BankAccount;
-use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
@@ -39,13 +38,6 @@ class BankAccountExporter extends Exporter
         }
 
         return $body;
-    }
-
-    public function getFormats(): array
-    {
-        return [
-            ExportFormat::Csv,
-        ];
     }
 
     public function getJobBatchName(): ?string
