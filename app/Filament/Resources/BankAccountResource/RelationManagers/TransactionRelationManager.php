@@ -40,8 +40,8 @@ class TransactionRelationManager extends RelationManager
                     ->copyMessage(__('tables.copied'))
                     ->label(fn() => __('resources.bank_account_transactions.table.amount_in') . $this->getOwnerRecord()->currency->value)
                     ->fontFamily('mono')
-                    ->numeric(function ($record) {
-                        $numberStr = (string)$record->amount;
+                    ->numeric(function ($state) {
+                        $numberStr = (string)$state;
                         $decimalPart = substr($numberStr, strpos($numberStr, '.') + 1);
                         $decimalPart = rtrim($decimalPart, '0');
                         $decimalPlaces = strlen($decimalPart);
@@ -50,13 +50,10 @@ class TransactionRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable()
                     ->badge()
-                    ->color(function ($record) {
-                        $type = $record->transactionCategory()->first()->type;
-                        return match (true) {
-                            $type == 'expense' => 'danger',
-                            $type == 'revenue' => 'success',
-                            default => 'gray',
-                        };
+                    ->color(fn($record) => match ($record->transactionCategory->type->name) {
+                        'expense' => 'danger',
+                        'revenue' => 'success',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('destination')
                     ->label(__('resources.bank_account_transactions.table.destination'))
@@ -73,9 +70,9 @@ class TransactionRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable()
                     ->wrap(),
-                Tables\Columns\TextColumn::make('transactionCategory.group')
+                Tables\Columns\TextColumn::make('transactionCategory.group.name')
                     ->label(__('resources.bank_account_transactions.table.group'))
-                    ->formatStateUsing(fn($record): string => __('resources.transaction_categories.groups')[$record->transactionCategory->group])
+                    ->formatStateUsing(fn($state): string => __('resources.transaction_categories.groups')[$state])
                     ->copyable()
                     ->copyMessage(__('tables.copied'))
                     ->searchable()

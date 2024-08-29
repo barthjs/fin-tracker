@@ -19,15 +19,8 @@ class TransactionCategoryFactory extends Factory
     public function definition(): array
     {
         $group = fake()->randomElement(TransactionGroup::cases())->name;
-        $type = match ($group) {
-            "transfers" => TransactionType::transfer->name,
-            "var_revenues", "fix_revenues" => TransactionType::revenue->name,
-            default => TransactionType::expense->name,
-        };
-
         return [
             'name' => fake()->word(),
-            'type' => $type,
             'group' => $group,
         ];
     }

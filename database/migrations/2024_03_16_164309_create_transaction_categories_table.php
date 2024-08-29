@@ -17,11 +17,11 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->string('name')->index();
-            $types = array_column(TransactionType::cases(), 'name');
-            $table->enum('type', $types)->default(TransactionType::transfer->name)->index();
             $groups = array_column(TransactionGroup::cases(), 'name');
             $table->enum('group', $groups)->default(TransactionGroup::transfers->name)->index();
             $table->boolean('active')->default(true)->index();
+            $types = array_column(TransactionType::cases(), 'name');
+            $table->enum('type', $types)->default(TransactionType::transfer->name)->index();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();
             $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();

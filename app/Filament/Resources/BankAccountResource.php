@@ -13,7 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class BankAccountResource extends Resource
 {
@@ -66,7 +66,6 @@ class BankAccountResource extends Resource
         return $table
             ->columns($columns)
             ->paginated(fn() => BankAccount::all()->count() > 20)
-            ->recordUrl(fn(Model $record): string => Pages\ViewBankAccount::getUrl([$record->id]))
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -83,6 +82,10 @@ class BankAccountResource extends Resource
                 Tables\Actions\DeleteAction::make()->iconButton()
                     ->modalHeading(__('resources.bank_accounts.delete_heading'))
                     ->disabled(fn($record) => $record->transactions()->count() > 0)
+            ])
+            ->bulkActions(self::getBulkActions())
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make(),
             ]);
     }
 
@@ -132,6 +135,27 @@ class BankAccountResource extends Resource
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ];
+    }
+
+    public static function getBulkActions(): Tables\Actions\BulkActionGroup
+    {
+        return Tables\Actions\BulkActionGroup::make([
+            Tables\Actions\BulkAction::make('Change currency')
+                ->icon('heroicon-m-pencil-square')
+                ->form([
+                    Forms\Components\Select::make('currency')
+                        ->label(__('resources.bank_accounts.table.currency'))
+                        ->placeholder(__('resources.bank_accounts.form.currency_placeholder'))
+                        ->options(Currency::class)
+                        ->default(fn() => BankAccount::getCurrency())
+                        ->required()
+                        ->searchable(),
+                ])
+                ->action(function (Collection $records, array $data): void {
+                    $records->each->update(['currency' => $data['currency']]);
+                })
+                ->deselectRecordsAfterCompletion(),
+        ]);
     }
 
     public static function getRelations(): array

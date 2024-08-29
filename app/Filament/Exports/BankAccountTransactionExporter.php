@@ -23,12 +23,12 @@ class BankAccountTransactionExporter extends Exporter
             ExportColumn::make('destination'),
             ExportColumn::make('transactionCategory.name')
                 ->label(__('resources.transaction_categories.table.name')),
-            ExportColumn::make('transactionCategory.type')
-                ->label(__('resources.transaction_categories.table.type'))
-                ->formatStateUsing(fn($state) => __('resources.transaction_categories.types')[$state->name]),
             ExportColumn::make('transactionCategory.group')
                 ->label(__('resources.transaction_categories.table.group'))
                 ->formatStateUsing(fn($state) => __('resources.transaction_categories.groups')[$state->name]),
+            ExportColumn::make('transactionCategory.type')
+                ->label(__('resources.transaction_categories.table.type'))
+                ->formatStateUsing(fn($state) => __('resources.transaction_categories.types')[$state->name]),
             ExportColumn::make('notes'),
         ];
     }

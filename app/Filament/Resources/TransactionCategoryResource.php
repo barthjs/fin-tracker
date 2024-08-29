@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Enums\TransactionGroup;
-use App\Enums\TransactionType;
 use App\Filament\Resources\TransactionCategoryResource\Pages;
 use App\Filament\Resources\TransactionCategoryResource\RelationManagers\TransactionRelationManager;
 use App\Models\TransactionCategory;
@@ -14,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class TransactionCategoryResource extends Resource
 {
@@ -36,23 +36,18 @@ class TransactionCategoryResource extends Resource
                     ->maxLength(255)
                     ->required()
                     ->string(),
-                Forms\Components\Toggle::make('active')
-                    ->label(__('tables.active'))
-                    ->default(true)
-                    ->inline(false),
-                Forms\Components\Select::make('type')
-                    ->label(__('resources.transaction_categories.table.type'))
-                    ->placeholder(__('resources.transaction_categories.form.type_placeholder'))
-                    ->options(__('resources.transaction_categories.types'))
-                    ->default(TransactionType::transfer->name)
-                    ->required(),
                 Forms\Components\Select::make('group')
                     ->label(__('resources.transaction_categories.table.group'))
                     ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
                     ->options(__('resources.transaction_categories.groups'))
                     ->default(TransactionGroup::transfers->name)
                     ->required(),
-            ]);
+                Forms\Components\Toggle::make('active')
+                    ->label(__('tables.active'))
+                    ->default(true)
+                    ->inline(false),
+            ])
+            ->columns(3);
     }
 
     /**
@@ -80,6 +75,10 @@ class TransactionCategoryResource extends Resource
                 Tables\Actions\DeleteAction::make()->iconButton()
                     ->modalHeading(__('resources.transaction_categories.delete_heading'))
                     ->disabled(fn($record) => $record->transactions()->count() > 0),
+            ])
+            ->bulkActions(self::getBulkActions())
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make(),
             ]);
     }
 
@@ -91,14 +90,14 @@ class TransactionCategoryResource extends Resource
                 ->searchable()
                 ->sortable()
                 ->wrap(),
-            Tables\Columns\TextColumn::make('type')
-                ->label(__('resources.transaction_categories.table.type'))
-                ->formatStateUsing(fn($record): string => __('resources.transaction_categories.types')[$record->type->name])
-                ->searchable()
-                ->sortable(),
             Tables\Columns\TextColumn::make('group')
                 ->label(__('resources.transaction_categories.table.group'))
                 ->formatStateUsing(fn($record): string => __('resources.transaction_categories.groups')[$record->group->name])
+                ->searchable()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('type')
+                ->label(__('resources.transaction_categories.table.type'))
+                ->formatStateUsing(fn($record): string => __('resources.transaction_categories.types')[$record->type->name])
                 ->searchable()
                 ->sortable(),
             Tables\Columns\IconColumn::make('active')
@@ -118,6 +117,26 @@ class TransactionCategoryResource extends Resource
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ];
+    }
+
+    public static function getBulkActions(): Tables\Actions\BulkActionGroup
+    {
+        return Tables\Actions\BulkActionGroup::make([
+            Tables\Actions\BulkAction::make('Change group')
+                ->icon('heroicon-m-pencil-square')
+                ->form([
+                    Forms\Components\Select::make('group')
+                        ->label(__('resources.transaction_categories.table.group'))
+                        ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
+                        ->options(__('resources.transaction_categories.groups'))
+                        ->default(TransactionGroup::transfers->name)
+                        ->required(),
+                ])
+                ->action(function (Collection $records, array $data): void {
+                    $records->each->update(['group' => $data['group']]);
+                })
+                ->deselectRecordsAfterCompletion(),
+        ]);
     }
 
     public static function getRelations(): array

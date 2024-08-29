@@ -48,9 +48,9 @@ return [
         "groups" => [
             'fix_expenses' => 'Fixed expenses',
             'var_expenses' => 'Variable expenses',
-            'fix_revenues' => 'Fixed Revenues',
-            'var_revenues' => 'Variable Revenues',
-            'transfer' => 'Transfers',
+            'fix_revenues' => 'Fixed revenues',
+            'var_revenues' => 'Variable revenues',
+            'transfers' => 'Transfers',
         ]
     ],
 

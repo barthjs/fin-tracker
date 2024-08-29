@@ -82,13 +82,6 @@ class BankAccountTransactionImporter extends Importer
                 ->rules(['max:255']),
             ImportColumn::make('category_id')
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state, $data): void {
-                    $type = array_key_exists('type', $data) ? match ($data['type']) {
-                        __('resources.transaction_categories.types.expense') => 'expense',
-                        __('resources.transaction_categories.types.revenue') => 'revenue',
-                        __('resources.transaction_categories.types.transfer') => 'transfer',
-                        default => ''
-                    } : '';
-
                     $group = array_key_exists('group', $data) ? match ($data['group']) {
                         __('resources.transaction_categories.groups.fix_expense') => 'fix_expense',
                         __('resources.transaction_categories.groups.var_expense') => 'var_expense',
@@ -99,10 +92,6 @@ class BankAccountTransactionImporter extends Importer
                     } : '';
 
                     $query = TransactionCategory::whereName($state);
-
-                    if ($type) {
-                        $query->whereType($type);
-                    }
 
                     if ($group) {
                         $query->whereGroup($group);
@@ -116,9 +105,6 @@ class BankAccountTransactionImporter extends Importer
                     }
                 }),
             ImportColumn::make('group')
-                ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
-                }),
-            ImportColumn::make('type')
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
                 }),
             ImportColumn::make('notes')

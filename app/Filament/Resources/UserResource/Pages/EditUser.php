@@ -22,7 +22,7 @@ class EditUser extends EditRecord
 
     public function getSubheading(): string
     {
-        return __('resources.users.create_heading');
+        return __('resources.users.edit_heading');
     }
 
     protected function getHeaderActions(): array

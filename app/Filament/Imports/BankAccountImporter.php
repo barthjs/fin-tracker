@@ -28,7 +28,9 @@ class BankAccountImporter extends Importer
 
     public function resolveRecord(): ?BankAccount
     {
-        return new BankAccount();
+        return BankAccount::firstOrNew([
+            'name' => $this->data['name'],
+        ]);
     }
 
     public static function getCompletedNotificationBody(Import $import): string

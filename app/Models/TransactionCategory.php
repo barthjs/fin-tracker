@@ -39,6 +39,25 @@ class TransactionCategory extends Model
                 $model->user_id = auth()->id();
             }
         });
+
+        static::created(function ($model) {
+            if (!is_null($model->group)) {
+                $model->type = match ($model->group->name) {
+                    'fix_expenses', 'var_expenses' => 'expense',
+                    'fix_revenues', 'var_revenues' => 'revenue',
+                    default => 'transfer'
+                };
+                $model->save();
+            }
+        });
+
+        static::updating(function ($model) {
+            $model->type = match ($model->group->name) {
+                'fix_expenses', 'var_expenses' => 'expense',
+                'fix_revenues', 'var_revenues' => 'revenue',
+                default => 'transfer'
+            };
+        });
     }
 
     public function user(): BelongsTo

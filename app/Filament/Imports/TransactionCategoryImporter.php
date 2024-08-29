@@ -20,31 +20,13 @@ class TransactionCategoryImporter extends Importer
             ImportColumn::make('group')
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(function (TransactionCategory $record, string $state, $data): void {
-                    $group = match ($state) {
+                ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
+                    $record->group = match ($state) {
                         __('resources.transaction_categories.groups.fix_expenses') => 'fix_expenses',
                         __('resources.transaction_categories.groups.var_expenses') => 'var_expenses',
                         __('resources.transaction_categories.groups.fix_revenues') => 'fix_revenues',
                         __('resources.transaction_categories.groups.var_revenues') => 'var_revenues',
                         default => 'transfers'
-                    };
-
-                    $record->group = $group;
-                    if (!array_key_exists('type', $data)) {
-                        $type = match ($group) {
-                            'fix_expenses', 'var_expenses' => 'expense',
-                            'fix_revenues', 'var_revenues' => 'revenue',
-                            default => 'transfer'
-                        };
-                        $record->type = $type;
-                    }
-                }),
-            ImportColumn::make('type')
-                ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
-                    $record->type = match ($state) {
-                        __('resources.transaction_categories.types.expense') => 'expense',
-                        __('resources.transaction_categories.types.revenue') => 'revenue',
-                        default => 'transfer'
                     };
                 }),
         ];
@@ -52,7 +34,9 @@ class TransactionCategoryImporter extends Importer
 
     public function resolveRecord(): ?TransactionCategory
     {
-        return new TransactionCategory();
+        return TransactionCategory::firstOrNew([
+            'name' => $this->data['name'],
+        ]);
     }
 
     public static function getCompletedNotificationBody(Import $import): string

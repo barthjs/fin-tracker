@@ -54,6 +54,10 @@ class TransactionCategoryRelationManager extends RelationManager
                 Tables\Actions\DeleteAction::make()->iconButton()
                     ->modalHeading(__('resources.transaction_categories.delete_heading')),
             ])
+            ->bulkActions(TransactionCategoryResource::getBulkActions())
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('tabler-plus')

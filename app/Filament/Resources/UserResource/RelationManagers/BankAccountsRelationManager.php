@@ -54,6 +54,10 @@ class BankAccountsRelationManager extends RelationManager
                 Tables\Actions\DeleteAction::make()->iconButton()
                     ->modalHeading(__('resources.bank_accounts.delete_heading')),
             ])
+            ->bulkActions(BankAccountResource::getBulkActions())
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('tabler-plus')

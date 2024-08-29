@@ -39,8 +39,8 @@ class TransactionRelationManager extends RelationManager
                     ->copyable()
                     ->copyMessage(__('tables.copied'))
                     ->fontFamily('mono')
-                    ->numeric(function ($record) {
-                        $numberStr = (string)$record->amount;
+                    ->numeric(function ($state) {
+                        $numberStr = (string)$state;
                         $decimalPart = substr($numberStr, strpos($numberStr, '.') + 1);
                         $decimalPart = rtrim($decimalPart, '0');
                         $decimalPlaces = strlen($decimalPart);
@@ -49,13 +49,10 @@ class TransactionRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable()
                     ->badge()
-                    ->color(function ($record) {
-                        $type = $record->transactionCategory()->first()->type;
-                        return match (true) {
-                            $type == 'expense' => 'danger',
-                            $type == 'income' => 'success',
-                            default => 'gray',
-                        };
+                    ->color(fn() => match ($this->getOwnerRecord()->type->name) {
+                        'expense' => 'danger',
+                        'income' => 'success',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('bankAccount.name')
                     ->label(__('resources.bank_account_transactions.table.account'))
