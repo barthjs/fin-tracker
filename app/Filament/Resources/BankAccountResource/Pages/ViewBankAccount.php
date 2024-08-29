@@ -11,7 +11,7 @@ class ViewBankAccount extends ViewRecord
 
     public function getTitle(): string
     {
-        return __('');
+        return __('bank_account.navigation_label');
     }
 
     public function getHeading(): string

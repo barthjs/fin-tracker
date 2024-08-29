@@ -2,25 +2,6 @@
 
 return [
 
-    "bank_accounts" => [
-        "navigation_label" => "Konten",
-        "create_label" => "Neues Konto",
-        "create_heading" => "Neues Konto erstellen",
-        "edit_heading" => "Konto bearbeiten",
-        "delete_heading" => "Konto löschen",
-
-        "table" => [
-            'name' => 'Konto',
-            'balance' => 'Kontostand',
-            'currency' => 'Währung',
-            'empty' => 'Keine Konten gefunden'
-        ],
-
-        "form" => [
-            'currency_placeholder' => 'Währung wählen',
-        ]
-    ],
-
     "transaction_categories" => [
         "navigation_label" => "Transaktionskategorien",
         "create_label" => "Neue Transaktionskategorie",

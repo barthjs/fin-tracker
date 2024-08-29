@@ -1,24 +1,6 @@
 <?php
+
 return [
-
-    "bank_accounts" => [
-        "navigation_label" => "Bank accounts",
-        "create_label" => "New bank account",
-        "create_heading" => "Create new bank account",
-        "edit_heading" => "Edit bank account",
-        "delete_heading" => "Delete bank account",
-
-        "table" => [
-            'name' => 'Name',
-            'balance' => 'Balance',
-            'currency' => 'Currency',
-            'empty' => 'No bank accounts found',
-        ],
-
-        "form" => [
-            'currency_placeholder' => 'Choose currency',
-        ]
-    ],
 
     "transaction_categories" => [
         "navigation_label" => "Transaction categories",

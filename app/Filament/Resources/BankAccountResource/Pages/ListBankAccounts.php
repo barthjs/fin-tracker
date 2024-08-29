@@ -17,12 +17,12 @@ class ListBankAccounts extends ListRecords
 
     public function getTitle(): string
     {
-        return __('resources.bank_accounts.navigation_label');
+        return __('bank_account.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('resources.bank_accounts.navigation_label');
+        return __('bank_account.navigation_label');
     }
 
     protected function getHeaderActions(): array
@@ -30,16 +30,27 @@ class ListBankAccounts extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->icon('tabler-plus')
-                ->label(__('resources.bank_accounts.create_label'))
-                ->modalHeading(__('resources.bank_accounts.create_heading')),
+                ->label(__('bank_account.buttons.create_button_label'))
+                ->modalHeading(__('bank_account.buttons.create_heading')),
             Actions\ImportAction::make()
-                ->label('import')
+                ->icon('tabler-table-import')
+                ->label(__('table.import'))
+                ->color('warning')
+                ->modalHeading(__('bank_account.buttons.import_heading'))
                 ->importer(BankAccountImporter::class)
+                ->failureNotificationTitle(__('bank_account.notifications.import.failure_heading'))
+                ->successNotificationTitle(__('bank_account.notifications.import.success_heading'))
                 ->fileRules([
                     File::types(['csv'])->max(1024),
                 ]),
             Actions\ExportAction::make()
+                ->icon('tabler-table-export')
+                ->label(__('table.export'))
+                ->color('warning')
+                ->modalHeading(__('bank_account.buttons.export_heading'))
                 ->exporter(BankAccountExporter::class)
+                ->failureNotificationTitle(__('bank_account.notifications.export.failure_heading'))
+                ->successNotificationTitle(__('bank_account.notifications.export.success_heading'))
                 ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes([BankAccountScope::class])->where('user_id', auth()->id()))
         ];
     }

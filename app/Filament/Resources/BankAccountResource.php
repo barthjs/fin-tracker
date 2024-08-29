@@ -21,9 +21,19 @@ class BankAccountResource extends Resource
     protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'tabler-bank-building';
 
+    public static function getSlug(): string
+    {
+        return __('bank_account.url');
+    }
+
+    public static function getNavigationUrl(): string
+    {
+        return __('bank_account.url');
+    }
+
     public static function getNavigationLabel(): string
     {
-        return __('resources.bank_accounts.navigation_label');
+        return __('bank_account.navigation_label');
     }
 
     public static function form(Form $form): Form
@@ -31,26 +41,26 @@ class BankAccountResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label(__('resources.bank_accounts.table.name'))
+                    ->label(__('bank_account.columns.name'))
                     ->maxLength(255)
                     ->required()
                     ->string(),
                 Forms\Components\Select::make('currency')
-                    ->label(__('resources.bank_accounts.table.currency'))
-                    ->placeholder(__('resources.bank_accounts.form.currency_placeholder'))
+                    ->label(__('bank_account.columns.currency'))
+                    ->placeholder(__('bank_account.form.currency_placeholder'))
                     ->options(Currency::class)
                     ->default(fn() => BankAccount::getCurrency())
                     ->required()
                     ->searchable(),
                 Forms\Components\Textarea::make('description')
-                    ->label(__('tables.description'))
+                    ->label(__('bank_account.columns.description'))
                     ->autosize()
                     ->maxLength(1000)
                     ->rows(1)
                     ->string()
                     ->grow(),
                 Forms\Components\Toggle::make('active')
-                    ->label(__('tables.active'))
+                    ->label(__('table.active'))
                     ->default(true)
                     ->inline(false)
             ])
@@ -71,21 +81,25 @@ class BankAccountResource extends Resource
             ->striped()
             ->filters([
                 Filter::make('inactive')
-                    ->label(__('tables.status_inactive'))
+                    ->label(__('table.status_inactive'))
                     ->query(fn($query) => $query->where('active', false))
             ])
-            ->emptyStateHeading(__('resources.bank_accounts.table.empty'))
             ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\EditAction::make()->iconButton()
-                    ->modalHeading(__('resources.bank_accounts.edit_heading')),
+                    ->modalHeading(__('bank_account.buttons.edit_heading')),
                 Tables\Actions\DeleteAction::make()->iconButton()
-                    ->modalHeading(__('resources.bank_accounts.delete_heading'))
+                    ->modalHeading(__('bank_account.buttons.delete_heading'))
                     ->disabled(fn($record) => $record->transactions()->count() > 0)
             ])
             ->bulkActions(self::getBulkActions())
+            ->emptyStateHeading(__('bank_account.empty'))
+            ->emptyStateDescription('')
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('bank_account.buttons.create_button_label'))
+                    ->modalHeading(__('bank_account.buttons.create_heading')),
             ]);
     }
 
@@ -93,11 +107,11 @@ class BankAccountResource extends Resource
     {
         return [
             Tables\Columns\TextColumn::make('name')
-                ->label(__('resources.bank_accounts.table.name'))
+                ->label(__('bank_account.columns.name'))
                 ->searchable()
                 ->sortable(),
             Tables\Columns\TextColumn::make('balance')
-                ->label(__('resources.bank_accounts.table.balance'))
+                ->label(__('bank_account.columns.balance'))
                 ->numeric(2)
                 ->badge()
                 ->color(function ($record) {
@@ -110,27 +124,27 @@ class BankAccountResource extends Resource
                 })
                 ->sortable(),
             Tables\Columns\TextColumn::make('currency')
-                ->label(__('resources.bank_accounts.table.currency'))
-                ->toggleable()
-                ->sortable(),
+                ->label(__('bank_account.columns.currency'))
+                ->sortable()
+                ->toggleable(),
             Tables\Columns\TextColumn::make('description')
-                ->label(__('tables.description'))
+                ->label(__('bank_account.columns.description'))
                 ->sortable()
                 ->toggleable()
                 ->wrap(),
             Tables\Columns\IconColumn::make('active')
-                ->label(__('tables.active'))
+                ->label(__('table.active'))
                 ->boolean()
                 ->sortable()
-                ->tooltip(fn($state): string => $state ? __('tables.status_active') : 'tables.status_inactive')
+                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('created_at')
-                ->label(__('tables.created_at'))
+                ->label(__('table.created_at'))
                 ->dateTime('Y-m-d H:i:s')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('updated_at')
-                ->label(__('tables.updated_at'))
+                ->label(__('table.updated_at'))
                 ->dateTime('Y-m-d H:i:s')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
@@ -140,12 +154,13 @@ class BankAccountResource extends Resource
     public static function getBulkActions(): Tables\Actions\BulkActionGroup
     {
         return Tables\Actions\BulkActionGroup::make([
-            Tables\Actions\BulkAction::make('Change currency')
-                ->icon('heroicon-m-pencil-square')
+            Tables\Actions\BulkAction::make('currency')
+                ->icon('tabler-edit')
+                ->label(__('bank_account.buttons.bulk_currency'))
                 ->form([
                     Forms\Components\Select::make('currency')
-                        ->label(__('resources.bank_accounts.table.currency'))
-                        ->placeholder(__('resources.bank_accounts.form.currency_placeholder'))
+                        ->label(__('bank_account.columns.currency'))
+                        ->placeholder(__('bank_account.form.currency_placeholder'))
                         ->options(Currency::class)
                         ->default(fn() => BankAccount::getCurrency())
                         ->required()

@@ -15,13 +15,22 @@ class BankAccountImporter extends Importer
     {
         return [
             ImportColumn::make('name')
+                ->label(__('bank_account.columns.name'))
+                ->exampleHeader(__('bank_account.columns.name'))
+                ->examples(__('bank_account.columns.name_examples'))
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
             ImportColumn::make('currency')
+                ->label(__('bank_account.columns.currency'))
+                ->exampleHeader(__('bank_account.columns.currency'))
+                ->examples(__('bank_account.columns.currency_examples'))
                 ->fillRecordUsing(function (BankAccount $record, string $state): void {
                     $record->currency = BankAccount::getCurrency($state);
                 }),
             ImportColumn::make('description')
+                ->label(__('bank_account.columns.description'))
+                ->exampleHeader(__('bank_account.columns.description'))
+                ->examples(__('bank_account.columns.description_examples'))
                 ->rules(['max:1000']),
         ];
     }
@@ -35,10 +44,11 @@ class BankAccountImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your bank account import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = __('bank_account.notifications.import.body_heading') . "\n\r" .
+            __('bank_account.notifications.import.body_success') . number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= "\n\r" . __('bank_account.notifications.import.body_failure') . number_format($failedRowsCount);
         }
 
         return $body;
