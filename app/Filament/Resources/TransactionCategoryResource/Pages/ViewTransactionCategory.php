@@ -11,7 +11,7 @@ class ViewTransactionCategory extends ViewRecord
 
     public function getTitle(): string
     {
-        return __('');
+        return  __('transaction_category.navigation_label');
     }
 
     public function getHeading(): string

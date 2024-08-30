@@ -10,7 +10,7 @@ return [
         'create_heading' => 'Neues Konto hinzufügen',
         'edit_heading' => 'Konto bearbeiten',
         'delete_heading' => 'Konto löschen',
-        'bulk_currency' => 'Währung ändern',
+        'bulk_currency' => 'Währung bearbeiten',
         'export_heading' => 'Konten exportieren',
         'import_heading' => 'Konten importieren',
     ],
@@ -60,4 +60,5 @@ return [
     ],
 
     'empty' => 'Keine Konten gefunden'
+
 ];

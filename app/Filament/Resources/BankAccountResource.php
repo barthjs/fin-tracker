@@ -114,13 +114,10 @@ class BankAccountResource extends Resource
                 ->label(__('bank_account.columns.balance'))
                 ->numeric(2)
                 ->badge()
-                ->color(function ($record) {
-                    $balance = $record->balance;
-                    return match (true) {
-                        floatval($balance) == 0 => 'gray',
-                        floatval($balance) < 0 => 'danger',
-                        default => 'success',
-                    };
+                ->color(fn($state) => match (true) {
+                    floatval($state) == 0 => 'gray',
+                    floatval($state) < 0 => 'danger',
+                    default => 'success'
                 })
                 ->sortable(),
             Tables\Columns\TextColumn::make('currency')

@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Enums\TransactionGroup;
-use App\Enums\TransactionType;
 use App\Models\TransactionCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

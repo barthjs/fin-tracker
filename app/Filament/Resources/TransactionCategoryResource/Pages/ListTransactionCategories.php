@@ -17,12 +17,12 @@ class ListTransactionCategories extends ListRecords
 
     public function getTitle(): string
     {
-        return __('resources.transaction_categories.navigation_label');
+        return __('transaction_category.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('resources.transaction_categories.navigation_label');
+        return __('transaction_category.navigation_label');
     }
 
     protected function getHeaderActions(): array
@@ -30,16 +30,27 @@ class ListTransactionCategories extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->icon('tabler-plus')
-                ->label(__('resources.transaction_categories.create_label'))
-                ->modalHeading(__('resources.transaction_categories.create_heading')),
+                ->label(__('transaction_category.buttons.create_button_label'))
+                ->modalHeading(__('transaction_category.buttons.create_heading')),
             Actions\ImportAction::make()
-                ->label('import')
+                ->icon('tabler-table-import')
+                ->label(__('table.import'))
+                ->color('warning')
+                ->modalHeading(__('transaction_category.buttons.import_heading'))
                 ->importer(TransactionCategoryImporter::class)
+                ->failureNotificationTitle(__('transaction_category.notifications.import.failure_heading'))
+                ->successNotificationTitle(__('transaction_category.notifications.import.success_heading'))
                 ->fileRules([
                     File::types(['csv'])->max(1024),
                 ]),
             Actions\ExportAction::make()
+                ->icon('tabler-table-export')
+                ->label(__('table.export'))
+                ->color('warning')
+                ->modalHeading(__('transaction_category.buttons.export_heading'))
                 ->exporter(TransactionCategoryExporter::class)
+                ->failureNotificationTitle(__('transaction_category.notifications.export.failure_heading'))
+                ->successNotificationTitle(__('transaction_category.notifications.export.success_heading'))
                 ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes([TransactionCategoryScope::class])->where('user_id', auth()->id()))
         ];
     }

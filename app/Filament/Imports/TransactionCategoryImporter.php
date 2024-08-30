@@ -15,17 +15,23 @@ class TransactionCategoryImporter extends Importer
     {
         return [
             ImportColumn::make('name')
+                ->label(__('transaction_category.columns.name'))
+                ->exampleHeader(__('transaction_category.columns.name'))
+                ->examples(__('transaction_category.columns.name_examples'))
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
             ImportColumn::make('group')
+                ->label(__('transaction_category.columns.group'))
+                ->exampleHeader(__('transaction_category.columns.group'))
+                ->examples(__('transaction_category.columns.group_examples'))
                 ->requiredMapping()
                 ->rules(['required'])
                 ->fillRecordUsing(function (TransactionCategory $record, string $state): void {
                     $record->group = match ($state) {
-                        __('resources.transaction_categories.groups.fix_expenses') => 'fix_expenses',
-                        __('resources.transaction_categories.groups.var_expenses') => 'var_expenses',
-                        __('resources.transaction_categories.groups.fix_revenues') => 'fix_revenues',
-                        __('resources.transaction_categories.groups.var_revenues') => 'var_revenues',
+                        __('transaction_category.groups.fix_expenses') => 'fix_expenses',
+                        __('transaction_category.groups.var_expenses') => 'var_expenses',
+                        __('transaction_category.groups.fix_revenues') => 'fix_revenues',
+                        __('transaction_category.groups.var_revenues') => 'var_revenues',
                         default => 'transfers'
                     };
                 }),
@@ -41,10 +47,11 @@ class TransactionCategoryImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your transaction category import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = __('transaction_category.notifications.import.body_heading') . "\n\r" .
+            __('transaction_category.notifications.import.body_success') . number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= "\n\r" . __('transaction_category.notifications.import.body_failure') . number_format($failedRowsCount);
         }
 
         return $body;

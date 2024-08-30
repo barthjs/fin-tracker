@@ -10,7 +10,7 @@ return [
         'create_heading' => 'Create new bank account',
         'edit_heading' => 'Edit bank account',
         'delete_heading' => 'Delete bank account',
-        'bulk_currency' => 'Change currency',
+        'bulk_currency' => 'Edit currency',
         'export_heading' => 'Export bank accounts',
         'import_heading' => 'Import bank accounts',
     ],
@@ -60,4 +60,5 @@ return [
     ],
 
     'empty' => 'No bank accounts found'
+
 ];

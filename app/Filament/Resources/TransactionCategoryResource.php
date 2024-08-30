@@ -21,9 +21,19 @@ class TransactionCategoryResource extends Resource
     protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'tabler-category';
 
+    public static function getSlug(): string
+    {
+        return __('transaction_category.url');
+    }
+
+    public static function getNavigationUrl(): string
+    {
+        return __('transaction_category.url');
+    }
+
     public static function getNavigationLabel(): string
     {
-        return __('resources.transaction_categories.navigation_label');
+        return __('transaction_category.navigation_label');
     }
 
     public static function form(Form $form): Form
@@ -31,19 +41,19 @@ class TransactionCategoryResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label(__('resources.transaction_categories.table.name'))
+                    ->label(__('transaction_category.columns.name'))
                     ->autofocus()
                     ->maxLength(255)
                     ->required()
                     ->string(),
                 Forms\Components\Select::make('group')
-                    ->label(__('resources.transaction_categories.table.group'))
-                    ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
-                    ->options(__('resources.transaction_categories.groups'))
+                    ->label(__('transaction_category.columns.group'))
+                    ->placeholder(__('transaction_category.form.group_placeholder'))
+                    ->options(__('transaction_category.groups'))
                     ->default(TransactionGroup::transfers->name)
                     ->required(),
                 Forms\Components\Toggle::make('active')
-                    ->label(__('tables.active'))
+                    ->label(__('table.active'))
                     ->default(true)
                     ->inline(false),
             ])
@@ -55,30 +65,34 @@ class TransactionCategoryResource extends Resource
      */
     public static function table(Table $table): Table
     {
-        $tableParts = self::tableColumns();
+        $columns = self::tableColumns();
         return $table
-            ->columns($tableParts)
+            ->columns($columns)
             ->paginated(fn() => TransactionCategory::all()->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
             ->filters([
                 Filter::make('inactive')
-                    ->label(__('tables.status_inactive'))
+                    ->label(__('table.status_inactive'))
                     ->query(fn($query) => $query->where('active', false))
             ])
             ->persistFiltersInSession()
-            ->emptyStateHeading(__('resources.transaction_categories.table.empty'))
             ->actions([
                 Tables\Actions\EditAction::make()->iconButton()
-                    ->modalHeading(__('resources.transaction_categories.edit_heading')),
+                    ->modalHeading(__('transaction_category.buttons.edit_heading')),
                 Tables\Actions\DeleteAction::make()->iconButton()
-                    ->modalHeading(__('resources.transaction_categories.delete_heading'))
+                    ->modalHeading(__('transaction_category.buttons.delete_heading'))
                     ->disabled(fn($record) => $record->transactions()->count() > 0),
             ])
             ->bulkActions(self::getBulkActions())
+            ->emptyStateHeading(__('transaction_category.empty'))
+            ->emptyStateDescription('')
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('transaction_category.buttons.create_button_label'))
+                    ->modalHeading(__('transaction_category.buttons.create_heading')),
             ]);
     }
 
@@ -86,33 +100,33 @@ class TransactionCategoryResource extends Resource
     {
         return [
             Tables\Columns\TextColumn::make('name')
-                ->label(__('resources.transaction_categories.table.name'))
+                ->label(__('transaction_category.columns.name'))
                 ->searchable()
                 ->sortable()
                 ->wrap(),
             Tables\Columns\TextColumn::make('group')
-                ->label(__('resources.transaction_categories.table.group'))
-                ->formatStateUsing(fn($record): string => __('resources.transaction_categories.groups')[$record->group->name])
+                ->label(__('transaction_category.columns.group'))
+                ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name])
                 ->searchable()
                 ->sortable(),
             Tables\Columns\TextColumn::make('type')
-                ->label(__('resources.transaction_categories.table.type'))
-                ->formatStateUsing(fn($record): string => __('resources.transaction_categories.types')[$record->type->name])
+                ->label(__('transaction_category.columns.type'))
+                ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name])
                 ->searchable()
                 ->sortable(),
             Tables\Columns\IconColumn::make('active')
-                ->label(__('tables.active'))
+                ->label(__('table.active'))
                 ->boolean()
                 ->sortable()
-                ->tooltip(fn($state): string => $state ? __('tables.status_active') : 'tables.status_inactive')
+                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('created_at')
-                ->label(__('tables.created_at'))
+                ->label(__('table.created_at'))
                 ->dateTime('Y-m-d H:i:s')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('updated_at')
-                ->label(__('tables.updated_at'))
+                ->label(__('table.updated_at'))
                 ->dateTime('Y-m-d H:i:s')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
@@ -123,12 +137,13 @@ class TransactionCategoryResource extends Resource
     {
         return Tables\Actions\BulkActionGroup::make([
             Tables\Actions\BulkAction::make('Change group')
-                ->icon('heroicon-m-pencil-square')
+                ->icon('tabler-edit')
+                ->label(__('transaction_category.buttons.bulk_group'))
                 ->form([
                     Forms\Components\Select::make('group')
-                        ->label(__('resources.transaction_categories.table.group'))
-                        ->placeholder(__('resources.transaction_categories.form.group_placeholder'))
-                        ->options(__('resources.transaction_categories.groups'))
+                        ->label(__('transaction_category.columns.group'))
+                        ->placeholder(__('transaction_category.form.group_placeholder'))
+                        ->options(__('transaction_category.groups'))
                         ->default(TransactionGroup::transfers->name)
                         ->required(),
                 ])

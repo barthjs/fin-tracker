@@ -19,15 +19,15 @@ class TransactionCategory extends Model
 
     protected $fillable = [
         'name',
-        'type',
         'group',
-        'active',
+        'type',
+        'active'
     ];
 
     protected $casts = [
         'active' => 'boolean',
-        'type' => TransactionType::class,
         'group' => TransactionGroup::class,
+        'type' => TransactionType::class
     ];
 
     protected static function booted(): void
