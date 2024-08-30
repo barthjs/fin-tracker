@@ -16,8 +16,7 @@ class Login extends BaseAuth
         return $form
             ->schema([
                 $this->getLoginFormComponent()
-                    ->label(__('resources.users.user_or_email'))
-                ,
+                    ->label(__('user.login.user_or_email')),
                 $this->getPasswordFormComponent(),
                 $this->getRememberFormComponent(),
             ])
@@ -34,7 +33,7 @@ class Login extends BaseAuth
     protected function getLoginFormComponent(): Component
     {
         return TextInput::make('login')
-            ->label(__('system.login_label'))
+            ->label(__('user.login.user_or_email'))
             ->required()
             ->autocomplete()
             ->autofocus()

@@ -20,7 +20,7 @@ class TransactionCategoryRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('resources.transaction_categories.navigation_label');
+        return __('transaction_category.navigation_label');
     }
 
     public function form(Form $form): Form
@@ -43,27 +43,21 @@ class TransactionCategoryRelationManager extends RelationManager
             ->striped()
             ->filters([
                 Filter::make('inactive')
-                    ->label(__('tables.status_inactive'))
+                    ->label(__('table.status_inactive'))
                     ->query(fn($query) => $query->where('active', false))
             ])
             ->persistFiltersInSession()
-            ->emptyStateHeading(__('resources.transaction_categories.table.empty'))
             ->actions([
-                Tables\Actions\EditAction::make()->iconButton()
-                    ->modalHeading(__('resources.transaction_categories.edit_heading')),
-                Tables\Actions\DeleteAction::make()->iconButton()
-                    ->modalHeading(__('resources.transaction_categories.delete_heading')),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->modalHeading(__('transaction_category.buttons.edit_heading')),
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->modalHeading(__('transaction_category.buttons.delete_heading'))
             ])
             ->bulkActions(TransactionCategoryResource::getBulkActions())
-            ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
-            ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('resources.transaction_categories.create_label'))
-                    ->modalHeading(__('resources.transaction_categories.create_heading'))
-            ])
+            ->emptyStateHeading(__('transaction_category.empty'))
+            ->emptyStateDescription('')
             ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes());
     }
 }

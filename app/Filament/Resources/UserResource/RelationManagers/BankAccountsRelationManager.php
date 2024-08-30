@@ -20,7 +20,7 @@ class BankAccountsRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('resources.bank_accounts.navigation_label');
+        return __('bank_account.navigation_label');
     }
 
     public function form(Form $form): Form
@@ -43,27 +43,21 @@ class BankAccountsRelationManager extends RelationManager
             ->striped()
             ->filters([
                 Filter::make('inactive')
-                    ->label(__('tables.status_inactive'))
+                    ->label(__('table.status_inactive'))
                     ->query(fn($query) => $query->where('active', false))
             ])
-            ->emptyStateHeading(__('resources.bank_accounts.table.empty'))
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make()->iconButton()
-                    ->modalHeading(__('resources.bank_accounts.edit_heading')),
-                Tables\Actions\DeleteAction::make()->iconButton()
-                    ->modalHeading(__('resources.bank_accounts.delete_heading')),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->modalHeading(__('bank_account.buttons.edit_heading')),
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->modalHeading(__('bank_account.buttons.delete_heading'))
             ])
             ->bulkActions(BankAccountResource::getBulkActions())
-            ->emptyStateActions([
-                Tables\Actions\CreateAction::make(),
-            ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('resources.bank_accounts.create_label'))
-                    ->modalHeading(__('resources.bank_accounts.create_heading'))
-            ])
+            ->emptyStateHeading(__('bank_account.empty'))
+            ->emptyStateDescription('')
             ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes());
     }
 }

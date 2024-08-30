@@ -25,13 +25,6 @@ return new class extends Migration {
             $table->rememberToken();
         });
 
-        Schema::create('sys_password_reset_tokens', function (Blueprint $table) {
-            $table->timestamp('created_at')->nullable();
-
-            $table->string('email')->primary();
-            $table->string('token');
-        });
-
         Schema::create('sys_sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();

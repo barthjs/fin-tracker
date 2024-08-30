@@ -24,6 +24,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         'name',
         'email',
         'password',
+        'verified',
         'is_admin',
         'active',
     ];
@@ -33,14 +34,12 @@ class User extends Authenticatable implements FilamentUser, HasName
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'password' => 'hashed',
-            'is_admin' => 'boolean',
-            'active' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'password' => 'hashed',
+        'verified' => 'boolean',
+        'is_admin' => 'boolean',
+        'active' => 'boolean',
+    ];
 
     protected static function booted(): void
     {
