@@ -38,30 +38,4 @@ return [
         ]
     ],
 
-    "users" => [
-        "navigation_label" => "Benutzer",
-        "create_label" => "Neuer Benutzer",
-        "create_heading" => "Neuen Benutzer erstellen",
-        "edit_heading" => "Benutzer bearbeiten",
-        "delete_heading" => "Benutzer löschen",
-        "password" => "Passwort",
-        "password_confirmation" => "Passwort wiederholen",
-        "user_or_email" => "Benutzername oder E-Mail",
-
-        "table" => [
-            'first_name' => 'Vorname',
-            'last_name' => 'Nachname',
-            'email' => 'E-Mail',
-            'name' => 'Benutzername',
-            'is_admin' => 'Administrator',
-            'empty' => 'Keine Benutzer gefunden'
-        ],
-
-        "filter" => [
-            'all' => 'Alle',
-            'admins' => 'Administratoren',
-            'users' => 'Benutzer',
-        ]
-    ]
-
 ];

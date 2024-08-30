@@ -79,9 +79,11 @@ class TransactionCategoryResource extends Resource
             ])
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make()->iconButton()
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
                     ->modalHeading(__('transaction_category.buttons.edit_heading')),
-                Tables\Actions\DeleteAction::make()->iconButton()
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
                     ->modalHeading(__('transaction_category.buttons.delete_heading'))
                     ->disabled(fn($record) => $record->transactions()->count() > 0),
             ])

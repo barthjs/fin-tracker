@@ -12,24 +12,24 @@ class EditUser extends EditRecord
 
     public function getTitle(): string
     {
-        return __('resources.users.navigation_label');
+        return __('user.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('resources.users.navigation_label');
+        return __('user.navigation_label');
     }
 
     public function getSubheading(): string
     {
-        return __('resources.users.edit_heading');
+        return __('user.buttons.edit_heading');
     }
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\DeleteAction::make()
-                ->modalHeading(__('resources.users.delete_heading')),
+                ->modalHeading(__('user.buttons.delete_heading')),
         ];
     }
 

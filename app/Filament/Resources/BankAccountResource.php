@@ -42,6 +42,7 @@ class BankAccountResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->label(__('bank_account.columns.name'))
+                    ->autofocus()
                     ->maxLength(255)
                     ->required()
                     ->string(),
@@ -86,9 +87,11 @@ class BankAccountResource extends Resource
             ])
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make()->iconButton()
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
                     ->modalHeading(__('bank_account.buttons.edit_heading')),
-                Tables\Actions\DeleteAction::make()->iconButton()
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
                     ->modalHeading(__('bank_account.buttons.delete_heading'))
                     ->disabled(fn($record) => $record->transactions()->count() > 0)
             ])

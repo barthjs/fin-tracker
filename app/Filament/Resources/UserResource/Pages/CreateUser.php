@@ -11,17 +11,17 @@ class CreateUser extends CreateRecord
 
     public function getTitle(): string
     {
-        return __('resources.users.navigation_label');
+        return __('user.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('resources.users.navigation_label');
+        return __('user.navigation_label');
     }
 
     public function getSubheading(): string
     {
-        return __('resources.users.create_heading');
+        return __('user.buttons.create_heading');
     }
 
     protected function getRedirectUrl(): string
