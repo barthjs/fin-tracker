@@ -20,7 +20,7 @@ class BankAccountExporter extends Exporter
                 ->label(__('bank_account.columns.name')),
             ExportColumn::make('balance')
                 ->label(__('bank_account.columns.balance'))
-                ->formatStateUsing(fn($state) => Number::format($state)),
+                ->formatStateUsing(fn($state) => Number::format($state,2)),
             ExportColumn::make('currency')
                 ->label(__('bank_account.columns.currency'))
                 ->formatStateUsing(fn($state) => $state->name),

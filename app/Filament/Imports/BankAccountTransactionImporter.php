@@ -19,6 +19,7 @@ class BankAccountTransactionImporter extends Importer
     {
         return [
             ImportColumn::make('date_time')
+                ->label(__('bank_account_transaction.columns.date'))
                 ->requiredMapping()
                 ->rules(['required'])
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
@@ -30,6 +31,7 @@ class BankAccountTransactionImporter extends Importer
                     $record->date_time = $carbon;
                 }),
             ImportColumn::make('bank_account_id')
+                ->label(__('bank_account_transaction.columns.account'))
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
                     $bankAccount = BankAccount::whereName($state);
                     if ($bankAccount->count() > 1) {
@@ -39,6 +41,7 @@ class BankAccountTransactionImporter extends Importer
                     }
                 }),
             ImportColumn::make('amount')
+                ->label(__('bank_account_transaction.columns.amount'))
                 ->requiredMapping()
                 ->rules(['required'])
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
@@ -79,8 +82,10 @@ class BankAccountTransactionImporter extends Importer
                     $record->amount = $floatValue;
                 }),
             ImportColumn::make('destination')
+                ->label(__('bank_account_transaction.columns.destination'))
                 ->rules(['max:255']),
             ImportColumn::make('category_id')
+                ->label(__('bank_account_transaction.columns.category'))
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state, $data): void {
                     $group = array_key_exists('group', $data) ? match ($data['group']) {
                         __('resources.transaction_categories.groups.fix_expense') => 'fix_expense',
@@ -105,9 +110,11 @@ class BankAccountTransactionImporter extends Importer
                     }
                 }),
             ImportColumn::make('group')
+                ->label(__('bank_account_transaction.columns.group'))
                 ->fillRecordUsing(function (BankAccountTransaction $record, string $state): void {
                 }),
             ImportColumn::make('notes')
+                ->label(__('bank_account_transaction.columns.notes'))
                 ->rules(['max:255'])];
     }
 
@@ -118,12 +125,18 @@ class BankAccountTransactionImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your bank account transaction import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = __('bank_account.notifications.import.body_heading') . "\n\r" .
+            __('bank_account.notifications.import.body_success') . number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= "\n\r" . __('bank_account.notifications.import.body_failure') . number_format($failedRowsCount);
         }
 
         return $body;
+    }
+
+    public function getJobBatchName(): ?string
+    {
+        return 'bank-account-transaction-import';
     }
 }

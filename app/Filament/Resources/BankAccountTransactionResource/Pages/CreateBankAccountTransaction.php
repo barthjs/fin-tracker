@@ -11,17 +11,17 @@ class CreateBankAccountTransaction extends CreateRecord
 
     public function getTitle(): string
     {
-        return __('resources.bank_account_transactions.navigation_label');
+        return __('bank_account_transaction.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('resources.bank_account_transactions.navigation_label');
+        return __('bank_account_transaction.navigation_label');
     }
 
     public function getSubheading(): string
     {
-        return __('resources.bank_account_transactions.create_heading');
+        return __('bank_account_transaction.buttons.create_heading');
     }
 
     protected function getRedirectUrl(): string
