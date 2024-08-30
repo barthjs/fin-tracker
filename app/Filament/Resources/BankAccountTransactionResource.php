@@ -27,11 +27,6 @@ class BankAccountTransactionResource extends Resource
         return __('bank_account_transaction.url');
     }
 
-    public static function getNavigationUrl(): string
-    {
-        return __('bank_account_transaction.url');
-    }
-
     public static function getNavigationLabel(): string
     {
         return __('bank_account_transaction.navigation_label');
@@ -182,14 +177,11 @@ class BankAccountTransactionResource extends Resource
                     ->label(__('bank_account_transaction.columns.amount'))
                     ->copyable()
                     ->copyMessage(__('table.copied'))
-                    ->suffix(fn($record) => " " . $record->bankAccount->currency->name)
                     ->fontFamily('mono')
                     ->numeric(function ($state) {
                         $numberStr = (string)$state;
-                        $decimalPart = substr($numberStr, strpos($numberStr, '.') + 1);
-                        $decimalPart = rtrim($decimalPart, '0');
-                        $decimalPlaces = strlen($decimalPart);
-                        return max($decimalPlaces, 2);
+                        $decimalPart = rtrim(substr($numberStr, strpos($numberStr, '.') + 1), '0');
+                        return max(strlen($decimalPart), 2);
                     })
                     ->sortable()
                     ->toggleable()

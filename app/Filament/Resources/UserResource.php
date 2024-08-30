@@ -24,11 +24,6 @@ class UserResource extends Resource
         return __('user.url');
     }
 
-    public static function getNavigationUrl(): string
-    {
-        return __('user.url');
-    }
-
     public static function getNavigationLabel(): string
     {
         return __('user.navigation_label');

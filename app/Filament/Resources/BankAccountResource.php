@@ -26,11 +26,6 @@ class BankAccountResource extends Resource
         return __('bank_account.url');
     }
 
-    public static function getNavigationUrl(): string
-    {
-        return __('bank_account.url');
-    }
-
     public static function getNavigationLabel(): string
     {
         return __('bank_account.navigation_label');
@@ -151,9 +146,9 @@ class BankAccountResource extends Resource
         ];
     }
 
-    public static function getBulkActions(): Tables\Actions\BulkActionGroup
+    public static function getBulkActions(): array
     {
-        return Tables\Actions\BulkActionGroup::make([
+        return [
             Tables\Actions\BulkAction::make('currency')
                 ->icon('tabler-edit')
                 ->label(__('bank_account.buttons.bulk_currency'))
@@ -169,8 +164,8 @@ class BankAccountResource extends Resource
                 ->action(function (Collection $records, array $data): void {
                     $records->each->update(['currency' => $data['currency']]);
                 })
-                ->deselectRecordsAfterCompletion(),
-        ]);
+                ->deselectRecordsAfterCompletion()
+        ];
     }
 
     public static function getRelations(): array

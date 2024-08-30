@@ -26,11 +26,6 @@ class TransactionCategoryResource extends Resource
         return __('transaction_category.url');
     }
 
-    public static function getNavigationUrl(): string
-    {
-        return __('transaction_category.url');
-    }
-
     public static function getNavigationLabel(): string
     {
         return __('transaction_category.navigation_label');
@@ -135,10 +130,10 @@ class TransactionCategoryResource extends Resource
         ];
     }
 
-    public static function getBulkActions(): Tables\Actions\BulkActionGroup
+    public static function getBulkActions(): array
     {
-        return Tables\Actions\BulkActionGroup::make([
-            Tables\Actions\BulkAction::make('Change group')
+        return [
+            Tables\Actions\BulkAction::make('group')
                 ->icon('tabler-edit')
                 ->label(__('transaction_category.buttons.bulk_group'))
                 ->form([
@@ -153,7 +148,7 @@ class TransactionCategoryResource extends Resource
                     $records->each->update(['group' => $data['group']]);
                 })
                 ->deselectRecordsAfterCompletion(),
-        ]);
+        ];
     }
 
     public static function getRelations(): array

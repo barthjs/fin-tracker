@@ -25,27 +25,25 @@ class TransactionRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->heading(__('resources.bank_account_transactions.navigation_label'))
+            ->heading(__('bank_account_transaction.navigation_label'))
             ->columns([
                 Tables\Columns\TextColumn::make('date_time')
-                    ->label(__('resources.bank_account_transactions.table.date'))
+                    ->label(__('bank_account_transaction.columns.date'))
                     ->date('Y-m-d H:m')
                     ->copyable()
                     ->copyMessage(__('tables.copied'))
                     ->fontFamily('mono')
-                    ->toggleable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('amount')
+                    ->label(__('bank_account_transaction.columns.amount'))
                     ->copyable()
-                    ->copyMessage(__('tables.copied'))
-                    ->label(fn() => __('resources.bank_account_transactions.table.amount_in') . $this->getOwnerRecord()->currency->value)
+                    ->copyMessage(__('table.copied'))
                     ->fontFamily('mono')
                     ->numeric(function ($state) {
                         $numberStr = (string)$state;
-                        $decimalPart = substr($numberStr, strpos($numberStr, '.') + 1);
-                        $decimalPart = rtrim($decimalPart, '0');
-                        $decimalPlaces = strlen($decimalPart);
-                        return max($decimalPlaces, 2);
+                        $decimalPart = rtrim(substr($numberStr, strpos($numberStr, '.') + 1), '0');
+                        return max(strlen($decimalPart), 2);
                     })
                     ->sortable()
                     ->toggleable()
@@ -56,32 +54,32 @@ class TransactionRelationManager extends RelationManager
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('destination')
-                    ->label(__('resources.bank_account_transactions.table.destination'))
+                    ->label(__('bank_account_transaction.columns.destination'))
                     ->copyable()
-                    ->copyMessage(__('tables.copied'))
+                    ->copyMessage(__('table.copied'))
                     ->searchable()
                     ->toggleable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('transactionCategory.name')
-                    ->label(__('resources.bank_account_transactions.table.category'))
+                    ->label(__('bank_account_transaction.columns.category'))
                     ->copyable()
-                    ->copyMessage(__('tables.copied'))
+                    ->copyMessage(__('table.copied'))
                     ->searchable()
                     ->sortable()
                     ->toggleable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('transactionCategory.group.name')
-                    ->label(__('resources.bank_account_transactions.table.group'))
-                    ->formatStateUsing(fn($state): string => __('resources.transaction_categories.groups')[$state])
+                    ->label(__('bank_account_transaction.columns.group'))
+                    ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state])
                     ->copyable()
                     ->copyMessage(__('tables.copied'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('notes')
-                    ->label(__('resources.bank_account_transactions.table.notes'))
+                    ->label(__('bank_account_transaction.columns.notes'))
                     ->copyable()
-                    ->copyMessage(__('tables.copied'))
+                    ->copyMessage(__('table.copied'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
@@ -90,31 +88,36 @@ class TransactionRelationManager extends RelationManager
             ->persistSortInSession()
             ->striped()
             ->filters([
-                SelectFilter::make('name')
-                    ->label(__('resources.bank_account_transactions.table.category'))
+                SelectFilter::make('category')
+                    ->label(__('bank_account_transaction.columns.category'))
                     ->relationship('transactionCategory', 'name')
                     ->multiple()
                     ->preload()
                     ->searchable(),
             ])
             ->persistFiltersInSession()
-            ->emptyStateHeading(__('resources.bank_account_transactions.table.empty'))
-            ->emptyStateDescription('')
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('resources.bank_account_transactions.create_label'))
-                    ->modalHeading(__('resources.bank_account_transactions.create_heading')),
+                    ->label(__('bank_account_transaction.buttons.create_button_label'))
+                    ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()->iconButton()
-                    ->modalHeading(__('resources.bank_account_transactions.edit_heading')),
-                Tables\Actions\DeleteAction::make()->iconButton()
-                    ->modalHeading(__('resources.bank_account_transactions.delete_heading')),
+            ->actions(actions: [
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->modalHeading(__('bank_account_transaction.buttons.edit_heading')),
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->modalHeading(__('bank_account_transaction.buttons.delete_heading')),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make()
-                    ->modalHeading(__('resources.bank_account_transactions.bulk_heading')),
+            ->bulkActions(BankAccountTransactionResource::getBulkActions())
+            ->emptyStateHeading(__('bank_account_transaction.empty'))
+            ->emptyStateDescription('')
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('bank_account_transaction.buttons.create_button_label'))
+                    ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
             ])
             ->recordAction(null);
     }
