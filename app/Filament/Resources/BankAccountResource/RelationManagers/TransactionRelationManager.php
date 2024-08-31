@@ -102,14 +102,7 @@ class TransactionRelationManager extends RelationManager
                     ->label(__('bank_account_transaction.buttons.create_button_label'))
                     ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
             ])
-            ->actions(actions: [
-                Tables\Actions\EditAction::make()
-                    ->iconButton()
-                    ->modalHeading(__('bank_account_transaction.buttons.edit_heading')),
-                Tables\Actions\DeleteAction::make()
-                    ->iconButton()
-                    ->modalHeading(__('bank_account_transaction.buttons.delete_heading')),
-            ])
+            ->actions(BankAccountTransactionResource::getActions())
             ->bulkActions(BankAccountTransactionResource::getBulkActions())
             ->emptyStateHeading(__('bank_account_transaction.empty'))
             ->emptyStateDescription('')

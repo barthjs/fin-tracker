@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class BankAccountTransactionResource extends Resource
@@ -39,6 +40,7 @@ class BankAccountTransactionResource extends Resource
 
     public static function formParts($account = null, $category = null): array
     {
+        // account and category for default values in relation manager
         return [
             Forms\Components\Section::make()
                 ->schema([
@@ -88,7 +90,7 @@ class BankAccountTransactionResource extends Resource
                         ]),
                     Forms\Components\TextInput::make('amount')
                         ->label(__('bank_account_transaction.columns.amount'))
-                        ->suffix(fn($get) => $account->currency->name ?? BankAccount::whereId($get('bank_account_id'))->first()->currency->name ?? "")
+                        ->suffix(fn($get) => BankAccount::whereId($get('bank_account_id'))->first()->currency->name ?? "")
                         ->numeric()
                         ->minValue(-999999999.9999)
                         ->maxValue(999999999.9999)
@@ -235,10 +237,15 @@ class BankAccountTransactionResource extends Resource
             ->filtersFormColumns(2)
             ->actions([
                 Tables\Actions\EditAction::make()
+                    // update balance for account on edit page
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
                     ->iconButton()
-                    ->modalHeading(__('bank_account_transaction.buttons.delete_heading')),
+                    ->modalHeading(__('bank_account_transaction.buttons.delete_heading'))
+                    ->after(function ($record) {
+                        $sum = BankAccountTransaction::whereBankAccountId($record->bank_account_id)->sum('amount');
+                        BankAccount::whereId($record->bank_account_id)->update(['balance' => $sum]);
+                    })
             ])
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('bank_account_transaction.empty'))
@@ -250,6 +257,43 @@ class BankAccountTransactionResource extends Resource
                     ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
             ])
             ->recordAction(null);
+    }
+
+    public static function getActions(): array
+    {
+        return [
+            Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->modalHeading(__('bank_account_transaction.buttons.edit_heading'))
+                ->using(function (Model $record, array $data): Model {
+                    // save old values before updating
+                    $oldAccountId = $record->getOriginal('bank_account_id');
+                    $oldSum = $record->getOriginal('amount');
+                    $record->update($data);
+
+                    // update balance if account has changed
+                    if ($oldAccountId != $record->bank_account_id) {
+                        $sum = BankAccountTransaction::whereBankAccountId($oldAccountId)->sum('amount');
+                        BankAccount::whereId($oldAccountId)->update(['balance' => $sum]);
+
+                        $sum = BankAccountTransaction::whereBankAccountId($record->bank_account_id)->sum('amount');
+                        BankAccount::whereId($record->bank_account_id)->update(['balance' => $sum]);
+                    } else if ($oldSum !== $record->amount) {
+                        // update balance if amount has changed
+                        $sum = BankAccountTransaction::whereBankAccountId($record->bank_account_id)->sum('amount');
+                        BankAccount::whereId($record->bank_account_id)->update(['balance' => $sum]);
+                    }
+
+                    return $record;
+                }),
+            Tables\Actions\DeleteAction::make()
+                ->iconButton()
+                ->modalHeading(__('bank_account_transaction.buttons.delete_heading'))
+                ->after(function ($record) {
+                    $sum = BankAccountTransaction::whereBankAccountId($record->bank_account_id)->sum('amount');
+                    BankAccount::whereId($record->bank_account_id)->update(['balance' => $sum]);
+                })
+        ];
     }
 
     public static function getBulkActions(): Tables\Actions\BulkActionGroup
@@ -270,7 +314,19 @@ class BankAccountTransactionResource extends Resource
                         ->searchable()
                 ])
                 ->action(function (Collection $records, array $data): void {
+                    // save old values before updating
+                    $oldAccountIds = $records->pluck('bank_account_id')->unique();
                     $records->each->update(['bank_account_id' => $data['bank_account_id']]);
+
+                    // update balance for new account
+                    $newSum = BankAccountTransaction::whereBankAccountId($data['bank_account_id'])->sum('amount');
+                    BankAccount::whereId($data['bank_account_id'])->update(['balance' => $newSum]);
+
+                    // update balance for new accounts
+                    foreach ($oldAccountIds as $oldAccountId) {
+                        $oldSum = BankAccountTransaction::whereBankAccountId($oldAccountId)->sum('amount');
+                        BankAccount::whereId($oldAccountId)->update(['balance' => $oldSum]);
+                    }
                 })
                 ->deselectRecordsAfterCompletion(),
             Tables\Actions\BulkAction::make('category')
