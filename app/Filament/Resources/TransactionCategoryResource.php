@@ -119,12 +119,14 @@ class TransactionCategoryResource extends Resource
                 ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('created_at')
                 ->label(__('table.created_at'))
-                ->dateTime('Y-m-d H:i:s')
+                ->dateTime('Y-m-d, H:i:s')
+                ->fontFamily('mono')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('updated_at')
                 ->label(__('table.updated_at'))
-                ->dateTime('Y-m-d H:i:s')
+                ->dateTime('Y-m-d, H:i:s')
+                ->fontFamily('mono')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ];

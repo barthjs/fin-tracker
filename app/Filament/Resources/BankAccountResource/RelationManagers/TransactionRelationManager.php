@@ -29,9 +29,9 @@ class TransactionRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('date_time')
                     ->label(__('bank_account_transaction.columns.date'))
-                    ->date('Y-m-d H:m')
+                    ->dateTime('Y-m-d, H:i')
                     ->copyable()
-                    ->copyMessage(__('tables.copied'))
+                    ->copyMessage(__('table.copied'))
                     ->fontFamily('mono')
                     ->sortable()
                     ->toggleable(),
@@ -72,7 +72,7 @@ class TransactionRelationManager extends RelationManager
                     ->label(__('bank_account_transaction.columns.group'))
                     ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state])
                     ->copyable()
-                    ->copyMessage(__('tables.copied'))
+                    ->copyMessage(__('table.copied'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(),

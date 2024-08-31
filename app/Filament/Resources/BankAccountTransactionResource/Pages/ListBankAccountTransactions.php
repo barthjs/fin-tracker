@@ -37,7 +37,8 @@ class ListBankAccountTransactions extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->icon('tabler-plus')
-                ->label(__('bank_account_transaction.buttons.create_button_label')),
+                ->label(__('bank_account_transaction.buttons.create_button_label'))
+                ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
             Actions\ImportAction::make()
                 ->icon('tabler-table-import')
                 ->label(__('table.import'))

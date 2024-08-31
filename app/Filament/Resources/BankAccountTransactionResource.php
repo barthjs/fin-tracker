@@ -47,7 +47,7 @@ class BankAccountTransactionResource extends Resource
                     Forms\Components\DateTimePicker::make('date_time')
                         ->label(__('bank_account_transaction.columns.date'))
                         ->autofocus()
-                        ->default(today())
+                        ->default(now())
                         ->required(),
                     Forms\Components\Select::make('bank_account_id')
                         ->label(__('bank_account_transaction.columns.account'))
@@ -63,7 +63,6 @@ class BankAccountTransactionResource extends Resource
                                 ->schema([
                                     Forms\Components\TextInput::make('name')
                                         ->label(__('bank_account.columns.name'))
-                                        ->autofocus()
                                         ->maxLength(255)
                                         ->required()
                                         ->string(),
@@ -92,9 +91,19 @@ class BankAccountTransactionResource extends Resource
                         ->label(__('bank_account_transaction.columns.amount'))
                         ->suffix(fn($get) => BankAccount::whereId($get('bank_account_id'))->first()->currency->name ?? "")
                         ->numeric()
+                        ->formatStateUsing(function ($state) {
+                            // TODO Change format
+                            // if value is "1234.0000" display "1234.00"
+                            $number = (float)$state;
+                            if (floor($number) == $number) {
+                                return (string)(int)$number;
+                            } else {
+                                return (string)$number;
+                            }
+                        })
+                        // Todo set max decimals to 4
                         ->minValue(-999999999.9999)
                         ->maxValue(999999999.9999)
-                        ->inputMode('decimal')
                         ->required(),
                 ])
                 ->columns(3),
@@ -124,7 +133,6 @@ class BankAccountTransactionResource extends Resource
                                 ->schema([
                                     Forms\Components\TextInput::make('name')
                                         ->label(__('transaction_category.columns.name'))
-                                        ->autofocus()
                                         ->maxLength(255)
                                         ->required()
                                         ->string(),
@@ -162,7 +170,7 @@ class BankAccountTransactionResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('date_time')
                     ->label(__('bank_account_transaction.columns.date'))
-                    ->dateTime('Y-m-d H:m')
+                    ->dateTime('Y-m-d, H:i')
                     ->copyable()
                     ->copyMessage(__('table.copied'))
                     ->fontFamily('mono')
@@ -235,18 +243,7 @@ class BankAccountTransactionResource extends Resource
             ])
             ->persistFiltersInSession()
             ->filtersFormColumns(2)
-            ->actions([
-                Tables\Actions\EditAction::make()
-                    // update balance for account on edit page
-                    ->iconButton(),
-                Tables\Actions\DeleteAction::make()
-                    ->iconButton()
-                    ->modalHeading(__('bank_account_transaction.buttons.delete_heading'))
-                    ->after(function ($record) {
-                        $sum = BankAccountTransaction::whereBankAccountId($record->bank_account_id)->sum('amount');
-                        BankAccount::whereId($record->bank_account_id)->update(['balance' => $sum]);
-                    })
-            ])
+            ->actions(self::getActions())
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('bank_account_transaction.empty'))
             ->emptyStateDescription('')
@@ -352,9 +349,6 @@ class BankAccountTransactionResource extends Resource
     {
         return [
             'index' => Pages\ListBankAccountTransactions::route('/'),
-            // TODO Replace with modal when bug fixed: https://github.com/filamentphp/filament/issues/12887
-            'create' => Pages\CreateBankAccountTransaction::route('/create'),
-            'edit' => Pages\EditBankAccountTransaction::route('/{record}/edit'),
         ];
     }
 }
