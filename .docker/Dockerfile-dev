@@ -1,0 +1,17 @@
+# Apache, Composer, PHP
+FROM webdevops/php-apache-dev:8.3-alpine
+ENV WEB_DOCUMENT_ROOT=/app/public
+
+# Node.js, NPM
+RUN apk add --no-cache nodejs npm
+RUN npm install npm@latest -g
+
+WORKDIR /app
+
+# X-Debug
+ENV PHP_DEBUGGER=xdebug \
+    PHP_DISPLAY_ERRORS=1 \
+    PHP_IDE_CONFIG="serverName=fin-tracker" \
+    XDEBUG_CLIENT_PORT=9003 \
+    XDEBUG_CLIENT_HOST=host.docker.internal \
+    XDEBUG_START_WITH_REQUEST=yes \

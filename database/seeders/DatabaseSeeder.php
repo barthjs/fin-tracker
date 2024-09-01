@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -14,16 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::firstOrCreate(['name' => 'admin'],
-            [
-                'first_name' => 'Admin',
-                'last_name' => 'Admin',
-                'email' => 'admin@example.com',
-                'password' => Hash::make('admin'),
-                'is_admin' => true,
-                'active' => true,
-            ]
-        );
-        Artisan::call('app:create-statistic');
+        if (!User::whereIsAdmin(1)->first()) {
+            User::firstOrCreate(['name' => 'admin'],
+                [
+                    'first_name' => 'Admin',
+                    'last_name' => 'Admin',
+                    'email' => 'admin@example.com',
+                    'password' => Hash::make('admin'),
+                    'is_admin' => true,
+                    'active' => true,
+                ]
+            );
+        }
+        // Artisan::call('app:create-statistic');
     }
 }

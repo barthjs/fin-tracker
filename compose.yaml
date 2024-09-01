@@ -1,16 +1,16 @@
 services:
   app:
-    extends:
-      file: .docker/compose.base.yaml
-      service: app
+    image: fin-tracker:latest
+    container_name: fin-tracker-app
     restart: unless-stopped
+    ports:
+      - "${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80"
+    env_file:
+      - .env
   db:
-    extends:
-      file: .docker/compose.base.yaml
-      service: db
+    image: mariadb:latest
+    container_name: fin-tracker-db
     restart: unless-stopped
-    volumes:
-      - db:/var/lib/mysql
-volumes:
-  db:
-    driver: local
+    environment:
+      - MARIADB_DATABASE=${DB_DATABASE}
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
