@@ -2,27 +2,25 @@
 
 return [
 
-    'default' => env('QUEUE_CONNECTION', 'database'),
+    'default' => 'database',
 
     'connections' => [
         'database' => [
             'driver' => 'database',
-            'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => 'sys_jobs',
-            'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int)env('DB_QUEUE_RETRY_AFTER', 90),
-            'after_commit' => false,
+            'queue' => 'default',
+            'retry_after' => 90,
         ],
     ],
 
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'database' => env('DB_CONNECTION', 'mariadb'),
         'table' => 'sys_job_batches',
     ],
 
     'failed' => [
-        'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'driver' => 'database-uuids',
+        'database' => env('DB_CONNECTION', 'mariadb'),
         'table' => 'sys_failed_jobs',
     ],
 

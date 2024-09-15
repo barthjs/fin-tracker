@@ -1,7 +1,7 @@
 services:
-  app:
+  fin-tracker:
     image: fin-tracker:latest
-    container_name: fin-tracker-app
+    container_name: fin-tracker
     restart: unless-stopped
     ports:
       - "${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80"
@@ -11,6 +11,8 @@ services:
     image: mariadb:latest
     container_name: fin-tracker-db
     restart: unless-stopped
+    volumes:
+      - './db-data:/var/lib/mysql'
     environment:
       - MARIADB_DATABASE=${DB_DATABASE}
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}

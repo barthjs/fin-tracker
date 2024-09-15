@@ -2,9 +2,9 @@
 
 return [
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => 'database',
 
-    'table' => env('SESSION_TABLE', 'sys_sessions'),
+    'table' => 'sys_sessions',
 
     'encrypt' => env('SESSION_ENCRYPT', true),
 ];

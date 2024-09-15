@@ -1,12 +1,8 @@
 {
     "name": "barthjs/fin-tracker",
     "type": "project",
-    "description": "Finance tracking web app",
+    "description": "Household Finance Manager",
     "homepage": "https://github.com/barthjs/fin-tracker",
-    "keywords": [
-        "laravel",
-        "finance"
-    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",

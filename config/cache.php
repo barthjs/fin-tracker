@@ -2,15 +2,13 @@
 
 return [
 
-    'default' => env('CACHE_STORE', 'database'),
+    'default' => 'database',
 
     'stores' => [
         'database' => [
             'driver' => 'database',
             'table' => 'sys_cache',
             'lock_table' => 'sys_cache_locks',
-            'connection' => env('DB_CACHE_CONNECTION'),
-            'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
         ],
     ],
 
