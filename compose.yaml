@@ -3,11 +3,15 @@ services:
     image: fin-tracker:latest
     container_name: fin-tracker
     restart: unless-stopped
+    # Remove this if you want to create your own network
     ports:
       - "${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80"
     env_file:
       - .env
-  db:
+    # Optional network for reverse proxy
+    # networks:
+    #   - fin-tracker
+  fin-tracker-db:
     image: mariadb:latest
     container_name: fin-tracker-db
     restart: unless-stopped
@@ -16,3 +20,7 @@ services:
     environment:
       - MARIADB_DATABASE=${DB_DATABASE}
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+# Optional network for reverse proxy
+# networks:
+#   fin-tracker:
+#     external: true
