@@ -11,8 +11,8 @@ export default defineConfig({
             ],
             refresh: [
                 ...refreshPaths,
-                'resources/views/**/**',
-                'app/Filament/**/**',
+                'resources/**',
+                'app/Filament/**',
             ],
         }),
     ],
