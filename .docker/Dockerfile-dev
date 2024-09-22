@@ -23,4 +23,5 @@ RUN npm install npm@latest -g
 
 WORKDIR /app
 
+# Container managment
 COPY worker.conf /opt/docker/etc/supervisor.d/worker.conf

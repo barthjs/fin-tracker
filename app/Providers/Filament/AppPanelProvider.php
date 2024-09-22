@@ -35,6 +35,7 @@ class AppPanelProvider extends PanelProvider
             ->login(Login::class)
             ->profile(EditProfile::class, isSimple: false)
             ->unsavedChangesAlerts()
+            ->databaseNotifications()
             ->colors(config('colors'))
             ->font('Poppins')
             ->viteTheme('resources/css/filament/app/theme.css')

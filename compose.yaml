@@ -1,26 +1,24 @@
 services:
   fin-tracker:
-    image: fin-tracker:latest
+    image: barthjs/fin-tracker:latest
     container_name: fin-tracker
     restart: unless-stopped
     # Remove this if you want to create your own network
     ports:
-      - "${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80"
+      - ${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80
     env_file:
       - .env
-    # Optional network for reverse proxy
-    # networks:
-    #   - fin-tracker
   fin-tracker-db:
-    image: mariadb:latest
+    image: mariadb:11.4
     container_name: fin-tracker-db
     restart: unless-stopped
     volumes:
-      - './db-data:/var/lib/mysql'
+      - ./db-data:/var/lib/mysql
     environment:
       - MARIADB_DATABASE=${DB_DATABASE}
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
 # Optional network for reverse proxy
 # networks:
-#   fin-tracker:
+#   default:
 #     external: true
+#     name: fin-tracker

@@ -30,6 +30,7 @@ RUN php artisan storage:link \
     && php artisan icons:cache \
     && chown -R application:application storage
 
+# Container managment
 COPY .docker/worker.conf /opt/docker/etc/supervisor.d/worker.conf
 COPY .docker/artisan.sh /opt/docker/provision/entrypoint.d/artisan.sh
 
