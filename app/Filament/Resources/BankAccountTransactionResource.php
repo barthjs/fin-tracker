@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\Currency;
-use App\Enums\TransactionGroup;
 use App\Filament\Resources\BankAccountTransactionResource\Pages;
 use App\Models\BankAccount;
 use App\Models\BankAccountTransaction;
@@ -16,6 +14,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Number;
 
 class BankAccountTransactionResource extends Resource
 {
@@ -47,7 +46,7 @@ class BankAccountTransactionResource extends Resource
                     Forms\Components\DateTimePicker::make('date_time')
                         ->label(__('bank_account_transaction.columns.date'))
                         ->autofocus()
-                        ->default(now())
+                        ->default(today())
                         ->required(),
                     Forms\Components\Select::make('bank_account_id')
                         ->label(__('bank_account_transaction.columns.account'))
@@ -58,50 +57,13 @@ class BankAccountTransactionResource extends Resource
                         ->searchable()
                         ->live(onBlur: true)
                         ->placeholder(__('bank_account_transaction.form.account_placeholder'))
-                        ->createOptionForm([
-                            Forms\Components\Section::make()
-                                ->schema([
-                                    Forms\Components\TextInput::make('name')
-                                        ->label(__('bank_account.columns.name'))
-                                        ->maxLength(255)
-                                        ->required()
-                                        ->string(),
-                                    Forms\Components\Select::make('currency')
-                                        ->label(__('bank_account.columns.currency'))
-                                        ->placeholder(__('bank_account.form.currency_placeholder'))
-                                        ->options(Currency::class)
-                                        ->default(fn() => BankAccount::getCurrency())
-                                        ->required()
-                                        ->searchable(),
-                                    Forms\Components\Textarea::make('description')
-                                        ->label(__('bank_account.columns.description'))
-                                        ->autosize()
-                                        ->maxLength(1000)
-                                        ->rows(1)
-                                        ->string()
-                                        ->grow(),
-                                    Forms\Components\Toggle::make('active')
-                                        ->label(__('table.active'))
-                                        ->default(true)
-                                        ->inline(false),
-                                ])
-                                ->columns(4),
-                        ]),
+                        ->createOptionForm(BankAccountResource::formParts())
+                        ->createOptionModalHeading(__('bank_account.buttons.create_heading')),
                     Forms\Components\TextInput::make('amount')
                         ->label(__('bank_account_transaction.columns.amount'))
                         ->suffix(fn($get) => BankAccount::whereId($get('bank_account_id'))->first()->currency->name ?? "")
                         ->numeric()
-                        ->formatStateUsing(function ($state) {
-                            // TODO Change format
-                            // if value is "1234.0000" display "1234.00"
-                            $number = (float)$state;
-                            if (floor($number) == $number) {
-                                return (string)(int)$number;
-                            } else {
-                                return (string)$number;
-                            }
-                        })
-                        // Todo set max decimals to 4
+                        ->formatStateUsing(fn($state): string => $state ? Number::format($state, 2, 4) : 0)
                         ->minValue(-999999999.9999)
                         ->maxValue(999999999.9999)
                         ->required(),
@@ -128,27 +90,8 @@ class BankAccountTransactionResource extends Resource
                         ->required()
                         ->searchable()
                         ->placeholder(__('bank_account_transaction.form.category_placeholder'))
-                        ->createOptionForm([
-                            Forms\Components\Section::make()
-                                ->schema([
-                                    Forms\Components\TextInput::make('name')
-                                        ->label(__('transaction_category.columns.name'))
-                                        ->maxLength(255)
-                                        ->required()
-                                        ->string(),
-                                    Forms\Components\Select::make('group')
-                                        ->label(__('transaction_category.columns.group'))
-                                        ->placeholder(__('transaction_category.form.group_placeholder'))
-                                        ->options(__('transaction_category.groups'))
-                                        ->default(TransactionGroup::transfers->name)
-                                        ->required(),
-                                    Forms\Components\Toggle::make('active')
-                                        ->label(__('table.active'))
-                                        ->default(true)
-                                        ->inline(false),
-                                ])
-                                ->columns(3)
-                        ]),
+                        ->createOptionForm(TransactionCategoryResource::formParts())
+                        ->createOptionModalHeading(__('transaction_category.buttons.create_heading')),
                     Forms\Components\Textarea::make('notes')
                         ->label(__('bank_account_transaction.columns.notes'))
                         ->autosize()
@@ -224,6 +167,7 @@ class BankAccountTransactionResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
             ])
+            ->paginated(fn() => BankAccountTransaction::all()->count() > 20)
             ->defaultSort('date_time', 'desc')
             ->persistSortInSession()
             ->striped()
@@ -251,9 +195,12 @@ class BankAccountTransactionResource extends Resource
                 Tables\Actions\CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('bank_account_transaction.buttons.create_button_label'))
-                    ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
-            ])
-            ->recordAction(null);
+                    ->modalHeading(__('bank_account_transaction.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['destination'] = trim($data['destination']);
+                        return $data;
+                    })
+            ]);
     }
 
     public static function getActions(): array

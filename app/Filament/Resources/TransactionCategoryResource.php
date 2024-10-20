@@ -9,7 +9,11 @@ use App\Models\TransactionCategory;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -31,28 +35,63 @@ class TransactionCategoryResource extends Resource
         return __('transaction_category.navigation_label');
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label(__('transaction_category.columns.name'))
+                            ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
+                            ->color(fn($record) => !$record->active ? 'danger' : 'success')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make('group')
+                            ->label(__('transaction_category.columns.group'))
+                            ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name])
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make('type')
+                            ->label(__('transaction_category.columns.type'))
+                            ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name])
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                    ])
+                    ->columns([
+                        'default' => 3,
+                    ])
+            ]);
+    }
+
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label(__('transaction_category.columns.name'))
-                    ->autofocus()
-                    ->maxLength(255)
-                    ->required()
-                    ->string(),
-                Forms\Components\Select::make('group')
-                    ->label(__('transaction_category.columns.group'))
-                    ->placeholder(__('transaction_category.form.group_placeholder'))
-                    ->options(__('transaction_category.groups'))
-                    ->default(TransactionGroup::transfers->name)
-                    ->required(),
-                Forms\Components\Toggle::make('active')
-                    ->label(__('table.active'))
-                    ->default(true)
-                    ->inline(false),
-            ])
-            ->columns(3);
+        return $form->schema(self::formParts());
+    }
+
+    public static function formParts(): array
+    {
+        return [
+            Forms\Components\Section::make()
+                ->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->label(__('transaction_category.columns.name'))
+                        ->autofocus()
+                        ->maxLength(255)
+                        ->required()
+                        ->string(),
+                    Forms\Components\Select::make('group')
+                        ->label(__('transaction_category.columns.group'))
+                        ->placeholder(__('transaction_category.form.group_placeholder'))
+                        ->options(__('transaction_category.groups'))
+                        ->default(TransactionGroup::transfers->name)
+                        ->required(),
+                    Forms\Components\Toggle::make('active')
+                        ->label(__('table.active'))
+                        ->default(true)
+                        ->inline(false),
+                ])->columns(3)
+        ];
     }
 
     /**
@@ -68,9 +107,10 @@ class TransactionCategoryResource extends Resource
             ->persistSortInSession()
             ->striped()
             ->filters([
-                Filter::make('inactive')
-                    ->label(__('table.status_inactive'))
-                    ->query(fn($query) => $query->where('active', false))
+                Filter::make('active')
+                    ->label(__('table.status_active'))
+                    ->toggle()
+                    ->query(fn($query) => $query->where('active', true))
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -80,7 +120,7 @@ class TransactionCategoryResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->iconButton()
                     ->modalHeading(__('transaction_category.buttons.delete_heading'))
-                    ->disabled(fn($record) => $record->transactions()->count() > 0),
+                    ->disabled(fn($record) => $record->transactions()->count() > 0)
             ])
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('transaction_category.empty'))

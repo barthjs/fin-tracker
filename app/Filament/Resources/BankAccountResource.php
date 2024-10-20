@@ -9,8 +9,13 @@ use App\Models\BankAccount;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
@@ -33,34 +38,74 @@ class BankAccountResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->schema(self::formParts());
+    }
+
+    public static function formParts(): array
+    {
+        return [
+            Forms\Components\Section::make()
+                ->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->label(__('bank_account.columns.name'))
+                        ->autofocus()
+                        ->maxLength(255)
+                        ->required()
+                        ->string(),
+                    Forms\Components\Select::make('currency')
+                        ->label(__('bank_account.columns.currency'))
+                        ->placeholder(__('bank_account.form.currency_placeholder'))
+                        ->options(Currency::class)
+                        ->default(fn() => BankAccount::getCurrency())
+                        ->required()
+                        ->searchable(),
+                    Forms\Components\Toggle::make('active')
+                        ->label(__('table.active'))
+                        ->default(true)
+                        ->inline(false),
+                    Forms\Components\Textarea::make('description')
+                        ->label(__('bank_account.columns.description'))
+                        ->autosize()
+                        ->columnSpanFull()
+                        ->rows(1)
+                        ->maxLength(1000)
+                        ->string()
+                ])
+                ->columns(3)
+        ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label(__('bank_account.columns.name'))
-                    ->autofocus()
-                    ->maxLength(255)
-                    ->required()
-                    ->string(),
-                Forms\Components\Select::make('currency')
-                    ->label(__('bank_account.columns.currency'))
-                    ->placeholder(__('bank_account.form.currency_placeholder'))
-                    ->options(Currency::class)
-                    ->default(fn() => BankAccount::getCurrency())
-                    ->required()
-                    ->searchable(),
-                Forms\Components\Textarea::make('description')
-                    ->label(__('bank_account.columns.description'))
-                    ->autosize()
-                    ->maxLength(1000)
-                    ->rows(1)
-                    ->string()
-                    ->grow(),
-                Forms\Components\Toggle::make('active')
-                    ->label(__('table.active'))
-                    ->default(true)
-                    ->inline(false)
-            ])
-            ->columns(4);
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label(__('bank_account.columns.name'))
+                            ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
+                            ->color(fn($record) => !$record->active ? 'danger' : 'success')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make('balance')
+                            ->label(__('bank_account.columns.balance'))
+                            ->color(fn($state) => match (true) {
+                                floatval($state) == 0 => 'gray',
+                                floatval($state) < 0 => 'danger',
+                                default => 'success'
+                            })
+                            ->money(currency: fn($record) => $record->currency->name)
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make('description')
+                            ->label(__('bank_account.columns.description'))
+                            ->size(TextEntry\TextEntrySize::Small)
+                    ])
+                    ->columns([
+                        'default' => 2,
+                        'lg' => 3
+                    ])
+            ]);
     }
 
     /**
@@ -76,9 +121,10 @@ class BankAccountResource extends Resource
             ->persistSortInSession()
             ->striped()
             ->filters([
-                Filter::make('inactive')
-                    ->label(__('table.status_inactive'))
-                    ->query(fn($query) => $query->where('active', false))
+                Filter::make('active')
+                    ->label(__('table.status_active'))
+                    ->toggle()
+                    ->query(fn($query) => $query->where('active', true))
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -110,23 +156,24 @@ class BankAccountResource extends Resource
                 ->sortable(),
             Tables\Columns\TextColumn::make('balance')
                 ->label(__('bank_account.columns.balance'))
-                ->numeric(2)
                 ->badge()
                 ->color(fn($state) => match (true) {
                     floatval($state) == 0 => 'gray',
                     floatval($state) < 0 => 'danger',
                     default => 'success'
                 })
-                ->sortable(),
-            Tables\Columns\TextColumn::make('currency')
-                ->label(__('bank_account.columns.currency'))
-                ->sortable()
-                ->toggleable(),
+                ->money(currency: fn($record) => $record->currency->name)
+                ->summarize(Sum::make()->money(config('app.currency'))),
             Tables\Columns\TextColumn::make('description')
                 ->label(__('bank_account.columns.description'))
                 ->sortable()
                 ->toggleable()
                 ->wrap(),
+            Tables\Columns\TextColumn::make('currency')
+                ->label(__('bank_account.columns.currency'))
+                ->sortable()
+                ->toggleable()
+                ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\IconColumn::make('active')
                 ->label(__('table.active'))
                 ->boolean()
