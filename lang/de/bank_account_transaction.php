@@ -57,7 +57,7 @@ return [
             'body_heading' => 'Der Umsatzexport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Umsatze_'
+            'file_name' => 'Umsätze_'
         ]
     ],
 

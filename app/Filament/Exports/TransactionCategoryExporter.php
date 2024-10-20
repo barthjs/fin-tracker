@@ -54,6 +54,6 @@ class TransactionCategoryExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('transaction_category.notifications.export.file_name') . Carbon::today()->format('Y-m-d') . "_{$export->getKey()}";
+        return __('transaction_category.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
     }
 }

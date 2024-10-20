@@ -20,7 +20,7 @@ class BankAccountExporter extends Exporter
                 ->label(__('bank_account.columns.name')),
             ExportColumn::make('balance')
                 ->label(__('bank_account.columns.balance'))
-                ->formatStateUsing(fn($state) => Number::format($state,2)),
+                ->formatStateUsing(fn($state) => Number::format($state, 2, 4)),
             ExportColumn::make('currency')
                 ->label(__('bank_account.columns.currency'))
                 ->formatStateUsing(fn($state) => $state->name),
@@ -57,6 +57,6 @@ class BankAccountExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('bank_account.notifications.export.file_name') . Carbon::today()->format('Y-m-d') . "_{$export->getKey()}";
+        return __('bank_account.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
     }
 }

@@ -2,8 +2,15 @@
 
 namespace App\Enums;
 
-enum Currency: string
+use Filament\Support\Contracts\HasLabel;
+
+enum Currency: string implements HasLabel
 {
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
     case AED = 'AED'; // United Arab Emirates Dirham
     case AFN = 'AFN'; // Afghan Afghani
     case ALL = 'ALL'; // Albanian Lek
