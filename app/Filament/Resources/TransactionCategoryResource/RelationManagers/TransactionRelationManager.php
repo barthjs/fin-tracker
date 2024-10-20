@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TransactionCategoryResource\RelationManagers;
 
 
 use App\Filament\Resources\BankAccountTransactionResource;
+use App\Models\BankAccountTransaction;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -75,6 +76,7 @@ class TransactionRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
             ])
+            ->paginated(fn() => BankAccountTransaction::all()->count() > 20)
             ->defaultSort('date_time', 'desc')
             ->persistSortInSession()
             ->striped()

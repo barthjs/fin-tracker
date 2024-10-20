@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BankAccountResource\RelationManagers;
 
 use App\Filament\Resources\BankAccountTransactionResource;
+use App\Models\BankAccountTransaction;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -84,6 +85,7 @@ class TransactionRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
             ])
+            ->paginated(fn() => BankAccountTransaction::all()->count() > 20)
             ->defaultSort('date_time', 'desc')
             ->persistSortInSession()
             ->striped()
@@ -111,8 +113,7 @@ class TransactionRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('bank_account_transaction.buttons.create_button_label'))
                     ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
-            ])
-            ->recordAction(null);
+            ]);
     }
 
     /**

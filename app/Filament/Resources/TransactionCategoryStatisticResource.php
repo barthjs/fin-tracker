@@ -5,78 +5,114 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TransactionCategoryStatisticResource\Pages;
 use App\Filament\Resources\TransactionCategoryStatisticResource\RelationManagers;
 use App\Models\TransactionCategoryStatistic;
-use Carbon\Carbon;
+use Exception;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class TransactionCategoryStatisticResource extends Resource
 {
     protected static ?string $model = TransactionCategoryStatistic::class;
     protected static ?int $navigationSort = 1;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'tabler-calendar-stats';
 
+    public static function getSlug(): string
+    {
+        return 'statistics';
+    }
 
+    public static function getNavigationLabel(): string
+    {
+        return 'Statistics';
+    }
+
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('category.name')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('category.type')
-                    ->sortable(),
+                    ->label(__('bank_account_transaction.columns.category'))
+                    ->copyable()
+                    ->copyMessage(__('table.copied'))
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('jan')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->summarize(Sum::make()->label('Total'))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('feb')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('mar')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('apr')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('may')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('jun')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('jul')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('aug')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('sep')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('oct')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('nov')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('dec')
-                    ->numeric()
-                    ->sortable(),
+                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->toggleable(),
             ])
-            ->modifyQueryUsing(function (Builder $query): Builder {
-                return $query->where('year', Carbon::today()->year);
-            })
-            ->defaultSort('category.type')
+            ->paginated(false)
+            ->searchable(false)
+            ->defaultSort('year')
+            ->persistSortInSession()
+            ->defaultGroup('category.group')
+            ->groupingSettingsHidden()
+            ->groups([
+                Group::make('category.group')
+                    ->label('')
+                    ->collapsible()
+                    ->getTitleFromRecordUsing(fn(TransactionCategoryStatistic $record): string => __('transaction_category.groups')[$record->category->group->name])
+            ])
+            ->striped()
             ->filters([
-                //
-            ]);
+                SelectFilter::make('year')
+                    ->options(fn(): array => TransactionCategoryStatistic::select('year')
+                        ->distinct()
+                        ->orderBy('year', 'desc')
+                        ->pluck('year', 'year')->toArray()
+                    )
+                    ->selectablePlaceholder(false)
+                    ->default(Carbon::today()->year)
+            ], Tables\Enums\FiltersLayout::AboveContent)
+            ->filtersFormColumns(1)
+            ->persistFiltersInSession();
     }
 
-    public static function getRelations(): array
+    private static function formatNumber($number)
     {
-        return [
-            //
-        ];
+        $numberStr = (string)$number;
+        $decimalPart = rtrim(substr($numberStr, strpos($numberStr, '.') + 1), '0');
+        return max(strlen($decimalPart), 2);
     }
 
     public static function getPages(): array

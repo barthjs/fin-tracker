@@ -2,11 +2,18 @@
 
 namespace App\Enums;
 
-enum TransactionGroup
+use Filament\Support\Contracts\HasLabel;
+
+enum TransactionGroup: string implements HasLabel
 {
-    case fix_expenses;
-    case var_expenses;
-    case fix_revenues;
-    case var_revenues;
-    case transfers;
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    case fix_expenses = 'fix_expenses';
+    case var_expenses = 'var_expenses';
+    case fix_revenues = 'fix_revenues';
+    case var_revenues = 'var_revenues';
+    case transfers = 'transfers';
 }

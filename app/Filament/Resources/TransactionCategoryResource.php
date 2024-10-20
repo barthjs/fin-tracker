@@ -6,6 +6,7 @@ use App\Enums\TransactionGroup;
 use App\Filament\Resources\TransactionCategoryResource\Pages;
 use App\Filament\Resources\TransactionCategoryResource\RelationManagers\TransactionRelationManager;
 use App\Models\TransactionCategory;
+use Carbon\Carbon;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -33,35 +34,6 @@ class TransactionCategoryResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('transaction_category.navigation_label');
-    }
-
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label(__('transaction_category.columns.name'))
-                            ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn($record) => !$record->active ? 'danger' : 'success')
-                            ->size(TextEntry\TextEntrySize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                        TextEntry::make('group')
-                            ->label(__('transaction_category.columns.group'))
-                            ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name])
-                            ->size(TextEntry\TextEntrySize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                        TextEntry::make('type')
-                            ->label(__('transaction_category.columns.type'))
-                            ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name])
-                            ->size(TextEntry\TextEntrySize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                    ])
-                    ->columns([
-                        'default' => 3,
-                    ])
-            ]);
     }
 
     public static function form(Form $form): Form
@@ -92,6 +64,45 @@ class TransactionCategoryResource extends Resource
                         ->inline(false),
                 ])->columns(3)
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label(__('transaction_category.columns.name'))
+                            ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
+                            ->color(fn($record) => !$record->active ? 'danger' : 'success')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make('group')
+                            ->label(__('transaction_category.columns.group'))
+                            ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name])
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make('type')
+                            ->label(__('transaction_category.columns.type'))
+                            ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name])
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make(Carbon::now()->year)
+                            ->numeric()
+                            ->state(function (TransactionCategory $record): float {
+                                return TransactionCategory::with(['transactions' => function ($query) {
+                                    $query->whereYear('date_time', Carbon::now()->year);
+                                }])->whereId($record->id)->first()->transactions->sum('amount');
+                            })
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                    ])
+                    ->columns([
+                        'default' => 2,
+                        'sm' => 4
+                    ])
+            ]);
     }
 
     /**

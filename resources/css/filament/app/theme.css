@@ -1,3 +1,7 @@
 @import '/vendor/filament/filament/resources/css/theme.css';
 
 @config 'tailwind.config.js';
+
+.fi-ta-summary-row-heading {
+    display: none;
+}
