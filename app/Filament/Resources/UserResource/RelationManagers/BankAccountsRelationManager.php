@@ -4,6 +4,7 @@ namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Filament\Resources\BankAccountResource;
 use App\Models\BankAccount;
+use App\Models\TransactionCategory;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -23,6 +24,11 @@ class BankAccountsRelationManager extends RelationManager
         return __('bank_account.navigation_label');
     }
 
+    public static function getBadge(Model $ownerRecord, string $pageClass): ?string
+    {
+        return BankAccount::count();
+    }
+
     public function form(Form $form): Form
     {
         return BankAccountResource::form($form);
@@ -35,18 +41,30 @@ class BankAccountsRelationManager extends RelationManager
     {
         $columns = BankAccountResource::tableColumns();
         return $table
+            ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes())
             ->heading('')
             ->columns($columns)
-            ->paginated(fn() => BankAccount::all()->count() > 20)
+            ->paginated(fn() => BankAccount::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
             ->filters([
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
-                    ->query(fn($query) => $query->where('active', false))
+                    ->toggle()
+                    ->query(fn(Builder $query) => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('bank_account.buttons.create_button_label'))
+                    ->modalHeading(__('bank_account.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data) {
+                        $data['user_id'] = $this->getOwnerRecord()->id;
+                        return $data;
+                    })
+            ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->iconButton()
@@ -58,6 +76,20 @@ class BankAccountsRelationManager extends RelationManager
             ->bulkActions(BankAccountResource::getBulkActions())
             ->emptyStateHeading(__('bank_account.empty'))
             ->emptyStateDescription('')
-            ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes());
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('bank_account.buttons.create_button_label'))
+                    ->modalHeading(__('bank_account.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data) {
+                        $data['user_id'] = $this->getOwnerRecord()->id;
+                        return $data;
+                    })
+            ]);
+    }
+
+    public function isReadOnly(): bool
+    {
+        return false;
     }
 }

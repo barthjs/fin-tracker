@@ -12,6 +12,7 @@ return [
         'delete_heading' => 'Benutzer löschen',
         'password' => 'Passwort',
         'password_confirmation' => 'Passwort wiederholen',
+        'password_confirmation_warning' => 'Passwörter stimmen nicht überein.',
     ],
 
     'columns' => [

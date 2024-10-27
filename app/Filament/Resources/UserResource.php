@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Models\User;
 use Exception;
 use Filament\Forms;
@@ -33,75 +34,84 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()->schema([
-                    Forms\Components\TextInput::make('first_name')
-                        ->label(__('user.columns.first_name'))
-                        ->autofocus()
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                    Forms\Components\TextInput::make('last_name')
-                        ->label(__('user.columns.last_name'))
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                    Forms\Components\TextInput::make('name')
-                        ->label(__('user.columns.name'))
-                        ->maxLength(255)
-                        ->required()
-                        ->string()
-                        ->unique(ignoreRecord: true),
-                    Forms\Components\TextInput::make('email')
-                        ->label(__('user.columns.email'))
-                        ->maxLength(255)
-                        ->email()
-                        ->unique(ignoreRecord: true),
-                ])->columns(2),
-                Forms\Components\Section::make()->schema([
-                    Forms\Components\TextInput::make('password')
-                        ->label(__('user.buttons.password'))
-                        ->password()
-                        ->revealable()
-                        ->rule(Password::default())
-                        ->autocomplete('new-password')
-                        ->dehydrated(fn($state): bool => filled($state))
-                        ->dehydrateStateUsing(fn($state): string => Hash::make($state))
-                        ->live(debounce: 500)
-                        ->same('passwordConfirmation'),
-                    Forms\Components\TextInput::make('passwordConfirmation')
-                        ->label(__('user.buttons.password_confirmation'))
-                        ->password()
-                        ->revealable()
-                        ->required(function (callable $get) {
-                            if (!$get('password')) {
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('first_name')
+                            ->label(__('user.columns.first_name'))
+                            ->autofocus()
+                            ->maxLength(255)
+                            ->required()
+                            ->string(),
+                        Forms\Components\TextInput::make('last_name')
+                            ->label(__('user.columns.last_name'))
+                            ->maxLength(255)
+                            ->required()
+                            ->string(),
+                        Forms\Components\TextInput::make('name')
+                            ->label(__('user.columns.name'))
+                            ->maxLength(255)
+                            ->required()
+                            ->string()
+                            ->unique(ignoreRecord: true),
+                        Forms\Components\TextInput::make('email')
+                            ->label(__('user.columns.email'))
+                            ->maxLength(255)
+                            ->email()
+                            ->unique(ignoreRecord: true),
+                    ])->columns(2),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('password')
+                            ->label(__('user.buttons.password'))
+                            ->password()
+                            ->revealable()
+                            ->rule(Password::default())
+                            ->autocomplete('new-password')
+                            ->dehydrated(fn($state): bool => filled($state))
+                            ->dehydrateStateUsing(fn($state): string => Hash::make($state))
+                            ->live(debounce: 200)
+                            ->same('passwordConfirmation')
+                            ->validationMessages(['same' => __('user.buttons.password_confirmation_warning')]),
+                        Forms\Components\TextInput::make('passwordConfirmation')
+                            ->label(__('user.buttons.password_confirmation'))
+                            ->password()
+                            ->revealable()
+                            ->required(function (callable $get) {
+                                if (!$get('password')) {
+                                    return false;
+                                }
+                                return true;
+                            })
+                            ->disabled(function (callable $get) {
+                                if (!$get('password')) {
+                                    return true;
+                                }
                                 return false;
-                            }
-                            return true;
-                        })
-                        ->dehydrated(false),
-                    Forms\Components\Toggle::make('is_admin')
-                        ->label(__('user.columns.is_admin'))
-                        ->disabled(function ($record) {
-                            // Prevent current user from removing his admin status
-                            if (!$record) {
-                                return false;
-                            }
-                            return $record->id == auth()->user()->id;
-                        })
-                        ->default(false)
-                        ->inline(false),
-                    Forms\Components\Toggle::make('active')
-                        ->label(__('table.active'))
-                        ->disabled(function ($record) {
-                            if (!$record) {
-                                // Prevent current user from making his account inactive
-                                return false;
-                            }
-                            return $record->id == auth()->user()->id;
-                        })
-                        ->default(true)
-                        ->inline(false)
-                ])->columns(2),
+                            })
+                            ->dehydrated(false),
+                        Forms\Components\Toggle::make('is_admin')
+                            ->label(__('user.columns.is_admin'))
+                            ->disabled(function ($record) {
+                                // Prevent current user from removing his admin status
+                                if (!$record) {
+                                    return false;
+                                }
+                                return $record->id == auth()->user()->id;
+                            })
+                            ->default(false)
+                            ->inline(false),
+                        Forms\Components\Toggle::make('active')
+                            ->label(__('table.active'))
+                            ->disabled(function ($record) {
+                                if (!$record) {
+                                    // Prevent current user from making his account inactive
+                                    return false;
+                                }
+                                return $record->id == auth()->user()->id;
+                            })
+                            ->default(true)
+                            ->inline(false)
+                    ])->columns(2),
             ]);
     }
 
@@ -118,7 +128,6 @@ class UserResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email')
                     ->label(__('user.columns.email'))
-                    ->url(fn($state) => "mailto:" . $state)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('first_name')
@@ -139,7 +148,7 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->paginated(fn() => User::all()->count() > 20)
+            ->paginated(fn() => User::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -147,6 +156,7 @@ class UserResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->iconButton()
             ])
+            ->recordUrl(fn(User $record): string => ViewUser::getUrl([$record->id]))
             ->emptyStateHeading(__('user.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
@@ -169,6 +179,7 @@ class UserResource extends Resource
         return [
             'index' => UserResource\Pages\ListUsers::route('/'),
             'create' => UserResource\Pages\CreateUser::route('/create'),
+            'view' => UserResource\Pages\ViewUser::route('/{record}'),
             'edit' => UserResource\Pages\EditUser::route('/{record}/edit'),
         ];
     }

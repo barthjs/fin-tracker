@@ -12,6 +12,7 @@ return [
         'delete_heading' => 'Delete user',
         'password' => 'Password',
         'password_confirmation' => 'Confirm password',
+        'password_confirmation_warning' => 'Passwords do not match.',
     ],
 
     'columns' => [

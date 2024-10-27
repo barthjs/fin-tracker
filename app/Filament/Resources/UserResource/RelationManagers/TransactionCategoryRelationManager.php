@@ -23,6 +23,11 @@ class TransactionCategoryRelationManager extends RelationManager
         return __('transaction_category.navigation_label');
     }
 
+    public static function getBadge(Model $ownerRecord, string $pageClass): ?string
+    {
+        return TransactionCategory::count();
+    }
+
     public function form(Form $form): Form
     {
         return TransactionCategoryResource::form($form);
@@ -35,16 +40,28 @@ class TransactionCategoryRelationManager extends RelationManager
     {
         $tableParts = TransactionCategoryResource::tableColumns();
         return $table
+            ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes())
             ->heading('')
             ->columns($tableParts)
-            ->paginated(fn() => TransactionCategory::all()->count() > 20)
+            ->paginated(fn() => TransactionCategory::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
             ->filters([
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
-                    ->query(fn($query) => $query->where('active', false))
+                    ->toggle()
+                    ->query(fn(Builder $query) => $query->where('active', false)),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('transaction_category.buttons.create_button_label'))
+                    ->modalHeading(__('transaction_category.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data) {
+                        $data['user_id'] = $this->getOwnerRecord()->id;
+                        return $data;
+                    })
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -58,6 +75,20 @@ class TransactionCategoryRelationManager extends RelationManager
             ->bulkActions(TransactionCategoryResource::getBulkActions())
             ->emptyStateHeading(__('transaction_category.empty'))
             ->emptyStateDescription('')
-            ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes());
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('transaction_category.buttons.create_button_label'))
+                    ->modalHeading(__('transaction_category.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data) {
+                        $data['user_id'] = $this->getOwnerRecord()->id;
+                        return $data;
+                    })
+            ]);
+    }
+
+    public function isReadOnly(): bool
+    {
+        return false;
     }
 }
