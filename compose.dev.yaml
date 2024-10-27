@@ -7,7 +7,7 @@ services:
     ports:
       - '${APP_PORT:-8080}:80'
     volumes:
-      - '.:/app'
+      - './:/app'
   fin-tracker-db:
     image: mariadb:11.4
     container_name: fin-tracker-db
@@ -16,3 +16,7 @@ services:
     environment:
       - MARIADB_DATABASE=${DB_DATABASE:-fin-tracker}
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD:-root}
+    volumes:
+      - 'db:/var/lib/mysql'
+volumes:
+  db:
