@@ -42,11 +42,20 @@ class BankAccountTransaction extends Model
             if (is_null($model->category_id)) {
                 $model->category_id = self::getDefaultTransactionCategoryId();
             }
+
+            $model->destination = trim($model->destination) ?? null;
         });
 
         static::created(callback: function (BankAccountTransaction $transaction) {
             $sum = BankAccountTransaction::whereBankAccountId($transaction->bank_account_id)->withoutGlobalScopes([BankAccountTransactionScope::class])->sum('amount');
             BankAccount::whereId($transaction->bank_account_id)->withoutGlobalScopes([BankAccountScope::class])->update(['balance' => $sum]);
+
+            $transaction->destination = trim($transaction->destination) ?? null;
+            $transaction->save();
+        });
+
+        static::updating(callback: function (BankAccountTransaction $transaction) {
+            $transaction->destination = trim($transaction->destination) ?? null;
         });
     }
 

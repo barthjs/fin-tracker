@@ -3,15 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BankAccountTransactionResource\Pages;
+use App\Filament\Resources\BankAccountTransactionResource\RelationManagers\TransactionRelationManager;
 use App\Models\BankAccount;
 use App\Models\BankAccountTransaction;
+use Carbon\Carbon;
 use Exception;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Number;
@@ -119,13 +124,6 @@ class BankAccountTransactionResource extends Resource
                     ->fontFamily('mono')
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('bankAccount.name')
-                    ->label(__('bank_account_transaction.columns.account'))
-                    ->copyable()
-                    ->copyMessage(__('table.copied'))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label(__('bank_account_transaction.columns.amount'))
                     ->copyable()
@@ -142,7 +140,7 @@ class BankAccountTransactionResource extends Resource
                     ->color(fn($record) => match ($record->transactionCategory->type->name) {
                         'expense' => 'danger',
                         'revenue' => 'success',
-                        default => 'gray',
+                        default => 'warning',
                     }),
                 Tables\Columns\TextColumn::make('destination')
                     ->label(__('bank_account_transaction.columns.destination'))
@@ -151,14 +149,40 @@ class BankAccountTransactionResource extends Resource
                     ->searchable()
                     ->toggleable()
                     ->wrap(),
+                Tables\Columns\TextColumn::make('bankAccount.name')
+                    ->label(__('bank_account_transaction.columns.account'))
+                    ->hiddenOn(BankAccountResource\RelationManagers\TransactionRelationManager::class)
+                    ->badge()
+                    ->color('info')
+                    ->copyable()
+                    ->copyMessage(__('table.copied'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('transactionCategory.name')
                     ->label(__('bank_account_transaction.columns.category'))
+                    ->hiddenOn(TransactionCategoryResource\RelationManagers\TransactionRelationManager::class)
+                    ->badge()
+                    ->color(fn($record) => match ($record->transactionCategory->type->name) {
+                        'expense' => 'danger',
+                        'revenue' => 'success',
+                        default => 'warning',
+                    })
                     ->copyable()
                     ->copyMessage(__('table.copied'))
                     ->searchable()
                     ->sortable()
                     ->toggleable()
                     ->wrap(),
+                Tables\Columns\TextColumn::make('transactionCategory.group.name')
+                    ->label(__('bank_account_transaction.columns.group'))
+                    ->hiddenOn([TransactionCategoryResource\RelationManagers\TransactionRelationManager::class, Pages\ListBankAccountTransactions::class])
+                    ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state])
+                    ->copyable()
+                    ->copyMessage(__('table.copied'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('notes')
                     ->label(__('bank_account_transaction.columns.notes'))
                     ->copyable()
@@ -167,26 +191,60 @@ class BankAccountTransactionResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
             ])
-            ->paginated(fn() => BankAccountTransaction::all()->count() > 20)
+            ->paginated(fn() => BankAccountTransaction::count() > 20)
+            ->deferLoading()
+            ->extremePaginationLinks()
             ->defaultSort('date_time', 'desc')
             ->persistSortInSession()
             ->striped()
             ->filters([
                 Tables\Filters\SelectFilter::make('bankAccount')
                     ->label(__('bank_account_transaction.columns.account'))
+                    ->hiddenOn(BankAccountResource\RelationManagers\TransactionRelationManager::class)
                     ->relationship('bankAccount', 'name')
                     ->multiple()
                     ->preload()
                     ->searchable(),
                 SelectFilter::make('category')
                     ->label(__('bank_account_transaction.columns.category'))
+                    ->hiddenOn(TransactionCategoryResource\RelationManagers\TransactionRelationManager::class)
                     ->relationship('transactionCategory', 'name')
                     ->multiple()
                     ->preload()
                     ->searchable(),
+                Filter::make('date')
+                    ->form([
+                        DatePicker::make('created_from')
+                            ->default(Carbon::today()->startOfYear()),
+                        DatePicker::make('created_until')
+                            ->default(Carbon::today()),
+                    ])
+                    ->columns(2)
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date),
+                            );
+                    })
+            ], Tables\Enums\FiltersLayout::AboveContentCollapsible)
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->icon('tabler-plus')
+                    ->label(__('bank_account_transaction.buttons.create_button_label'))
+                    ->hidden(function ($livewire) {
+                        return $livewire instanceof Pages\ListBankAccountTransactions ? true : false;
+                    })
+                    ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
             ])
             ->persistFiltersInSession()
-            ->filtersFormColumns(2)
+            ->filtersFormColumns(function ($livewire) {
+                return $livewire instanceof Pages\ListBankAccountTransactions ? 3 : 2;
+            })
             ->actions(self::getActions())
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('bank_account_transaction.empty'))
@@ -196,10 +254,6 @@ class BankAccountTransactionResource extends Resource
                     ->icon('tabler-plus')
                     ->label(__('bank_account_transaction.buttons.create_button_label'))
                     ->modalHeading(__('bank_account_transaction.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['destination'] = trim($data['destination']);
-                        return $data;
-                    })
             ]);
     }
 

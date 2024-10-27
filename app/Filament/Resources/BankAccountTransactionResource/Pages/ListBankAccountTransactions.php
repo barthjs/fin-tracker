@@ -72,7 +72,7 @@ class ListBankAccountTransactions extends ListRecords
         return [
             'All' => Tab::make()
                 ->label(__('bank_account_transaction.filter.all')),
-            'All Expenses' => Tab::make()
+            'Expenses' => Tab::make()
                 ->label(__('bank_account_transaction.filter.expenses'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = TransactionCategory::whereType(TransactionType::expense)->get(['id'])->toArray();

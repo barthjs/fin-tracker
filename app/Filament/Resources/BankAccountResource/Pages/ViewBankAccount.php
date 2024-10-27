@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BankAccountResource\Pages;
 
 use App\Filament\Resources\BankAccountResource;
+use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewBankAccount extends ViewRecord
@@ -16,6 +17,14 @@ class ViewBankAccount extends ViewRecord
 
     public function getHeading(): string
     {
-        return __('');
+        return __('bank_account.navigation_label');
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\EditAction::make()
+                ->icon('tabler-edit')
+        ];
     }
 }

@@ -18,6 +18,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class BankAccountResource extends Resource
@@ -115,16 +116,23 @@ class BankAccountResource extends Resource
     {
         $columns = self::tableColumns();
         return $table
+            ->modifyQueryUsing(function (Builder $query, Table $table) {
+                if (!$table->getActiveFiltersCount()) {
+                    return $query->where('active', true);
+                } else {
+                    return $query;
+                }
+            })
             ->columns($columns)
-            ->paginated(fn() => BankAccount::all()->count() > 20)
+            ->paginated(fn() => BankAccount::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
             ->filters([
-                Filter::make('active')
-                    ->label(__('table.status_active'))
+                Filter::make('inactive')
+                    ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn($query) => $query->where('active', true))
+                    ->query(fn(Builder $query) => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->actions([

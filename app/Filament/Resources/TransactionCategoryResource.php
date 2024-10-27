@@ -5,7 +5,9 @@ namespace App\Filament\Resources;
 use App\Enums\TransactionGroup;
 use App\Filament\Resources\TransactionCategoryResource\Pages;
 use App\Filament\Resources\TransactionCategoryResource\RelationManagers\TransactionRelationManager;
+use App\Models\BankAccount;
 use App\Models\TransactionCategory;
+use App\Models\TransactionCategoryStatistic;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms;
@@ -17,7 +19,9 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class TransactionCategoryResource extends Resource
@@ -81,15 +85,25 @@ class TransactionCategoryResource extends Resource
                         TextEntry::make('group')
                             ->label(__('transaction_category.columns.group'))
                             ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name])
+                            ->color(fn($record) => match ($record->type->name) {
+                                'expense' => 'danger',
+                                'revenue' => 'success',
+                                default => 'warning',
+                            })
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('type')
                             ->label(__('transaction_category.columns.type'))
                             ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name])
+                            ->color(fn($state) => match ($state) {
+                                'expense' => 'danger',
+                                'revenue' => 'success',
+                                default => 'warning',
+                            })
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make(Carbon::now()->year)
-                            ->numeric()
+                            ->money(BankAccount::getCurrency())
                             ->state(function (TransactionCategory $record): float {
                                 return TransactionCategory::with(['transactions' => function ($query) {
                                     $query->whereYear('date_time', Carbon::now()->year);
@@ -112,16 +126,23 @@ class TransactionCategoryResource extends Resource
     {
         $columns = self::tableColumns();
         return $table
+            ->modifyQueryUsing(function (Builder $query, Table $table) {
+                if (!$table->getActiveFiltersCount()) {
+                    return $query->where('active', true);
+                } else {
+                    return $query;
+                }
+            })
             ->columns($columns)
             ->paginated(fn() => TransactionCategory::all()->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
             ->filters([
-                Filter::make('active')
-                    ->label(__('table.status_active'))
+                Filter::make('inactive')
+                    ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn($query) => $query->where('active', true))
+                    ->query(fn(Builder $query) => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -155,11 +176,23 @@ class TransactionCategoryResource extends Resource
             Tables\Columns\TextColumn::make('group')
                 ->label(__('transaction_category.columns.group'))
                 ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name])
+                ->badge()
+                ->color(fn($record) => match ($record->type->name) {
+                    'expense' => 'danger',
+                    'revenue' => 'success',
+                    default => 'warning',
+                })
                 ->searchable()
                 ->sortable(),
             Tables\Columns\TextColumn::make('type')
                 ->label(__('transaction_category.columns.type'))
                 ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name])
+                ->badge()
+                ->color(fn($state) => match ($state) {
+                    'expense' => 'danger',
+                    'revenue' => 'success',
+                    default => 'warning',
+                })
                 ->searchable()
                 ->sortable(),
             Tables\Columns\IconColumn::make('active')

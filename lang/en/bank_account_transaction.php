@@ -35,7 +35,7 @@ return [
 
     'filter' => [
         'all' => 'All',
-        'expenses' => 'All expenses',
+        'expenses' => 'Expenses',
         'fix_expenses' => 'Fixed expenses',
         'var_expenses' => 'Variable expenses',
         'revenues' => 'Revenues',

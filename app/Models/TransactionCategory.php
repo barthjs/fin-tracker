@@ -38,6 +38,8 @@ class TransactionCategory extends Model
             if (is_null($model->user_id)) {
                 $model->user_id = auth()->id();
             }
+
+            $model->name = trim($model->name);
         });
 
         static::created(function ($model) {
@@ -57,6 +59,8 @@ class TransactionCategory extends Model
                 'fix_revenues', 'var_revenues' => 'revenue',
                 default => 'transfer'
             };
+
+            $model->name = trim($model->name);
         });
     }
 

@@ -42,6 +42,12 @@ class BankAccount extends Model
             if (is_null($model->currency)) {
                 $model->currency = self::getCurrency();
             }
+
+            $model->name = trim($model->name);
+        });
+
+        static::updating(function ($model) {
+            $model->name = trim($model->name);
         });
     }
 
