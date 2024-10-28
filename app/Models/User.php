@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\BankAccountScope;
-use App\Models\Scopes\TransactionCategoryScope;
+use App\Models\Scopes\AccountScope;
+use App\Models\Scopes\CategoryScope;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
@@ -43,20 +43,20 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     protected static function booted(): void
     {
-        static::created(function ($model) {
-            BankAccount::withoutGlobalScopes([BankAccountScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $model->id]);
-            TransactionCategory::withoutGlobalScopes([TransactionCategoryScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $model->id]);
+        static::created(function (User $user) {
+            Account::withoutGlobalScopes([AccountScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
+            Category::withoutGlobalScopes([CategoryScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
         });
     }
 
-    public function bankAccounts(): HasMany
+    public function accounts(): HasMany
     {
-        return $this->hasMany(BankAccount::class, 'user_id');
+        return $this->hasMany(Account::class, 'user_id');
     }
 
-    public function transactionCategory(): HasMany
+    public function categories(): HasMany
     {
-        return $this->hasMany(TransactionCategory::class, 'user_id');
+        return $this->hasMany(Category::class, 'user_id');
     }
 
     public function canAccessPanel(Panel $panel): bool

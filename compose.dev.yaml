@@ -8,6 +8,8 @@ services:
       - '${APP_PORT:-8080}:80'
     volumes:
       - './:/app'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   fin-tracker-db:
     image: mariadb:11.4
     container_name: fin-tracker-db

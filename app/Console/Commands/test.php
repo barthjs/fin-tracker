@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\BankAccountTransaction;
-use App\Models\Scopes\BankAccountScope;
-use App\Models\Scopes\BankAccountTransactionScope;
+use App\Models\Transaction;
+use App\Models\Scopes\AccountScope;
+use App\Models\Scopes\TransactionScope;
 use Illuminate\Console\Command;
 
 class test extends Command
@@ -28,7 +28,7 @@ class test extends Command
      */
     public function handle()
     {
-        $bank = BankAccountTransaction::withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class])
+        $bank = Transaction::withoutGlobalScopes([TransactionScope::class, AccountScope::class])
             ->whereId(353)
             ->first()
             ->updateOrCreate(['bank_account_id' => 1]);

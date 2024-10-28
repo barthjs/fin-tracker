@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Models\BankAccountTransaction;
-use App\Models\Scopes\BankAccountScope;
-use App\Models\Scopes\BankAccountTransactionScope;
-use App\Models\Scopes\TransactionCategoryScope;
-use App\Models\Scopes\TransactionCategoryStatisticScope;
-use App\Models\TransactionCategory;
-use App\Models\TransactionCategoryStatistic;
+use App\Models\Transaction;
+use App\Models\Scopes\AccountScope;
+use App\Models\Scopes\TransactionScope;
+use App\Models\Scopes\CategoryScope;
+use App\Models\Scopes\CategoryStatisticScope;
+use App\Models\Category;
+use App\Models\CategoryStatistic;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -33,13 +33,13 @@ class CreateStatistic extends Command
      */
     public function handle(): int
     {
-        $categoryIds = TransactionCategory::withoutGlobalScopes([TransactionCategoryScope::class])
+        $categoryIds = Category::withoutGlobalScopes([CategoryScope::class])
             ->whereActive(true)
             ->pluck('id');
 
         $yearCurrent = Carbon::now()->year;
         foreach ($categoryIds as $categoryId) {
-            $oldestRecord = BankAccountTransaction::withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class])
+            $oldestRecord = Transaction::withoutGlobalScopes([TransactionScope::class, AccountScope::class])
                 ->where('category_id', $categoryId)
                 ->orderBy('date_time')
                 ->first();
@@ -48,14 +48,14 @@ class CreateStatistic extends Command
                 $yearFirst = Carbon::parse($oldestRecord->date)->year;
                 for ($year = $yearFirst; $year <= $yearCurrent; $year++) {
                     for ($i = 1; $i <= 12; $i++) {
-                        $sumPerMonth[$i] = BankAccountTransaction::withoutGlobalScopes([BankAccountTransactionScope::class, BankAccountScope::class])
+                        $sumPerMonth[$i] = Transaction::withoutGlobalScopes([TransactionScope::class, AccountScope::class])
                             ->where('category_id', '=', $categoryId)
                             ->whereYear('date_time', $year)
                             ->whereMonth('date_time', $i)
                             ->sum('amount');
 
                     }
-                    TransactionCategoryStatistic::withoutGlobalScopes([TransactionCategoryStatisticScope::class])->updateOrCreate(['year' => $year,
+                    CategoryStatistic::withoutGlobalScopes([CategoryStatisticScope::class])->updateOrCreate(['year' => $year,
                         'category_id' => $categoryId,
                     ],
                         [

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\BankAccount;
-use App\Models\BankAccountTransaction;
-use App\Models\TransactionCategory;
+use App\Models\Account;
+use App\Models\Transaction;
+use App\Models\Category;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -43,20 +43,21 @@ class DemoSeeder extends Seeder
      */
     private function createTestValues(User $user): void
     {
-        $bank = BankAccount::factory(3)->create(['user_id' => $user->id]);
-        $cat = TransactionCategory::factory(10)->create(['user_id' => $user->id]);
+        $accounts = Account::factory(3)->create(['user_id' => $user->id]);
+        $categories = Category::factory(10)->create(['user_id' => $user->id]);
         for ($y = 0; $y < 3; $y++) {
             for ($m = 1; $m <= 12; $m++) {
-                foreach ($bank as $item) {
+                foreach ($accounts as $account) {
                     for ($i = 0; $i < 2; $i++) {
-                        $category = $cat->random();
-                        $amount = fake()->randomFloat(2, 0, 10000);
-                        $amount *= ($category->type == "expense") ? -1 : 1;
-                        BankAccountTransaction::factory()->create([
+                        $category = $categories->random();
+                        $amount = fake()->randomFloat(2, 0, 1000);
+                        $amount *= ($category->type->name == "expense") ? -1 : 1;
+                        Transaction::factory()->create([
                             'date_time' => Carbon::now()->subYears($y)->month($m),
                             'amount' => $amount,
-                            'bank_account_id' => $item->id,
-                            'category_id' => $category->id
+                            'account_id' => $account->id,
+                            'category_id' => $category->id,
+                            'user_id' => $user->id
                         ]);
                     }
                 }

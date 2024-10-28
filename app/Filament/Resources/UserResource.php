@@ -169,8 +169,8 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            UserResource\RelationManagers\BankAccountsRelationManager::class,
-            UserResource\RelationManagers\TransactionCategoryRelationManager::class
+            UserResource\RelationManagers\AccountsRelationManager::class,
+            UserResource\RelationManagers\CategoryRelationManager::class
         ];
     }
 

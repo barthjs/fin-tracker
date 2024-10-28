@@ -25,6 +25,5 @@ class DatabaseSeeder extends Seeder
                 ]
             );
         }
-        // Artisan::call('app:create-statistic');
     }
 }
