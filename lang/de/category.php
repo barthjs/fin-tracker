@@ -2,7 +2,7 @@
 
 return [
 
-    'url' => 'kategorien',
+    'slug' => 'kategorien',
     'navigation_label' => 'Kategorien',
 
     'buttons' => [

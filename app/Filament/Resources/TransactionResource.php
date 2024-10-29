@@ -2,17 +2,29 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TransactionResource\Pages;
+use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Models\Account;
-use App\Models\CategoryStatistic;
+use App\Models\Category;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Exception;
-use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -20,7 +32,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Number;
+use Illuminate\Support\Number;
 
 class TransactionResource extends Resource
 {
@@ -30,12 +42,12 @@ class TransactionResource extends Resource
 
     public static function getSlug(): string
     {
-        return __('bank_account_transaction.url');
+        return __('transaction.slug');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('bank_account_transaction.navigation_label');
+        return __('transaction.navigation_label');
     }
 
     public static function form(Form $form): Form
@@ -47,38 +59,41 @@ class TransactionResource extends Resource
     {
         // account and category for default values in relation manager
         return [
-            Forms\Components\Section::make()
+            Section::make()
                 ->schema([
-                    Forms\Components\DateTimePicker::make('date_time')
-                        ->label(__('bank_account_transaction.columns.date'))
+                    DateTimePicker::make('date_time')
+                        ->label(__('transaction.columns.date'))
                         ->autofocus()
                         ->default(today())
                         ->required(),
-                    Forms\Components\Select::make('account_id')
-                        ->label(__('bank_account_transaction.columns.account'))
+                    Select::make('account_id')
+                        ->label(__('transaction.columns.account'))
                         ->relationship('account', 'name')
-                        ->default(fn() => $account->id ?? "")
+                        ->placeholder(__('transaction.form.account_placeholder'))
                         ->preload()
+                        ->default(fn(): string => $account->id ?? "")
+                        ->live(true)
                         ->required()
                         ->searchable()
-                        ->live(onBlur: true)
-                        ->placeholder(__('bank_account_transaction.form.account_placeholder'))
                         ->createOptionForm(AccountResource::formParts())
-                        ->createOptionModalHeading(__('bank_account.buttons.create_heading')),
-                    Forms\Components\TextInput::make('amount')
-                        ->label(__('bank_account_transaction.columns.amount'))
+                        ->createOptionModalHeading(__('account.buttons.create_heading')),
+                    TextInput::make('amount')
+                        ->label(__('transaction.columns.amount'))
                         ->suffix(fn($get) => Account::whereId($get('account_id'))->first()->currency->name ?? "")
                         ->numeric()
-                        ->formatStateUsing(fn($state): string => $state ? Number::format($state, 2, 4) : 0)
-                        ->minValue(-999999999.9999)
-                        ->maxValue(999999999.9999)
+                        ->formatStateUsing(function ($state) {
+                            $state = $state ? Number::format($state, 2, 4) : 0;
+                            return str_replace(',', '.', $state);
+                        })
+                        ->minValue(-99999999.9999)
+                        ->maxValue(99999999.9999)
                         ->required(),
                 ])
                 ->columns(3),
-            Forms\Components\Section::make()
+            Section::make()
                 ->schema([
-                    Forms\Components\TextInput::make('destination')
-                        ->label(__('bank_account_transaction.columns.destination'))
+                    TextInput::make('destination')
+                        ->label(__('transaction.columns.destination'))
                         ->datalist(Transaction::query()
                             ->select('destination')
                             ->distinct()
@@ -88,18 +103,20 @@ class TransactionResource extends Resource
                         ->maxLength(255)
                         ->required()
                         ->string(),
-                    Forms\Components\Select::make('category_id')
-                        ->label(__('bank_account_transaction.columns.category'))
+                    Select::make('category_id')
+                        ->label(__('transaction.columns.category'))
                         ->relationship('category', 'name')
-                        ->default(fn() => $category->id ?? "")
+                        ->placeholder(__('transaction.form.category_placeholder'))
                         ->preload()
+                        ->default(fn(): string => $category->id ?? "")
+                        ->live(true)
+                        ->hint(fn($get): string => __('category.types')[Category::whereId($get('category_id'))->first()->type->name ?? ""] ?? "")
                         ->required()
                         ->searchable()
-                        ->placeholder(__('bank_account_transaction.form.category_placeholder'))
                         ->createOptionForm(CategoryResource::formParts())
-                        ->createOptionModalHeading(__('transaction_category.buttons.create_heading')),
-                    Forms\Components\Textarea::make('notes')
-                        ->label(__('bank_account_transaction.columns.notes'))
+                        ->createOptionModalHeading(__('category.buttons.create_heading')),
+                    Textarea::make('notes')
+                        ->label(__('transaction.columns.notes'))
                         ->autosize()
                         ->columnSpanFull()
                         ->maxLength(255)
@@ -117,97 +134,83 @@ class TransactionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('date_time')
-                    ->label(__('bank_account_transaction.columns.date'))
+                TextColumn::make('date_time')
+                    ->label(__('transaction.columns.date'))
                     ->dateTime('Y-m-d, H:i')
-                    ->copyable()
-                    ->copyMessage(__('table.copied'))
                     ->fontFamily('mono')
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('amount')
-                    ->label(__('bank_account_transaction.columns.amount'))
-                    ->copyable()
-                    ->copyMessage(__('table.copied'))
+                TextColumn::make('amount')
+                    ->label(__('transaction.columns.amount'))
                     ->fontFamily('mono')
                     ->numeric(function ($state) {
                         $numberStr = (string)$state;
                         $decimalPart = rtrim(substr($numberStr, strpos($numberStr, '.') + 1), '0');
                         return max(strlen($decimalPart), 2);
                     })
-                    ->sortable()
-                    ->toggleable()
                     ->badge()
-                    ->color(fn($record) => match ($record->category->type->name) {
-                        'expense' => 'danger',
-                        'revenue' => 'success',
-                        default => 'warning',
-                    }),
-                Tables\Columns\TextColumn::make('destination')
-                    ->label(__('bank_account_transaction.columns.destination'))
-                    ->copyable()
-                    ->copyMessage(__('table.copied'))
-                    ->searchable()
-                    ->toggleable()
-                    ->wrap(),
-                Tables\Columns\TextColumn::make('account.name')
-                    ->label(__('bank_account_transaction.columns.account'))
-                    ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
-                    ->badge()
-                    ->color('info')
-                    ->copyable()
-                    ->copyMessage(__('table.copied'))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('category.name')
-                    ->label(__('bank_account_transaction.columns.category'))
-                    ->hiddenOn(CategoryResource\RelationManagers\TransactionRelationManager::class)
-                    ->badge()
-                    ->color(fn($record) => match ($record->category->type->name) {
+                    ->color(fn($record): string => match ($record->category->type->name) {
                         'expense' => 'danger',
                         'revenue' => 'success',
                         default => 'warning',
                     })
-                    ->copyable()
-                    ->copyMessage(__('table.copied'))
-                    ->searchable()
                     ->sortable()
+                    ->toggleable(),
+                TextColumn::make('destination')
+                    ->label(__('transaction.columns.destination'))
+                    ->searchable()
                     ->toggleable()
                     ->wrap(),
-                Tables\Columns\TextColumn::make('category.group.name')
-                    ->label(__('bank_account_transaction.columns.group'))
-                    ->hiddenOn([CategoryResource\RelationManagers\TransactionRelationManager::class, Pages\ListTransactions::class])
-                    ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state])
-                    ->copyable()
-                    ->copyMessage(__('table.copied'))
+                TextColumn::make('account.name')
+                    ->label(__('transaction.columns.account'))
+                    ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
+                    ->badge()
+                    ->color('info')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('category.name')
+                    ->label(__('transaction.columns.category'))
+                    ->hiddenOn(CategoryResource\RelationManagers\TransactionRelationManager::class)
+                    ->badge()
+                    ->color(fn($record): string => match ($record->category->type->name) {
+                        'expense' => 'danger',
+                        'revenue' => 'success',
+                        default => 'warning',
+                    })
+                    ->wrap()
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('category.group.name')
+                    ->label(__('transaction.columns.group'))
+                    ->hiddenOn([CategoryResource\RelationManagers\TransactionRelationManager::class, ListTransactions::class])
+                    ->formatStateUsing(fn($state): string => __('category.groups')[$state])
+                    ->wrap()
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('notes')
-                    ->label(__('bank_account_transaction.columns.notes'))
-                    ->copyable()
-                    ->copyMessage(__('table.copied'))
+                    ->label(__('transaction.columns.notes'))
+                    ->wrap()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->wrap(),
             ])
-            ->paginated(fn() => Transaction::count() > 20)
+            ->paginated(fn(): bool => Transaction::count() > 20)
             ->deferLoading()
             ->extremePaginationLinks()
             ->defaultSort('date_time', 'desc')
             ->persistSortInSession()
             ->striped()
             ->filters([
-                Tables\Filters\SelectFilter::make('account')
-                    ->label(__('bank_account_transaction.columns.account'))
+                SelectFilter::make('account')
+                    ->label(__('transaction.columns.account'))
                     ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
                     ->relationship('account', 'name')
                     ->multiple()
                     ->preload()
                     ->searchable(),
                 SelectFilter::make('category')
-                    ->label(__('bank_account_transaction.columns.category'))
+                    ->label(__('transaction.columns.category'))
                     ->hiddenOn(CategoryResource\RelationManagers\TransactionRelationManager::class)
                     ->relationship('category', 'name')
                     ->multiple()
@@ -216,54 +219,52 @@ class TransactionResource extends Resource
                 Filter::make('date')
                     ->form([
                         DatePicker::make('created_from')
+                            ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
-                        DatePicker::make('created_until')
-                            ->default(Carbon::today()),
+                        DatePicker::make(__('table.filter.created_until'))
+                            ->default(Carbon::today()->endOfYear()),
                     ])
                     ->columns(2)
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when(
-                                $data['created_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date),
-                            )
-                            ->when(
-                                $data['created_until'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date),
-                            );
+                            ->when($data['created_from'],
+                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
+                            ->when($data['created_until'],
+                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
                     })
-            ], Tables\Enums\FiltersLayout::AboveContentCollapsible)
+            ], FiltersLayout::AboveContentCollapsible)
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('bank_account_transaction.buttons.create_button_label'))
+                    ->label(__('transaction.buttons.create_button_label'))
                     ->hidden(function ($livewire) {
-                        return $livewire instanceof Pages\ListTransactions;
+                        return $livewire instanceof ListTransactions;
                     })
-                    ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
+                    ->modalHeading(__('transaction.buttons.create_heading')),
             ])
             ->persistFiltersInSession()
             ->filtersFormColumns(function ($livewire) {
-                return $livewire instanceof Pages\ListTransactions ? 3 : 2;
+                return $livewire instanceof ListTransactions ? 3 : 2;
             })
             ->actions(self::getActions())
             ->bulkActions(self::getBulkActions())
-            ->emptyStateHeading(__('bank_account_transaction.empty'))
+            ->emptyStateHeading(__('transaction.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('bank_account_transaction.buttons.create_button_label'))
-                    ->modalHeading(__('bank_account_transaction.buttons.create_heading'))
+                    ->label(__('transaction.buttons.create_button_label'))
+                    ->modalHeading(__('transaction.buttons.create_heading'))
             ]);
     }
 
     public static function getActions(): array
     {
         return [
-            Tables\Actions\EditAction::make()
+            EditAction::make()
                 ->iconButton()
-                ->modalHeading(__('bank_account_transaction.buttons.edit_heading'))
+                ->icon('tabler-edit')
+                ->modalHeading(__('transaction.buttons.edit_heading'))
                 ->using(function (Model $record, array $data): Model {
                     $oldDate = $record->getOriginal('date_time');
                     $oldAmount = $record->getOriginal('amount');
@@ -273,9 +274,9 @@ class TransactionResource extends Resource
                     DB::transaction(function () use ($record, $data, $oldDate, $oldAmount, $oldAccountId, $oldCategoryId) {
                         $record->update($data);
 
-                        $newAccountId = $record->account_id;
                         $newAmount = $record->amount;
                         $newDate = $record->date_time;
+                        $newAccountId = $record->account_id;
                         $newCategoryId = $record->category_id;
 
                         if ($oldAccountId !== $newAccountId || $oldAmount !== $newAmount) {
@@ -284,49 +285,46 @@ class TransactionResource extends Resource
                         }
 
                         if ($oldCategoryId !== $newCategoryId || $oldDate !== $newDate || $oldAmount !== $newAmount) {
-                            self::updateCategoryStatistics($oldCategoryId, $oldDate);
-                            self::updateCategoryStatistics($newCategoryId, $newDate);
+                            Transaction::updateCategoryStatistics($oldCategoryId, $oldDate);
+                            Transaction::updateCategoryStatistics($newCategoryId, $newDate);
                         }
                     });
 
                     return $record;
                 }),
+            DeleteAction::make()
+                ->iconButton()
+                ->icon('tabler-trash')
+                ->modalHeading(__('transaction.buttons.delete_heading'))
+                ->after(function (Transaction $record): Transaction {
+                    Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
+                    return $record;
+                })
         ];
     }
 
+    /**
+     * @param int $accountId
+     * @return void
+     */
     private static function updateAccountBalance(int $accountId): void
     {
         $newBalance = Transaction::whereAccountId($accountId)->sum('amount');
         Account::whereId($accountId)->update(['balance' => $newBalance]);
     }
 
-    private static function updateCategoryStatistics(int $categoryId, string $date): void
+    public static function getBulkActions(): BulkActionGroup
     {
-        $year = Carbon::parse($date)->year;
-        $month = Carbon::parse($date)->month;
-        $monthColumn = strtolower(Carbon::createFromDate(null, $month)->format('M'));
-        $sumPerMonth = Transaction::withoutGlobalScopes([TransactionScope::class])
-            ->where('category_id', $categoryId)
-            ->whereYear('date_time', $year)
-            ->whereMonth('date_time', $month)
-            ->sum('amount');
-
-        CategoryStatistic::updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$month => $sumPerMonth]);
-    }
-
-
-    public static function getBulkActions(): Tables\Actions\BulkActionGroup
-    {
-        return Tables\Actions\BulkActionGroup::make([
-            Tables\Actions\DeleteBulkAction::make()
-                ->modalHeading(__('bank_account_transaction.buttons.bulk_delete_heading')),
-            Tables\Actions\BulkAction::make('account')
+        return BulkActionGroup::make([
+            DeleteBulkAction::make()
+                ->modalHeading(__('transaction.buttons.bulk_delete_heading')),
+            BulkAction::make('account')
                 ->icon('tabler-edit')
-                ->label(__('bank_account_transaction.buttons.bulk_account'))
+                ->label(__('transaction.buttons.bulk_account'))
                 ->form([
-                    Forms\Components\Select::make('account_id')
-                        ->label(__('bank_account_transaction.columns.account'))
-                        ->placeholder(__('bank_account_transaction.form.account_placeholder'))
+                    Select::make('account_id')
+                        ->label(__('transaction.columns.account'))
+                        ->placeholder(__('transaction.form.account_placeholder'))
                         ->relationship('account', 'name')
                         ->preload()
                         ->required()
@@ -348,14 +346,14 @@ class TransactionResource extends Resource
                     }
                 })
                 ->deselectRecordsAfterCompletion(),
-            Tables\Actions\BulkAction::make('category')
+            BulkAction::make('category')
                 ->icon('tabler-edit')
-                ->label(__('bank_account_transaction.buttons.bulk_category'))
+                ->label(__('transaction.buttons.bulk_category'))
                 ->form([
-                    Forms\Components\Select::make('category_id')
-                        ->label(__('bank_account_transaction.columns.category'))
-                        ->placeholder(__('bank_account_transaction.form.category_placeholder'))
+                    Select::make('category_id')
+                        ->label(__('transaction.columns.category'))
                         ->relationship('category', 'name')
+                        ->placeholder(__('transaction.form.category_placeholder'))
                         ->preload()
                         ->required()
                         ->searchable()
@@ -370,7 +368,7 @@ class TransactionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTransactions::route('/'),
+            'index' => ListTransactions::route('/'),
         ];
     }
 }

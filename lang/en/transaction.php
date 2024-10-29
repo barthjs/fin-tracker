@@ -2,7 +2,7 @@
 
 return [
 
-    'url' => 'transactions',
+    'slug' => 'transactions',
     'navigation_label' => 'Transactions',
 
     'buttons' => [
@@ -29,18 +29,8 @@ return [
     ],
 
     'form' => [
-        'account_placeholder' => 'Select bank account',
+        'account_placeholder' => 'Select account',
         'category_placeholder' => 'Select category',
-    ],
-
-    'filter' => [
-        'all' => 'All',
-        'expenses' => 'Expenses',
-        'fix_expenses' => 'Fixed expenses',
-        'var_expenses' => 'Variable expenses',
-        'revenues' => 'Revenues',
-        'fix_revenues' => 'Fixed revenues',
-        'var_revenues' => 'Variable revenues',
     ],
 
     'notifications' => [

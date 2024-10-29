@@ -3,13 +3,17 @@
 namespace App\Filament\Resources;
 
 use App\Enums\TransactionGroup;
-use App\Filament\Resources\CategoryResource\Pages;
+use App\Filament\Resources\CategoryResource\Pages\ListCategories;
+use App\Filament\Resources\CategoryResource\Pages\ViewCategory;
 use App\Filament\Resources\CategoryResource\RelationManagers\TransactionRelationManager;
 use App\Models\Account;
 use App\Models\Category;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -17,6 +21,12 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,12 +40,17 @@ class CategoryResource extends Resource
 
     public static function getSlug(): string
     {
-        return __('transaction_category.url');
+        return __('category.slug');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('transaction_category.navigation_label');
+        return __('category.navigation_label');
+    }
+
+    public static function getBreadcrumb(): string
+    {
+        return __('category.navigation_label');
     }
 
     public static function form(Form $form): Form
@@ -48,23 +63,24 @@ class CategoryResource extends Resource
         return [
             Forms\Components\Section::make()
                 ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->label(__('transaction_category.columns.name'))
+                    TextInput::make('name')
+                        ->label(__('category.columns.name'))
                         ->autofocus()
                         ->maxLength(255)
                         ->required()
                         ->string(),
-                    Forms\Components\Select::make('group')
-                        ->label(__('transaction_category.columns.group'))
-                        ->placeholder(__('transaction_category.form.group_placeholder'))
-                        ->options(__('transaction_category.groups'))
+                    Select::make('group')
+                        ->label(__('category.columns.group'))
+                        ->placeholder(__('category.form.group_placeholder'))
+                        ->options(__('category.groups'))
                         ->default(TransactionGroup::transfers->name)
                         ->required(),
-                    Forms\Components\Toggle::make('active')
+                    Toggle::make('active')
                         ->label(__('table.active'))
                         ->default(true)
                         ->inline(false),
-                ])->columns(3)
+                ])
+                ->columns(3)
         ];
     }
 
@@ -75,15 +91,15 @@ class CategoryResource extends Resource
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
-                            ->label(__('transaction_category.columns.name'))
-                            ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn($record) => !$record->active ? 'danger' : 'success')
+                            ->label(__('category.columns.name'))
+                            ->tooltip(fn($record): string => !$record->active ? __('table.status_inactive') : "")
+                            ->color(fn($record): string => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('group')
-                            ->label(__('transaction_category.columns.group'))
-                            ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name])
-                            ->color(fn($record) => match ($record->type->name) {
+                            ->label(__('category.columns.group'))
+                            ->formatStateUsing(fn($state): string => __('category.groups')[$state->name])
+                            ->color(fn($record): string => match ($record->type->name) {
                                 'expense' => 'danger',
                                 'revenue' => 'success',
                                 default => 'warning',
@@ -91,9 +107,9 @@ class CategoryResource extends Resource
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('type')
-                            ->label(__('transaction_category.columns.type'))
-                            ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name])
-                            ->color(fn($state) => match ($state->name) {
+                            ->label(__('category.columns.type'))
+                            ->formatStateUsing(fn($state): string => __('category.types')[$state->name])
+                            ->color(fn($state): string => match ($state->name) {
                                 'expense' => 'danger',
                                 'revenue' => 'success',
                                 default => 'warning',
@@ -132,7 +148,7 @@ class CategoryResource extends Resource
                 }
             })
             ->columns($columns)
-            ->paginated(fn() => Category::count() > 20)
+            ->paginated(fn(): bool => Category::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -140,72 +156,74 @@ class CategoryResource extends Resource
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query) => $query->where('active', false)),
+                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->iconButton()
-                    ->modalHeading(__('transaction_category.buttons.edit_heading')),
-                Tables\Actions\DeleteAction::make()
+                    ->icon('tabler-edit')
+                    ->modalHeading(__('category.buttons.edit_heading')),
+                DeleteAction::make()
                     ->iconButton()
-                    ->modalHeading(__('transaction_category.buttons.delete_heading'))
-                    ->disabled(fn($record) => $record->transactions()->count() > 0)
+                    ->icon('tabler-trash')
+                    ->modalHeading(__('category.buttons.delete_heading'))
+                    ->disabled(fn($record): bool => $record->transactions()->count() > 0)
             ])
             ->bulkActions(self::getBulkActions())
-            ->emptyStateHeading(__('transaction_category.empty'))
+            ->emptyStateHeading(__('category.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('transaction_category.buttons.create_button_label'))
-                    ->modalHeading(__('transaction_category.buttons.create_heading')),
+                    ->label(__('category.buttons.create_button_label'))
+                    ->modalHeading(__('category.buttons.create_heading')),
             ]);
     }
 
     public static function tableColumns(): array
     {
         return [
-            Tables\Columns\TextColumn::make('name')
-                ->label(__('transaction_category.columns.name'))
+            TextColumn::make('name')
+                ->label(__('category.columns.name'))
+                ->wrap()
                 ->searchable()
-                ->sortable()
-                ->wrap(),
-            Tables\Columns\TextColumn::make('group')
-                ->label(__('transaction_category.columns.group'))
-                ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name])
+                ->sortable(),
+            TextColumn::make('group')
+                ->label(__('category.columns.group'))
+                ->formatStateUsing(fn($state): string => __('category.groups')[$state->name])
                 ->badge()
-                ->color(fn($record) => match ($record->type->name) {
+                ->color(fn($record): string => match ($record->type->name) {
                     'expense' => 'danger',
                     'revenue' => 'success',
                     default => 'warning',
                 })
                 ->searchable()
                 ->sortable(),
-            Tables\Columns\TextColumn::make('type')
-                ->label(__('transaction_category.columns.type'))
-                ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name])
+            TextColumn::make('type')
+                ->label(__('category.columns.type'))
+                ->formatStateUsing(fn($state): string => __('category.types')[$state->name])
                 ->badge()
-                ->color(fn($state) => match ($state->name) {
+                ->color(fn($state): string => match ($state->name) {
                     'expense' => 'danger',
                     'revenue' => 'success',
                     default => 'warning',
                 })
                 ->searchable()
                 ->sortable(),
-            Tables\Columns\IconColumn::make('active')
+            IconColumn::make('active')
                 ->label(__('table.active'))
+                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
                 ->sortable()
-                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\TextColumn::make('created_at')
+            TextColumn::make('created_at')
                 ->label(__('table.created_at'))
                 ->dateTime('Y-m-d, H:i:s')
                 ->fontFamily('mono')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\TextColumn::make('updated_at')
+            TextColumn::make('updated_at')
                 ->label(__('table.updated_at'))
                 ->dateTime('Y-m-d, H:i:s')
                 ->fontFamily('mono')
@@ -217,14 +235,14 @@ class CategoryResource extends Resource
     public static function getBulkActions(): array
     {
         return [
-            Tables\Actions\BulkAction::make('group')
+            BulkAction::make('group')
                 ->icon('tabler-edit')
-                ->label(__('transaction_category.buttons.bulk_group'))
+                ->label(__('category.buttons.bulk_group'))
                 ->form([
-                    Forms\Components\Select::make('group')
-                        ->label(__('transaction_category.columns.group'))
-                        ->placeholder(__('transaction_category.form.group_placeholder'))
-                        ->options(__('transaction_category.groups'))
+                    Select::make('group')
+                        ->label(__('category.columns.group'))
+                        ->placeholder(__('category.form.group_placeholder'))
+                        ->options(__('category.groups'))
                         ->default(TransactionGroup::transfers->name)
                         ->required(),
                 ])
@@ -245,8 +263,8 @@ class CategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCategories::route('/'),
-            'view' => Pages\ViewCategory::route('/{record}'),
+            'index' => ListCategories::route('/'),
+            'view' => ViewCategory::route('/{record}'),
         ];
     }
 }

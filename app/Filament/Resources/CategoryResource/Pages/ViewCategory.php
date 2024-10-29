@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\CategoryResource\Pages;
 
 use App\Filament\Resources\CategoryResource;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewCategory extends ViewRecord
@@ -12,19 +12,20 @@ class ViewCategory extends ViewRecord
 
     public function getTitle(): string
     {
-        return __('transaction_category.navigation_label');
+        return __('category.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('transaction_category.navigation_label');
+        return __('category.navigation_label');
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make()
+            EditAction::make()
                 ->icon('tabler-edit')
+                ->modalHeading(__('category.buttons.edit_heading')),
         ];
     }
 }

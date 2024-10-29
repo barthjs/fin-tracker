@@ -2,7 +2,7 @@
 
 return [
 
-    'url' => 'users',
+    'slug' => 'users',
     'navigation_label' => 'Users',
 
     'buttons' => [
@@ -25,7 +25,6 @@ return [
     ],
 
     'filter' => [
-        'all' => 'All',
         'verified' => 'Verified',
         'admins' => 'Administrators',
         'users' => 'Users',

@@ -3,8 +3,8 @@
 namespace App\Filament\Imports;
 
 use App\Models\Account;
-use App\Models\Transaction;
 use App\Models\Category;
+use App\Models\Transaction;
 use Exception;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -19,7 +19,7 @@ class TransactionImporter extends Importer
     {
         return [
             ImportColumn::make('date_time')
-                ->label(__('bank_account_transaction.columns.date'))
+                ->label(__('transaction.columns.date'))
                 ->requiredMapping()
                 ->rules(['required'])
                 ->fillRecordUsing(function (Transaction $record, string $state): void {
@@ -31,7 +31,7 @@ class TransactionImporter extends Importer
                     $record->date_time = $carbon;
                 }),
             ImportColumn::make('account_id')
-                ->label(__('bank_account_transaction.columns.account'))
+                ->label(__('transaction.columns.account'))
                 ->fillRecordUsing(function (Transaction $record, string $state): void {
                     $account = Account::whereName($state);
                     if ($account->count() > 1) {
@@ -41,7 +41,7 @@ class TransactionImporter extends Importer
                     }
                 }),
             ImportColumn::make('amount')
-                ->label(__('bank_account_transaction.columns.amount'))
+                ->label(__('transaction.columns.amount'))
                 ->requiredMapping()
                 ->rules(['required'])
                 ->fillRecordUsing(function (Transaction $record, string $state): void {
@@ -82,17 +82,17 @@ class TransactionImporter extends Importer
                     $record->amount = $floatValue;
                 }),
             ImportColumn::make('destination')
-                ->label(__('bank_account_transaction.columns.destination'))
+                ->label(__('transaction.columns.destination'))
                 ->rules(['max:255']),
             ImportColumn::make('category_id')
-                ->label(__('bank_account_transaction.columns.category'))
+                ->label(__('transaction.columns.category'))
                 ->fillRecordUsing(function (Transaction $record, string $state, $data): void {
                     $group = array_key_exists('group', $data) ? match ($data['group']) {
-                        __('resources.transaction_categories.groups.fix_expense') => 'fix_expense',
-                        __('resources.transaction_categories.groups.var_expense') => 'var_expense',
-                        __('resources.transaction_categories.groups.fix_revenues') => 'fix_revenues',
-                        __('resources.transaction_categories.groups.var_revenues') => 'var_revenues',
-                        __('resources.transaction_categories.groups.transfers') => 'transfers',
+                        __('category.groups.fix_expenses') => 'fix_expenses',
+                        __('category.groups.var_expenses') => 'var_expenses',
+                        __('category.groups.fix_revenues') => 'fix_revenues',
+                        __('category.groups.var_revenues') => 'var_revenues',
+                        __('category.groups.transfers') => 'transfers',
                         default => ''
                     } : '';
 
@@ -110,11 +110,11 @@ class TransactionImporter extends Importer
                     }
                 }),
             ImportColumn::make('group')
-                ->label(__('bank_account_transaction.columns.group'))
+                ->label(__('transaction.columns.group'))
                 ->fillRecordUsing(function (Transaction $record, string $state): void {
                 }),
             ImportColumn::make('notes')
-                ->label(__('bank_account_transaction.columns.notes'))
+                ->label(__('transaction.columns.notes'))
                 ->rules(['max:255'])];
     }
 
@@ -125,11 +125,11 @@ class TransactionImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = __('bank_account.notifications.import.body_heading') . "\n\r" .
-            __('bank_account.notifications.import.body_success') . number_format($import->successful_rows);
+        $body = __('transaction.notifications.import.body_heading') . "\n\r" .
+            __('transaction.notifications.import.body_success') . number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= "\n\r" . __('bank_account.notifications.import.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r" . __('transaction.notifications.import.body_failure') . number_format($failedRowsCount);
         }
 
         return $body;

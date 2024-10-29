@@ -11,7 +11,7 @@ class CreateUser extends CreateRecord
 
     public function getTitle(): string
     {
-        return __('user.navigation_label');
+        return __('user.buttons.create_button_label');
     }
 
     public function getHeading(): string

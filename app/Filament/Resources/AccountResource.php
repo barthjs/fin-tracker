@@ -3,19 +3,29 @@
 namespace App\Filament\Resources;
 
 use App\Enums\Currency;
-use App\Filament\Resources\AccountResource\Pages;
+use App\Filament\Resources\AccountResource\Pages\ListAccounts;
+use App\Filament\Resources\AccountResource\Pages\ViewAccount;
 use App\Filament\Resources\AccountResource\RelationManagers\TransactionRelationManager;
 use App\Models\Account;
 use Exception;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,12 +39,17 @@ class AccountResource extends Resource
 
     public static function getSlug(): string
     {
-        return __('bank_account.url');
+        return __('account.slug');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('bank_account.navigation_label');
+        return __('account.navigation_label');
+    }
+
+    public static function getBreadcrumb(): string
+    {
+        return __('account.navigation_label');
     }
 
     public static function form(Form $form): Form
@@ -47,25 +62,25 @@ class AccountResource extends Resource
         return [
             Forms\Components\Section::make()
                 ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->label(__('bank_account.columns.name'))
+                    TextInput::make('name')
+                        ->label(__('account.columns.name'))
                         ->autofocus()
                         ->maxLength(255)
                         ->required()
                         ->string(),
-                    Forms\Components\Select::make('currency')
-                        ->label(__('bank_account.columns.currency'))
-                        ->placeholder(__('bank_account.form.currency_placeholder'))
+                    Select::make('currency')
+                        ->label(__('account.columns.currency'))
+                        ->placeholder(__('account.form.currency_placeholder'))
                         ->options(Currency::class)
-                        ->default(fn() => Account::getCurrency())
+                        ->default(Account::getCurrency())
                         ->required()
                         ->searchable(),
-                    Forms\Components\Toggle::make('active')
+                    Toggle::make('active')
                         ->label(__('table.active'))
                         ->default(true)
                         ->inline(false),
-                    Forms\Components\Textarea::make('description')
-                        ->label(__('bank_account.columns.description'))
+                    Textarea::make('description')
+                        ->label(__('account.columns.description'))
                         ->autosize()
                         ->columnSpanFull()
                         ->rows(1)
@@ -83,13 +98,13 @@ class AccountResource extends Resource
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
-                            ->label(__('bank_account.columns.name'))
+                            ->label(__('account.columns.name'))
                             ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
                             ->color(fn($record) => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('balance')
-                            ->label(__('bank_account.columns.balance'))
+                            ->label(__('account.columns.balance'))
                             ->color(fn($state) => match (true) {
                                 floatval($state) == 0 => 'gray',
                                 floatval($state) < 0 => 'danger',
@@ -99,7 +114,7 @@ class AccountResource extends Resource
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('description')
-                            ->label(__('bank_account.columns.description'))
+                            ->label(__('account.columns.description'))
                             ->size(TextEntry\TextEntrySize::Small)
                     ])
                     ->columns([
@@ -124,7 +139,7 @@ class AccountResource extends Resource
                 }
             })
             ->columns($columns)
-            ->paginated(fn() => Account::count() > 20)
+            ->paginated(fn(): bool => Account::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -132,69 +147,71 @@ class AccountResource extends Resource
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query) => $query->where('active', false)),
+                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->iconButton()
-                    ->modalHeading(__('bank_account.buttons.edit_heading')),
-                Tables\Actions\DeleteAction::make()
+                    ->icon('tabler-edit')
+                    ->modalHeading(__('account.buttons.edit_heading')),
+                DeleteAction::make()
                     ->iconButton()
-                    ->modalHeading(__('bank_account.buttons.delete_heading'))
-                    ->disabled(fn($record) => $record->transactions()->count() > 0)
+                    ->icon('tabler-trash')
+                    ->modalHeading(__('account.buttons.delete_heading'))
+                    ->disabled(fn(Account $record): bool => $record->transactions()->count() > 0)
             ])
             ->bulkActions(self::getBulkActions())
-            ->emptyStateHeading(__('bank_account.empty'))
+            ->emptyStateHeading(__('account.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('bank_account.buttons.create_button_label'))
-                    ->modalHeading(__('bank_account.buttons.create_heading')),
+                    ->label(__('account.buttons.create_button_label'))
+                    ->modalHeading(__('account.buttons.create_heading')),
             ]);
     }
 
     public static function tableColumns(): array
     {
         return [
-            Tables\Columns\TextColumn::make('name')
-                ->label(__('bank_account.columns.name'))
+            TextColumn::make('name')
+                ->label(__('account.columns.name'))
                 ->searchable()
                 ->sortable(),
-            Tables\Columns\TextColumn::make('balance')
-                ->label(__('bank_account.columns.balance'))
+            TextColumn::make('balance')
+                ->label(__('account.columns.balance'))
                 ->badge()
-                ->color(fn($state) => match (true) {
+                ->color(fn($state): string => match (true) {
                     floatval($state) == 0 => 'gray',
                     floatval($state) < 0 => 'danger',
                     default => 'success'
                 })
-                ->money(currency: fn($record) => $record->currency->name)
+                ->money(currency: fn($record): string => $record->currency->name)
                 ->summarize(Sum::make()->money(config('app.currency'))),
-            Tables\Columns\TextColumn::make('description')
-                ->label(__('bank_account.columns.description'))
+            TextColumn::make('description')
+                ->label(__('account.columns.description'))
+                ->wrap()
                 ->sortable()
-                ->toggleable()
-                ->wrap(),
-            Tables\Columns\TextColumn::make('currency')
-                ->label(__('bank_account.columns.currency'))
+                ->toggleable(),
+            TextColumn::make('currency')
+                ->label(__('account.columns.currency'))
                 ->sortable()
                 ->toggleable()
                 ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\IconColumn::make('active')
+            IconColumn::make('active')
                 ->label(__('table.active'))
+                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
                 ->sortable()
-                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\TextColumn::make('created_at')
+            TextColumn::make('created_at')
                 ->label(__('table.created_at'))
                 ->dateTime('Y-m-d, H:i:s')
                 ->fontFamily('mono')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\TextColumn::make('updated_at')
+            TextColumn::make('updated_at')
                 ->label(__('table.updated_at'))
                 ->dateTime('Y-m-d, H:i:s')
                 ->fontFamily('mono')
@@ -206,15 +223,15 @@ class AccountResource extends Resource
     public static function getBulkActions(): array
     {
         return [
-            Tables\Actions\BulkAction::make('currency')
+            BulkAction::make('currency')
                 ->icon('tabler-edit')
-                ->label(__('bank_account.buttons.bulk_currency'))
+                ->label(__('account.buttons.bulk_currency'))
                 ->form([
-                    Forms\Components\Select::make('currency')
-                        ->label(__('bank_account.columns.currency'))
-                        ->placeholder(__('bank_account.form.currency_placeholder'))
+                    Select::make('currency')
+                        ->label(__('account.columns.currency'))
+                        ->placeholder(__('account.form.currency_placeholder'))
                         ->options(Currency::class)
-                        ->default(fn() => Account::getCurrency())
+                        ->default(Account::getCurrency())
                         ->required()
                         ->searchable(),
                 ])
@@ -235,8 +252,8 @@ class AccountResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAccounts::route('/'),
-            'view' => Pages\ViewAccount::route('/{record}'),
+            'index' => ListAccounts::route('/'),
+            'view' => ViewAccount::route('/{record}'),
         ];
     }
 }

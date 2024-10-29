@@ -16,13 +16,13 @@ class CategoryExporter extends Exporter
     {
         return [
             ExportColumn::make('name')
-                ->label(__('transaction_category.columns.name')),
+                ->label(__('category.columns.name')),
             ExportColumn::make('group')
-                ->label(__('transaction_category.columns.group'))
-                ->formatStateUsing(fn($state): string => __('transaction_category.groups')[$state->name]),
+                ->label(__('category.columns.group'))
+                ->formatStateUsing(fn($state): string => __('category.groups')[$state->name]),
             ExportColumn::make('type')
-                ->label(__('transaction_category.columns.type'))
-                ->formatStateUsing(fn($state): string => __('transaction_category.types')[$state->name]),
+                ->label(__('category.columns.type'))
+                ->formatStateUsing(fn($state): string => __('category.types')[$state->name]),
             ExportColumn::make('created_at')
                 ->label(__('table.created_at'))
                 ->enabledByDefault(false),
@@ -37,11 +37,11 @@ class CategoryExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = __('transaction_category.notifications.export.body_heading') . "\n\r" .
-            __('transaction_category.notifications.export.body_success') . number_format($export->successful_rows);
+        $body = __('category.notifications.export.body_heading') . "\n\r" .
+            __('category.notifications.export.body_success') . number_format($export->successful_rows);
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= "\n\r" . __('transaction_category.notifications.export.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r" . __('category.notifications.export.body_failure') . number_format($failedRowsCount);
         }
 
         return $body;
@@ -54,6 +54,6 @@ class CategoryExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('transaction_category.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
+        return __('category.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
     }
 }

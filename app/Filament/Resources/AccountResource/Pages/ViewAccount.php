@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\AccountResource\Pages;
 
 use App\Filament\Resources\AccountResource;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewAccount extends ViewRecord
@@ -12,19 +12,20 @@ class ViewAccount extends ViewRecord
 
     public function getTitle(): string
     {
-        return __('bank_account.navigation_label');
+        return __('account.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('bank_account.navigation_label');
+        return __('account.navigation_label');
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make()
+            EditAction::make()
                 ->icon('tabler-edit')
+                ->modalHeading(__('account.buttons.edit_heading')),
         ];
     }
 }

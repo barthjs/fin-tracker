@@ -8,8 +8,17 @@ return [
     'status_active' => 'Aktiv',
     'status_inactive' => 'Inaktiv',
 
-    'copied' => 'Kopiert',
     'export' => 'Exportieren',
     'import' => 'Importieren',
+
+    'filter' => [
+        'all' => 'Alle',
+        'year' => 'Jahr',
+        'expenses' => 'Ausgaben',
+        'revenues' => 'Einnahmen',
+        'transfers' => 'Umbuchungen',
+        'created_from' => 'Von',
+        'created_until' => 'Bis',
+    ]
 
 ];

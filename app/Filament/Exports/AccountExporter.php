@@ -17,15 +17,15 @@ class AccountExporter extends Exporter
     {
         return [
             ExportColumn::make('name')
-                ->label(__('bank_account.columns.name')),
+                ->label(__('account.columns.name')),
             ExportColumn::make('balance')
-                ->label(__('bank_account.columns.balance'))
+                ->label(__('account.columns.balance'))
                 ->formatStateUsing(fn($state) => Number::format($state, 2, 4)),
             ExportColumn::make('currency')
-                ->label(__('bank_account.columns.currency'))
-                ->formatStateUsing(fn($state) => $state->name),
+                ->label(__('account.columns.currency'))
+                ->formatStateUsing(fn($state): string => $state->name),
             ExportColumn::make('description')
-                ->label(__('bank_account.columns.description')),
+                ->label(__('account.columns.description')),
             ExportColumn::make('created_at')
                 ->label(__('table.created_at'))
                 ->enabledByDefault(false),
@@ -40,11 +40,11 @@ class AccountExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = __('bank_account.notifications.export.body_heading') . "\n\r" .
-            __('bank_account.notifications.export.body_success') . number_format($export->successful_rows);
+        $body = __('account.notifications.export.body_heading') . "\n\r" .
+            __('account.notifications.export.body_success') . number_format($export->successful_rows);
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= "\n\r" . __('bank_account.notifications.export.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r" . __('account.notifications.export.body_failure') . number_format($failedRowsCount);
         }
 
         return $body;
@@ -57,6 +57,6 @@ class AccountExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('bank_account.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
+        return __('account.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
     }
 }

@@ -12,19 +12,35 @@ class ListCategoryStatistics extends ListRecords
 {
     protected static string $resource = CategoryStatisticResource::class;
 
+    public function getTitle(): string
+    {
+        return __('category_statistic.navigation_label');
+    }
+
+    public function getHeading(): string
+    {
+        return __('category_statistic.navigation_label');
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     public function getTabs(): array
     {
         return [
-            'All' => Tab::make()
-                ->label(__('bank_account_transaction.filter.all')),
             'Expenses' => Tab::make()
-                ->label(__('bank_account_transaction.filter.expenses'))
+                ->icon('tabler-minus')
+                ->label(__('table.filter.expenses'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = Category::whereType(TransactionType::expense)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
             'Revenues' => Tab::make()
-                ->label(__('bank_account_transaction.filter.revenues'))
+                ->icon('tabler-plus')
+                ->iconPosition('after')
+                ->label(__('table.filter.revenues'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = Category::whereType(TransactionType::revenue)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);

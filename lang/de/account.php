@@ -2,7 +2,7 @@
 
 return [
 
-    'url' => 'konten',
+    'slug' => 'konten',
     'navigation_label' => 'Konten',
 
     'buttons' => [

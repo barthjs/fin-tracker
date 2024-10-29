@@ -7,7 +7,9 @@ use App\Models\Category;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +22,7 @@ class CategoryRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('transaction_category.navigation_label');
+        return __('category.navigation_label');
     }
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
@@ -40,10 +42,10 @@ class CategoryRelationManager extends RelationManager
     {
         $tableParts = CategoryResource::tableColumns();
         return $table
-            ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes())
+            ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes())
             ->heading('')
             ->columns($tableParts)
-            ->paginated(fn() => Category::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
+            ->paginated(fn(): bool => Category::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -51,36 +53,38 @@ class CategoryRelationManager extends RelationManager
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query) => $query->where('active', false)),
+                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('transaction_category.buttons.create_button_label'))
-                    ->modalHeading(__('transaction_category.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data) {
+                    ->label(__('category.buttons.create_button_label'))
+                    ->modalHeading(__('category.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
                         return $data;
                     })
             ])
             ->persistFiltersInSession()
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->iconButton()
-                    ->modalHeading(__('transaction_category.buttons.edit_heading')),
-                Tables\Actions\DeleteAction::make()
+                    ->icon('tabler-edit')
+                    ->modalHeading(__('category.buttons.edit_heading')),
+                DeleteAction::make()
                     ->iconButton()
-                    ->modalHeading(__('transaction_category.buttons.delete_heading'))
+                    ->icon('tabler-trash')
+                    ->modalHeading(__('category.buttons.delete_heading'))
             ])
             ->bulkActions(CategoryResource::getBulkActions())
-            ->emptyStateHeading(__('transaction_category.empty'))
+            ->emptyStateHeading(__('category.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('transaction_category.buttons.create_button_label'))
-                    ->modalHeading(__('transaction_category.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data) {
+                    ->label(__('category.buttons.create_button_label'))
+                    ->modalHeading(__('category.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
                         return $data;
                     })

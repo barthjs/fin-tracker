@@ -24,7 +24,7 @@ class TransactionRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return TransactionResource::table($table)
-            ->heading(__('bank_account_transaction.navigation_label'));
+            ->heading(__('transaction.navigation_label'));
     }
 
     /**
@@ -35,4 +35,3 @@ class TransactionRelationManager extends RelationManager
         return false;
     }
 }
-

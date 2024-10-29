@@ -17,38 +17,38 @@ class TransactionExporter extends Exporter
     {
         return [
             ExportColumn::make('date_time')
-                ->label(__('bank_account_transaction.columns.date')),
+                ->label(__('transaction.columns.date')),
             ExportColumn::make('account.name')
-                ->label(__('bank_account_transaction.columns.account')),
+                ->label(__('transaction.columns.account')),
             ExportColumn::make('amount')
-                ->label(__('bank_account_transaction.columns.amount'))
+                ->label(__('transaction.columns.amount'))
                 ->formatStateUsing(fn($state) => Number::format($state, 2, 4)),
             ExportColumn::make('currency')
-                ->label(__('bank_account.columns.currency'))
+                ->label(__('account.columns.currency'))
                 ->enabledByDefault(false)
-                ->state(fn($record) => $record->account->currency->name),
+                ->state(fn($record): string => $record->account->currency->name),
             ExportColumn::make('destination')
-                ->label(__('bank_account_transaction.columns.destination')),
+                ->label(__('transaction.columns.destination')),
             ExportColumn::make('category.name')
-                ->label(__('bank_account_transaction.columns.category')),
+                ->label(__('transaction.columns.category')),
             ExportColumn::make('category.group')
-                ->label(__('bank_account_transaction.columns.group'))
-                ->formatStateUsing(fn($state) => __('transaction_category.groups')[$state->name]),
+                ->label(__('transaction.columns.group'))
+                ->formatStateUsing(fn($state): string => __('category.groups')[$state->name]),
             ExportColumn::make('category.type')
-                ->label(__('bank_account_transaction.columns.type'))
-                ->formatStateUsing(fn($state) => __('transaction_category.types')[$state->name]),
+                ->label(__('transaction.columns.type'))
+                ->formatStateUsing(fn($state): string => __('category.types')[$state->name]),
             ExportColumn::make('notes')
-                ->label(__('bank_account_transaction.columns.notes')),
+                ->label(__('transaction.columns.notes')),
         ];
     }
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = __('bank_account_transaction.notifications.export.body_heading') . "\n\r" .
-            __('bank_account_transaction.notifications.export.body_success') . number_format($export->successful_rows);
+        $body = __('transaction.notifications.export.body_heading') . "\n\r" .
+            __('transaction.notifications.export.body_success') . number_format($export->successful_rows);
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= "\n\r" . __('bank_account.notifications.export.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r" . __('transaction.notifications.export.body_failure') . number_format($failedRowsCount);
         }
 
         return $body;
@@ -61,6 +61,6 @@ class TransactionExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('bank_account_transaction.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
+        return __('transaction.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
     }
 }

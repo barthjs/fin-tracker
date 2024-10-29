@@ -7,12 +7,10 @@ use App\Enums\TransactionType;
 use App\Filament\Exports\TransactionExporter;
 use App\Filament\Imports\TransactionImporter;
 use App\Filament\Resources\TransactionResource;
-use App\Models\Account;
-use App\Models\Scopes\AccountScope;
-use App\Models\Scopes\TransactionScope;
-use App\Models\Scopes\CategoryScope;
 use App\Models\Category;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,46 +22,44 @@ class ListTransactions extends ListRecords
 
     public function getTitle(): string
     {
-        return __('bank_account_transaction.navigation_label');
+        return __('transaction.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('bank_account_transaction.navigation_label');
+        return __('transaction.navigation_label');
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [];
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->icon('tabler-plus')
-                ->label(__('bank_account_transaction.buttons.create_button_label'))
-                ->modalHeading(__('bank_account_transaction.buttons.create_heading')),
-            Actions\ImportAction::make()
+                ->label(__('transaction.buttons.create_button_label'))
+                ->modalHeading(__('transaction.buttons.create_heading')),
+            ImportAction::make()
                 ->icon('tabler-table-import')
                 ->label(__('table.import'))
                 ->color('warning')
+                ->modalHeading(__('transaction.buttons.import_heading'))
                 ->importer(TransactionImporter::class)
-                ->modalHeading(__('bank_account_transaction.buttons.import_heading'))
-                ->failureNotificationTitle(__('bank_account_transaction.notifications.import.failure_heading'))
-                ->successNotificationTitle(__('bank_account_transaction.notifications.import.success_heading'))
-                ->fileRules([
-                    File::types(['csv'])->max(1024),
-                ]),
-            Actions\ExportAction::make()
+                ->failureNotificationTitle(__('transaction.notifications.import.failure_heading'))
+                ->successNotificationTitle(__('transaction.notifications.import.success_heading'))
+                ->fileRules([File::types(['csv'])->max(1024)]),
+            ExportAction::make()
                 ->icon('tabler-table-export')
                 ->label(__('table.export'))
                 ->color('warning')
-                ->modalHeading(__('bank_account_transaction.buttons.export_heading'))
+                ->modalHeading(__('transaction.buttons.export_heading'))
                 ->exporter(TransactionExporter::class)
-                ->failureNotificationTitle(__('bank_account_transaction.notifications.export.failure_heading'))
-                ->successNotificationTitle(__('bank_account_transaction.notifications.export.success_heading'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    // Todo improve this
-                    $accounts = Account::whereUserId(auth()->id())->pluck('id')->toArray();
-                    return $query->withoutGlobalScopes([AccountScope::class, TransactionScope::class, CategoryScope::class])
-                        ->whereIn('account_id', $accounts);
-                })
+                ->failureNotificationTitle(__('transaction.notifications.export.failure_heading'))
+                ->successNotificationTitle(__('transaction.notifications.export.success_heading'))
+                ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id()))
         ];
     }
 
@@ -71,39 +67,39 @@ class ListTransactions extends ListRecords
     {
         return [
             'All' => Tab::make()
-                ->label(__('bank_account_transaction.filter.all')),
+                ->label(__('table.filter.all')),
             'Expenses' => Tab::make()
-                ->label(__('bank_account_transaction.filter.expenses'))
+                ->label(__('table.filter.expenses'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = Category::whereType(TransactionType::expense)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
             'Variable Expenses' => Tab::make()
-                ->label(__('bank_account_transaction.filter.var_expenses'))
+                ->label(__('category.groups.var_expenses'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = Category::whereGroup(TransactionGroup::var_expenses)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
             'Fixed Expenses' => Tab::make()
-                ->label(__('bank_account_transaction.filter.fix_expenses'))
+                ->label(__('category.groups.fix_expenses'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = Category::whereGroup(TransactionGroup::fix_expenses)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
             'Revenues' => Tab::make()
-                ->label(__('bank_account_transaction.filter.revenues'))
+                ->label(__('table.filter.expenses'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = Category::whereType(TransactionType::revenue)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
             'Fixed Revenues' => Tab::make()
-                ->label(__('bank_account_transaction.filter.fix_revenues'))
+                ->label(__('category.groups.fix_revenues'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = Category::whereGroup(TransactionGroup::fix_revenues)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);
                 }),
             'Variable Revenues' => Tab::make()
-                ->label(__('bank_account_transaction.filter.var_revenues'))
+                ->label(__('category.groups.var_revenues'))
                 ->modifyQueryUsing(function ($query) {
                     $cat = Category::whereGroup(TransactionGroup::var_revenues)->get(['id'])->toArray();
                     $query->whereIn('category_id', $cat);

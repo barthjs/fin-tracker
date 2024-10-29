@@ -41,6 +41,10 @@ class User extends Authenticatable implements FilamentUser, HasName
         'active' => 'boolean',
     ];
 
+    /**
+     * Automatically creates a default 'Demo' account and category
+     * for each new user after they are created.
+     */
     protected static function booted(): void
     {
         static::created(function (User $user) {

@@ -4,7 +4,7 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use App\Models\User;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,7 +26,7 @@ class ListUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
                 ->icon('tabler-plus')
                 ->label(__('user.buttons.create_button_label'))
         ];
@@ -36,28 +36,28 @@ class ListUsers extends ListRecords
     {
         return [
             'all' => Tab::make()
-                ->label(__('user.filter.all'))
+                ->label(__('table.filter.all'))
                 ->badge(User::all()->count()),
             'verified' => Tab::make()
                 ->label(__('user.filter.verified'))
                 ->badge(User::whereVerified(true)->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('verified', true)),
+                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('verified', true)),
             'admins' => Tab::make()
                 ->label(__('user.filter.admins'))
                 ->badge(User::whereIsAdmin(true)->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_admin', true)),
+                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('is_admin', true)),
             'users' => Tab::make()
                 ->label(__('user.filter.users'))
                 ->badge(User::whereIsAdmin(false)->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_admin', false)),
+                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('is_admin', false)),
             'active' => Tab::make()
                 ->label(__('table.status_active'))
                 ->badge(User::whereActive(true)->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('active', true)),
+                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('active', true)),
             'inactive' => Tab::make()
                 ->label(__('table.status_inactive'))
                 ->badge(User::whereActive(false)->count())
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('active', false))
+                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('active', false))
         ];
     }
 }

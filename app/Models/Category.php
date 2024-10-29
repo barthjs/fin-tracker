@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Enums\TransactionGroup;
 use App\Enums\TransactionType;
 use App\Models\Scopes\CategoryScope;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,47 +33,46 @@ class Category extends Model
     ];
 
     /**
-     * Boot the model and set up global scopes and event listeners.
+     * Set up global scopes and event listeners
      *
-     * This method is called when the model is being booted. It adds a global
-     * scope for category queries and sets up event listeners for creating,
-     * created, and updating events to manage category attributes.
+     * Adds a global scope for filtering only the authenticated users categories.
+     * Sets the 'type' based on the 'group' attribute and ensures
+     * 'user_id' is assigned to the authenticated user.
      *
      * @return void
      */
     protected static function booted(): void
     {
-        // Add a global scope to the Category model, applying the CategoryScope to all queries.
         static::addGlobalScope(new CategoryScope());
 
-        // Listen for the creating event to set default values for the model before saving.
         static::creating(function (Category $category) {
-            // Only in seeder and importer
+            // Needed for seeder, importer and in web
             $category->type = match ($category->group->name ?? $category->group = TransactionGroup::transfers) {
-                'fix_expenses', 'var_expenses' => 'expense',  // Map expense groups to 'expense' type
-                'fix_revenues', 'var_revenues' => 'revenue',  // Map revenue groups to 'revenue' type
-                default => 'transfer'  // Default to 'transfer' if no matches found
+                'fix_expenses', 'var_expenses' => 'expense',
+                'fix_revenues', 'var_revenues' => 'revenue',
+                default => 'transfer'
             };
 
-            // Only in web and importer
+            // Only in importer and web
             if (is_null($category->user_id)) {
                 $category->user_id = auth()->user()->id;
             }
 
-            // Trim whitespace from the category name to ensure no leading or trailing spaces.
             $category->name = trim($category->name);
+        });
+
+        static::created(function (Category $category) {
+            CategoryStatistic::create(['year' => Carbon::now()->year, 'category_id' => $category->id]);
         });
 
         // Listen for the updating event to set the type and trim the name before saving.
         static::updating(function (Category $category) {
-            // Determine the category type based on the group name during an update.
             $category->type = match ($category->group->name) {
-                'fix_expenses', 'var_expenses' => 'expense',  // Map expense groups to 'expense' type
-                'fix_revenues', 'var_revenues' => 'revenue',  // Map revenue groups to 'revenue' type
-                default => 'transfer'  // Default to 'transfer' if no matches found
+                'fix_expenses', 'var_expenses' => 'expense',
+                'fix_revenues', 'var_revenues' => 'revenue',
+                default => 'transfer'
             };
 
-            // Trim whitespace from the category name to maintain data consistency.
             $category->name = trim($category->name);
         });
     }

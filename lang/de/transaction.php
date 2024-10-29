@@ -2,7 +2,7 @@
 
 return [
 
-    'url' => 'umsaetze',
+    'slug' => 'umsaetze',
     'navigation_label' => 'Umsätze',
 
     'buttons' => [
@@ -31,16 +31,6 @@ return [
     'form' => [
         'account_placeholder' => 'Konto wählen',
         'category_placeholder' => 'Kategorie wählen',
-    ],
-
-    'filter' => [
-        'all' => 'Alle',
-        'expenses' => 'Ausgaben',
-        'fix_expenses' => 'Fixe Ausgaben',
-        'var_expenses' => 'Variable Ausgaben',
-        'revenues' => 'Einnahmen',
-        'fix_revenues' => 'Fixe Einnahmen',
-        'var_revenues' => 'Variable Einnahmen',
     ],
 
     'notifications' => [

@@ -2,17 +2,17 @@
 
 return [
 
-    'url' => 'bank-accounts',
-    'navigation_label' => 'Bank accounts',
+    'slug' => 'accounts',
+    'navigation_label' => 'accounts',
 
     'buttons' => [
-        'create_button_label' => 'New bank account',
-        'create_heading' => 'Create new bank account',
-        'edit_heading' => 'Edit bank account',
-        'delete_heading' => 'Delete bank account',
+        'create_button_label' => 'New account',
+        'create_heading' => 'Create new account',
+        'edit_heading' => 'Edit account',
+        'delete_heading' => 'Delete account',
         'bulk_currency' => 'Edit currency',
-        'export_heading' => 'Export bank accounts',
-        'import_heading' => 'Import bank accounts',
+        'export_heading' => 'Export accounts',
+        'import_heading' => 'Import accounts',
     ],
 
     'columns' => [
@@ -43,22 +43,22 @@ return [
 
     'notifications' => [
         'import' => [
-            'failure_heading' => 'Bank account import failed',
-            'success_heading' => 'Bank account import successful',
-            'body_heading' => 'The bank account import has been completed.',
+            'failure_heading' => 'Account import failed',
+            'success_heading' => 'Account import successful',
+            'body_heading' => 'The account import has been completed.',
             'body_failure' => 'Failed rows: ',
             'body_success' => 'Successfully imported rows: ',
         ],
         'export' => [
-            'failure_heading' => 'Bank account failed',
-            'success_heading' => 'Bank account successful',
-            'body_heading' => 'The bank account export has been completed.',
+            'failure_heading' => 'Account failed',
+            'success_heading' => 'Account successful',
+            'body_heading' => 'The account export has been completed.',
             'body_failure' => 'Failed rows: ',
             'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'bank_accounts_'
+            'file_name' => 'accounts_'
         ]
     ],
 
-    'empty' => 'No bank accounts found'
+    'empty' => 'No accounts found'
 
 ];

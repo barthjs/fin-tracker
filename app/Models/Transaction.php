@@ -3,9 +3,9 @@
 namespace App\Models;
 
 
-use App\Enums\TransactionGroup;
 use App\Models\Scopes\AccountScope;
 use App\Models\Scopes\TransactionScope;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,56 +33,48 @@ class Transaction extends Model
     ];
 
     /**
-     * Boot the model and set up global scopes and event listeners.
+     * Set up global scopes and event listeners
      *
-     * This method is called when the model is being booted. It adds a global
-     * scope for transaction queries and sets up event listeners for creating,
-     * created, and updating events to manage transaction attributes.
-     *
-     * @return void
+     * Adds a global scope for filtering only the authenticated users transactions.
+     * Sets default values for 'account_id' and 'category_id'
+     * and associates the authenticated user with the transaction.
      */
     protected static function booted(): void
     {
-        // Add a global scope to the Transaction model, applying the TransactionScope to all queries.
         static::addGlobalScope(new TransactionScope());
 
-        // Listen for the creating event to set default values for the model before saving.
         static::creating(function (Transaction $transaction) {
-            // If bank_account_id is not set, assign the default bank account ID.
-            // Only in importer
+            // Only needed in importer
             if (is_null($transaction->account_id)) {
                 $transaction->account_id = self::getDefaultAccountId();
             }
 
-            // If category_id is not set, assign the default transaction category ID.
-            // Only in importer
+            // Only needed in importer
             if (is_null($transaction->category_id)) {
                 $transaction->category_id = self::getDefaultCategoryId();
             }
 
-            // Only in web and importer
+            // Only needed in importer and web
             if (is_null($transaction->user_id)) {
                 $transaction->user_id = auth()->user()->id;
             }
 
-            // Trim whitespace from the destination attribute to ensure no leading or trailing spaces.
             $transaction->destination = trim($transaction->destination) ?? null;
         });
 
-        // Listen for the created event, which is triggered after a transaction is created.
         static::created(function (Transaction $transaction) {
-            // Calculate the total amount of transactions for the bank account, excluding global scopes.
-            $sum = Transaction::whereAccountId($transaction->account_id)
+            // Recalculates and updates the account balance for the associated account
+            $balance = Transaction::whereAccountId($transaction->account_id)
                 ->withoutGlobalScopes([TransactionScope::class])
                 ->sum('amount');
 
-            // Update the balance of the associated bank account with the new total amount.
             Account::whereId($transaction->account_id)
                 ->withoutGlobalScopes([AccountScope::class])
-                ->update(['balance' => $sum]);
+                ->update(['balance' => $balance]);
+
+            self::updateCategoryStatistics($transaction->category_id, $transaction->date_time);
         });
 
-        // Listen for the updating event to trim the destination before saving.
         static::updating(function (Transaction $transaction) {
             $transaction->destination = trim($transaction->destination) ?? null;
         });
@@ -98,13 +90,11 @@ class Transaction extends Model
      */
     private static function getDefaultAccountId(): int
     {
-        // Try to find a bank account with the name 'Demo'.
         $account = Account::whereName('Demo')->first();
         if (!$account) {
-            // If it does not exist, create a new bank account with that name.
             $account = Account::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
-        return $account->id; // Return the ID of the bank account.
+        return $account->id;
     }
 
     /**
@@ -117,13 +107,31 @@ class Transaction extends Model
      */
     private static function getDefaultCategoryId(): int
     {
-        // Try to find a category with the name 'Demo'.
         $category = Category::whereName('Demo')->first();
         if (!$category) {
-            // If it does not exist, create a new category with that name.
             $category = Category::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
-        return $category->id; // Return the ID of the category.
+        return $category->id;
+    }
+
+    /**
+     * @param int $categoryId
+     * @param string $date
+     * @return void
+     */
+    public static function updateCategoryStatistics(int $categoryId, string $date): void
+    {
+        $year = Carbon::parse($date)->year;
+        $month = Carbon::parse($date)->month;
+        $monthColumn = strtolower(Carbon::createFromDate(null, $month)->format('M'));
+        $sumPerMonth = Transaction::withoutGlobalScopes()
+            ->whereCategoryId($categoryId)
+            ->whereYear('date_time', $year)
+            ->whereMonth('date_time', $month)
+            ->sum('amount');
+
+        CategoryStatistic::withoutGlobalScopes()
+            ->updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
     }
 
     public function account(): BelongsTo

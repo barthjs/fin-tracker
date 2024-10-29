@@ -4,11 +4,12 @@ namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Filament\Resources\AccountResource;
 use App\Models\Account;
-use App\Models\Category;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +22,7 @@ class AccountsRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('bank_account.navigation_label');
+        return __('account.navigation_label');
     }
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
@@ -41,10 +42,10 @@ class AccountsRelationManager extends RelationManager
     {
         $columns = AccountResource::tableColumns();
         return $table
-            ->modifyQueryUsing(fn(Builder $query) => $query->withoutGlobalScopes())
+            ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes())
             ->heading('')
             ->columns($columns)
-            ->paginated(fn() => Account::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
+            ->paginated(fn(): bool => Account::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -52,36 +53,38 @@ class AccountsRelationManager extends RelationManager
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query) => $query->where('active', false)),
+                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('bank_account.buttons.create_button_label'))
-                    ->modalHeading(__('bank_account.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data) {
+                    ->label(__('account.buttons.create_button_label'))
+                    ->modalHeading(__('account.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
                         return $data;
                     })
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->iconButton()
-                    ->modalHeading(__('bank_account.buttons.edit_heading')),
-                Tables\Actions\DeleteAction::make()
+                    ->icon('tabler-edit')
+                    ->modalHeading(__('account.buttons.edit_heading')),
+                DeleteAction::make()
                     ->iconButton()
-                    ->modalHeading(__('bank_account.buttons.delete_heading'))
+                    ->icon('tabler-trash')
+                    ->modalHeading(__('account.buttons.delete_heading'))
             ])
             ->bulkActions(AccountResource::getBulkActions())
-            ->emptyStateHeading(__('bank_account.empty'))
+            ->emptyStateHeading(__('account.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('bank_account.buttons.create_button_label'))
-                    ->modalHeading(__('bank_account.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data) {
+                    ->label(__('account.buttons.create_button_label'))
+                    ->modalHeading(__('account.buttons.create_heading'))
+                    ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
                         return $data;
                     })

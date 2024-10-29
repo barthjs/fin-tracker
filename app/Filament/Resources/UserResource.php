@@ -2,13 +2,23 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\UserResource\Pages\CreateUser;
+use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
+use App\Filament\Resources\UserResource\RelationManagers\AccountsRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\CategoryRelationManager;
 use App\Models\User;
 use Exception;
-use Filament\Forms;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -16,16 +26,19 @@ use Illuminate\Validation\Rules\Password;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-    protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'tabler-users';
-    protected static ?string $navigationGroup = 'System';
 
     public static function getSlug(): string
     {
-        return __('user.url');
+        return __('user.slug');
     }
 
     public static function getNavigationLabel(): string
+    {
+        return __('user.navigation_label');
+    }
+
+    public static function getBreadcrumb(): string
     {
         return __('user.navigation_label');
     }
@@ -34,34 +47,35 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()
+                Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('first_name')
+                        TextInput::make('first_name')
                             ->label(__('user.columns.first_name'))
                             ->autofocus()
                             ->maxLength(255)
                             ->required()
                             ->string(),
-                        Forms\Components\TextInput::make('last_name')
+                        TextInput::make('last_name')
                             ->label(__('user.columns.last_name'))
                             ->maxLength(255)
                             ->required()
                             ->string(),
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->label(__('user.columns.name'))
                             ->maxLength(255)
                             ->required()
                             ->string()
                             ->unique(ignoreRecord: true),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->label(__('user.columns.email'))
                             ->maxLength(255)
                             ->email()
                             ->unique(ignoreRecord: true),
-                    ])->columns(2),
-                Forms\Components\Section::make()
+                    ])
+                    ->columns(2),
+                Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('password')
+                        TextInput::make('password')
                             ->label(__('user.buttons.password'))
                             ->password()
                             ->revealable()
@@ -72,7 +86,7 @@ class UserResource extends Resource
                             ->live(debounce: 200)
                             ->same('passwordConfirmation')
                             ->validationMessages(['same' => __('user.buttons.password_confirmation_warning')]),
-                        Forms\Components\TextInput::make('passwordConfirmation')
+                        TextInput::make('passwordConfirmation')
                             ->label(__('user.buttons.password_confirmation'))
                             ->password()
                             ->revealable()
@@ -89,7 +103,7 @@ class UserResource extends Resource
                                 return false;
                             })
                             ->dehydrated(false),
-                        Forms\Components\Toggle::make('is_admin')
+                        Toggle::make('is_admin')
                             ->label(__('user.columns.is_admin'))
                             ->disabled(function ($record) {
                                 // Prevent current user from removing his admin status
@@ -100,7 +114,7 @@ class UserResource extends Resource
                             })
                             ->default(false)
                             ->inline(false),
-                        Forms\Components\Toggle::make('active')
+                        Toggle::make('active')
                             ->label(__('table.active'))
                             ->disabled(function ($record) {
                                 if (!$record) {
@@ -111,7 +125,8 @@ class UserResource extends Resource
                             })
                             ->default(true)
                             ->inline(false)
-                    ])->columns(2),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -122,45 +137,50 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label(__('user.columns.name'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label(__('user.columns.email'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('first_name')
+                TextColumn::make('first_name')
                     ->label(__('user.columns.first_name'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('last_name')
+                TextColumn::make('last_name')
                     ->label(__('user.columns.last_name'))
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label(__('table.created_at'))
                     ->dateTime('Y-m-d H:i:s')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label(__('table.updated_at'))
                     ->dateTime('Y-m-d H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->paginated(fn() => User::count() > 20)
+            ->paginated(fn(): bool => User::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->iconButton()
+                    ->icon('tabler-edit'),
+                DeleteAction::make()
+                    ->iconButton()
+                    ->icon('tabler-trash')
+                    ->modalHeading(__('user.buttons.delete_heading'))
             ])
             ->recordUrl(fn(User $record): string => ViewUser::getUrl([$record->id]))
             ->emptyStateHeading(__('user.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('user.buttons.create_button_label'))
             ]);
@@ -169,18 +189,23 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            UserResource\RelationManagers\AccountsRelationManager::class,
-            UserResource\RelationManagers\CategoryRelationManager::class
+            AccountsRelationManager::class,
+            CategoryRelationManager::class
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => UserResource\Pages\ListUsers::route('/'),
-            'create' => UserResource\Pages\CreateUser::route('/create'),
-            'view' => UserResource\Pages\ViewUser::route('/{record}'),
-            'edit' => UserResource\Pages\EditUser::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'view' => ViewUser::route('/{record}'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
     }
 }

@@ -3,18 +3,20 @@
 namespace Database\Seeders;
 
 use App\Models\Account;
-use App\Models\Transaction;
 use App\Models\Category;
+use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Artisan;
 
 class DemoSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * Seeds demo data for existing users and creates additional
+     * test users with associated accounts, categories, and transactions.
      */
     public function run(): void
     {
@@ -23,11 +25,11 @@ class DemoSeeder extends Seeder
             foreach ($users as $user) {
                 $this->createTestValues($user);
             }
+
             for ($i = 1; $i <= 3; $i++) {
                 $user = User::factory()->create(['email' => "test$i@example.com"]);
                 $this->createTestValues($user);
             }
-            Artisan::call('app:create-statistic');
         }
     }
 

@@ -31,36 +31,31 @@ class Account extends Model
     ];
 
     /**
-     * Boot the model and set up global scopes and event listeners.
+     * Set up global scopes and event listeners
      *
-     * This method is called when the model is being booted. It adds a global
-     * scope for account queries and sets up event listeners for the creating
-     * and updating events.
-     *
-     * @return void
+     * Adds a global scope for filtering only the authenticated users accounts.
+     * Ensures defaults for 'currency' and that the 'user_id' is assigned
+     * to the authenticated.
      */
     protected static function booted(): void
     {
         static::addGlobalScope(new AccountScope());
 
-        // Listen for the creating event to set default values for the model before saving.
         static::creating(function (Account $account) {
-            // Only in seeder and importer.
+            // Only needed in seeder
             if (is_null($account->currency)) {
                 $account->currency = self::getCurrency();
             }
 
-            // Only in web
+            // Only needed in importer and web
             if (is_null($account->user_id)) {
                 $account->user_id = auth()->user()->id;
             }
 
-            // Trim whitespace from the account name to ensure no leading or trailing spaces.
             $account->name = trim($account->name);
         });
 
         static::updating(function (Account $account) {
-            // Trim whitespace from the category name to maintain data consistency.
             $account->name = trim($account->name);
         });
     }
@@ -90,7 +85,6 @@ class Account extends Model
             return $currency->name;
         }
 
-        // If all else fails, return the name of the USD currency as a fallback
         return Currency::USD->name;
     }
 

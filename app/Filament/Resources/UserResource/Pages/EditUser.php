@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord
@@ -12,7 +12,7 @@ class EditUser extends EditRecord
 
     public function getTitle(): string
     {
-        return __('user.navigation_label');
+        return __('user.buttons.edit_heading');
     }
 
     public function getHeading(): string
@@ -28,7 +28,8 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
+            DeleteAction::make()
+                ->icon('tabler-trash')
                 ->modalHeading(__('user.buttons.delete_heading')),
         ];
     }
