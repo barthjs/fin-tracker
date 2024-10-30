@@ -30,7 +30,9 @@ return [
 
     'form' => [
         'account_placeholder' => 'Konto wählen',
+        'account_validation_message' => 'Bitte ein Konto angeben',
         'category_placeholder' => 'Kategorie wählen',
+        'category_validation_message' => 'Bitte eine Kategorie angeben',
     ],
 
     'notifications' => [

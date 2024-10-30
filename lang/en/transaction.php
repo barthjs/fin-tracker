@@ -30,7 +30,9 @@ return [
 
     'form' => [
         'account_placeholder' => 'Select account',
+        'account_validation_message' => 'Please specify an account',
         'category_placeholder' => 'Select category',
+        'category_validation_message' => 'Please specify a category',
     ],
 
     'notifications' => [

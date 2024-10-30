@@ -3,7 +3,7 @@
 return [
 
     'slug' => 'accounts',
-    'navigation_label' => 'accounts',
+    'navigation_label' => 'Accounts',
 
     'buttons' => [
         'create_button_label' => 'New account',
@@ -39,6 +39,7 @@ return [
 
     'form' => [
         'currency_placeholder' => 'Choose currency',
+        'currency_validation_message' => 'Please specify a currency',
     ],
 
     'notifications' => [

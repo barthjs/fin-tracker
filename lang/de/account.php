@@ -39,6 +39,7 @@ return [
 
     'form' => [
         'currency_placeholder' => 'Währung wählen',
+        'currency_validation_message' => 'Bitte eine Währung angeben',
     ],
 
     'notifications' => [

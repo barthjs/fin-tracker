@@ -16,7 +16,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
@@ -70,6 +69,7 @@ class TransactionResource extends Resource
                         ->label(__('transaction.columns.account'))
                         ->relationship('account', 'name')
                         ->placeholder(__('transaction.form.account_placeholder'))
+                        ->validationMessages(['required' => __('transaction.form.account_validation_message')])
                         ->preload()
                         ->default(fn(): string => $account->id ?? "")
                         ->live(true)
@@ -107,6 +107,7 @@ class TransactionResource extends Resource
                         ->label(__('transaction.columns.category'))
                         ->relationship('category', 'name')
                         ->placeholder(__('transaction.form.category_placeholder'))
+                        ->validationMessages(['required' => __('transaction.form.category_validation_message')])
                         ->preload()
                         ->default(fn(): string => $category->id ?? "")
                         ->live(true)
@@ -189,7 +190,7 @@ class TransactionResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('notes')
+                TextColumn::make('notes')
                     ->label(__('transaction.columns.notes'))
                     ->wrap()
                     ->searchable()
@@ -229,12 +230,12 @@ class TransactionResource extends Resource
                         return $query
                             ->when($data['created_from'],
                                 fn(Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
-                            ->when($data['created_until'],
+                            ->when($data['created_until'] ?? null,
                                 fn(Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
                     })
             ], FiltersLayout::AboveContentCollapsible)
             ->headerActions([
-                CreateAction::make()
+                CreateAction::make('header-create')
                     ->icon('tabler-plus')
                     ->label(__('transaction.buttons.create_button_label'))
                     ->hidden(function ($livewire) {

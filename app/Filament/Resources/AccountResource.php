@@ -71,6 +71,7 @@ class AccountResource extends Resource
                     Select::make('currency')
                         ->label(__('account.columns.currency'))
                         ->placeholder(__('account.form.currency_placeholder'))
+                        ->validationMessages(['required' => __('account.form.currency_validation_message')])
                         ->options(Currency::class)
                         ->default(Account::getCurrency())
                         ->required()
