@@ -9,6 +9,8 @@ use App\Filament\Resources\AccountResource\RelationManagers\TransactionRelationM
 use App\Models\Account;
 use Exception;
 use Filament\Forms;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -24,6 +26,7 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -76,19 +79,31 @@ class AccountResource extends Resource
                         ->default(Account::getCurrency())
                         ->required()
                         ->searchable(),
+                    Textarea::make('description')
+                        ->label(__('account.columns.description'))
+                        ->autosize()
+                        ->rows(1)
+                        ->maxLength(1000)
+                        ->string(),
+                    FileUpload::make('logo')
+                        ->avatar()
+                        ->image()
+                        ->imageEditor()
+                        ->circleCropper()
+                        ->moveFiles()
+                        ->directory('logos')
+                        ->maxSize(1024),
+                    ColorPicker::make('color')
+                        ->label(__('widget.color'))
+                        ->validationMessages(['regex' => __('widget.color_validation_message')])
+                        ->required()
+                        ->default(strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
+                        ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
                     Toggle::make('active')
                         ->label(__('table.active'))
                         ->default(true)
                         ->inline(false),
-                    Textarea::make('description')
-                        ->label(__('account.columns.description'))
-                        ->autosize()
-                        ->columnSpanFull()
-                        ->rows(1)
-                        ->maxLength(1000)
-                        ->string()
-                ])
-                ->columns(3)
+                ])->columns(3),
         ];
     }
 
@@ -176,8 +191,17 @@ class AccountResource extends Resource
     public static function tableColumns(): array
     {
         return [
+            ImageColumn::make('logo')
+                ->label(__('account.columns.logo'))
+                ->circular()
+                ->extraImgAttributes(fn(Account $record): array => [
+                    'alt' => "{$record->name} logo",
+                ]),
             TextColumn::make('name')
+                ->size(TextColumn\TextColumnSize::Medium)
+                ->weight(FontWeight::SemiBold)
                 ->label(__('account.columns.name'))
+                ->weight(FontWeight::Bold)
                 ->searchable()
                 ->sortable(),
             TextColumn::make('balance')
@@ -231,6 +255,7 @@ class AccountResource extends Resource
                     Select::make('currency')
                         ->label(__('account.columns.currency'))
                         ->placeholder(__('account.form.currency_placeholder'))
+                        ->validationMessages(['required' => __('account.form.currency_validation_message')])
                         ->options(Currency::class)
                         ->default(Account::getCurrency())
                         ->required()

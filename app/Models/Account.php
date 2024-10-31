@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Storage;
 
 class Account extends Model
 {
@@ -20,6 +21,8 @@ class Account extends Model
         'balance',
         'currency',
         'description',
+        'logo',
+        'color',
         'active',
         'user_id'
     ];
@@ -52,12 +55,31 @@ class Account extends Model
                 $account->user_id = auth()->user()->id;
             }
 
+            // Only needed in importer and seeder
+            if (is_null($account->color)) {
+                $account->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+            }
+
             $account->name = trim($account->name);
         });
 
         static::updating(function (Account $account) {
             $account->name = trim($account->name);
         });
+
+        static::updated(function (Account $account) {
+            $logo = $account->getOriginal('logo');
+            if (is_null($account->logo) && !is_null($logo) && Storage::disk('public')->exists($logo)) {
+                Storage::disk('public')->delete($logo);
+            }
+        });
+
+        static::deleted(function (Account $account) {
+            if (!is_null($account->logo) && Storage::disk('public')->exists($account->logo)) {
+                Storage::disk('public')->delete($account->logo);
+            }
+        });
+
     }
 
     /**

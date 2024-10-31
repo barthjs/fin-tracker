@@ -23,6 +23,7 @@ return new class extends Migration {
             $types = array_column(TransactionType::cases(), 'name');
             $table->enum('type', $types)->default(TransactionType::transfer->name)->index();
 
+            $table->string('color');
             $table->boolean('active')->default(true)->index();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();

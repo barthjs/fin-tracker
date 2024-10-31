@@ -11,6 +11,7 @@ use App\Models\Category;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -74,12 +75,17 @@ class CategoryResource extends Resource
                         ->options(__('category.groups'))
                         ->default(TransactionGroup::transfers->name)
                         ->required(),
+                    ColorPicker::make('color')
+                        ->label(__('widget.color'))
+                        ->required()
+                        ->default(strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
+                        ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
                     Toggle::make('active')
                         ->label(__('table.active'))
                         ->default(true)
                         ->inline(false),
                 ])
-                ->columns(3)
+                ->columns(2),
         ];
     }
 
@@ -105,16 +111,6 @@ class CategoryResource extends Resource
                             })
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
-                        TextEntry::make('type')
-                            ->label(__('category.columns.type'))
-                            ->formatStateUsing(fn($state): string => __('category.types')[$state->name])
-                            ->color(fn($state): string => match ($state->name) {
-                                'expense' => 'danger',
-                                'revenue' => 'success',
-                                default => 'warning',
-                            })
-                            ->size(TextEntry\TextEntrySize::Medium)
-                            ->weight(FontWeight::SemiBold),
                         TextEntry::make(Carbon::now()->year)
                             ->money(Account::getCurrency())
                             ->state(function (Category $record): float {
@@ -127,7 +123,7 @@ class CategoryResource extends Resource
                     ])
                     ->columns([
                         'default' => 2,
-                        'sm' => 4
+                        'sm' => 3
                     ])
             ]);
     }
@@ -185,6 +181,8 @@ class CategoryResource extends Resource
         return [
             TextColumn::make('name')
                 ->label(__('category.columns.name'))
+                ->size(TextColumn\TextColumnSize::Medium)
+                ->weight(FontWeight::SemiBold)
                 ->wrap()
                 ->searchable()
                 ->sortable(),
@@ -193,17 +191,6 @@ class CategoryResource extends Resource
                 ->formatStateUsing(fn($state): string => __('category.groups')[$state->name])
                 ->badge()
                 ->color(fn($record): string => match ($record->type->name) {
-                    'expense' => 'danger',
-                    'revenue' => 'success',
-                    default => 'warning',
-                })
-                ->searchable()
-                ->sortable(),
-            TextColumn::make('type')
-                ->label(__('category.columns.type'))
-                ->formatStateUsing(fn($state): string => __('category.types')[$state->name])
-                ->badge()
-                ->color(fn($state): string => match ($state->name) {
                     'expense' => 'danger',
                     'revenue' => 'success',
                     default => 'warning',

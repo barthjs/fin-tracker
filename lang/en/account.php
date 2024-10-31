@@ -16,6 +16,7 @@ return [
     ],
 
     'columns' => [
+        'logo' => 'Logo',
         'name' => 'Name',
         'name_examples' => [
             'Bank of America',

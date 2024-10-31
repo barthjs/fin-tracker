@@ -22,6 +22,7 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -162,6 +163,10 @@ class TransactionResource extends Resource
                     ->searchable()
                     ->toggleable()
                     ->wrap(),
+                ImageColumn::make('account.logo')
+                    ->label('')
+                    ->circular()
+                    ->alignEnd(),
                 TextColumn::make('account.name')
                     ->label(__('transaction.columns.account'))
                     ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
@@ -222,15 +227,15 @@ class TransactionResource extends Resource
                         DatePicker::make('created_from')
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
-                        DatePicker::make(__('table.filter.created_until'))
-                            ->default(Carbon::today()->endOfYear()),
+                        DatePicker::make('created_until')
+                            ->label(__('table.filter.created_until'))
                     ])
                     ->columns(2)
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when($data['created_from'],
                                 fn(Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
-                            ->when($data['created_until'] ?? null,
+                            ->when($data['created_until'],
                                 fn(Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
                     })
             ], FiltersLayout::AboveContentCollapsible)

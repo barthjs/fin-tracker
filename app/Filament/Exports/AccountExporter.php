@@ -26,12 +26,8 @@ class AccountExporter extends Exporter
                 ->formatStateUsing(fn($state): string => $state->name),
             ExportColumn::make('description')
                 ->label(__('account.columns.description')),
-            ExportColumn::make('created_at')
-                ->label(__('table.created_at'))
-                ->enabledByDefault(false),
-            ExportColumn::make('updated_at')
-                ->label(__('table.updated_at'))
-                ->enabledByDefault(false),
+            ExportColumn::make('color')
+                ->label(__('widget.color')),
             ExportColumn::make('active')
                 ->label(__('table.active'))
                 ->enabledByDefault(false),

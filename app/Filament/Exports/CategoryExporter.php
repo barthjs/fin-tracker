@@ -23,12 +23,8 @@ class CategoryExporter extends Exporter
             ExportColumn::make('type')
                 ->label(__('category.columns.type'))
                 ->formatStateUsing(fn($state): string => __('category.types')[$state->name]),
-            ExportColumn::make('created_at')
-                ->label(__('table.created_at'))
-                ->enabledByDefault(false),
-            ExportColumn::make('updated_at')
-                ->label(__('table.updated_at'))
-                ->enabledByDefault(false),
+            ExportColumn::make('color')
+                ->label(__('widget.color')),
             ExportColumn::make('active')
                 ->label(__('table.active'))
                 ->enabledByDefault(false),

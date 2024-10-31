@@ -21,6 +21,8 @@ return new class extends Migration {
             $table->enum('currency', $currencies)->default(Currency::USD->name)->index();
             $table->text('description')->nullable();
 
+            $table->string('logo')->nullable();
+            $table->string('color');
             $table->boolean('active')->default(true)->index();
 
             $table->unsignedTinyInteger('user_id')->nullable()->index();

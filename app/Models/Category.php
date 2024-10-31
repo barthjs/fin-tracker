@@ -22,6 +22,7 @@ class Category extends Model
         'name',
         'group',
         'type',
+        'color',
         'active',
         'user_id'
     ];
@@ -56,6 +57,11 @@ class Category extends Model
             // Only in importer and web
             if (is_null($category->user_id)) {
                 $category->user_id = auth()->user()->id;
+            }
+
+            // Only needed in importer and seeder
+            if (is_null($category->color)) {
+                $category->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
             }
 
             $category->name = trim($category->name);
