@@ -37,10 +37,15 @@ class CategoryStatisticResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
+            ->modifyQueryUsing(function (Builder $query, Table $table) {
                 $query->whereHas('category', function (Builder $query) {
                     $query->where('type', '!=', TransactionType::transfer)->where('active', '=', true);
                 });
+                if (!$table->getActiveFiltersCount()) {
+                    return $query->where('year', '=', Carbon::now()->year);
+                } else {
+                    return $query;
+                }
             })
             ->columns([
                 Tables\Columns\TextColumn::make('category.name')
@@ -121,7 +126,6 @@ class CategoryStatisticResource extends Resource
             ])
             ->paginated(false)
             ->searchable(false)
-            ->defaultSort('year')
             ->persistSortInSession()
             ->defaultGroup('category.group')
             ->groupingSettingsHidden()
@@ -148,7 +152,6 @@ class CategoryStatisticResource extends Resource
                     })
                     ->placeholder(__('table.filter.year'))
                     ->selectablePlaceholder(false)
-                    ->default(Carbon::today()->year)
             ], Tables\Enums\FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(1)
             ->persistFiltersInSession()

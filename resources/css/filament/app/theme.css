@@ -2,6 +2,3 @@
 
 @config 'tailwind.config.js';
 
-.fi-ta-summary-row-heading {
-    display: none;
-}

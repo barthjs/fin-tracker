@@ -18,17 +18,13 @@ class TransactionExporter extends Exporter
         return [
             ExportColumn::make('date_time')
                 ->label(__('transaction.columns.date')),
-            ExportColumn::make('account.name')
-                ->label(__('transaction.columns.account')),
             ExportColumn::make('amount')
                 ->label(__('transaction.columns.amount'))
                 ->formatStateUsing(fn($state) => Number::format($state, 2, 4)),
-            ExportColumn::make('currency')
-                ->label(__('account.columns.currency'))
-                ->enabledByDefault(false)
-                ->state(fn($record): string => $record->account->currency->name),
             ExportColumn::make('destination')
                 ->label(__('transaction.columns.destination')),
+            ExportColumn::make('account.name')
+                ->label(__('transaction.columns.account')),
             ExportColumn::make('category.name')
                 ->label(__('transaction.columns.category')),
             ExportColumn::make('category.group')
@@ -39,6 +35,10 @@ class TransactionExporter extends Exporter
                 ->formatStateUsing(fn($state): string => __('category.types')[$state->name]),
             ExportColumn::make('notes')
                 ->label(__('transaction.columns.notes')),
+            ExportColumn::make('currency')
+                ->label(__('account.columns.currency'))
+                ->enabledByDefault(false)
+                ->state(fn($record): string => $record->account->currency->name),
         ];
     }
 

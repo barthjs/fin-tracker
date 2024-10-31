@@ -7,7 +7,6 @@ use App\Enums\TransactionType;
 use App\Filament\Exports\TransactionExporter;
 use App\Filament\Imports\TransactionImporter;
 use App\Filament\Resources\TransactionResource;
-use App\Models\Category;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
@@ -70,39 +69,45 @@ class ListTransactions extends ListRecords
                 ->label(__('table.filter.all')),
             'Expenses' => Tab::make()
                 ->label(__('table.filter.expenses'))
-                ->modifyQueryUsing(function ($query) {
-                    $cat = Category::whereType(TransactionType::expense)->get(['id'])->toArray();
-                    $query->whereIn('category_id', $cat);
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->whereHas('category', function ($query) {
+                        $query->where('type', '=', TransactionType::expense);
+                    });
                 }),
             'Variable Expenses' => Tab::make()
                 ->label(__('category.groups.var_expenses'))
-                ->modifyQueryUsing(function ($query) {
-                    $cat = Category::whereGroup(TransactionGroup::var_expenses)->get(['id'])->toArray();
-                    $query->whereIn('category_id', $cat);
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->whereHas('category', function ($query) {
+                        $query->where('group', '=', TransactionGroup::var_expenses);
+                    });
                 }),
             'Fixed Expenses' => Tab::make()
                 ->label(__('category.groups.fix_expenses'))
-                ->modifyQueryUsing(function ($query) {
-                    $cat = Category::whereGroup(TransactionGroup::fix_expenses)->get(['id'])->toArray();
-                    $query->whereIn('category_id', $cat);
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->whereHas('category', function ($query) {
+                        $query->where('group', '=', TransactionGroup::fix_expenses);
+                    });
                 }),
             'Revenues' => Tab::make()
                 ->label(__('table.filter.expenses'))
-                ->modifyQueryUsing(function ($query) {
-                    $cat = Category::whereType(TransactionType::revenue)->get(['id'])->toArray();
-                    $query->whereIn('category_id', $cat);
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->whereHas('category', function ($query) {
+                        $query->where('type', '=', TransactionType::revenue);
+                    });
                 }),
             'Fixed Revenues' => Tab::make()
                 ->label(__('category.groups.fix_revenues'))
-                ->modifyQueryUsing(function ($query) {
-                    $cat = Category::whereGroup(TransactionGroup::fix_revenues)->get(['id'])->toArray();
-                    $query->whereIn('category_id', $cat);
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->whereHas('category', function ($query) {
+                        $query->where('group', '=', TransactionGroup::fix_revenues);
+                    });
                 }),
             'Variable Revenues' => Tab::make()
                 ->label(__('category.groups.var_revenues'))
-                ->modifyQueryUsing(function ($query) {
-                    $cat = Category::whereGroup(TransactionGroup::var_revenues)->get(['id'])->toArray();
-                    $query->whereIn('category_id', $cat);
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->whereHas('category', function ($query) {
+                        $query->where('group', '=', TransactionGroup::var_revenues);
+                    });
                 }),
         ];
     }

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Transaction;
 use App\Models\Scopes\AccountScope;
 use App\Models\Scopes\TransactionScope;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class test extends Command
@@ -28,9 +29,8 @@ class test extends Command
      */
     public function handle()
     {
-        $bank = Transaction::withoutGlobalScopes([TransactionScope::class, AccountScope::class])
-            ->whereId(353)
-            ->first()
-            ->updateOrCreate(['bank_account_id' => 1]);
+        for ($i = 1; $i <= 12; $i++) {
+            echo $monthColumn = strtolower(Carbon::create(null, $i)->format('M')) . PHP_EOL;;
+        }
     }
 }

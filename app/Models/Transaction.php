@@ -123,7 +123,7 @@ class Transaction extends Model
     {
         $year = Carbon::parse($date)->year;
         $month = Carbon::parse($date)->month;
-        $monthColumn = strtolower(Carbon::createFromDate(null, $month)->format('M'));
+        $monthColumn = strtolower(Carbon::create(null, $month)->format('M'));
         $sumPerMonth = Transaction::withoutGlobalScopes()
             ->whereCategoryId($categoryId)
             ->whereYear('date_time', $year)

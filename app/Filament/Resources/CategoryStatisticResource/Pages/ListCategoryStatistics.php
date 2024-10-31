@@ -4,9 +4,9 @@ namespace App\Filament\Resources\CategoryStatisticResource\Pages;
 
 use App\Enums\TransactionType;
 use App\Filament\Resources\CategoryStatisticResource;
-use App\Models\Category;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListCategoryStatistics extends ListRecords
 {
@@ -33,17 +33,19 @@ class ListCategoryStatistics extends ListRecords
             'Expenses' => Tab::make()
                 ->icon('tabler-minus')
                 ->label(__('table.filter.expenses'))
-                ->modifyQueryUsing(function ($query) {
-                    $cat = Category::whereType(TransactionType::expense)->get(['id'])->toArray();
-                    $query->whereIn('category_id', $cat);
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->whereHas('category', function ($query) {
+                        $query->where('type', '=', TransactionType::expense);
+                    });
                 }),
             'Revenues' => Tab::make()
                 ->icon('tabler-plus')
                 ->iconPosition('after')
                 ->label(__('table.filter.revenues'))
-                ->modifyQueryUsing(function ($query) {
-                    $cat = Category::whereType(TransactionType::revenue)->get(['id'])->toArray();
-                    $query->whereIn('category_id', $cat);
+                ->modifyQueryUsing(function (Builder $query) {
+                    $query->whereHas('category', function ($query) {
+                        $query->where('type', '=', TransactionType::revenue);
+                    });
                 }),
         ];
     }
