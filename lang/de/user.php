@@ -18,6 +18,7 @@ return [
     'columns' => [
         'first_name' => 'Vorname',
         'last_name' => 'Nachname',
+        'full_name' => 'Name',
         'name' => 'Benutzername',
         'email' => 'E-Mail',
         'verified' => 'Verifiziert',
@@ -26,6 +27,7 @@ return [
 
     'filter' => [
         'verified' => 'Verifiziert',
+        'unverified' => 'Unverifiziert',
         'admins' => 'Administratoren',
         'users' => 'Benutzer',
     ],

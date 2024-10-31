@@ -4,7 +4,9 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
-use Awcodes\FilamentStickyHeader\StickyHeaderPlugin;
+use App\Filament\Pages\Settings;
+use App\Filament\Resources\UserResource;
+use App\Http\Middleware\CheckVerified;
 use Exception;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -37,6 +39,7 @@ class AppPanelProvider extends PanelProvider
             ->profile(EditProfile::class, isSimple: false)
             ->unsavedChangesAlerts()
             ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->colors(config('colors'))
             ->font('Poppins')
             ->viteTheme('resources/css/filament/app/theme.css')
@@ -45,17 +48,17 @@ class AppPanelProvider extends PanelProvider
             ->maxContentWidth('full')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->userMenuItems([
                 'settings' => MenuItem::make()
                     ->label(__('settings.navigation_label'))
                     ->icon('tabler-settings')
-                    ->url(fn() => url(__('settings.slug'))),
+                    ->url(fn(): string => Settings::getUrl()),
                 'users' => MenuItem::make()
                     ->label(__('user.navigation_label'))
                     ->icon('tabler-users')
-                    ->url(fn() => url(__('user.slug'))),
+                    ->url(fn(): string => UserResource::getUrl()),
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

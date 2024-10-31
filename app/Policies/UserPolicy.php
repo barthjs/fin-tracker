@@ -44,7 +44,6 @@ class UserPolicy
     public function delete(User $user): bool
     {
         return $user->is_admin;
-
     }
 
     /**

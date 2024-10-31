@@ -14,7 +14,11 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -77,6 +81,8 @@ class UserResource extends Resource
                     ->schema([
                         TextInput::make('password')
                             ->label(__('user.buttons.password'))
+                            ->validationMessages(['same' => __('user.buttons.password_confirmation_warning')])
+                            ->required(fn(string $context): bool => $context === 'create')
                             ->password()
                             ->revealable()
                             ->rule(Password::default())
@@ -84,8 +90,7 @@ class UserResource extends Resource
                             ->dehydrated(fn($state): bool => filled($state))
                             ->dehydrateStateUsing(fn($state): string => Hash::make($state))
                             ->live(debounce: 200)
-                            ->same('passwordConfirmation')
-                            ->validationMessages(['same' => __('user.buttons.password_confirmation_warning')]),
+                            ->same('passwordConfirmation'),
                         TextInput::make('passwordConfirmation')
                             ->label(__('user.buttons.password_confirmation'))
                             ->password()
@@ -127,6 +132,42 @@ class UserResource extends Resource
                             ->inline(false)
                     ])
                     ->columns(2),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                \Filament\Infolists\Components\Section::make()
+                    ->schema([
+                        TextEntry::make('full_name')
+                            ->label(__('user.columns.full_name'))
+                            ->state(fn(User $record): string => $record->getFilamentName())
+                            ->tooltip(fn($record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->color(fn($record): string => !$record->active ? 'danger' : 'success')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make('name')
+                            ->label(__('user.columns.name'))
+                            ->tooltip(fn($record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->color(fn($record): string => !$record->active ? 'danger' : 'success')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        TextEntry::make('email')
+                            ->label(__('user.columns.email'))
+                            ->tooltip(fn($record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->color(fn($record): string => !$record->active ? 'danger' : 'success')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
+                        IconEntry::make('is_admin')
+                            ->label(__('user.columns.is_admin'))
+                            ->boolean()
+                    ])
+                    ->columns([
+                        'default' => 2,
+                        'md' => 4
+                    ])
             ]);
     }
 

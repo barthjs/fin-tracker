@@ -38,26 +38,18 @@ class ListUsers extends ListRecords
             'all' => Tab::make()
                 ->label(__('table.filter.all'))
                 ->badge(User::all()->count()),
-            'verified' => Tab::make()
-                ->label(__('user.filter.verified'))
-                ->badge(User::whereVerified(true)->count())
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('verified', true)),
             'admins' => Tab::make()
                 ->label(__('user.filter.admins'))
                 ->badge(User::whereIsAdmin(true)->count())
                 ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('is_admin', true)),
-            'users' => Tab::make()
-                ->label(__('user.filter.users'))
-                ->badge(User::whereIsAdmin(false)->count())
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('is_admin', false)),
-            'active' => Tab::make()
-                ->label(__('table.status_active'))
-                ->badge(User::whereActive(true)->count())
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('active', true)),
             'inactive' => Tab::make()
                 ->label(__('table.status_inactive'))
                 ->badge(User::whereActive(false)->count())
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('active', false))
+                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('active', false)),
+            'unverified' => Tab::make()
+                ->label(__('user.filter.unverified'))
+                ->badge(User::whereVerified(false)->count())
+                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('verified', false)),
         ];
     }
 }
