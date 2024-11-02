@@ -22,10 +22,10 @@ test_db_connection() {
     "
 }
 
-# Check if .env file exists, if not, create it and generate the APP_KEY
-if [ ! -f ".env" ]; then
-    echo "Creating .env file and generating APP_KEY..."
-    echo "APP_KEY=" >>.env
+# Generate the APP_KEY
+if ! grep -q "^APP_KEY=" ".env"; then
+    echo "Generating APP_KEY..."
+    echo "APP_KEY=" >> .env
     if ! php artisan key:generate --force; then
         echo "Error: Failed to generate APP_KEY."
         exit 1

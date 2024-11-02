@@ -3,7 +3,6 @@ services:
     image: barthjs/fin-tracker:latest
     container_name: fin-tracker
     restart: unless-stopped
-    # Remove this if you want to create your own network
     ports:
       - ${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80
     env_file:

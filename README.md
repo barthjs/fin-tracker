@@ -3,21 +3,18 @@
 <div align="center">
 
 <h1>Fin-Tracker</h1>
-<h3>Self-hosted Household Finance Manager</h3>
+<h3>Household Finance Manager</h3>
 
 <!-- Badges -->
 <p>
   <a href="https://hub.docker.com/r/barthjs/fin-tracker/tags" title="Docker image">
-  <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker&style=for-the-badge&style=flat" alt="Docker image">
-  </a>
+    <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker&style=for-the-badge&style=flat" alt="Docker image"></a>
   <a href="https://github.com/barthjs/fin-tracker/blob/main/LICENSE">
-    <img alt="Static Badge" src="https://img.shields.io/github/license/barthjs/fin-tracker"/>
-  </a>
+    <img alt="Static Badge" src="https://img.shields.io/github/license/barthjs/fin-tracker"/></a>
   <a href="https://github.com/barthjs/fin-tracker/issues/">
-    <img src="https://img.shields.io/github/issues/barthjs/fin-tracker" alt="open issues"/>
-  </a>
-  <a href="https://filamentphp.com/"><img alt="Filament v3.x" src="https://img.shields.io/badge/Filament-v3.x-e9b228?style=for-the-badge&style=flat">
-  </a>
+    <img src="https://img.shields.io/github/issues/barthjs/fin-tracker" alt="open issues"/></a>
+  <a href="https://filamentphp.com/">
+    <img alt="Filament v3.x" src="https://img.shields.io/badge/Filament-v3.x-e9b228?style=for-the-badge&style=flat"></a>
 </p>
 
 <h4>
@@ -60,7 +57,7 @@
 
 ## About
 
-Fin-Tracker is a self-hosted household finance manager that helps you track and categorize expenses across multiple bank
+Fin-Tracker is a household finance manager that helps you track and categorize expenses across multiple bank
 accounts. Its user-friendly interface allows you to easily log and categorize expenses, providing valuable insights into
 your spending habits. Designed for multi-user access, you can host the app for family and friends. Additionally,
 Fin-Tracker supports CSV imports and exports, along with Excel exports, making it simple to manage and analyze your
@@ -141,15 +138,13 @@ information.
 - Who manages the users?
     - One user is designated as the admin and is responsible for managing all other users
 
-- Is native installation supported?
-    - Only Docker with the prebuilt image is supported, and native installation support will not be available in the
-      future.
-
 - Are mobile clients available?
     - Mobile clients are planned for the future. If you're interested in contributing, please refer to the contributing
       guidelines.
 
 ## Screenshots
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Development
 
@@ -196,11 +191,11 @@ Login at: [http://localhost:80](http://localhost:80)
 
 ### Built With
 
-- <a href="https://tabler.io/icons"><img alt="Tabler Icons" src="https://img.shields.io/badge/Tabler_Icons-grey?style=flat-square">
+- <a href="https://laravel.com"><img alt="Laravel v9.x" src="https://img.shields.io/badge/Laravel-v11.x-FF2D20?style=flat-square&logo=laravel">
   </a>
 - <a href="https://filamentphp.com/"><img alt="Filament v3.x" src="https://img.shields.io/badge/Filament-v3.x-e9b228?style=flat-square">
   </a>
-- <a href="https://laravel.com"><img alt="Laravel v9.x" src="https://img.shields.io/badge/Laravel-v11.x-FF2D20?style=flat-square&logo=laravel">
+- <a href="https://tabler.io/icons"><img alt="Tabler Icons" src="https://img.shields.io/badge/Tabler_Icons-grey?style=flat-square">
   </a>
 - <a href="https://hub.docker.com/r/barthjs/fin-tracker/tags" title="Docker image">
   <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker&style=flat-square" alt="Docker image">

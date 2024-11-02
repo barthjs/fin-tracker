@@ -1,13 +1,14 @@
-# Apache, Composer, PHP
+# Base image for PHP and NGINX
 FROM webdevops/php-nginx-dev:8.3-alpine
 
 # Labels
-LABEL vendor="barthjs"
-LABEL maintainer="barthjs"
-LABEL org.opencontainers.image.url="https://github.com/barthjs/fin-tracker"
-LABEL org.opencontainers.image.source="https://github.com/barthjs/fin-tracker"
-LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.title="Fin-Tracker"
+LABEL vendor="barthjs" \
+      maintainer="barthjs" \
+      org.opencontainers.image.url="https://github.com/barthjs/fin-tracker" \
+      org.opencontainers.image.source="https://github.com/barthjs/fin-tracker" \
+      org.opencontainers.image.license="MIT" \
+      org.opencontainers.image.title="Fin-Tracker" \
+      org.opencontainers.image.description="Household Finance Manager"
 
 ENV PHP_DEBUGGER=xdebug \
     PHP_DISPLAY_ERRORS=1 \
@@ -23,5 +24,5 @@ RUN npm install npm@latest -g
 
 WORKDIR /app
 
-# Container managment
+# Copy configuration files for container entrypoint setup
 COPY worker.conf /opt/docker/etc/supervisor.d/worker.conf
