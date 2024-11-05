@@ -50,9 +50,9 @@ class CategoryChart extends ChartWidget
         foreach ($categories as $category) {
             $categoryLabels[] = $category->name;
             $categoryData[] = $category->transactions()
-                ->when($startDate, fn(Builder $query) => $query->whereDate('date_time', '>=', $startDate))
-                ->when($endDate, fn(Builder $query) => $query->whereDate('date_time', '<=', $endDate))
-                ->sum('amount');
+                    ->when($startDate, fn(Builder $query) => $query->whereDate('date_time', '>=', $startDate))
+                    ->when($endDate, fn(Builder $query) => $query->whereDate('date_time', '<=', $endDate))
+                    ->sum('amount') / 100;
             $backgroundColors[] = $category->color;
         }
 

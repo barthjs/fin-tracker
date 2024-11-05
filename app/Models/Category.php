@@ -54,19 +54,20 @@ class Category extends Model
                 default => 'transfer'
             };
 
-            // Only in importer and web
-            if (is_null($category->user_id)) {
-                $category->user_id = auth()->user()->id;
-            }
-
             // Only needed in importer and seeder
             if (is_null($category->color)) {
                 $category->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
             }
 
+            // Only in importer and web
+            if (is_null($category->user_id)) {
+                $category->user_id = auth()->user()->id;
+            }
+
             $category->name = trim($category->name);
         });
 
+        // Create an empty entry for the statistic after category creation
         static::created(function (Category $category) {
             CategoryStatistic::create(['year' => Carbon::now()->year, 'category_id' => $category->id]);
         });
@@ -83,9 +84,9 @@ class Category extends Model
         });
     }
 
-    public function user(): BelongsTo
+    public function statistics(): HasMany
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasMany(CategoryStatistic::class, 'category_id');
     }
 
     public function transactions(): HasMany
@@ -93,8 +94,8 @@ class Category extends Model
         return $this->hasMany(Transaction::class, 'category_id');
     }
 
-    public function statistics(): HasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(CategoryStatistic::class, 'category_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

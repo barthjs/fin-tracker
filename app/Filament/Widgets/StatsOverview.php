@@ -17,7 +17,7 @@ class StatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $totalAssets = Account::sum('balance');
+        $totalAssets = Account::getSum();
         $totalAssets = Number::currency($totalAssets, Account::getCurrency());
 
         $monthColumn = strtolower(Carbon::createFromDate(null, Carbon::today()->month)->format('M'));
@@ -25,12 +25,12 @@ class StatsOverview extends BaseWidget
 
         $expenseSum = CategoryStatistic::where('year', '=', $year)->whereHas('category', function ($query) {
             $query->where('type', TransactionType::expense);
-        })->sum($monthColumn);
+        })->sum($monthColumn) / 100;
         $expenseSum = Number::currency($expenseSum, Account::getCurrency());
 
         $revenueSum = CategoryStatistic::where('year', '=', $year)->whereHas('category', function ($query) {
             $query->where('type', TransactionType::revenue);
-        })->sum($monthColumn);
+        })->sum($monthColumn) / 100;
         $revenueSum = Number::currency($revenueSum, Account::getCurrency());
 
         return [

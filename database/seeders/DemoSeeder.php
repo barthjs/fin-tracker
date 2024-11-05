@@ -52,7 +52,7 @@ class DemoSeeder extends Seeder
                 foreach ($accounts as $account) {
                     for ($i = 0; $i < 2; $i++) {
                         $category = $categories->random();
-                        $amount = fake()->randomFloat(2, 0, 1000);
+                        $amount = fake()->numberBetween(-10000, 10000);
                         $amount *= ($category->type->name == "expense") ? -1 : 1;
                         Transaction::factory()->create([
                             'date_time' => Carbon::now()->subYears($y)->month($m),

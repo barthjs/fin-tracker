@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Models\Scopes\CategoryStatisticScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,18 +33,18 @@ class CategoryStatistic extends Model
     ];
 
     protected $casts = [
-        'jan' => 'decimal:4',
-        'feb' => 'decimal:4',
-        'mar' => 'decimal:4',
-        'apr' => 'decimal:4',
-        'may' => 'decimal:4',
-        'jun' => 'decimal:4',
-        'jul' => 'decimal:4',
-        'aug' => 'decimal:4',
-        'sep' => 'decimal:4',
-        'oct' => 'decimal:4',
-        'nov' => 'decimal:4',
-        'dec' => 'decimal:4',
+        'jan' => MoneyCast::class,
+        'feb' => MoneyCast::class,
+        'mar' => MoneyCast::class,
+        'apr' => MoneyCast::class,
+        'may' => MoneyCast::class,
+        'jun' => MoneyCast::class,
+        'jul' => MoneyCast::class,
+        'aug' => MoneyCast::class,
+        'sep' => MoneyCast::class,
+        'oct' => MoneyCast::class,
+        'nov' => MoneyCast::class,
+        'dec' => MoneyCast::class,
     ];
 
     protected static function booted(): void

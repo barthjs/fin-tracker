@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\Currency;
 use App\Models\Scopes\AccountScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 class Account extends Model
 {
@@ -28,7 +29,7 @@ class Account extends Model
     ];
 
     protected $casts = [
-        'balance' => 'decimal:4',
+        'balance' => MoneyCast::class,
         'currency' => Currency::class,
         'active' => 'boolean',
     ];
@@ -50,14 +51,14 @@ class Account extends Model
                 $account->currency = self::getCurrency();
             }
 
-            // Only needed in importer and web
-            if (is_null($account->user_id)) {
-                $account->user_id = auth()->user()->id;
-            }
-
             // Only needed in importer and seeder
             if (is_null($account->color)) {
                 $account->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+            }
+
+            // Only needed in importer and web
+            if (is_null($account->user_id)) {
+                $account->user_id = auth()->user()->id;
             }
 
             $account->name = trim($account->name);
@@ -79,7 +80,6 @@ class Account extends Model
                 Storage::disk('public')->delete($account->logo);
             }
         });
-
     }
 
     /**
@@ -110,13 +110,18 @@ class Account extends Model
         return Currency::USD->name;
     }
 
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'account_id');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function transactions(): HasMany
+    public static function getSum(): float
     {
-        return $this->hasMany(Transaction::class, 'account_id');
+        return Account::whereActive(true)->sum('balance') / 100;
     }
 }

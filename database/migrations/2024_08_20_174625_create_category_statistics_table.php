@@ -14,18 +14,18 @@ return new class extends Migration {
             $table->id();
             $table->smallInteger('year')->nullable()->index();
 
-            $table->decimal('jan', 13, 4)->default(0.00)->index();
-            $table->decimal('feb', 13, 4)->default(0.00)->index();
-            $table->decimal('mar', 13, 4)->default(0.00)->index();
-            $table->decimal('apr', 13, 4)->default(0.00)->index();
-            $table->decimal('may', 13, 4)->default(0.00)->index();
-            $table->decimal('jun', 13, 4)->default(0.00)->index();
-            $table->decimal('jul', 13, 4)->default(0.00)->index();
-            $table->decimal('aug', 13, 4)->default(0.00)->index();
-            $table->decimal('sep', 13, 4)->default(0.00)->index();
-            $table->decimal('oct', 13, 4)->default(0.00)->index();
-            $table->decimal('nov', 13, 4)->default(0.00)->index();
-            $table->decimal('dec', 13, 4)->default(0.00)->index();
+            $table->bigInteger('jan')->default(0)->index();
+            $table->bigInteger('feb')->default(0)->index();
+            $table->bigInteger('mar')->default(0)->index();
+            $table->bigInteger('apr')->default(0)->index();
+            $table->bigInteger('may')->default(0)->index();
+            $table->bigInteger('jun')->default(0)->index();
+            $table->bigInteger('jul')->default(0)->index();
+            $table->bigInteger('aug')->default(0)->index();
+            $table->bigInteger('sep')->default(0)->index();
+            $table->bigInteger('oct')->default(0)->index();
+            $table->bigInteger('nov')->default(0)->index();
+            $table->bigInteger('dec')->default(0)->index();
 
             $table->unsignedInteger('category_id')->index();
             $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete()->cascadeOnUpdate();

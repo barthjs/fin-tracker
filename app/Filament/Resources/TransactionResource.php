@@ -32,7 +32,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Number;
 
 class TransactionResource extends Resource
 {
@@ -82,12 +81,8 @@ class TransactionResource extends Resource
                         ->label(__('transaction.columns.amount'))
                         ->suffix(fn($get) => Account::whereId($get('account_id'))->first()->currency->name ?? "")
                         ->numeric()
-                        ->formatStateUsing(function ($state) {
-                            $state = $state ? Number::format($state, 2, 4) : 0;
-                            return str_replace(',', '.', $state);
-                        })
-                        ->minValue(-99999999.9999)
-                        ->maxValue(99999999.9999)
+                        ->minValue(-922337203685477580)
+                        ->maxValue(9223372036854775807)
                         ->required(),
                 ])
                 ->columns(3),
@@ -145,11 +140,7 @@ class TransactionResource extends Resource
                 TextColumn::make('amount')
                     ->label(__('transaction.columns.amount'))
                     ->fontFamily('mono')
-                    ->numeric(function ($state) {
-                        $numberStr = (string)$state;
-                        $decimalPart = rtrim(substr($numberStr, strpos($numberStr, '.') + 1), '0');
-                        return max(strlen($decimalPart), 2);
-                    })
+                    ->numeric(2)
                     ->badge()
                     ->color(fn($record): string => match ($record->category->type->name) {
                         'expense' => 'danger',
@@ -345,7 +336,7 @@ class TransactionResource extends Resource
                     $newSum = Transaction::whereAccountId($data['account_id'])->sum('amount');
                     Account::whereId($data['account_id'])->update(['balance' => $newSum]);
 
-                    // update balance for new accounts
+                    // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {
                         $oldSum = Transaction::whereAccountId($oldAccountId)->sum('amount');
                         Account::whereId($oldAccountId)->update(['balance' => $oldSum]);
@@ -365,7 +356,23 @@ class TransactionResource extends Resource
                         ->searchable()
                 ])
                 ->action(function (Collection $records, array $data): void {
+                    // save old values before updating
+                    $oldCategoryIds = $records->pluck('category_id', 'date_time')->unique();
                     $records->each->update(['category_id' => $data['category_id']]);
+
+                    // update statistic for new category
+                    $firstDate = Transaction::orderBy('date_time', 'desc')->first()->date_time;
+                    $firstDate = Carbon::parse($firstDate);
+                    $currentDate = Carbon::now();
+                    while ($firstDate->lessThanOrEqualTo($currentDate)) {
+                        Transaction::updateCategoryStatistics($data['category_id'], $firstDate->copy());
+                        $firstDate->addMonth();
+                    }
+
+                    // update balance for old categories
+                    foreach ($oldCategoryIds as $oldCategoryId => $categoryId) {
+                        Transaction::updateCategoryStatistics($categoryId, $oldCategoryId);
+                    }
                 })
                 ->deselectRecordsAfterCompletion(),
         ]);

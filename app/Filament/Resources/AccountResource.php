@@ -196,12 +196,12 @@ class AccountResource extends Resource
                 ->circular()
                 ->extraImgAttributes(fn(Account $record): array => [
                     'alt' => "{$record->name} logo",
-                ]),
+                ])
+                ->toggleable(),
             TextColumn::make('name')
+                ->label(__('account.columns.name'))
                 ->size(TextColumn\TextColumnSize::Medium)
                 ->weight(FontWeight::SemiBold)
-                ->label(__('account.columns.name'))
-                ->weight(FontWeight::Bold)
                 ->searchable()
                 ->sortable(),
             TextColumn::make('balance')
@@ -213,7 +213,8 @@ class AccountResource extends Resource
                     default => 'success'
                 })
                 ->money(currency: fn($record): string => $record->currency->name)
-                ->summarize(Sum::make()->money(config('app.currency'))),
+                ->summarize(Sum::make()->money(config('app.currency'), 100))
+                ->toggleable(),
             TextColumn::make('description')
                 ->label(__('account.columns.description'))
                 ->wrap()

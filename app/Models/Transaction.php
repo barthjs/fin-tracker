@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Casts\MoneyCast;
 use App\Models\Scopes\AccountScope;
 use App\Models\Scopes\TransactionScope;
 use Carbon\Carbon;
@@ -29,7 +30,7 @@ class Transaction extends Model
 
     protected $casts = [
         'date_time' => 'datetime',
-        'amount' => 'decimal:4',
+        'amount' => MoneyCast::class,
     ];
 
     /**

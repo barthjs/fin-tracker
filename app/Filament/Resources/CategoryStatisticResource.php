@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\TransactionType;
 use App\Filament\Resources\CategoryStatisticResource\Pages;
+use App\Models\Account;
 use App\Models\CategoryStatistic;
 use Exception;
 use Filament\Resources\Resource;
@@ -54,74 +55,74 @@ class CategoryStatisticResource extends Resource
                 Tables\Columns\TextColumn::make('jan')
                     ->label(__('category_statistic.columns.jan'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('feb')
                     ->label(__('category_statistic.columns.feb'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('mar')
                     ->label(__('category_statistic.columns.mar'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('apr')
                     ->label(__('category_statistic.columns.apr'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
+                    ->numeric(2)
                     ->summarize(Sum::make()->label(''))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('may')
                     ->label(__('category_statistic.columns.may'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('jun')
                     ->label(__('category_statistic.columns.jun'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('jul')
                     ->label(__('category_statistic.columns.jul'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('aug')
                     ->label(__('category_statistic.columns.aug'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('sep')
                     ->label(__('category_statistic.columns.sep'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('oct')
                     ->label(__('category_statistic.columns.oct'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('nov')
                     ->label(__('category_statistic.columns.nov'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('dec')
                     ->label(__('category_statistic.columns.dec'))
                     ->alignEnd()
-                    ->numeric(fn($state) => self::formatNumber($state))
-                    ->summarize(Sum::make()->label(''))
+                    ->numeric(2)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
             ])
             ->paginated(false)

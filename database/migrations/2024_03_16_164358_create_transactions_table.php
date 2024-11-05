@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->unsignedInteger('id')->autoIncrement();
             $table->dateTime('date_time')->index();
 
-            $table->decimal('amount', 13, 4)->default(0.00)->index();
+            $table->bigInteger('amount')->default(0);
             $table->string('destination')->nullable()->index();
             $table->string('notes')->nullable();
 

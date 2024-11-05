@@ -27,6 +27,17 @@ class AccountImporter extends Importer
                 ->fillRecordUsing(function (Account $record, string $state): void {
                     $record->currency = Account::getCurrency($state);
                 }),
+            ImportColumn::make('color')
+                ->label(__('widget.color'))
+                ->exampleHeader(__('widget.color'))
+                ->examples(function (): array {
+                    $colors = [];
+                    for ($i = 1; $i <= 3; $i++) {
+                        $colors[] = strtolower(sprintf("#%06X", mt_rand(0, 0xFFFFFF)));
+                    }
+                    return $colors;
+                })
+                ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
             ImportColumn::make('description')
                 ->label(__('account.columns.description'))
                 ->exampleHeader(__('account.columns.description'))

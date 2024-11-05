@@ -18,7 +18,7 @@ class TransactionFactory extends Factory
     {
         return [
             'date_time' => fake()->dateTime(),
-            'amount' => fake()->randomFloat(2, -10000, 10000),
+            'amount' => fake()->numberBetween(-10000, 10000),
             'destination' => fake()->company(),
             'notes' => fake()->sentence(),
         ];

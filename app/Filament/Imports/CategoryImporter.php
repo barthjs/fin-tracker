@@ -35,6 +35,17 @@ class CategoryImporter extends Importer
                         default => 'transfers'
                     };
                 }),
+            ImportColumn::make('color')
+                ->label(__('widget.color'))
+                ->exampleHeader(__('widget.color'))
+                ->examples(function (): array {
+                    $colors = [];
+                    for ($i = 1; $i <= 7; $i++) {
+                        $colors[] = strtolower(sprintf("#%06X", mt_rand(0, 0xFFFFFF)));
+                    }
+                    return $colors;
+                })
+                ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'])
         ];
     }
 

@@ -13,18 +13,18 @@ class CategoryStatisticFactory extends Factory
     {
         return [
             'year' => fake()->year,
-            'jan' => fake()->randomFloat(2, 0, 10000),
-            'feb' => fake()->randomFloat(2, 0, 10000),
-            'mar' => fake()->randomFloat(2, 0, 10000),
-            'apr' => fake()->randomFloat(2, 0, 10000),
-            'may' => fake()->randomFloat(2, 0, 10000),
-            'jun' => fake()->randomFloat(2, 0, 10000),
-            'jul' => fake()->randomFloat(2, 0, 10000),
-            'aug' => fake()->randomFloat(2, 0, 10000),
-            'sep' => fake()->randomFloat(2, 0, 10000),
-            'oct' => fake()->randomFloat(2, 0, 10000),
-            'nov' => fake()->randomFloat(2, 0, 10000),
-            'dec' => fake()->randomFloat(2, 0, 10000),
+            'jan' => fake()->numberBetween(-1000, 1000),
+            'feb' => fake()->numberBetween(-1000, 1000),
+            'mar' => fake()->numberBetween(-1000, 1000),
+            'apr' => fake()->numberBetween(-1000, 1000),
+            'may' => fake()->numberBetween(-1000, 1000),
+            'jun' => fake()->numberBetween(-1000, 1000),
+            'jul' => fake()->numberBetween(-1000, 1000),
+            'aug' => fake()->numberBetween(-1000, 1000),
+            'sep' => fake()->numberBetween(-1000, 1000),
+            'oct' => fake()->numberBetween(-1000, 1000),
+            'nov' => fake()->numberBetween(-1000, 1000),
+            'dec' => fake()->numberBetween(-1000, 1000),
         ];
     }
 }
