@@ -21,6 +21,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\App;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
@@ -53,10 +54,12 @@ class AppPanelProvider extends PanelProvider
                 'settings' => MenuItem::make()
                     ->label(__('settings.navigation_label'))
                     ->icon('tabler-settings')
+                    ->hidden(fn() => App::runningInConsole() || !auth()->user()->is_admin)
                     ->url(fn(): string => Settings::getUrl()),
                 'users' => MenuItem::make()
                     ->label(__('user.navigation_label'))
                     ->icon('tabler-users')
+                    ->hidden(fn() => App::runningInConsole() || !auth()->user()->is_admin)
                     ->url(fn(): string => UserResource::getUrl()),
             ])
             ->middleware([

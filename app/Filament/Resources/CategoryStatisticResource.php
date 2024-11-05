@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\TransactionType;
+use App\Filament\Resources\CategoryResource\Pages\ViewCategory;
 use App\Filament\Resources\CategoryStatisticResource\Pages;
 use App\Models\Account;
 use App\Models\CategoryStatistic;
@@ -74,7 +75,7 @@ class CategoryStatisticResource extends Resource
                     ->label(__('category_statistic.columns.apr'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize(Sum::make()->label(''))
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('may')
                     ->label(__('category_statistic.columns.may'))
@@ -156,14 +157,8 @@ class CategoryStatisticResource extends Resource
             ], Tables\Enums\FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(1)
             ->persistFiltersInSession()
+            ->recordUrl(fn(CategoryStatistic $record): string => ViewCategory::getUrl([$record->category_id]))
             ->emptyStateHeading('');
-    }
-
-    private static function formatNumber($number)
-    {
-        $numberStr = (string)$number;
-        $decimalPart = rtrim(substr($numberStr, strpos($numberStr, '.') + 1), '0');
-        return max(strlen($decimalPart), 2);
     }
 
     public static function getPages(): array

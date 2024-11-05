@@ -312,9 +312,14 @@ class TransactionResource extends Resource
 
     public static function getBulkActions(): BulkActionGroup
     {
-        return BulkActionGroup::make([
+        return BulkActionGroup::make(actions: [
             DeleteBulkAction::make()
-                ->modalHeading(__('transaction.buttons.bulk_delete_heading')),
+                ->modalHeading(__('transaction.buttons.bulk_delete_heading'))
+                ->after(function (Collection $records) {
+                    foreach ($records as $record) {
+                        Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
+                    }
+                }),
             BulkAction::make('account')
                 ->icon('tabler-edit')
                 ->label(__('transaction.buttons.bulk_account'))
@@ -342,7 +347,8 @@ class TransactionResource extends Resource
                         Account::whereId($oldAccountId)->update(['balance' => $oldSum]);
                     }
                 })
-                ->deselectRecordsAfterCompletion(),
+                ->deselectRecordsAfterCompletion()
+            /*
             BulkAction::make('category')
                 ->icon('tabler-edit')
                 ->label(__('transaction.buttons.bulk_category'))
@@ -355,26 +361,37 @@ class TransactionResource extends Resource
                         ->required()
                         ->searchable()
                 ])
+                // Todo this doesnt work all the time, some values don't get updated, disabled until fixed
                 ->action(function (Collection $records, array $data): void {
                     // save old values before updating
-                    $oldCategoryIds = $records->pluck('category_id', 'date_time')->unique();
+                    $oldCategories = $records->pluck('category_id', 'date_time');
                     $records->each->update(['category_id' => $data['category_id']]);
 
-                    // update statistic for new category
-                    $firstDate = Transaction::orderBy('date_time', 'desc')->first()->date_time;
-                    $firstDate = Carbon::parse($firstDate);
-                    $currentDate = Carbon::now();
-                    while ($firstDate->lessThanOrEqualTo($currentDate)) {
-                        Transaction::updateCategoryStatistics($data['category_id'], $firstDate->copy());
-                        $firstDate->addMonth();
+                    // update new values
+                    $dates = Transaction::whereCategoryId($data['category_id'])
+                        ->pluck('date_time')
+                        ->map(fn($date) => Carbon::parse($date)->format('Y-m'))
+                        ->unique();
+                    foreach ($dates as $date) {
+                        Transaction::updateCategoryStatistics($data['category_id'], $date);
                     }
 
-                    // update balance for old categories
-                    foreach ($oldCategoryIds as $oldCategoryId => $categoryId) {
-                        Transaction::updateCategoryStatistics($categoryId, $oldCategoryId);
+                    // update old values
+                    $groupedData = [];
+                    foreach ($oldCategories as $datetime => $categoryId) {
+                        $monthKey = Carbon::parse($datetime)->format('Y-m');
+
+                        $groupedData[$monthKey][] = $categoryId;
+                    }
+
+                    foreach ($groupedData as $month => $categories) {
+                        foreach (array_unique($categories) as $categoryId) {
+                            Transaction::updateCategoryStatistics($categoryId, $month);
+                        }
                     }
                 })
                 ->deselectRecordsAfterCompletion(),
+            */
         ]);
     }
 

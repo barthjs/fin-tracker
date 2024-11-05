@@ -3,6 +3,7 @@
 return [
 
     'name' => 'Fin-Tracker',
+    'version' => env('APP_VERSION'),
 
     'maintenance' => [
         'driver' => 'cache',

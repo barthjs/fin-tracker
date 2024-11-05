@@ -2,7 +2,7 @@
     <x-filament::section>
         <div id="version">
             <h1>
-                {{ __('settings.current_version') }}: {{ env('APP_VERSION') }}
+                {{ __('settings.current_version') }}: {{ config('app.version') }}
             </h1>
             <a href="https://hub.docker.com/r/barthjs/fin-tracker/tags" target="_blank">
                 <h1>

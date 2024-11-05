@@ -36,10 +36,11 @@ class DemoSeeder extends Seeder
     /**
      * Generates test data for a given user, including transaction categories, bank accounts, and transactions.
      *
-     * - Creates 10 transaction categories for the user.
+     *
+     * - Creates 10 categories for the user.
      * - Creates 3 bank accounts for the user.
-     * - Generates 60 transactions for each bank account, assigning them randomly to the transaction categories.
-     * Total transactions for 4 users: 2160
+     * - Generates 216 transactions for each bank account, assigning them randomly to the transaction categories.
+     * Total transactions for 4 users: 864
      * @param User $user The user for whom the test data is generated.
      * @return void
      */
@@ -52,7 +53,7 @@ class DemoSeeder extends Seeder
                 foreach ($accounts as $account) {
                     for ($i = 0; $i < 2; $i++) {
                         $category = $categories->random();
-                        $amount = fake()->numberBetween(-10000, 10000);
+                        $amount = fake()->numberBetween(0, 1000);
                         $amount *= ($category->type->name == "expense") ? -1 : 1;
                         Transaction::factory()->create([
                             'date_time' => Carbon::now()->subYears($y)->month($m),
