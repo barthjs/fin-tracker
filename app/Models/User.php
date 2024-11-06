@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Scopes\AccountScope;
 use App\Models\Scopes\CategoryScope;
+use App\Models\Scopes\PortfolioScope;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
@@ -42,7 +43,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     ];
 
     /**
-     * Automatically creates a default 'Demo' account and category
+     * Automatically creates a default 'Demo' account, category and portfolio
      * for each new user after they are created.
      */
     protected static function booted(): void
@@ -50,6 +51,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         static::created(function (User $user) {
             Account::withoutGlobalScopes([AccountScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
             Category::withoutGlobalScopes([CategoryScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
+            Portfolio::withoutGlobalScopes([PortfolioScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
         });
     }
 

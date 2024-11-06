@@ -2,6 +2,7 @@
 
 namespace App\Casts;
 
+use App\Models\Trade;
 use App\Models\Transaction;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;

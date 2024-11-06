@@ -47,7 +47,7 @@ class Transaction extends Model
         static::creating(function (Transaction $transaction) {
             // Only needed in importer
             if (is_null($transaction->account_id)) {
-                $transaction->account_id = self::getDefaultAccountId();
+                $transaction->account_id = Account::getDefaultAccountId();
             }
 
             // Only needed in importer
@@ -79,23 +79,6 @@ class Transaction extends Model
         static::updating(function (Transaction $transaction) {
             $transaction->destination = trim($transaction->destination) ?? null;
         });
-    }
-
-    /**
-     * Get the default bank account ID for the current user.
-     *
-     * This method retrieves the bank account with the name 'Demo' for the currently
-     * authenticated user. If it does not exist, it creates one with that name.
-     *
-     * @return int The ID of the default bank account.
-     */
-    private static function getDefaultAccountId(): int
-    {
-        $account = Account::whereName('Demo')->first();
-        if (!$account) {
-            $account = Account::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
-        }
-        return $account->id;
     }
 
     /**

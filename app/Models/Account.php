@@ -110,6 +110,23 @@ class Account extends Model
         return Currency::USD->name;
     }
 
+    /**
+     * Get the default account ID for the current user.
+     *
+     * Retrieves the first account with the name 'Demo' for the currently
+     * authenticated user. If it does not exist, it creates one with that name.
+     *
+     * @return int The ID of the default account.
+     */
+    public static function getDefaultAccountId(): int
+    {
+        $account = Account::whereName('Demo')->first();
+        if (!$account) {
+            $account = Account::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
+        }
+        return $account->id;
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class, 'account_id');
