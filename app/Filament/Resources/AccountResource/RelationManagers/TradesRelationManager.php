@@ -2,25 +2,25 @@
 
 namespace App\Filament\Resources\AccountResource\RelationManagers;
 
-use App\Filament\Resources\TransactionResource;
+use App\Filament\Resources\TradeResource;
 use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class TransactionRelationManager extends RelationManager
+class TradesRelationManager extends RelationManager
 {
-    protected static string $relationship = 'transactions';
+    protected static string $relationship = 'trades';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('transaction.navigation_label');
+        return __('trade.navigation_label');
     }
 
     public function form(Form $form): Form
     {
-        return $form->schema(TransactionResource::formParts(account: $this->ownerRecord));
+        return $form->schema(TradeResource::formParts(account: $this->ownerRecord));
     }
 
     /**
@@ -28,7 +28,7 @@ class TransactionRelationManager extends RelationManager
      */
     public function table(Table $table): Table
     {
-        return TransactionResource::table($table)
+        return TradeResource::table($table)
             ->heading('');
     }
 

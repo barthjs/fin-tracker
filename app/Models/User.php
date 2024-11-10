@@ -65,6 +65,16 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->hasMany(Category::class, 'user_id');
     }
 
+    public function portfolios(): HasMany
+    {
+        return $this->hasMany(Portfolio::class, 'user_id');
+    }
+
+    public function securities(): HasMany
+    {
+        return $this->hasMany(Security::class, 'user_id');
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->active == true;

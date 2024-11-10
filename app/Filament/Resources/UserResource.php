@@ -8,6 +8,8 @@ use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Filament\Resources\UserResource\RelationManagers\AccountsRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\CategoryRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\PortfoliosRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\SecuritiesRelationManager;
 use App\Models\User;
 use Exception;
 use Filament\Forms\Components\Section;
@@ -231,7 +233,9 @@ class UserResource extends Resource
     {
         return [
             AccountsRelationManager::class,
-            CategoryRelationManager::class
+            CategoryRelationManager::class,
+            PortfoliosRelationManager::class,
+            SecuritiesRelationManager::class,
         ];
     }
 

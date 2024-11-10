@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PortfolioResource\Pages\ListPortfolios;
 use App\Filament\Resources\PortfolioResource\Pages\ViewPortfolio;
-use App\Filament\Resources\PortfolioResource\RelationManagers;
+use App\Filament\Resources\PortfolioResource\RelationManagers\TradesRelationManager;
 use App\Models\Account;
 use App\Models\Portfolio;
 use Exception;
@@ -226,7 +226,7 @@ class PortfolioResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            TradesRelationManager::class,
         ];
     }
 

@@ -12,12 +12,12 @@ class ViewPortfolio extends ViewRecord
 
     public function getTitle(): string
     {
-        return __('security.navigation_label');
+        return __('portfolio.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('security.navigation_label');
+        return __('portfolio.navigation_label');
     }
 
     protected function getHeaderActions(): array

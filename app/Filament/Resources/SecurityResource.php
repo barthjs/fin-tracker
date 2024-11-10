@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SecurityResource\Pages\ListSecurities;
 use App\Filament\Resources\SecurityResource\Pages\ViewSecurity;
-use App\Filament\Resources\SecurityResource\RelationManagers;
+use App\Filament\Resources\SecurityResource\RelationManagers\TradesRelationManager;
 use App\Models\Account;
 use App\Models\Security;
 use Exception;
@@ -72,11 +72,6 @@ class SecurityResource extends Resource
                         ->label(__('security.columns.isin'))
                         ->maxLength(255)
                         ->string(),
-                    Select::make('type_id')
-                        ->label(__('security.columns.type'))
-                        ->relationship('type', 'name')
-                        ->preload()
-                        ->searchable(),
                     TextInput::make('symbol')
                         ->label(__('security.columns.symbol'))
                         ->maxLength(255)
@@ -95,6 +90,11 @@ class SecurityResource extends Resource
                         ->columnSpanFull()
                         ->maxLength(1000)
                         ->string(),
+                    Select::make('type_id')
+                        ->label(__('security.columns.type'))
+                        ->relationship('type', 'name')
+                        ->preload()
+                        ->searchable(),
                     FileUpload::make('logo')
                         ->avatar()
                         ->image()
@@ -113,7 +113,7 @@ class SecurityResource extends Resource
                         ->label(__('table.active'))
                         ->default(true)
                         ->inline(false),
-                ])->columns(3),
+                ])->columns(4),
         ];
     }
 
@@ -182,6 +182,7 @@ class SecurityResource extends Resource
                     ->modalHeading(__('security.buttons.delete_heading'))
                     ->disabled(fn(Security $record): bool => $record->trades()->count() > 0),
             ])
+            ->emptyStateHeading(__('security.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
                 CreateAction::make()
@@ -195,7 +196,7 @@ class SecurityResource extends Resource
     {
         return [
             ImageColumn::make('logo')
-                ->label(__('widget.color'))
+                ->label(__('security.columns.logo'))
                 ->circular()
                 ->extraImgAttributes(fn(Account $record): array => [
                     'alt' => "{$record->name} logo",
@@ -221,6 +222,7 @@ class SecurityResource extends Resource
                 ->sortable(),
             TextColumn::make('type.name')
                 ->label(__('security.columns.type'))
+                ->searchable()
                 ->sortable(),
             TextColumn::make('isin')
                 ->label(__('security.columns.isin'))
@@ -258,7 +260,7 @@ class SecurityResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            TradesRelationManager::class,
         ];
     }
 

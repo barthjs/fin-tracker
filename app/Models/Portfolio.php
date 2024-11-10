@@ -6,6 +6,7 @@ use App\Models\Scopes\PortfolioScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
@@ -67,11 +68,9 @@ class Portfolio extends Model
         });
     }
 
-
-
-    public function securities(): HasMany
+    public function securities(): BelongsToMany
     {
-        return $this->hasMany(Security::class);
+        return $this->belongsToMany(Security::class, 'security_portfolio', 'portfolio_id', 'security_id');
     }
 
     public function trades(): HasMany

@@ -12,7 +12,6 @@ class SecurityType extends Model
 {
     use HasFactory;
 
-
     protected $table = 'security_types';
 
     protected $fillable = [
@@ -52,7 +51,7 @@ class SecurityType extends Model
 
     public function securities(): HasMany
     {
-        return $this->hasMany(Security::class);
+        return $this->hasMany(Security::class, 'type_id');
     }
 
     public function user(): BelongsTo

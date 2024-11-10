@@ -12,12 +12,12 @@ class ViewSecurity extends ViewRecord
 
     public function getTitle(): string
     {
-        return __('portfolio.navigation_label');
+        return __('security.navigation_label');
     }
 
     public function getHeading(): string
     {
-        return __('portfolio.navigation_label');
+        return __('security.navigation_label');
     }
 
     protected function getHeaderActions(): array
@@ -25,7 +25,7 @@ class ViewSecurity extends ViewRecord
         return [
             Actions\EditAction::make()
                 ->icon('tabler-edit')
-                ->modalHeading(__('portfolio.buttons.edit_heading')),
+                ->modalHeading(__('security.buttons.edit_heading')),
         ];
     }
 }

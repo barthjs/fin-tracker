@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use App\Casts\MoneyCast;
+use App\Enums\TradeType;
 use App\Models\Scopes\AccountScope;
 use App\Models\Scopes\PortfolioScope;
 use App\Models\Scopes\SecurityScope;
 use App\Models\Scopes\TradeScope;
-use App\Models\Scopes\TransactionScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,11 +34,12 @@ class Trade extends Model
 
     protected $casts = [
         'date_time' => 'datetime',
-        'total_amount' => 'decimal:18',
-        'quantity' => 'decimal:18',
-        'price' => 'decimal:18',
-        'tax' => MoneyCast::class,
-        'fee' => MoneyCast::class,
+        'total_amount' => 'decimal:6',
+        'quantity' => 'decimal:6',
+        'price' => 'decimal:6',
+        'tax' => 'decimal:2',
+        'fee' => 'decimal:2',
+        'type' => TradeType::class,
     ];
 
     protected static function booted(): void
@@ -63,13 +63,17 @@ class Trade extends Model
             }
 
             $trade->notes = trim($trade->notes) ?? null;
+            // Set the type factor based on trade type
+            $type = ($trade->type === 'removal') ? -1 : 1;
+            $trade->total_amount = ($trade->price * $trade->quantity + $trade->tax + $trade->fee) * $type;
+            $trade->quantity *= $type;
         });
 
         static::created(function (Trade $trade) {
             // Recalculates and updates the account balance for the associated account
-            $balance = Transaction::whereAccountId($trade->account_id)
-                ->withoutGlobalScopes([TransactionScope::class])
-                ->sum('amount');
+            $balance = Trade::whereAccountId($trade->account_id)
+                ->withoutGlobalScopes([TradeScope::class])
+                ->sum('total_amount');
             Account::whereId($trade->account_id)
                 ->withoutGlobalScopes([AccountScope::class])
                 ->update(['balance' => $balance]);
@@ -93,6 +97,9 @@ class Trade extends Model
 
         static::updating(function (Trade $trade) {
             $trade->notes = trim($trade->notes) ?? null;
+            // Set the type factor based on trade type
+            $type = ($trade->type->name === 'removal') ? -1 : 1;
+            $trade->total_amount = ($trade->price * $trade->quantity + $trade->tax + $trade->fee) * $type;
         });
     }
 

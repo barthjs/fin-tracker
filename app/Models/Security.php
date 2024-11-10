@@ -6,13 +6,13 @@ use App\Models\Scopes\SecurityScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Security extends Model
 {
     use HasFactory;
-
 
     public $table = 'securities';
 
@@ -31,7 +31,8 @@ class Security extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:18',
+        'price' => 'decimal:6',
+        'total_quantity' => 'decimal:6',
         'active' => 'boolean',
     ];
 
@@ -75,6 +76,11 @@ class Security extends Model
                 Storage::disk('public')->delete($security->logo);
             }
         });
+    }
+
+    public function portfolios(): BelongsToMany
+    {
+        return $this->belongsToMany(Security::class, 'securities_portfolios_r', 'security_id', 'portfolio_id');
     }
 
     public function trades(): HasMany

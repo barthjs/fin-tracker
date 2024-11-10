@@ -132,6 +132,11 @@ class Account extends Model
         return $this->hasMany(Transaction::class, 'account_id');
     }
 
+    public function trades(): HasMany
+    {
+        return $this->hasMany(Trade::class, 'account_id');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

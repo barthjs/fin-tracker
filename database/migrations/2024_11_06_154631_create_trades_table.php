@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TradeType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,8 +18,10 @@ return new class extends Migration {
             $table->decimal('total_amount', 18, 6)->default(0);
             $table->decimal('quantity', 18, 6)->default(0);
             $table->decimal('price', 18, 6)->default(0);
-            $table->bigInteger('tax')->default(0);
-            $table->bigInteger('fee')->default(0);
+            $table->decimal('tax', 13)->default(0);
+            $table->decimal('fee', 13)->default(0);
+            $types = array_column(TradeType::cases(), 'name');
+            $table->enum('type', $types)->index();
             $table->string('notes')->nullable();
 
             $table->unsignedSmallInteger('account_id')->index();

@@ -189,7 +189,6 @@ class TransactionResource extends Resource
                 TextColumn::make('notes')
                     ->label(__('transaction.columns.notes'))
                     ->wrap()
-                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
             ])
             ->paginated(fn(): bool => Transaction::count() > 20)
@@ -295,6 +294,7 @@ class TransactionResource extends Resource
                 ->modalHeading(__('transaction.buttons.delete_heading'))
                 ->after(function (Transaction $record): Transaction {
                     Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
+                    self::updateAccountBalance($record->account_id);
                     return $record;
                 })
         ];
@@ -312,11 +312,12 @@ class TransactionResource extends Resource
 
     public static function getBulkActions(): BulkActionGroup
     {
-        return BulkActionGroup::make(actions: [
+        return BulkActionGroup::make([
             DeleteBulkAction::make()
                 ->modalHeading(__('transaction.buttons.bulk_delete_heading'))
                 ->after(function (Collection $records) {
                     foreach ($records as $record) {
+                        self::updateAccountBalance($record->account_id);
                         Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
                     }
                 }),

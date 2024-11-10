@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\Currency;
 use App\Filament\Resources\AccountResource\Pages\ListAccounts;
 use App\Filament\Resources\AccountResource\Pages\ViewAccount;
+use App\Filament\Resources\AccountResource\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\AccountResource\RelationManagers\TransactionRelationManager;
 use App\Models\Account;
 use Exception;
@@ -272,7 +273,8 @@ class AccountResource extends Resource
     public static function getRelations(): array
     {
         return [
-            TransactionRelationManager::class
+            TransactionRelationManager::class,
+            TradesRelationManager::class,
         ];
     }
 
