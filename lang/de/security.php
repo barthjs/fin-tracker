@@ -25,6 +25,18 @@ return [
         'type' => 'Typ',
     ],
 
+    'form' => [
+        'type_placeholder' => 'Typ wählen',
+    ],
+
+    'types' => [
+        'BOND' => 'Anleihe',
+        'DERIVATIVE' => 'Derivat',
+        'ETF' => 'ETF',
+        'FUND' => 'Fonds',
+        'STOCK' => 'Aktie',
+    ],
+
     'notifications' => [
         'import' => [
             'failure_heading' => 'Wertpapierimport fehlgeschlagen',

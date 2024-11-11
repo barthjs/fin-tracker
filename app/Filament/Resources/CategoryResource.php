@@ -35,7 +35,7 @@ use Illuminate\Support\Collection;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 8;
     protected static ?string $navigationIcon = 'tabler-category';
 
     public static function getSlug(): string

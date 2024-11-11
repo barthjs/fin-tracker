@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\SecurityType;
 use App\Models\Security;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,6 +19,7 @@ class SecurityFactory extends Factory
             'price' => $this->faker->randomFloat(3, 1, 100),
             'total_quantity' => $this->faker->randomFloat(6, 1, 100),
             'description' => $this->faker->text(),
+            'type' => $this->faker->randomElement(SecurityType::cases())->name
         ];
     }
 }

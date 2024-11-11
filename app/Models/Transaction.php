@@ -84,7 +84,7 @@ class Transaction extends Model
     /**
      * Get the default transaction category ID for the current user.
      *
-     * This method retrieves the category with the name 'Demo' for the currently
+     * Retrieves the category with the name 'Demo' for the currently
      * authenticated user. If it does not exist, it creates one with that name.
      *
      * @return int The ID of the default transaction category.
@@ -99,6 +99,8 @@ class Transaction extends Model
     }
 
     /**
+     * Updates the transaction statistics
+     *
      * @param int $categoryId
      * @param string $date
      * @return void

@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\DB;
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 5;
     protected static ?string $navigationIcon = 'tabler-credit-card';
 
     public static function getSlug(): string
@@ -63,6 +63,7 @@ class TransactionResource extends Resource
                     DateTimePicker::make('date_time')
                         ->label(__('transaction.columns.date'))
                         ->autofocus()
+                        ->seconds(false)
                         ->default(today())
                         ->required(),
                     Select::make('account_id')
@@ -92,6 +93,7 @@ class TransactionResource extends Resource
                         ->label(__('transaction.columns.destination'))
                         ->datalist(Transaction::query()
                             ->select('destination')
+                            ->whereYear('date_time', now()->year)
                             ->distinct()
                             ->orderBy('destination')
                             ->pluck('destination')
@@ -327,8 +329,9 @@ class TransactionResource extends Resource
                 ->form([
                     Select::make('account_id')
                         ->label(__('transaction.columns.account'))
-                        ->placeholder(__('transaction.form.account_placeholder'))
                         ->relationship('account', 'name')
+                        ->placeholder(__('transaction.form.account_placeholder'))
+                        ->validationMessages(['required' => __('transaction.form.account_validation_message')])
                         ->preload()
                         ->required()
                         ->searchable()

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TradeType;
 use App\Filament\Resources\TradeResource\Pages\ListTrades;
 use App\Models\Account;
 use App\Models\Portfolio;
@@ -36,6 +37,8 @@ use Illuminate\Support\Facades\DB;
 class TradeResource extends Resource
 {
     protected static ?string $model = Trade::class;
+
+    protected static ?int $navigationSort = 6;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getSlug(): string
@@ -62,6 +65,7 @@ class TradeResource extends Resource
                     DateTimePicker::make('date_time')
                         ->label(__('trade.columns.date'))
                         ->autofocus()
+                        ->seconds(false)
                         ->default(today())
                         ->required(),
                     Select::make('security_id')
@@ -106,7 +110,7 @@ class TradeResource extends Resource
                     TextInput::make('fee')
                         ->label(__('trade.columns.fee'))
                         ->required()
-                        ->numeric()
+                        ->numeric(2)
                         ->default(0)
                         ->minValue(0)
                         ->live(true, 500)
@@ -147,15 +151,16 @@ class TradeResource extends Resource
                                 ->searchable()
                                 ->createOptionForm(PortfolioResource::formParts())
                                 ->createOptionModalHeading(__('portfolio.buttons.create_heading')),
+                            Textarea::make('notes')
+                                ->label(__('trade.columns.notes'))
+                                ->autosize()
+                                ->columnSpanFull()
+                                ->maxLength(255)
+                                ->rows(1)
+                                ->string(),
                         ])
                         ->columns(2),
-                    Textarea::make('notes')
-                        ->label(__('trade.columns.notes'))
-                        ->autosize()
-                        ->columnSpanFull()
-                        ->maxLength(255)
-                        ->rows(1)
-                        ->string(),
+
                 ])
                 ->columns(2)
         ];
@@ -179,30 +184,35 @@ class TradeResource extends Resource
                     ->fontFamily('mono')
                     ->numeric(2)
                     ->badge()
+                    ->color(fn($record): string => match ($record->type) {
+                        TradeType::BUY => 'success',
+                        TradeType::SELL => 'danger',
+                        default => 'warning',
+                    })
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('quantity')
                     ->label(__('trade.columns.quantity'))
                     ->fontFamily('mono')
-                    ->numeric()
+                    ->numeric(2)
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('price')
                     ->label(__('trade.columns.price'))
                     ->fontFamily('mono')
-                    ->money()
+                    ->numeric(2)
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('tax')
                     ->label(__('trade.columns.tax'))
                     ->fontFamily('mono')
-                    ->numeric()
+                    ->numeric(2)
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('fee')
                     ->label(__('trade.columns.fee'))
                     ->fontFamily('mono')
-                    ->numeric()
+                    ->numeric(2)
                     ->sortable()
                     ->toggleable(),
                 ImageColumn::make('account.logo')
@@ -485,7 +495,7 @@ class TradeResource extends Resource
                     $records->each->update(['security_id' => $data['security_id']]);
 
                     /// update quantity for new security
-                    self::updatePortfolioMarketValue($data['security_id']);
+                    self::updateSecurityQuantity($data['security_id']);
 
                     // update quantity for old securities
                     foreach ($oldSecurityIds as $oldSecurityId) {

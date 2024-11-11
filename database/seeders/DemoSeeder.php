@@ -78,7 +78,6 @@ class DemoSeeder extends Seeder
     /**
      * Generates test trades data for a given user
      *
-     *
      * - Creates 10 categories for the user.
      * - Creates 3 bank accounts for the user.
      * - Generates 216 transactions for each bank account, assigning them randomly to the transaction categories.

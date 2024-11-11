@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TradeType;
 use App\Models\Trade;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -26,6 +27,7 @@ class TradeFactory extends Factory
             'tax' => $tax,
             'fee' => $fee,
             'notes' => $this->faker->words(3, true),
+            'type' => $this->faker->randomElement(TradeType::cases())->name
         ];
     }
 }

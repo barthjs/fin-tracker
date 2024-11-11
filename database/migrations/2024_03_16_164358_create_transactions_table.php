@@ -18,13 +18,13 @@ return new class extends Migration {
             $table->string('destination')->nullable()->index();
             $table->string('notes')->nullable();
 
-            $table->unsignedSmallInteger('account_id')->nullable()->index();
+            $table->unsignedSmallInteger('account_id')->index();
             $table->foreign('account_id')->references('id')->on('accounts')->cascadeOnDelete()->cascadeOnUpdate();
 
-            $table->unsignedInteger('category_id')->nullable()->index();
+            $table->unsignedInteger('category_id')->index();
             $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete()->cascadeOnUpdate();
 
-            $table->unsignedTinyInteger('user_id')->nullable()->index();
+            $table->unsignedTinyInteger('user_id')->index();
             $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
@@ -34,5 +34,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        Schema::dropIfExists('transactions');
     }
 };

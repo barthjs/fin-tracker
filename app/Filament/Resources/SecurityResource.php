@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\SecurityType;
 use App\Filament\Resources\SecurityResource\Pages\ListSecurities;
 use App\Filament\Resources\SecurityResource\Pages\ViewSecurity;
 use App\Filament\Resources\SecurityResource\RelationManagers\TradesRelationManager;
@@ -34,7 +35,7 @@ use Illuminate\Database\Eloquent\Builder;
 class SecurityResource extends Resource
 {
     protected static ?string $model = Security::class;
-
+    protected static ?int $navigationSort = 7;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getSlug(): string
@@ -83,26 +84,12 @@ class SecurityResource extends Resource
                 ])->columns(2),
             Forms\Components\Section::make()
                 ->schema([
-                    Textarea::make('description')
-                        ->label(__('security.columns.description'))
-                        ->autosize()
-                        ->rows(1)
-                        ->columnSpanFull()
-                        ->maxLength(1000)
-                        ->string(),
-                    Select::make('type_id')
+                    Select::make('type')
                         ->label(__('security.columns.type'))
-                        ->relationship('type', 'name')
-                        ->preload()
-                        ->searchable(),
-                    FileUpload::make('logo')
-                        ->avatar()
-                        ->image()
-                        ->imageEditor()
-                        ->circleCropper()
-                        ->moveFiles()
-                        ->directory('logos')
-                        ->maxSize(1024),
+                        ->placeholder(__('security.form.type_placeholder'))
+                        ->options(__('security.types'))
+                        ->default(SecurityType::STOCK)
+                        ->required(),
                     ColorPicker::make('color')
                         ->label(__('widget.color'))
                         ->validationMessages(['regex' => __('widget.color_validation_message')])
@@ -113,7 +100,21 @@ class SecurityResource extends Resource
                         ->label(__('table.active'))
                         ->default(true)
                         ->inline(false),
-                ])->columns(4),
+                    FileUpload::make('logo')
+                        ->avatar()
+                        ->image()
+                        ->imageEditor()
+                        ->circleCropper()
+                        ->moveFiles()
+                        ->directory('logos')
+                        ->maxSize(1024),
+                    Textarea::make('description')
+                        ->label(__('security.columns.description'))
+                        ->autosize()
+                        ->columnSpan(2)
+                        ->maxLength(1000)
+                        ->string(),
+                ])->columns(3),
         ];
     }
 
@@ -131,17 +132,23 @@ class SecurityResource extends Resource
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('price')
                             ->label(__('security.columns.price'))
-                            ->size(TextEntry\TextEntrySize::Small)
+                            ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold)
                             ->numeric(6),
                         TextEntry::make('total_quantity')
                             ->label(__('security.columns.total_quantity'))
-                            ->size(TextEntry\TextEntrySize::Small)
+                            ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold)
                             ->numeric(6),
+                        TextEntry::make('type')
+                            ->label(__('security.columns.type'))
+                            ->formatStateUsing(fn($state): string => __('security.types')[$state->name])
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold),
                     ])
                     ->columns([
-                        'default' => 3,
+                        'default' => 2,
+                        'md' => 4
                     ])
             ]);
     }
@@ -212,16 +219,18 @@ class SecurityResource extends Resource
             TextColumn::make('price')
                 ->label(__('security.columns.price'))
                 ->badge()
-                ->money(Account::getCurrency())
+                ->numeric(2)
                 ->searchable()
                 ->sortable(),
             TextColumn::make('total_quantity')
                 ->label(__('security.columns.total_quantity'))
-                ->numeric()
+                ->numeric(2)
                 ->searchable()
                 ->sortable(),
-            TextColumn::make('type.name')
+            TextColumn::make('type')
                 ->label(__('security.columns.type'))
+                ->formatStateUsing(fn($state): string => __('security.types')[$state->name])
+                ->badge()
                 ->searchable()
                 ->sortable(),
             TextColumn::make('isin')

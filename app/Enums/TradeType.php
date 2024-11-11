@@ -2,9 +2,16 @@
 
 namespace App\Enums;
 
-enum TradeType
+use Filament\Support\Contracts\HasLabel;
+
+enum TradeType: string implements HasLabel
 {
-    case deposit;
-    case removal;
-    case dividend;
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    case BUY = 'BUY';
+    case SELL = 'SELL';
+    case DIVIDEND = 'DIVIDEND';
 }

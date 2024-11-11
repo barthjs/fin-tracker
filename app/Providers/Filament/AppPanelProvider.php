@@ -6,7 +6,6 @@ use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\UserResource;
-use App\Http\Middleware\CheckVerified;
 use Exception;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -47,6 +46,7 @@ class AppPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->defaultThemeMode(ThemeMode::Dark)
             ->maxContentWidth('full')
+            ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')

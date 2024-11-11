@@ -26,7 +26,7 @@ return new class extends Migration {
             $table->string('color');
             $table->boolean('active')->default(true)->index();
 
-            $table->unsignedTinyInteger('user_id')->nullable()->index();
+            $table->unsignedTinyInteger('user_id')->index();
             $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
@@ -36,5 +36,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        Schema::dropIfExists('categories');
     }
 };

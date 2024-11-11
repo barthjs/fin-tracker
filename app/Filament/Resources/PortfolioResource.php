@@ -34,7 +34,7 @@ use Illuminate\Database\Eloquent\Builder;
 class PortfolioResource extends Resource
 {
     protected static ?string $model = Portfolio::class;
-
+    protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getSlug(): string
@@ -201,6 +201,11 @@ class PortfolioResource extends Resource
                 })
                 ->money(Account::getCurrency())
                 ->summarize(Sum::make()->money(config('app.currency')))
+                ->toggleable(),
+            TextColumn::make('description')
+                ->label(__('portfolio.columns.description'))
+                ->wrap()
+                ->sortable()
                 ->toggleable(),
             IconColumn::make('active')
                 ->label(__('table.active'))

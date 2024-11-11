@@ -26,6 +26,7 @@ class Trade extends Model
         'tax',
         'fee',
         'notes',
+        'type',
         'account_id',
         'portfolio_id',
         'security_id',
@@ -64,7 +65,7 @@ class Trade extends Model
 
             $trade->notes = trim($trade->notes) ?? null;
             // Set the type factor based on trade type
-            $type = ($trade->type === 'removal') ? -1 : 1;
+            $type = ($trade->type == TradeType::SELL) ? -1 : 1;
             $trade->total_amount = ($trade->price * $trade->quantity + $trade->tax + $trade->fee) * $type;
             $trade->quantity *= $type;
         });
@@ -98,7 +99,7 @@ class Trade extends Model
         static::updating(function (Trade $trade) {
             $trade->notes = trim($trade->notes) ?? null;
             // Set the type factor based on trade type
-            $type = ($trade->type->name === 'removal') ? -1 : 1;
+            $type = ($trade->type == TradeType::SELL) ? -1 : 1;
             $trade->total_amount = ($trade->price * $trade->quantity + $trade->tax + $trade->fee) * $type;
         });
     }

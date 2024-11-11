@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SecurityType;
 use App\Models\Scopes\SecurityScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,8 +26,8 @@ class Security extends Model
         'description',
         'logo',
         'color',
+        'type',
         'active',
-        'type_id',
         'user_id',
     ];
 
@@ -34,6 +35,7 @@ class Security extends Model
         'price' => 'decimal:6',
         'total_quantity' => 'decimal:6',
         'active' => 'boolean',
+        'type' => SecurityType::class,
     ];
 
     protected static function booted(): void
@@ -86,11 +88,6 @@ class Security extends Model
     public function trades(): HasMany
     {
         return $this->hasMany(Trade::class);
-    }
-
-    public function type(): BelongsTo
-    {
-        return $this->belongsTo(SecurityType::class, 'type_id');
     }
 
     public function user(): BelongsTo

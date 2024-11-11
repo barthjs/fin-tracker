@@ -43,9 +43,9 @@ return [
     ],
 
     'types' => [
-        'deposit' => 'Kauf',
-        'removal' => 'Verkauf',
-        'dividend' => 'Dividende'
+        'BUY' => 'Kauf',
+        'SELL' => 'Verkauf',
+        'DIVIDEND' => 'Dividende'
     ],
 
     'notifications' => [
