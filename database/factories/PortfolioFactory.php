@@ -13,7 +13,6 @@ class PortfolioFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'market_value' => $this->faker->randomFloat(2, 1, 10000),
             'description' => $this->faker->sentence(),
         ];
     }

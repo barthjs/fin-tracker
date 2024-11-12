@@ -25,7 +25,7 @@ class ViewPortfolio extends ViewRecord
         return [
             Actions\EditAction::make()
                 ->icon('tabler-edit')
-                ->modalHeading(__('security.buttons.edit_heading')),
+                ->modalHeading(__('portfolio.buttons.edit_heading')),
         ];
     }
 }

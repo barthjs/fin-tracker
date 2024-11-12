@@ -13,5 +13,4 @@ enum TradeType: string implements HasLabel
 
     case BUY = 'BUY';
     case SELL = 'SELL';
-    case DIVIDEND = 'DIVIDEND';
 }

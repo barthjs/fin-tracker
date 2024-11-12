@@ -17,7 +17,6 @@ class SecurityFactory extends Factory
             'isin' => chr(rand(65, 90)) . chr(rand(65, 90)) . str_pad(rand(0, 9999999999), 10, '0', STR_PAD_LEFT),
             'symbol' => strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, rand(3, 5))),
             'price' => $this->faker->randomFloat(3, 1, 100),
-            'total_quantity' => $this->faker->randomFloat(6, 1, 100),
             'description' => $this->faker->text(),
             'type' => $this->faker->randomElement(SecurityType::cases())->name
         ];

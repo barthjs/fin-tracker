@@ -4,8 +4,7 @@ namespace App\Models;
 
 
 use App\Casts\MoneyCast;
-use App\Models\Scopes\AccountScope;
-use App\Models\Scopes\TransactionScope;
+use App\Models\Scopes\UserScope;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,7 +41,7 @@ class Transaction extends Model
      */
     protected static function booted(): void
     {
-        static::addGlobalScope(new TransactionScope());
+        static::addGlobalScope(new UserScope());
 
         static::creating(function (Transaction $transaction) {
             // Only needed in importer
@@ -64,15 +63,8 @@ class Transaction extends Model
         });
 
         static::created(function (Transaction $transaction) {
-            // Recalculates and updates the account balance for the associated account
-            $balance = Transaction::whereAccountId($transaction->account_id)
-                ->withoutGlobalScopes([TransactionScope::class])
-                ->sum('amount');
-
-            Account::whereId($transaction->account_id)
-                ->withoutGlobalScopes([AccountScope::class])
-                ->update(['balance' => $balance]);
-
+            // Recalculate and update the balance for the associated account and all statistics
+            Account::updateAccountBalance($transaction->account_id);
             self::updateCategoryStatistics($transaction->category_id, $transaction->date_time);
         });
 
@@ -110,14 +102,12 @@ class Transaction extends Model
         $year = Carbon::parse($date)->year;
         $month = Carbon::parse($date)->month;
         $monthColumn = strtolower(Carbon::create(null, $month)->format('M'));
-        $sumPerMonth = Transaction::withoutGlobalScopes()
-            ->whereCategoryId($categoryId)
+        $sumPerMonth = Transaction::whereCategoryId($categoryId)
             ->whereYear('date_time', $year)
             ->whereMonth('date_time', $month)
             ->sum('amount');
 
-        CategoryStatistic::withoutGlobalScopes()
-            ->updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
+        CategoryStatistic::updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
     }
 
     public function account(): BelongsTo

@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('symbol')->nullable()->index();
             $table->decimal('price', 18, 6)->default(0);
             $table->decimal('total_quantity', 18, 6)->default(0);
+            $table->decimal('market_value', 18, 6)->default(0);
             $table->text('description')->nullable();
 
             $groups = array_column(SecurityType::cases(), 'name');

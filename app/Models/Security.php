@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SecurityType;
-use App\Models\Scopes\SecurityScope;
+use App\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +23,7 @@ class Security extends Model
         'symbol',
         'price',
         'total_quantity',
+        'market_value',
         'description',
         'logo',
         'color',
@@ -34,18 +35,23 @@ class Security extends Model
     protected $casts = [
         'price' => 'decimal:6',
         'total_quantity' => 'decimal:6',
+        'market_value' => 'decimal:6',
         'active' => 'boolean',
         'type' => SecurityType::class,
     ];
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new SecurityScope());
+        static::addGlobalScope(new UserScope());
 
         static::creating(function (Security $security) {
             // Only needed in importer and seeder
             if (is_null($security->color)) {
                 $security->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+            }
+
+            if (is_null($security->type)) {
+                $security->type = SecurityType::STOCK;
             }
 
             // Only needed in importer and web
@@ -56,6 +62,7 @@ class Security extends Model
             $security->name = trim($security->name);
             $security->isin = trim($security->isin);
             $security->symbol = trim($security->symbol) ?? null;
+            $security->market_value = $security->price * $security->total_quantity;
             $security->description = trim($security->description) ?? null;
         });
 
@@ -63,6 +70,7 @@ class Security extends Model
             $security->name = trim($security->name);
             $security->isin = trim($security->isin) ?? null;
             $security->symbol = trim($security->symbol) ?? null;
+            $security->market_value = $security->price * $security->total_quantity;
             $security->description = trim($security->description) ?? null;
         });
 
@@ -82,7 +90,7 @@ class Security extends Model
 
     public function portfolios(): BelongsToMany
     {
-        return $this->belongsToMany(Security::class, 'securities_portfolios_r', 'security_id', 'portfolio_id');
+        return $this->belongsToMany(Security::class, 'trades', 'security_id', 'portfolio_id');
     }
 
     public function trades(): HasMany

@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->string('name')->index();
-            $table->bigInteger('market_value')->default(0)->index();
+            $table->decimal('market_value', 18, 6)->default(0)->index();
             $table->text('description')->nullable();
 
             $table->string('logo')->nullable();

@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->unsignedInteger('id')->autoIncrement();
             $table->dateTime('date_time')->index();
 
-            $table->decimal('total_amount', 18, 6)->default(0);
+            $table->bigInteger('total_amount')->default(0);
             $table->decimal('quantity', 18, 6)->default(0);
             $table->decimal('price', 18, 6)->default(0);
             $table->decimal('tax', 13)->default(0);

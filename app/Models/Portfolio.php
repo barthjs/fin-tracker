@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\PortfolioScope;
+use App\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,12 +27,13 @@ class Portfolio extends Model
     ];
 
     protected $casts = [
+        'market_value' => 'decimal:6',
         'active' => 'boolean',
     ];
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new PortfolioScope());
+        static::addGlobalScope(new UserScope());
 
         static::creating(function (Portfolio $portfolio) {
             // Only needed in importer and seeder
@@ -70,7 +71,8 @@ class Portfolio extends Model
 
     public function securities(): BelongsToMany
     {
-        return $this->belongsToMany(Security::class, 'security_portfolio', 'portfolio_id', 'security_id');
+        return $this->belongsToMany(Security::class, 'trades', 'portfolio_id', 'security_id')
+            ->withoutGlobalScopes();
     }
 
     public function trades(): HasMany

@@ -6,7 +6,6 @@ use App\Models\Trade;
 use App\Models\Transaction;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Number;
 
 class MoneyCast implements CastsAttributes
 {
@@ -27,7 +26,7 @@ class MoneyCast implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): float
     {
-        if (!$model instanceof Transaction) {
+        if ((!$model instanceof Transaction) && (!$model instanceof Trade)) {
             return $value;
         }
         return round(floatval($value) * 100);

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PortfolioResource\Pages\ListPortfolios;
 use App\Filament\Resources\PortfolioResource\Pages\ViewPortfolio;
+use App\Filament\Resources\PortfolioResource\RelationManagers\SecuritiesRelationManager;
 use App\Filament\Resources\PortfolioResource\RelationManagers\TradesRelationManager;
 use App\Models\Account;
 use App\Models\Portfolio;
@@ -112,9 +113,9 @@ class PortfolioResource extends Resource
                         TextEntry::make('market_value')
                             ->label(__('portfolio.columns.market_value'))
                             ->color(fn($state) => match (true) {
-                                floatval($state) == 0 => 'gray',
-                                floatval($state) < 0 => 'danger',
-                                default => 'success'
+                                $state > 0 => 'success',
+                                $state < 0 => 'danger',
+                                default => 'gray'
                             })
                             ->money(currency: fn($record) => Account::getCurrency())
                             ->size(TextEntry\TextEntrySize::Medium)
@@ -164,7 +165,7 @@ class PortfolioResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('portfolio.buttons.delete_heading'))
-                    ->disabled(fn(Portfolio $record): bool => $record->trades()->count() > 0),
+                    ->disabled(fn(Portfolio $record): bool => $record->securities()->where('total_quantity', '!=', 0)->count() > 0),
             ])
             ->emptyStateDescription('')
             ->emptyStateActions([
@@ -195,9 +196,9 @@ class PortfolioResource extends Resource
                 ->label(__('portfolio.columns.market_value'))
                 ->badge()
                 ->color(fn($state): string => match (true) {
-                    floatval($state) == 0 => 'gray',
-                    floatval($state) < 0 => 'danger',
-                    default => 'success'
+                    $state > 0 => 'success',
+                    $state < 0 => 'danger',
+                    default => 'gray'
                 })
                 ->money(Account::getCurrency())
                 ->summarize(Sum::make()->money(config('app.currency')))
@@ -231,6 +232,7 @@ class PortfolioResource extends Resource
     public static function getRelations(): array
     {
         return [
+            SecuritiesRelationManager::class,
             TradesRelationManager::class,
         ];
     }

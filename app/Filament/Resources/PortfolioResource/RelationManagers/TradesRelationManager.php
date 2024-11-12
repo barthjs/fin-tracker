@@ -7,16 +7,21 @@ use Exception;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class TradesRelationManager extends RelationManager
 {
     protected static string $relationship = 'trades';
 
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    {
+        return __('trade.navigation_label');
+    }
+
     public function form(Form $form): Form
     {
         return $form->schema(TradeResource::formParts(portfolio: $this->ownerRecord));
     }
-
 
     /**
      * @throws Exception
@@ -25,13 +30,5 @@ class TradesRelationManager extends RelationManager
     {
         return TradeResource::table($table)
             ->heading(__('trade.navigation_label'));
-    }
-
-    /**
-     * Editable on the list poge
-     */
-    public function isReadOnly(): bool
-    {
-        return false;
     }
 }

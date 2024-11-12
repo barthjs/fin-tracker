@@ -5,7 +5,7 @@ namespace App\Models;
 
 use App\Enums\TransactionGroup;
 use App\Enums\TransactionType;
-use App\Models\Scopes\CategoryScope;
+use App\Models\Scopes\UserScope;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,18 +33,9 @@ class Category extends Model
         'type' => TransactionType::class
     ];
 
-    /**
-     * Set up global scopes and event listeners
-     *
-     * Adds a global scope for filtering only the authenticated users categories.
-     * Sets the 'type' based on the 'group' attribute and ensures
-     * 'user_id' is assigned to the authenticated user.
-     *
-     * @return void
-     */
     protected static function booted(): void
     {
-        static::addGlobalScope(new CategoryScope());
+        static::addGlobalScope(new UserScope());
 
         static::creating(function (Category $category) {
             // Needed for seeder, importer and in web

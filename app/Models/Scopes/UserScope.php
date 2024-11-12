@@ -2,17 +2,20 @@
 
 namespace App\Models\Scopes;
 
+use App;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 
-class PortfolioScope implements Scope
+class UserScope implements Scope
 {
     /**
-     * Apply the scope to a given Eloquent query builder.
+     * Query only for records belonging to the authenticated user
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->where('user_id', auth()->user()->id);
+        if (!App::runningInConsole()) {
+            $builder->where('user_id', auth()->id());
+        }
     }
 }

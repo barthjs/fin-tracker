@@ -5,8 +5,6 @@ namespace App\Filament\Resources;
 use App\Enums\TradeType;
 use App\Filament\Resources\TradeResource\Pages\ListTrades;
 use App\Models\Account;
-use App\Models\Portfolio;
-use App\Models\Security;
 use App\Models\Trade;
 use Carbon\Carbon;
 use Exception;
@@ -85,6 +83,12 @@ class TradeResource extends Resource
                         ->numeric()
                         ->minValue(0)
                         ->live(true, 500)
+                        ->formatStateUsing(function ($state) {
+                            if ($state < 0) {
+                                return $state * -1;
+                            }
+                            return $state;
+                        })
                         ->afterStateUpdated(function ($state, callable $get, callable $set) {
                             $set('total_amount', $get('price') * $state + $get('tax') + $get('fee'));
                         }),
@@ -95,7 +99,7 @@ class TradeResource extends Resource
                         ->minValue(0)
                         ->live(true, 500)
                         ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                            $set('total_amount', $state * $get('quantity') + $get('tax') + $get('fee'));
+                            $set('total_amount', round($state * $get('quantity') + $get('tax') + $get('fee'), 2));
                         }),
                     TextInput::make('tax')
                         ->label(__('trade.columns.tax'))
@@ -185,8 +189,8 @@ class TradeResource extends Resource
                     ->numeric(2)
                     ->badge()
                     ->color(fn($record): string => match ($record->type) {
-                        TradeType::BUY => 'success',
-                        TradeType::SELL => 'danger',
+                        TradeType::BUY => 'danger',
+                        TradeType::SELL => 'success',
                         default => 'warning',
                     })
                     ->sortable()
@@ -217,10 +221,12 @@ class TradeResource extends Resource
                     ->toggleable(),
                 ImageColumn::make('account.logo')
                     ->label('')
+                    ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
                     ->circular()
                     ->alignEnd(),
                 TextColumn::make('account.name')
                     ->label(__('trade.columns.account'))
+                    ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
                     ->badge()
                     ->color('info')
                     ->searchable()
@@ -228,6 +234,7 @@ class TradeResource extends Resource
                     ->toggleable(),
                 TextColumn::make('portfolio.name')
                     ->label(__('trade.columns.portfolio'))
+                    ->hiddenOn(PortfolioResource\RelationManagers\TradesRelationManager::class)
                     ->badge()
                     ->color('info')
                     ->searchable()
@@ -235,6 +242,7 @@ class TradeResource extends Resource
                     ->toggleable(),
                 TextColumn::make('security.name')
                     ->label(__('trade.columns.security'))
+                    ->hiddenOn(SecurityResource\RelationManagers\TradesRelationManager::class)
                     ->badge()
                     ->color('info')
                     ->searchable()
@@ -254,8 +262,8 @@ class TradeResource extends Resource
             ->filters([
                 SelectFilter::make('account')
                     ->label(__('trade.columns.account'))
-                    ->relationship('account', 'name')
                     ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
+                    ->relationship('account', 'name')
                     ->multiple()
                     ->preload()
                     ->searchable(),
@@ -332,24 +340,31 @@ class TradeResource extends Resource
                     DB::transaction(function () use ($record, $data, $oldAmount, $oldQuantity, $oldAccountId, $oldPortfolioId, $oldSecurityId): void {
                         $record->update($data);
 
-                        $newAmount = $record->total_amount;
-                        $newQuantity = $record->quantity;
-                        $newAccountId = $record->account_id;
-                        $newSecurityId = $record->portfolio_id;
+                        $amount = $record->total_amount;
+                        $quantity = $record->quantity;
+                        $accountId = $record->account_id;
+                        $portfolioId = $record->portfolio_id;
+                        $securityId = $record->security_id;
 
-                        if ($oldAccountId !== $newAccountId || $oldAmount !== $newAmount) {
-                            self::updateAccountBalance($oldAccountId);
-                            self::updateAccountBalance($newAccountId);
+                        if ($oldAccountId !== $accountId) {
+                            Account::updateAccountBalance($oldAccountId);
+                            Account::updateAccountBalance($accountId);
+                        } else if ($oldAmount !== $amount) {
+                            Account::updateAccountBalance($accountId);
                         }
 
-                        if ($oldPortfolioId !== $newSecurityId || $oldAmount !== $newAmount) {
-                            self::updatePortfolioMarketValue($oldSecurityId);
-                            self::updatePortfolioMarketValue($newSecurityId);
+                        if ($oldPortfolioId !== $portfolioId) {
+                            Trade::updatePortfolioMarketValue($oldPortfolioId);
+                            Trade::updatePortfolioMarketValue($portfolioId);
+                        } else if ($oldQuantity !== $quantity) {
+                            Trade::updatePortfolioMarketValue($portfolioId);
                         }
 
-                        if ($oldSecurityId !== $newSecurityId || $oldQuantity !== $newQuantity) {
-                            self::updateSecurityQuantity($oldSecurityId);
-                            self::updateSecurityQuantity($newSecurityId);
+                        if ($oldSecurityId !== $securityId) {
+                            Trade::updateSecurityQuantity($oldSecurityId);
+                            Trade::updateSecurityQuantity($securityId);
+                        } else if ($oldQuantity !== $quantity) {
+                            Trade::updateSecurityQuantity($securityId);
                         }
                     });
 
@@ -360,42 +375,12 @@ class TradeResource extends Resource
                 ->icon('tabler-trash')
                 ->modalHeading(__('trade.buttons.delete_heading'))
                 ->after(function (Trade $record): Trade {
-                    self::updateAccountBalance($record->account_id);
-                    self::updatePortfolioMarketValue($record->portfolio_id);
-                    self::updateSecurityQuantity($record->security_id);
+                    Account::updateAccountBalance($record->account_id);
+                    Trade::updatePortfolioMarketValue($record->portfolio_id);
+                    Trade::updateSecurityQuantity($record->security_id);
                     return $record;
                 })
         ];
-    }
-
-    /**
-     * @param int $accountId
-     * @return void
-     */
-    private static function updateAccountBalance(int $accountId): void
-    {
-        $newBalance = Trade::whereAccountId($accountId)->sum('total_amount');
-        Account::whereId($accountId)->update(['balance' => $newBalance]);
-    }
-
-    /**
-     * @param int $portfolioId
-     * @return void
-     */
-    private static function updatePortfolioMarketValue(int $portfolioId): void
-    {
-        $marketValue = Trade::wherePortfolioId($portfolioId)->sum('total_amount');
-        Portfolio::whereId($portfolioId)->update(['market_value' => $marketValue]);
-    }
-
-    /**
-     * @param int $securityId
-     * @return void
-     */
-    private static function updateSecurityQuantity(int $securityId): void
-    {
-        $newQuantity = Trade::whereSecurityId($securityId)->sum('quantity');
-        Security::whereId($securityId)->update(['total_quantity' => $newQuantity]);
     }
 
     public static function getBulkActions(): BulkActionGroup
@@ -403,6 +388,7 @@ class TradeResource extends Resource
         return BulkActionGroup::make([
             DeleteBulkAction::make()
                 ->modalHeading(__('trade.buttons.bulk_delete_heading'))
+                ->disabled()
                 ->after(function (Collection $records) {
                     $deletedAccountIds = [];
                     $deletedPortfolioIds = [];
@@ -411,18 +397,27 @@ class TradeResource extends Resource
                     foreach ($records as $record) {
                         if (!in_array($record->account_id, $deletedAccountIds)) {
                             $deletedAccountIds[] = $record->account_id;
-                            self::updateAccountBalance($record->account_id);
                         }
 
                         if (!in_array($record->portfolio_id, $deletedPortfolioIds)) {
                             $deletedPortfolioIds[] = $record->portfolio_id;
-                            self::updatePortfolioMarketValue($record->portfolio_id);
                         }
 
                         if (!in_array($record->account_id, $deletedSecurityIds)) {
                             $deletedSecurityIds[] = $record->account_id;
-                            self::updateSecurityQuantity($record->security_id);
                         }
+                    }
+
+                    foreach ($deletedAccountIds as $accountId) {
+                        Account::updateAccountBalance($accountId);
+                    }
+
+                    foreach ($deletedPortfolioIds as $portfolioId) {
+                        Trade::updatePortfolioMarketValue($portfolioId);
+                    }
+
+                    foreach ($deletedSecurityIds as $securityId) {
+                        Trade::updateSecurityQuantity($securityId);
                     }
                 }),
             BulkAction::make('account')
@@ -443,11 +438,11 @@ class TradeResource extends Resource
                     $records->each->update(['account_id' => $data['account_id']]);
 
                     // update balance for new account
-                    self::updateAccountBalance($data['account_id']);
+                    Account::updateAccountBalance($data['account_id']);
 
                     // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {
-                        self::updateAccountBalance($oldAccountId);
+                        Account::updateAccountBalance($oldAccountId);
                     }
                 })
                 ->deselectRecordsAfterCompletion(),
@@ -469,11 +464,11 @@ class TradeResource extends Resource
                     $records->each->update(['portfolio_id' => $data['portfolio_id']]);
 
                     // update market value for new portfolio
-                    self::updatePortfolioMarketValue($data['portfolio_id']);
+                    Trade::updatePortfolioMarketValue($data['portfolio_id']);
 
-                    // update balance for old accounts
+                    // update market value for old portfolios
                     foreach ($oldPortfolioIds as $oldPortfolioId) {
-                        self::updatePortfolioMarketValue($oldPortfolioId);
+                        Trade::updatePortfolioMarketValue($oldPortfolioId);
                     }
                 })
                 ->deselectRecordsAfterCompletion(),
@@ -489,17 +484,18 @@ class TradeResource extends Resource
                         ->required()
                         ->searchable()
                 ])
+                ->disabled()
                 ->action(function (Collection $records, array $data): void {
                     // save old values before updating
                     $oldSecurityIds = $records->pluck('security_id')->unique();
                     $records->each->update(['security_id' => $data['security_id']]);
 
-                    /// update quantity for new security
-                    self::updateSecurityQuantity($data['security_id']);
+                    // update quantity for new security
+                    Trade::updateSecurityQuantity($data['security_id']);
 
                     // update quantity for old securities
                     foreach ($oldSecurityIds as $oldSecurityId) {
-                        self::updateSecurityQuantity($oldSecurityId);
+                        Trade::updateSecurityQuantity($oldSecurityId);
                     }
                 })
                 ->deselectRecordsAfterCompletion(),

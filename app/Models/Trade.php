@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\TradeType;
-use App\Models\Scopes\AccountScope;
-use App\Models\Scopes\PortfolioScope;
-use App\Models\Scopes\SecurityScope;
-use App\Models\Scopes\TradeScope;
+use App\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Number;
 
 class Trade extends Model
 {
@@ -35,7 +34,7 @@ class Trade extends Model
 
     protected $casts = [
         'date_time' => 'datetime',
-        'total_amount' => 'decimal:6',
+        'total_amount' => MoneyCast::class,
         'quantity' => 'decimal:6',
         'price' => 'decimal:6',
         'tax' => 'decimal:2',
@@ -45,7 +44,7 @@ class Trade extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new TradeScope());
+        static::addGlobalScope(new UserScope());
 
         static::creating(function (Trade $trade) {
             // Only needed in importer
@@ -58,49 +57,67 @@ class Trade extends Model
                 $trade->portfolio_id = self::getDefaultPortfolioId();
             }
 
+            // Only needed in importer
+            if (is_null($trade->security_id)) {
+                $trade->portfolio_id = self::getDefaultSecurityId();
+            }
+
             // Only needed in importer and web
             if (is_null($trade->user_id)) {
                 $trade->user_id = auth()->user()->id;
             }
 
             $trade->notes = trim($trade->notes) ?? null;
+
             // Set the type factor based on trade type
-            $type = ($trade->type == TradeType::SELL) ? -1 : 1;
-            $trade->total_amount = ($trade->price * $trade->quantity + $trade->tax + $trade->fee) * $type;
-            $trade->quantity *= $type;
+            $amountSign = 1;
+            $quantitySign = 1;
+            $feeSign = 1;
+
+            if ($trade->type == TradeType::BUY) {
+                $amountSign = -1;
+            } else {
+                $quantitySign = -1;
+                $feeSign = -1;
+            }
+
+            $trade->total_amount = round(
+                ($trade->price * $trade->quantity + ($trade->tax + $trade->fee) * $feeSign) * $amountSign,
+                2
+            );
+
+            $trade->quantity *= $quantitySign;
         });
 
         static::created(function (Trade $trade) {
-            // Recalculates and updates the account balance for the associated account
-            $balance = Trade::whereAccountId($trade->account_id)
-                ->withoutGlobalScopes([TradeScope::class])
-                ->sum('total_amount');
-            Account::whereId($trade->account_id)
-                ->withoutGlobalScopes([AccountScope::class])
-                ->update(['balance' => $balance]);
+            // Recalculate and update the balance for the associated account
+            Account::updateAccountBalance($trade->account_id);
 
-            // Recalculates and updates the total quantity for the associated security
-            $totalQuantity = Trade::whereSecurityId($trade->security_id)
-                ->withoutGlobalScopes([TradeScope::class])
-                ->sum('quantity');
-            Security::whereId($trade->security_id)
-                ->withoutGlobalScopes([SecurityScope::class])
-                ->update(['total_quantity' => $totalQuantity]);
-
-            // Recalculates and updates the market value for the associated portfolio
-            $marketValue = Trade::wherePortfolioId($trade->portfolio_id)
-                ->withoutGlobalScopes([TradeScope::class])
-                ->sum('total_amount');
-            Portfolio::whereId($trade->security_id)
-                ->withoutGlobalScopes([PortfolioScope::class])
-                ->update(['market_value' => $marketValue]);
+            self::updateSecurityQuantity($trade->security_id);
+            self::updatePortfolioMarketValue($trade->portfolio_id);
         });
 
         static::updating(function (Trade $trade) {
             $trade->notes = trim($trade->notes) ?? null;
+
             // Set the type factor based on trade type
-            $type = ($trade->type == TradeType::SELL) ? -1 : 1;
-            $trade->total_amount = ($trade->price * $trade->quantity + $trade->tax + $trade->fee) * $type;
+            $amountSign = 1;
+            $quantitySign = 1;
+            $feeSign = 1;
+
+            if ($trade->type == TradeType::BUY) {
+                $amountSign = -1;
+            } else {
+                $quantitySign = -1;
+                $feeSign = -1;
+            }
+
+            $trade->total_amount = round(
+                ($trade->price * $trade->quantity + ($trade->tax + $trade->fee) * $feeSign) * $amountSign,
+                2
+            );
+
+            $trade->quantity *= $quantitySign;
         });
     }
 
@@ -119,6 +136,64 @@ class Trade extends Model
             $portfolio = Portfolio::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
         return $portfolio->id;
+    }
+
+    /**
+     * Get the default security ID for the current user.
+     *
+     * Retrieves the first security with the name 'Demo' for the currently
+     * authenticated user. If it does not exist, it creates one with that name.
+     *
+     * @return int The ID of the default security.
+     */
+    private static function getDefaultSecurityId(): int
+    {
+        $portfolio = Security::whereName('Demo')->first();
+        if (!$portfolio) {
+            $portfolio = Security::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
+        }
+        return $portfolio->id;
+    }
+
+    /**
+     * Recalculate and update the market value for the associated portfolio
+     *
+     * @param int $portfolioId
+     * @return void
+     */
+    public static function updatePortfolioMarketValue(int $portfolioId): void
+    {
+        $securities = Trade::wherePortfolioId($portfolioId)
+            ->pluck('security_id')
+            ->unique()
+            ->toArray();
+
+        $marketValue = 0;
+        foreach ($securities as $security) {
+            $quantity = Trade::whereSecurityId($security)
+                ->wherePortfolioId($portfolioId)
+                ->sum('quantity');
+
+            $price = Security::whereId($security)
+                ->value('price');
+
+            $marketValue += $price * $quantity;
+        }
+
+        Portfolio::whereId($portfolioId)
+            ->update(['market_value' => $marketValue]);
+    }
+
+    /**
+     * Recalculate and update the total quantity for the associated security
+     *
+     * @param int $securityId
+     * @return void
+     */
+    public static function updateSecurityQuantity(int $securityId): void
+    {
+        $totalQuantity = Trade::whereSecurityId($securityId)->sum('quantity');
+        Security::whereId($securityId)->update(['total_quantity' => $totalQuantity]);
     }
 
     public function account(): BelongsTo

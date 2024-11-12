@@ -92,8 +92,8 @@ class TransactionResource extends Resource
                     TextInput::make('destination')
                         ->label(__('transaction.columns.destination'))
                         ->datalist(Transaction::query()
-                            ->select('destination')
                             ->whereYear('date_time', now()->year)
+                            ->select('destination')
                             ->distinct()
                             ->orderBy('destination')
                             ->pluck('destination')
@@ -158,6 +158,7 @@ class TransactionResource extends Resource
                     ->wrap(),
                 ImageColumn::make('account.logo')
                     ->label('')
+                    ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
                     ->circular()
                     ->alignEnd(),
                 TextColumn::make('account.name')
@@ -278,8 +279,8 @@ class TransactionResource extends Resource
                         $newCategoryId = $record->category_id;
 
                         if ($oldAccountId !== $newAccountId || $oldAmount !== $newAmount) {
-                            self::updateAccountBalance($oldAccountId);
-                            self::updateAccountBalance($newAccountId);
+                            Account::updateAccountBalance($oldAccountId);
+                            Account::updateAccountBalance($newAccountId);
                         }
 
                         if ($oldCategoryId !== $newCategoryId || $oldDate !== $newDate || $oldAmount !== $newAmount) {
@@ -295,22 +296,13 @@ class TransactionResource extends Resource
                 ->icon('tabler-trash')
                 ->modalHeading(__('transaction.buttons.delete_heading'))
                 ->after(function (Transaction $record): Transaction {
+                    Account::updateAccountBalance($record->account_id);
                     Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
-                    self::updateAccountBalance($record->account_id);
                     return $record;
                 })
         ];
     }
 
-    /**
-     * @param int $accountId
-     * @return void
-     */
-    private static function updateAccountBalance(int $accountId): void
-    {
-        $newBalance = Transaction::whereAccountId($accountId)->sum('amount');
-        Account::whereId($accountId)->update(['balance' => $newBalance]);
-    }
 
     public static function getBulkActions(): BulkActionGroup
     {
@@ -319,7 +311,7 @@ class TransactionResource extends Resource
                 ->modalHeading(__('transaction.buttons.bulk_delete_heading'))
                 ->after(function (Collection $records) {
                     foreach ($records as $record) {
-                        self::updateAccountBalance($record->account_id);
+                        Account::updateAccountBalance($record->account_id);
                         Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
                     }
                 }),
@@ -342,13 +334,11 @@ class TransactionResource extends Resource
                     $records->each->update(['account_id' => $data['account_id']]);
 
                     // update balance for new account
-                    $newSum = Transaction::whereAccountId($data['account_id'])->sum('amount');
-                    Account::whereId($data['account_id'])->update(['balance' => $newSum]);
+                    Account::updateAccountBalance($data['account_id']);
 
                     // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {
-                        $oldSum = Transaction::whereAccountId($oldAccountId)->sum('amount');
-                        Account::whereId($oldAccountId)->update(['balance' => $oldSum]);
+                        Account::updateAccountBalance($oldAccountId);
                     }
                 })
                 ->deselectRecordsAfterCompletion()

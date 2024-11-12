@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Enums\Currency;
-use App\Models\Scopes\AccountScope;
+use App\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,16 +34,9 @@ class Account extends Model
         'active' => 'boolean',
     ];
 
-    /**
-     * Set up global scopes and event listeners
-     *
-     * Adds a global scope for filtering only the authenticated users accounts.
-     * Ensures defaults for 'currency' and that the 'user_id' is assigned
-     * to the authenticated.
-     */
     protected static function booted(): void
     {
-        static::addGlobalScope(new AccountScope());
+        static::addGlobalScope(new UserScope());
 
         static::creating(function (Account $account) {
             // Only needed in seeder
@@ -125,6 +118,18 @@ class Account extends Model
             $account = Account::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
         return $account->id;
+    }
+
+    /**
+     * @param int $accountId
+     * @return void
+     */
+    public static function updateAccountBalance(int $accountId): void
+    {
+        $transactionAmount = Transaction::whereAccountId($accountId)->sum('amount');
+        $tradeAmount = Trade::whereAccountId($accountId)->sum('total_amount');
+
+        Account::whereId($accountId)->update(['balance' => $transactionAmount + $tradeAmount]);
     }
 
     public function transactions(): HasMany

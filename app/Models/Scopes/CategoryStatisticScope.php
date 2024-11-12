@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Scope;
 class CategoryStatisticScope implements Scope
 {
     /**
-     * Apply the scope to a given Eloquent query builder.
+     * Query only for statistics with a category belonging to the authenticated user
      */
     public function apply(Builder $builder, Model $model): void
     {

@@ -8,6 +8,7 @@ use App\Filament\Resources\SecurityResource\Pages\ViewSecurity;
 use App\Filament\Resources\SecurityResource\RelationManagers\TradesRelationManager;
 use App\Models\Account;
 use App\Models\Security;
+use App\Models\Trade;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\ColorPicker;
@@ -182,12 +183,28 @@ class SecurityResource extends Resource
                 EditAction::make()
                     ->iconButton()
                     ->icon('tabler-edit')
-                    ->modalHeading(__('security.buttons.edit_heading')),
+                    ->modalHeading(__('security.buttons.edit_heading'))
+                    ->using(function (Security $record, array $data): Security {
+                        $price = $record->price;
+                        $record->update($data);
+                        if ($data['price'] !== $price) {
+                            $portfolios = Trade::whereSecurityId($record->id)
+                                ->pluck('portfolio_id')
+                                ->unique()
+                                ->toArray();
+                            if (!empty($portfolios)) {
+                                foreach ($portfolios as $portfolio) {
+                                    Trade::updatePortfolioMarketValue($portfolio);
+                                }
+                            }
+                        }
+                        return $record;
+                    }),
                 DeleteAction::make()
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('security.buttons.delete_heading'))
-                    ->disabled(fn(Security $record): bool => $record->trades()->count() > 0),
+                    ->disabled(fn(Security $record): bool => $record->trades()->count() > 0)
             ])
             ->emptyStateHeading(__('security.empty'))
             ->emptyStateDescription('')

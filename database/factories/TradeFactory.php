@@ -17,11 +17,9 @@ class TradeFactory extends Factory
         $price = $this->faker->randomFloat(2, 1, 100);
         $tax = $this->faker->numberBetween(0, 100);
         $fee = $this->faker->numberBetween(0, 100);
-        $totalAmount = $price * $quantity + $tax + $fee;
 
         return [
             'date_time' => Carbon::now(),
-            'total_amount' => $totalAmount,
             'quantity' => $quantity,
             'price' => $price,
             'tax' => $tax,
