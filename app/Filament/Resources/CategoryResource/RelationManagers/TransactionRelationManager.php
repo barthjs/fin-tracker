@@ -12,7 +12,7 @@ use Filament\Tables\Table;
 class TransactionRelationManager extends RelationManager
 {
     protected static string $relationship = 'transactions';
-
+    protected static ?string $icon = 'tabler-credit-card';
     public function form(Form $form): Form
     {
         return $form->schema(TransactionResource::formParts(category: $this->ownerRecord));
@@ -25,13 +25,5 @@ class TransactionRelationManager extends RelationManager
     {
         return TransactionResource::table($table)
             ->heading(__('transaction.navigation_label'));
-    }
-
-    /**
-     * Editable on the list poge
-     */
-    public function isReadOnly(): bool
-    {
-        return false;
     }
 }

@@ -43,7 +43,6 @@ class AppPanelProvider extends PanelProvider
             ->colors(config('colors'))
             ->font('Poppins')
             ->viteTheme('resources/css/filament/app/theme.css')
-            ->sidebarCollapsibleOnDesktop()
             ->defaultThemeMode(ThemeMode::Dark)
             ->maxContentWidth('full')
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)

@@ -7,6 +7,7 @@ use App\Filament\Resources\SecurityResource\Pages\ListSecurities;
 use App\Filament\Resources\SecurityResource\Pages\ViewSecurity;
 use App\Filament\Resources\SecurityResource\RelationManagers\TradesRelationManager;
 use App\Models\Account;
+use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
 use Exception;
@@ -37,7 +38,7 @@ class SecurityResource extends Resource
 {
     protected static ?string $model = Security::class;
     protected static ?int $navigationSort = 7;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'tabler-file-percent';
 
     public static function getSlug(): string
     {
@@ -194,7 +195,7 @@ class SecurityResource extends Resource
                                 ->toArray();
                             if (!empty($portfolios)) {
                                 foreach ($portfolios as $portfolio) {
-                                    Trade::updatePortfolioMarketValue($portfolio);
+                                    Portfolio::updatePortfolioMarketValue($portfolio);
                                 }
                             }
                         }

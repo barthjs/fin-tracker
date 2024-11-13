@@ -36,7 +36,7 @@ class PortfolioResource extends Resource
 {
     protected static ?string $model = Portfolio::class;
     protected static ?int $navigationSort = 4;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'tabler-wallet';
 
     public static function getSlug(): string
     {

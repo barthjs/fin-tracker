@@ -273,19 +273,21 @@ class TransactionResource extends Resource
                     DB::transaction(function () use ($record, $data, $oldDate, $oldAmount, $oldAccountId, $oldCategoryId) {
                         $record->update($data);
 
-                        $newAmount = $record->amount;
-                        $newDate = $record->date_time;
-                        $newAccountId = $record->account_id;
-                        $newCategoryId = $record->category_id;
+                        $amount = $record->amount;
+                        $date = $record->date_time;
+                        $accountId = $record->account_id;
+                        $categoryId = $record->category_id;
 
-                        if ($oldAccountId !== $newAccountId || $oldAmount !== $newAmount) {
+                        if ($oldAccountId !== $accountId) {
                             Account::updateAccountBalance($oldAccountId);
-                            Account::updateAccountBalance($newAccountId);
+                            Account::updateAccountBalance($accountId);
+                        } elseif ($oldAmount !== $amount) {
+                            Account::updateAccountBalance($accountId);
                         }
 
-                        if ($oldCategoryId !== $newCategoryId || $oldDate !== $newDate || $oldAmount !== $newAmount) {
+                        if ($oldCategoryId !== $categoryId || $oldDate !== $date || $oldAmount !== $amount) {
                             Transaction::updateCategoryStatistics($oldCategoryId, $oldDate);
-                            Transaction::updateCategoryStatistics($newCategoryId, $newDate);
+                            Transaction::updateCategoryStatistics($categoryId, $date);
                         }
                     });
 

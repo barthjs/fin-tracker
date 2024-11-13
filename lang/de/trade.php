@@ -6,16 +6,16 @@ return [
     'navigation_label' => 'Trades',
 
     'buttons' => [
-        'create_button_label' => 'Neuer Umsatz',
-        'create_heading' => 'Neuen Umsatz hinzufügen',
-        'edit_heading' => 'Umsatz bearbeiten',
-        'delete_heading' => 'Umsatz löschen',
-        'bulk_delete_heading' => 'Ausgewählte Umsätze löschen',
+        'create_button_label' => 'Neuer Trade',
+        'create_heading' => 'Neuen Trade hinzufügen',
+        'edit_heading' => 'Trade bearbeiten',
+        'delete_heading' => 'Trade löschen',
+        'bulk_delete_heading' => 'Ausgewählte Trades löschen',
         'bulk_account' => 'Konto bearbeiten',
         'bulk_portfolio' => 'Depot bearbeiten',
         'bulk_security' => 'Wertpapier bearbeiten',
-        'export_heading' => 'Umsätze exportieren',
-        'import_heading' => 'Umsätze importieren',
+        'export_heading' => 'Trades exportieren',
+        'import_heading' => 'Trades importieren',
     ],
 
     'columns' => [
@@ -45,27 +45,26 @@ return [
     'types' => [
         'BUY' => 'Kauf',
         'SELL' => 'Verkauf',
-        'DIVIDEND' => 'Dividende'
     ],
 
     'notifications' => [
         'import' => [
-            'failure_heading' => 'Umsatzimport fehlgeschlagen',
-            'success_heading' => 'Umsatzimport erfolgreich',
-            'body_heading' => 'Der Umsatzimport wurde abgeschlossen.',
+            'failure_heading' => 'Tradesimport fehlgeschlagen',
+            'success_heading' => 'Tradesimport erfolgreich',
+            'body_heading' => 'Der Tradesimport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreich importierte Zeilen: ',
         ],
         'export' => [
-            'failure_heading' => 'Umsatzexport fehlgeschlagen',
-            'success_heading' => 'Umsatzexport erfolgreich',
-            'body_heading' => 'Der Umsatzexport wurde abgeschlossen.',
+            'failure_heading' => 'Tradesexport fehlgeschlagen',
+            'success_heading' => 'Tradesexport erfolgreich',
+            'body_heading' => 'Der Tradesexport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Umsätze_'
+            'file_name' => 'Trades_'
         ]
     ],
 
-    'empty' => 'Keine Umsätze gefunden',
+    'empty' => 'Keine Trades gefunden',
 
 ];

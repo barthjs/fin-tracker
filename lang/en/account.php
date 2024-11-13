@@ -52,8 +52,8 @@ return [
             'body_success' => 'Successfully imported rows: ',
         ],
         'export' => [
-            'failure_heading' => 'Account failed',
-            'success_heading' => 'Account successful',
+            'failure_heading' => 'Account export failed',
+            'success_heading' => 'Account export successful',
             'body_heading' => 'The account export has been completed.',
             'body_failure' => 'Failed rows: ',
             'body_success' => 'Successfully exported rows: ',

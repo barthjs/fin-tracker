@@ -2,10 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\AccountScope;
-use App\Models\Scopes\CategoryScope;
-use App\Models\Scopes\PortfolioScope;
-use App\Models\Scopes\SecurityScope;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
@@ -50,10 +46,10 @@ class User extends Authenticatable implements FilamentUser, HasName
     protected static function booted(): void
     {
         static::created(function (User $user) {
-            Account::withoutGlobalScopes([AccountScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
-            Category::withoutGlobalScopes([CategoryScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
-            Portfolio::withoutGlobalScopes([PortfolioScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
-            Security::withoutGlobalScopes([SecurityScope::class])->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
+            Account::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
+            Category::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
+            Portfolio::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
+            Security::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
         });
     }
 

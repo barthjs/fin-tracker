@@ -32,13 +32,6 @@ class Transaction extends Model
         'amount' => MoneyCast::class,
     ];
 
-    /**
-     * Set up global scopes and event listeners
-     *
-     * Adds a global scope for filtering only the authenticated users transactions.
-     * Sets default values for 'account_id' and 'category_id'
-     * and associates the authenticated user with the transaction.
-     */
     protected static function booted(): void
     {
         static::addGlobalScope(new UserScope());

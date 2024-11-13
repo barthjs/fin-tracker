@@ -25,12 +25,4 @@ class TradesRelationManager extends RelationManager
         return TradeResource::table($table)
             ->heading(__('trade.navigation_label'));
     }
-
-    /**
-     * Editable on the list poge
-     */
-    public function isReadOnly(): bool
-    {
-        return false;
-    }
 }

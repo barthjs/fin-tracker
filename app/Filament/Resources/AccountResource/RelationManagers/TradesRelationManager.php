@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 class TradesRelationManager extends RelationManager
 {
     protected static string $relationship = 'trades';
+    protected static ?string $icon = 'tabler-exchange';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -30,13 +31,5 @@ class TradesRelationManager extends RelationManager
     {
         return TradeResource::table($table)
             ->heading('');
-    }
-
-    /**
-     * Editable on the list poge
-     */
-    public function isReadOnly(): bool
-    {
-        return false;
     }
 }

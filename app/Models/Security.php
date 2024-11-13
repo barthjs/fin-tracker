@@ -50,6 +50,7 @@ class Security extends Model
                 $security->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
             }
 
+            // Only needed in importer
             if (is_null($security->type)) {
                 $security->type = SecurityType::STOCK;
             }
@@ -86,6 +87,18 @@ class Security extends Model
                 Storage::disk('public')->delete($security->logo);
             }
         });
+    }
+
+    /**
+     * Recalculate and update the total quantity for the associated security
+     *
+     * @param int $securityId
+     * @return void
+     */
+    public static function updateSecurityQuantity(int $securityId): void
+    {
+        $totalQuantity = Trade::whereSecurityId($securityId)->sum('quantity');
+        Security::whereId($securityId)->update(['total_quantity' => $totalQuantity]);
     }
 
     public function portfolios(): BelongsToMany

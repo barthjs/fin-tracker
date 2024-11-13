@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 class SecuritiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'securities';
+    protected static ?string $icon = 'tabler-file-percent';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -34,7 +35,8 @@ class SecuritiesRelationManager extends RelationManager
             ->query(function () {
                 $securities = Trade::distinct()
                     ->wherePortfolioId($this->ownerRecord->id)
-                    ->pluck('id')->toArray();
+                    ->pluck('id')
+                    ->toArray();
                 return Security::where('total_quantity', '>', 0)
                     ->whereIn('id', $securities);
             })

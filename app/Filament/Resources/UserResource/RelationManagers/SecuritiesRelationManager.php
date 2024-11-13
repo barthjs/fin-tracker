@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 class SecuritiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'securities';
+    protected static ?string $icon = 'tabler-file-percent';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -87,10 +88,5 @@ class SecuritiesRelationManager extends RelationManager
                         return $data;
                     })
             ]);
-    }
-
-    public function isReadOnly(): bool
-    {
-        return false;
     }
 }

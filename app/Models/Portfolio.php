@@ -69,6 +69,35 @@ class Portfolio extends Model
         });
     }
 
+    /**
+     * Recalculate and update the market value for the associated portfolio
+     *
+     * @param int $portfolioId
+     * @return void
+     */
+    public static function updatePortfolioMarketValue(int $portfolioId): void
+    {
+        $securities = Trade::wherePortfolioId($portfolioId)
+            ->pluck('security_id')
+            ->unique()
+            ->toArray();
+
+        $marketValue = 0;
+        foreach ($securities as $security) {
+            $quantity = Trade::whereSecurityId($security)
+                ->wherePortfolioId($portfolioId)
+                ->sum('quantity');
+
+            $price = Security::whereId($security)
+                ->value('price');
+
+            $marketValue += $price * $quantity;
+        }
+
+        Portfolio::whereId($portfolioId)
+            ->update(['market_value' => $marketValue]);
+    }
+
     public function securities(): BelongsToMany
     {
         return $this->belongsToMany(Security::class, 'trades', 'portfolio_id', 'security_id')
@@ -83,5 +112,10 @@ class Portfolio extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public static function getSum(): float
+    {
+        return Portfolio::whereActive(true)->sum('market_value');
     }
 }

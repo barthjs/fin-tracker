@@ -33,7 +33,7 @@ return [
         'BOND' => 'Anleihe',
         'DERIVATIVE' => 'Derivat',
         'ETF' => 'ETF',
-        'FUND' => 'Fonds',
+        'FUND' => 'Fond',
         'STOCK' => 'Aktie',
     ],
 

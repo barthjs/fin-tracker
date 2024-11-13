@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 class TransactionRelationManager extends RelationManager
 {
     protected static string $relationship = 'transactions';
+    protected static ?string $icon = 'tabler-credit-card';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -30,13 +31,5 @@ class TransactionRelationManager extends RelationManager
     {
         return TransactionResource::table($table)
             ->heading('');
-    }
-
-    /**
-     * Editable on the list poge
-     */
-    public function isReadOnly(): bool
-    {
-        return false;
     }
 }

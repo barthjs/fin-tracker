@@ -224,7 +224,6 @@ class AccountResource extends Resource
             TextColumn::make('currency')
                 ->label(__('account.columns.currency'))
                 ->sortable()
-                ->toggleable()
                 ->toggleable(isToggledHiddenByDefault: true),
             IconColumn::make('active')
                 ->label(__('table.active'))

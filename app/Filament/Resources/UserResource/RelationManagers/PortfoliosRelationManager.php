@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 class PortfoliosRelationManager extends RelationManager
 {
     protected static string $relationship = 'portfolios';
+    protected static ?string $icon = 'tabler-wallet';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -87,10 +88,5 @@ class PortfoliosRelationManager extends RelationManager
                         return $data;
                     })
             ]);
-    }
-
-    public function isReadOnly(): bool
-    {
-        return false;
     }
 }

@@ -90,9 +90,4 @@ class CategoryRelationManager extends RelationManager
                     })
             ]);
     }
-
-    public function isReadOnly(): bool
-    {
-        return false;
-    }
 }

@@ -8,7 +8,6 @@ use App\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Number;
 
 class Trade extends Model
 {
@@ -90,11 +89,9 @@ class Trade extends Model
         });
 
         static::created(function (Trade $trade) {
-            // Recalculate and update the balance for the associated account
             Account::updateAccountBalance($trade->account_id);
-
-            self::updateSecurityQuantity($trade->security_id);
-            self::updatePortfolioMarketValue($trade->portfolio_id);
+            Portfolio::updatePortfolioMarketValue($trade->portfolio_id);
+            Security::updateSecurityQuantity($trade->security_id);
         });
 
         static::updating(function (Trade $trade) {
@@ -153,47 +150,6 @@ class Trade extends Model
             $portfolio = Security::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
         return $portfolio->id;
-    }
-
-    /**
-     * Recalculate and update the market value for the associated portfolio
-     *
-     * @param int $portfolioId
-     * @return void
-     */
-    public static function updatePortfolioMarketValue(int $portfolioId): void
-    {
-        $securities = Trade::wherePortfolioId($portfolioId)
-            ->pluck('security_id')
-            ->unique()
-            ->toArray();
-
-        $marketValue = 0;
-        foreach ($securities as $security) {
-            $quantity = Trade::whereSecurityId($security)
-                ->wherePortfolioId($portfolioId)
-                ->sum('quantity');
-
-            $price = Security::whereId($security)
-                ->value('price');
-
-            $marketValue += $price * $quantity;
-        }
-
-        Portfolio::whereId($portfolioId)
-            ->update(['market_value' => $marketValue]);
-    }
-
-    /**
-     * Recalculate and update the total quantity for the associated security
-     *
-     * @param int $securityId
-     * @return void
-     */
-    public static function updateSecurityQuantity(int $securityId): void
-    {
-        $totalQuantity = Trade::whereSecurityId($securityId)->sum('quantity');
-        Security::whereId($securityId)->update(['total_quantity' => $totalQuantity]);
     }
 
     public function account(): BelongsTo
