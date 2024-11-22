@@ -26,13 +26,13 @@ class DemoSeeder extends Seeder
         if (App::environment() === 'local') {
             $users = User::all();
             foreach ($users as $user) {
-                $this->createTestValuesTransactions($user);
+                $this->createTestTransactions($user);
                 $this->createTestValuesTrades($user);
             }
 
             for ($i = 1; $i <= 3; $i++) {
                 $user = User::factory()->create(['email' => "test$i@example.com"]);
-                $this->createTestValuesTransactions($user);
+                $this->createTestTransactions($user);
                 $this->createTestValuesTrades($user);
             }
         }
@@ -46,10 +46,10 @@ class DemoSeeder extends Seeder
      * - Creates 3 bank accounts for the user.
      * - Generates 216 transactions for each bank account, assigning them randomly to the transaction categories.
      * Total transactions for 4 users: 864
-     * @param User $user The user for whom the test data is generated.
+     * @param User $user
      * @return void
      */
-    private function createTestValuesTransactions(User $user): void
+    private function createTestTransactions(User $user): void
     {
         $accounts = Account::factory(3)->create(['user_id' => $user->id]);
         $categories = Category::factory(10)->create(['user_id' => $user->id]);
@@ -72,7 +72,6 @@ class DemoSeeder extends Seeder
             }
         }
     }
-
 
     /**
      * Generates test trades data for a given user

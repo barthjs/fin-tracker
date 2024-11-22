@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -24,9 +24,9 @@ class TransactionImporter extends Importer
                 ->rules(['required'])
                 ->fillRecordUsing(function (Transaction $record, string $state): void {
                     try {
-                        $carbon = Carbon::parse($state)->toDateTimeString();
+                        $carbon = Carbon::parse($state);
                     } catch (Exception) {
-                        $carbon = Carbon::now()->toDateTimeString();
+                        $carbon = Carbon::now();
                     }
                     $record->date_time = $carbon;
                 }),

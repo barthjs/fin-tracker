@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources\CategoryResource\RelationManagers;
 
@@ -13,6 +13,7 @@ class TransactionRelationManager extends RelationManager
 {
     protected static string $relationship = 'transactions';
     protected static ?string $icon = 'tabler-credit-card';
+
     public function form(Form $form): Form
     {
         return $form->schema(TransactionResource::formParts(category: $this->ownerRecord));

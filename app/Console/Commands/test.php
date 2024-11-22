@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Portfolio;
-use App\Models\Trade;
 use Illuminate\Console\Command;
 
 class test extends Command
@@ -27,9 +25,5 @@ class test extends Command
      */
     public function handle()
     {
-        $securities = Trade::wherePortfolioId(1)
-            ->pluck('security_id')
-            ->unique()
-            ->toArray();
     }
 }

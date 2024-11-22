@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Number;
 
 class TransactionResource extends Resource
 {
@@ -54,7 +55,7 @@ class TransactionResource extends Resource
         return $form->schema(self::formParts());
     }
 
-    public static function formParts($account = null, $category = null): array
+    public static function formParts(Model $account = null, Model $category = null): array
     {
         // account and category for default values in relation manager
         return [
@@ -63,6 +64,8 @@ class TransactionResource extends Resource
                     DateTimePicker::make('date_time')
                         ->label(__('transaction.columns.date'))
                         ->autofocus()
+                        ->native(false)
+                        ->displayFormat('d.m.Y, H:i')
                         ->seconds(false)
                         ->default(today())
                         ->required(),
@@ -72,8 +75,8 @@ class TransactionResource extends Resource
                         ->placeholder(__('transaction.form.account_placeholder'))
                         ->validationMessages(['required' => __('transaction.form.account_validation_message')])
                         ->preload()
-                        ->default(fn(): string => $account->id ?? "")
                         ->live(true)
+                        ->default(fn(): int|string => $account->id ?? "")
                         ->required()
                         ->searchable()
                         ->createOptionForm(AccountResource::formParts())
@@ -107,8 +110,8 @@ class TransactionResource extends Resource
                         ->placeholder(__('transaction.form.category_placeholder'))
                         ->validationMessages(['required' => __('transaction.form.category_validation_message')])
                         ->preload()
-                        ->default(fn(): string => $category->id ?? "")
                         ->live(true)
+                        ->default(fn(): int|string => $category->id ?? "")
                         ->hint(fn($get): string => __('category.types')[Category::whereId($get('category_id'))->first()->type->name ?? ""] ?? "")
                         ->required()
                         ->searchable()
@@ -142,9 +145,11 @@ class TransactionResource extends Resource
                 TextColumn::make('amount')
                     ->label(__('transaction.columns.amount'))
                     ->fontFamily('mono')
+                    ->copyable()
+                    ->copyableState(fn($state) => Number::format($state, 2))
                     ->numeric(2)
                     ->badge()
-                    ->color(fn($record): string => match ($record->category->type->name) {
+                    ->color(fn(Transaction $record): string => match ($record->category->type->name) {
                         'expense' => 'danger',
                         'revenue' => 'success',
                         default => 'warning',
@@ -153,9 +158,9 @@ class TransactionResource extends Resource
                     ->toggleable(),
                 TextColumn::make('destination')
                     ->label(__('transaction.columns.destination'))
+                    ->wrap()
                     ->searchable()
-                    ->toggleable()
-                    ->wrap(),
+                    ->toggleable(),
                 ImageColumn::make('account.logo')
                     ->label('')
                     ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
@@ -173,7 +178,7 @@ class TransactionResource extends Resource
                     ->label(__('transaction.columns.category'))
                     ->hiddenOn(CategoryResource\RelationManagers\TransactionRelationManager::class)
                     ->badge()
-                    ->color(fn($record): string => match ($record->category->type->name) {
+                    ->color(fn(Transaction $record): string => match ($record->category->type->name) {
                         'expense' => 'danger',
                         'revenue' => 'success',
                         default => 'warning',
@@ -264,7 +269,7 @@ class TransactionResource extends Resource
                 ->iconButton()
                 ->icon('tabler-edit')
                 ->modalHeading(__('transaction.buttons.edit_heading'))
-                ->using(function (Model $record, array $data): Model {
+                ->using(function (Transaction $record, array $data): Model {
                     $oldDate = $record->getOriginal('date_time');
                     $oldAmount = $record->getOriginal('amount');
                     $oldAccountId = $record->getOriginal('account_id');
@@ -285,7 +290,7 @@ class TransactionResource extends Resource
                             Account::updateAccountBalance($accountId);
                         }
 
-                        if ($oldCategoryId !== $categoryId || $oldDate !== $date || $oldAmount !== $amount) {
+                        if ($oldCategoryId !== $categoryId || $date->notEqualTo($oldDate) || $oldAmount !== $amount) {
                             Transaction::updateCategoryStatistics($oldCategoryId, $oldDate);
                             Transaction::updateCategoryStatistics($categoryId, $date);
                         }
@@ -304,7 +309,6 @@ class TransactionResource extends Resource
                 })
         ];
     }
-
 
     public static function getBulkActions(): BulkActionGroup
     {
@@ -336,7 +340,7 @@ class TransactionResource extends Resource
                     $records->each->update(['account_id' => $data['account_id']]);
 
                     // update balance for new account
-                    Account::updateAccountBalance($data['account_id']);
+                    Account::updateAccountBalance(intval($data['account_id']));
 
                     // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {

@@ -1,7 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Models;
-
 
 use App\Casts\MoneyCast;
 use App\Models\Scopes\UserScope;
@@ -28,8 +27,11 @@ class Transaction extends Model
     ];
 
     protected $casts = [
-        'date_time' => 'datetime',
+        'date_time' => 'datetime', // Carbon object
         'amount' => MoneyCast::class,
+        'account_id' => 'integer',
+        'category_id' => 'integer',
+        'user_id' => 'integer',
     ];
 
     protected static function booted(): void
@@ -87,10 +89,10 @@ class Transaction extends Model
      * Updates the transaction statistics
      *
      * @param int $categoryId
-     * @param string $date
+     * @param Carbon $date
      * @return void
      */
-    public static function updateCategoryStatistics(int $categoryId, string $date): void
+    public static function updateCategoryStatistics(int $categoryId, Carbon $date): void
     {
         $year = Carbon::parse($date)->year;
         $month = Carbon::parse($date)->month;

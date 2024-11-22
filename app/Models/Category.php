@@ -38,7 +38,7 @@ class Category extends Model
 
         static::creating(function (Category $category) {
             // Needed for seeder, importer and in web
-            $category->type = match ($category->group->name) {
+            $category->type = match ($category->group->name ?? $category->group = TransactionGroup::transfers) {
                 'fix_expenses', 'var_expenses' => 'expense',
                 'fix_revenues', 'var_revenues' => 'revenue',
                 default => 'transfer'
