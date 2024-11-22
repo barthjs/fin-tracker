@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -45,7 +45,12 @@ class CategoryImporter extends Importer
                     }
                     return $colors;
                 })
-                ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'])
+                ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
+            ImportColumn::make('active')
+                ->label(__('table.active'))
+                ->exampleHeader(__('table.active'))
+                ->examples([1, 1, 1])
+                ->boolean(),
         ];
     }
 

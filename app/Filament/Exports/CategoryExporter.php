@@ -1,7 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
+use App\Enums\TransactionGroup;
+use App\Enums\TransactionType;
 use App\Models\Category;
 use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
@@ -19,10 +21,10 @@ class CategoryExporter extends Exporter
                 ->label(__('category.columns.name')),
             ExportColumn::make('group')
                 ->label(__('category.columns.group'))
-                ->formatStateUsing(fn($state): string => __('category.groups')[$state->name]),
+                ->formatStateUsing(fn(TransactionGroup $state): string => __('category.groups')[$state->name]),
             ExportColumn::make('type')
                 ->label(__('category.columns.type'))
-                ->formatStateUsing(fn($state): string => __('category.types')[$state->name]),
+                ->formatStateUsing(fn(TransactionType $state): string => __('category.types')[$state->name]),
             ExportColumn::make('color')
                 ->label(__('widget.color')),
             ExportColumn::make('active')
@@ -50,6 +52,6 @@ class CategoryExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('category.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
+        return __('category.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i');
     }
 }

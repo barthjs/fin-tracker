@@ -1,11 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Database\Seeders;
 
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Portfolio;
-use App\Models\Scopes\AccountScope;
 use App\Models\Security;
 use App\Models\Trade;
 use App\Models\Transaction;
@@ -89,7 +88,7 @@ class DemoSeeder extends Seeder
     {
         $portfolios = Portfolio::factory(3)->create(['user_id' => $user->id]);
         $securities = Security::factory(10)->create(['user_id' => $user->id]);
-        $accounts = Account::withoutGlobalScopes([AccountScope::class])->whereUserId($user->id)->get();
+        $accounts = Account::withoutGlobalScopes()->whereUserId($user->id)->get();
         for ($y = 0; $y < 3; $y++) {
             for ($m = 1; $m <= 12; $m++) {
                 foreach ($portfolios as $portfolio) {

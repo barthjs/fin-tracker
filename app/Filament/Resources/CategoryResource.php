@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -77,6 +77,7 @@ class CategoryResource extends Resource
                         ->required(),
                     ColorPicker::make('color')
                         ->label(__('widget.color'))
+                        ->validationMessages(['regex' => __('widget.color_validation_message')])
                         ->required()
                         ->default(strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
                         ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
@@ -97,21 +98,21 @@ class CategoryResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('category.columns.name'))
-                            ->tooltip(fn($record): string => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn($record): string => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn(Category $record): string => !$record->active ? __('table.status_inactive') : "")
+                            ->color(fn(Category $record): string => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('group')
                             ->label(__('category.columns.group'))
-                            ->formatStateUsing(fn($state): string => __('category.groups')[$state->name])
-                            ->color(fn($record): string => match ($record->type->name) {
+                            ->formatStateUsing(fn(TransactionGroup $state): string => __('category.groups')[$state->name])
+                            ->color(fn(Category $record): string => match ($record->type->name) {
                                 'expense' => 'danger',
                                 'revenue' => 'success',
                                 default => 'warning',
                             })
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
-                        TextEntry::make(Carbon::now()->year)
+                        TextEntry::make(Carbon::today()->format('Y'))
                             ->money(Account::getCurrency())
                             ->state(function (Category $record): float {
                                 return Category::with(['transactions' => function ($query) {
@@ -163,7 +164,7 @@ class CategoryResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('category.buttons.delete_heading'))
-                    ->disabled(fn($record): bool => $record->transactions()->count() > 0)
+                    ->disabled(fn(Category $record): bool => $record->transactions()->count() > 0)
             ])
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('category.empty'))
@@ -190,7 +191,7 @@ class CategoryResource extends Resource
                 ->label(__('category.columns.group'))
                 ->formatStateUsing(fn($state): string => __('category.groups')[$state->name])
                 ->badge()
-                ->color(fn($record): string => match ($record->type->name) {
+                ->color(fn(Category $record): string => match ($record->type->name) {
                     'expense' => 'danger',
                     'revenue' => 'success',
                     default => 'warning',
@@ -199,20 +200,8 @@ class CategoryResource extends Resource
                 ->sortable(),
             IconColumn::make('active')
                 ->label(__('table.active'))
-                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
+                ->tooltip(fn(bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('created_at')
-                ->label(__('table.created_at'))
-                ->dateTime('Y-m-d, H:i:s')
-                ->fontFamily('mono')
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('updated_at')
-                ->label(__('table.updated_at'))
-                ->dateTime('Y-m-d, H:i:s')
-                ->fontFamily('mono')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ];

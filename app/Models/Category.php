@@ -1,7 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Models;
-
 
 use App\Enums\TransactionGroup;
 use App\Enums\TransactionType;
@@ -39,7 +38,7 @@ class Category extends Model
 
         static::creating(function (Category $category) {
             // Needed for seeder, importer and in web
-            $category->type = match ($category->group->name ?? $category->group = TransactionGroup::transfers) {
+            $category->type = match ($category->group->name) {
                 'fix_expenses', 'var_expenses' => 'expense',
                 'fix_revenues', 'var_revenues' => 'revenue',
                 default => 'transfer'
@@ -60,7 +59,9 @@ class Category extends Model
 
         // Create an empty entry for the statistic after category creation
         static::created(function (Category $category) {
-            CategoryStatistic::create(['year' => Carbon::now()->year, 'category_id' => $category->id]);
+            if ($category->type != TransactionType::transfer) {
+                CategoryStatistic::create(['year' => Carbon::now()->year, 'category_id' => $category->id]);
+            }
         });
 
         // Listen for the updating event to set the type and trim the name before saving.
