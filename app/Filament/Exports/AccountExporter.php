@@ -1,7 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
+use App\Enums\Currency;
 use App\Models\Account;
 use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
@@ -20,10 +21,10 @@ class AccountExporter extends Exporter
                 ->label(__('account.columns.name')),
             ExportColumn::make('balance')
                 ->label(__('account.columns.balance'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn(float $state): string => Number::format($state)),
             ExportColumn::make('currency')
                 ->label(__('account.columns.currency'))
-                ->formatStateUsing(fn($state): string => $state->name),
+                ->formatStateUsing(fn(Currency $state): string => $state->name),
             ExportColumn::make('description')
                 ->label(__('account.columns.description')),
             ExportColumn::make('color')
@@ -53,6 +54,6 @@ class AccountExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('account.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
+        return __('account.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i');
     }
 }

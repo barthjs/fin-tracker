@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -116,27 +116,28 @@ class AccountResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('account.columns.name'))
-                            ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn($record) => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn(Account $record) => !$record->active ? __('table.status_inactive') : "")
+                            ->color(fn(Account $record) => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('balance')
                             ->label(__('account.columns.balance'))
-                            ->color(fn($state) => match (true) {
-                                floatval($state) == 0 => 'gray',
-                                floatval($state) < 0 => 'danger',
+                            ->color(fn(float $state): string => match (true) {
+                                $state == 0 => 'gray',
+                                $state < 0 => 'danger',
                                 default => 'success'
                             })
-                            ->money(currency: fn($record) => $record->currency->name)
+                            ->money(fn(Account $record): string => $record->currency->name)
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('description')
                             ->label(__('account.columns.description'))
                             ->size(TextEntry\TextEntrySize::Small)
+                            ->hidden(fn(Account $record) => !$record->description)
                     ])
                     ->columns([
                         'default' => 2,
-                        'lg' => 3
+                        'md' => 3
                     ])
             ]);
     }
@@ -208,13 +209,13 @@ class AccountResource extends Resource
             TextColumn::make('balance')
                 ->label(__('account.columns.balance'))
                 ->badge()
-                ->color(fn($state): string => match (true) {
-                    floatval($state) == 0 => 'gray',
-                    floatval($state) < 0 => 'danger',
+                ->color(fn(float $state): string => match (true) {
+                    $state == 0 => 'gray',
+                    $state < 0 => 'danger',
                     default => 'success'
                 })
-                ->money(currency: fn($record): string => $record->currency->name)
-                ->summarize(Sum::make()->money(config('app.currency'), 100))
+                ->money(currency: fn(Account $record): string => $record->currency->name)
+                ->summarize(Sum::make()->money(Account::getCurrency(), 100))
                 ->toggleable(),
             TextColumn::make('description')
                 ->label(__('account.columns.description'))
@@ -227,20 +228,8 @@ class AccountResource extends Resource
                 ->toggleable(isToggledHiddenByDefault: true),
             IconColumn::make('active')
                 ->label(__('table.active'))
-                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
+                ->tooltip(fn(bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('created_at')
-                ->label(__('table.created_at'))
-                ->dateTime('Y-m-d, H:i:s')
-                ->fontFamily('mono')
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('updated_at')
-                ->label(__('table.updated_at'))
-                ->dateTime('Y-m-d, H:i:s')
-                ->fontFamily('mono')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ];

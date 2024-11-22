@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Casts;
 
@@ -24,7 +24,7 @@ class MoneyCast implements CastsAttributes
      *
      * @param array<string, mixed> $attributes
      */
-    public function set(Model $model, string $key, mixed $value, array $attributes): float
+    public function set(Model $model, string $key, mixed $value, array $attributes): string|float
     {
         if ((!$model instanceof Transaction) && (!$model instanceof Trade)) {
             return $value;

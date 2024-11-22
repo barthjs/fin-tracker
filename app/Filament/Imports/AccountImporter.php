@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -27,6 +27,11 @@ class AccountImporter extends Importer
                 ->fillRecordUsing(function (Account $record, string $state): void {
                     $record->currency = Account::getCurrency($state);
                 }),
+            ImportColumn::make('description')
+                ->label(__('account.columns.description'))
+                ->exampleHeader(__('account.columns.description'))
+                ->examples(__('account.columns.description_examples'))
+                ->rules(['max:1000']),
             ImportColumn::make('color')
                 ->label(__('widget.color'))
                 ->exampleHeader(__('widget.color'))
@@ -38,11 +43,11 @@ class AccountImporter extends Importer
                     return $colors;
                 })
                 ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
-            ImportColumn::make('description')
-                ->label(__('account.columns.description'))
-                ->exampleHeader(__('account.columns.description'))
-                ->examples(__('account.columns.description_examples'))
-                ->rules(['max:1000']),
+            ImportColumn::make('active')
+                ->label(__('table.active'))
+                ->exampleHeader(__('table.active'))
+                ->examples([1, 1, 1])
+                ->boolean(),
         ];
     }
 

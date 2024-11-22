@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Models;
 
@@ -147,7 +147,7 @@ class Account extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public static function getSum(): float
+    public static function getActiveSum(): float
     {
         return Account::whereActive(true)->sum('balance') / 100;
     }
