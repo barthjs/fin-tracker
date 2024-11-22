@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\Pages;
 
@@ -38,10 +38,6 @@ class ListUsers extends ListRecords
             'all' => Tab::make()
                 ->label(__('table.filter.all'))
                 ->badge(User::all()->count()),
-            'admins' => Tab::make()
-                ->label(__('user.filter.admins'))
-                ->badge(User::whereIsAdmin(true)->count())
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('is_admin', true)),
             'inactive' => Tab::make()
                 ->label(__('table.status_inactive'))
                 ->badge(User::whereActive(false)->count())

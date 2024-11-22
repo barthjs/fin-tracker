@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
@@ -27,7 +27,7 @@ class CategoryRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        return Category::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
+        return (string)Category::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
     public function form(Form $form): Form

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -16,6 +16,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Infolists\Components;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -141,25 +142,25 @@ class UserResource extends Resource
     {
         return $infolist
             ->schema([
-                \Filament\Infolists\Components\Section::make()
+                Components\Section::make()
                     ->schema([
                         TextEntry::make('full_name')
                             ->label(__('user.columns.full_name'))
                             ->state(fn(User $record): string => $record->getFilamentName())
-                            ->tooltip(fn($record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->tooltip(fn(User $record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
                             ->color(fn($record): string => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('name')
                             ->label(__('user.columns.name'))
-                            ->tooltip(fn($record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
-                            ->color(fn($record): string => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn(User $record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->color(fn(User $record): string => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('email')
                             ->label(__('user.columns.email'))
-                            ->tooltip(fn($record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
-                            ->color(fn($record): string => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn(User $record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->color(fn(User $record): string => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         IconEntry::make('is_admin')
