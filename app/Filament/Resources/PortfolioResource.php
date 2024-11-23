@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -6,6 +6,7 @@ use App\Filament\Resources\PortfolioResource\Pages\ListPortfolios;
 use App\Filament\Resources\PortfolioResource\Pages\ViewPortfolio;
 use App\Filament\Resources\PortfolioResource\RelationManagers\SecuritiesRelationManager;
 use App\Filament\Resources\PortfolioResource\RelationManagers\TradesRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\PortfoliosRelationManager;
 use App\Models\Account;
 use App\Models\Portfolio;
 use Exception;
@@ -106,27 +107,28 @@ class PortfolioResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('portfolio.columns.name'))
-                            ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn($record) => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn(Portfolio $record) => !$record->active ? __('table.status_inactive') : "")
+                            ->color(fn(Portfolio $record) => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('market_value')
                             ->label(__('portfolio.columns.market_value'))
-                            ->color(fn($state) => match (true) {
-                                $state > 0 => 'success',
+                            ->color(fn(float $state): string => match (true) {
+                                $state == 0 => 'gray',
                                 $state < 0 => 'danger',
-                                default => 'gray'
+                                default => 'success'
                             })
-                            ->money(currency: fn($record) => Account::getCurrency())
+                            ->money(fn(Portfolio $record) => Account::getCurrency())
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('description')
                             ->label(__('portfolio.columns.description'))
                             ->size(TextEntry\TextEntrySize::Small)
+                            ->hidden(fn(Portfolio $record) => !$record->description)
                     ])
                     ->columns([
                         'default' => 2,
-                        'lg' => 3
+                        'md' => 3
                     ])
             ]);
     }
@@ -165,8 +167,9 @@ class PortfolioResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('portfolio.buttons.delete_heading'))
-                    ->disabled(fn(Portfolio $record): bool => $record->securities()->where('total_quantity', '!=', 0)->count() > 0),
+                    ->disabled(fn(Portfolio $record): bool => $record->trades()->exists()),
             ])
+            ->emptyStateHeading(__('portfolio.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
                 CreateAction::make()
@@ -180,9 +183,9 @@ class PortfolioResource extends Resource
     {
         return [
             ImageColumn::make('logo')
-                ->label(__('widget.color'))
+                ->label(__('portfolio.columns.logo'))
                 ->circular()
-                ->extraImgAttributes(fn(Account $record): array => [
+                ->extraImgAttributes(fn(Portfolio $record): array => [
                     'alt' => "{$record->name} logo",
                 ])
                 ->toggleable(),
@@ -194,11 +197,12 @@ class PortfolioResource extends Resource
                 ->sortable(),
             TextColumn::make('market_value')
                 ->label(__('portfolio.columns.market_value'))
+                ->hiddenOn(PortfoliosRelationManager::class)
                 ->badge()
-                ->color(fn($state): string => match (true) {
-                    $state > 0 => 'success',
+                ->color(fn(float $state): string => match (true) {
+                    $state == 0 => 'gray',
                     $state < 0 => 'danger',
-                    default => 'gray'
+                    default => 'success'
                 })
                 ->money(Account::getCurrency())
                 ->summarize(Sum::make()->money(config('app.currency')))
@@ -212,18 +216,6 @@ class PortfolioResource extends Resource
                 ->label(__('table.active'))
                 ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('created_at')
-                ->label(__('table.created_at'))
-                ->dateTime('Y-m-d, H:i:s')
-                ->fontFamily('mono')
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('updated_at')
-                ->label(__('table.updated_at'))
-                ->dateTime('Y-m-d, H:i:s')
-                ->fontFamily('mono')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ];

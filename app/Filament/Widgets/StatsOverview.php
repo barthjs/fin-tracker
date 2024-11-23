@@ -18,7 +18,7 @@ class StatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $totalAssets = Account::getActiveSum() + Portfolio::getSum();
+        $totalAssets = Account::getActiveSum() + Portfolio::getActiveSum();
         $totalAssets = Number::currency($totalAssets, Account::getCurrency());
 
         $monthColumn = strtolower(Carbon::createFromDate(null, Carbon::today()->month)->format('M'));

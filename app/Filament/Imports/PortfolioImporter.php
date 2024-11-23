@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -20,8 +20,11 @@ class PortfolioImporter extends Importer
                 ->examples(__('portfolio.columns.name_examples'))
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
-            ImportColumn::make('logo')
-                ->rules(['max:255']),
+            ImportColumn::make('description')
+                ->label(__('portfolio.columns.description'))
+                ->exampleHeader(__('portfolio.columns.description'))
+                ->examples(__('portfolio.columns.description_examples'))
+                ->rules(['max:1000']),
             ImportColumn::make('color')
                 ->label(__('widget.color'))
                 ->exampleHeader(__('widget.color'))
@@ -33,11 +36,11 @@ class PortfolioImporter extends Importer
                     return $colors;
                 })
                 ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
-            ImportColumn::make('description')
-                ->label(__('portfolio.columns.description'))
-                ->exampleHeader(__('portfolio.columns.description'))
-                ->examples(__('portfolio.columns.description_examples'))
-                ->rules(['max:1000']),
+            ImportColumn::make('active')
+                ->label(__('table.active'))
+                ->exampleHeader(__('table.active'))
+                ->examples([1, 1, 1])
+                ->boolean(),
         ];
     }
 

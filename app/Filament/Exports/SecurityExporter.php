@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
@@ -24,10 +24,10 @@ class SecurityExporter extends Exporter
                 ->label(__('security.columns.symbol')),
             ExportColumn::make('price')
                 ->label(__('security.columns.price'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn(float $state): string => Number::format($state, 6)),
             ExportColumn::make('total_quantity')
                 ->label(__('security.columns.total_quantity'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn(float $state): string => Number::format($state, 6)),
             ExportColumn::make('description')
                 ->label(__('security.columns.description')),
             ExportColumn::make('type')
@@ -60,6 +60,6 @@ class SecurityExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('security.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
+        return __('security.notifications.export.file_name') . Carbon::now()->format('Y-m-d-H-i');
     }
 }

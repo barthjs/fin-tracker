@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
@@ -27,7 +27,7 @@ class SecuritiesRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        return Security::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
+        return (string)Security::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
     public function form(Form $form): Form
@@ -75,6 +75,7 @@ class SecuritiesRelationManager extends RelationManager
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('security.buttons.delete_heading'))
+                    ->disabled(fn(Security $record): bool => $record->trades()->withoutGlobalScopes()->exists())
             ])
             ->emptyStateHeading(__('security.empty'))
             ->emptyStateDescription('')

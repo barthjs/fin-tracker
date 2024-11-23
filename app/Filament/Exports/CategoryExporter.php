@@ -52,6 +52,6 @@ class CategoryExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('category.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i');
+        return __('category.notifications.export.file_name') . Carbon::now()->format('Y-m-d-H-i');
     }
 }

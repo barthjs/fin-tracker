@@ -35,6 +35,6 @@ class Settings extends Page
     {
         $response = Http::get('https://hub.docker.com/v2/repositories/barthjs/fin-tracker/tags?page_size=2');
         $data = json_decode($response->getBody(), true);
-        $this->latestVersion = $data['results'][1]['name'];
+        $this->latestVersion = $data['results'][0]['name'];
     }
 }

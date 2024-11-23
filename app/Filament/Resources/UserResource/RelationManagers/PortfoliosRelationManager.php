@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
@@ -27,7 +27,7 @@ class PortfoliosRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        return Portfolio::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
+        return (string)Portfolio::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
     public function form(Form $form): Form
@@ -75,6 +75,7 @@ class PortfoliosRelationManager extends RelationManager
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('portfolio.buttons.delete_heading'))
+                    ->disabled(fn(Portfolio $record): bool => $record->trades()->withoutGlobalScopes()->exists())
             ])
             ->emptyStateHeading(__('portfolio.empty'))
             ->emptyStateDescription('')

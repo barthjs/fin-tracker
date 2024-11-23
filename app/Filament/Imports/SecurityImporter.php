@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -84,6 +84,10 @@ class SecurityImporter extends Importer
                         default => ''
                     };
                 }),
+            ImportColumn::make('description')
+                ->label(__('security.columns.description'))
+                ->exampleHeader(__('security.columns.description'))
+                ->rules(['max:1000']),
             ImportColumn::make('color')
                 ->label(__('widget.color'))
                 ->exampleHeader(__('widget.color'))
@@ -95,10 +99,11 @@ class SecurityImporter extends Importer
                     return $colors;
                 })
                 ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
-            ImportColumn::make('description')
-                ->label(__('security.columns.description'))
-                ->exampleHeader(__('security.columns.description'))
-                ->rules(['max:1000']),
+            ImportColumn::make('active')
+                ->label(__('table.active'))
+                ->exampleHeader(__('table.active'))
+                ->examples([1, 1, 1])
+                ->boolean(),
         ];
     }
 
@@ -106,6 +111,7 @@ class SecurityImporter extends Importer
     {
         return Security::firstOrNew([
             'name' => trim($this->data['name']),
+            'isin' => trim($this->data['isin']),
         ]);
     }
 

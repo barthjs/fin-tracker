@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Models;
 
@@ -61,18 +61,18 @@ class Security extends Model
             }
 
             $security->name = trim($security->name);
-            $security->isin = trim($security->isin);
-            $security->symbol = trim($security->symbol) ?? null;
+            $security->isin = trim($security->isin ?? "");
+            $security->symbol = trim($security->symbol ?? "");
             $security->market_value = $security->price * $security->total_quantity;
-            $security->description = trim($security->description) ?? null;
+            $security->description = trim($security->description ?? "");
         });
 
         static::updating(function (Security $security) {
             $security->name = trim($security->name);
-            $security->isin = trim($security->isin) ?? null;
-            $security->symbol = trim($security->symbol) ?? null;
+            $security->isin = trim($security->isin ?? "");
+            $security->symbol = trim($security->symbol ?? "");
             $security->market_value = $security->price * $security->total_quantity;
-            $security->description = trim($security->description) ?? null;
+            $security->description = trim($security->description ?? "");
         });
 
         static::updated(function (Security $security) {

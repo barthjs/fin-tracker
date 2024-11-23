@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
@@ -20,7 +20,7 @@ class PortfolioExporter extends Exporter
                 ->label(__('portfolio.columns.name')),
             ExportColumn::make('market_value')
                 ->label(__('portfolio.columns.market_value'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn(float $state): string => Number::format($state, 2)),
             ExportColumn::make('description')
                 ->label(__('portfolio.columns.description')),
             ExportColumn::make('color')
@@ -50,6 +50,6 @@ class PortfolioExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('portfolio.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
+        return __('portfolio.notifications.export.file_name') . Carbon::now()->format('Y-m-d-H-i');
     }
 }

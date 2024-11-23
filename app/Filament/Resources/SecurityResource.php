@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -6,7 +6,7 @@ use App\Enums\SecurityType;
 use App\Filament\Resources\SecurityResource\Pages\ListSecurities;
 use App\Filament\Resources\SecurityResource\Pages\ViewSecurity;
 use App\Filament\Resources\SecurityResource\RelationManagers\TradesRelationManager;
-use App\Models\Account;
+use App\Filament\Resources\UserResource\RelationManagers\SecuritiesRelationManager;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
@@ -128,8 +128,8 @@ class SecurityResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('security.columns.name'))
-                            ->tooltip(fn($record) => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn($record) => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn(Security $record) => !$record->active ? __('table.status_inactive') : "")
+                            ->color(fn(Security $record) => !$record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('price')
@@ -223,7 +223,7 @@ class SecurityResource extends Resource
             ImageColumn::make('logo')
                 ->label(__('security.columns.logo'))
                 ->circular()
-                ->extraImgAttributes(fn(Account $record): array => [
+                ->extraImgAttributes(fn(Security $record): array => [
                     'alt' => "{$record->name} logo",
                 ])
                 ->toggleable(),
@@ -242,23 +242,20 @@ class SecurityResource extends Resource
                 ->sortable(),
             TextColumn::make('total_quantity')
                 ->label(__('security.columns.total_quantity'))
+                ->hiddenOn(SecuritiesRelationManager::class)
                 ->numeric(2)
-                ->searchable()
-                ->sortable(),
-            TextColumn::make('type')
-                ->label(__('security.columns.type'))
-                ->formatStateUsing(fn($state): string => __('security.types')[$state->name])
-                ->badge()
                 ->searchable()
                 ->sortable(),
             TextColumn::make('isin')
                 ->label(__('security.columns.isin'))
                 ->searchable()
-                ->sortable(),
+                ->sortable()
+                ->toggleable(),
             TextColumn::make('symbol')
                 ->label(__('security.columns.symbol'))
                 ->searchable()
-                ->sortable(),
+                ->sortable()
+                ->toggleable(),
             TextColumn::make('description')
                 ->label(__('security.columns.description'))
                 ->wrap()
@@ -267,18 +264,6 @@ class SecurityResource extends Resource
                 ->label(__('table.active'))
                 ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('created_at')
-                ->label(__('table.created_at'))
-                ->dateTime('Y-m-d, H:i:s')
-                ->fontFamily('mono')
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('updated_at')
-                ->label(__('table.updated_at'))
-                ->dateTime('Y-m-d, H:i:s')
-                ->fontFamily('mono')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ];

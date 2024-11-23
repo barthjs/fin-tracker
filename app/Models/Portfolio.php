@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Models;
 
@@ -47,12 +47,12 @@ class Portfolio extends Model
             }
 
             $portfolio->name = trim($portfolio->name);
-            $portfolio->description = trim($portfolio->description) ?? null;
+            $portfolio->description = trim($portfolio->description ?? "");
         });
 
         static::updating(function (Portfolio $portfolio) {
             $portfolio->name = trim($portfolio->name);
-            $portfolio->description = trim($portfolio->description) ?? null;
+            $portfolio->description = trim($portfolio->description ?? "");
         });
 
         static::updated(function (Portfolio $portfolio) {
@@ -114,8 +114,8 @@ class Portfolio extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public static function getSum(): float
+    public static function getActiveSum(): float
     {
-        return Portfolio::whereActive(true)->sum('market_value');
+        return floatval(Portfolio::whereActive(true)->sum('market_value'));
     }
 }

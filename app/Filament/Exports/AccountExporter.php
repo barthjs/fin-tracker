@@ -54,6 +54,6 @@ class AccountExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('account.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i');
+        return __('account.notifications.export.file_name') . Carbon::now()->format('Y-m-d-H-i');
     }
 }

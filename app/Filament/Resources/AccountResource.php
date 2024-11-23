@@ -148,7 +148,6 @@ class AccountResource extends Resource
      */
     public static function table(Table $table): Table
     {
-        $columns = self::tableColumns();
         return $table
             ->modifyQueryUsing(function (Builder $query, Table $table) {
                 if (!$table->getActiveFiltersCount()) {
@@ -157,7 +156,7 @@ class AccountResource extends Resource
                     return $query;
                 }
             })
-            ->columns($columns)
+            ->columns(self::tableColumns())
             ->paginated(fn(): bool => Account::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()

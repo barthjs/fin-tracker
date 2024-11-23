@@ -55,10 +55,12 @@ class Account extends Model
             }
 
             $account->name = trim($account->name);
+            $account->description = trim($account->description ?? "");
         });
 
         static::updating(function (Account $account) {
             $account->name = trim($account->name);
+            $account->description = trim($portfolio->description ?? "");
         });
 
         static::updated(function (Account $account) {
