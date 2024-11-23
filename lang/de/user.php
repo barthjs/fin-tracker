@@ -4,6 +4,8 @@ return [
 
     'slug' => 'benutzer',
     'navigation_label' => 'Benutzer',
+    'profile-slug' => 'profil',
+    'unverified_message' => 'Bitte das Passwort ändern',
 
     'buttons' => [
         'create_button_label' => 'Neuer Benutzer',
@@ -20,7 +22,9 @@ return [
         'last_name' => 'Nachname',
         'full_name' => 'Name',
         'name' => 'Benutzername',
+        'name_unique_warning' => 'Benutzername bereits vergeben',
         'email' => 'E-Mail',
+        'email_unique_warning' => 'E-Mail bereits vergeben',
         'verified' => 'Verifiziert',
         'is_admin' => 'Administrator',
     ],
@@ -28,8 +32,6 @@ return [
     'filter' => [
         'verified' => 'Verifiziert',
         'unverified' => 'Unverifiziert',
-        'admins' => 'Administratoren',
-        'users' => 'Benutzer',
     ],
 
     'login' => [

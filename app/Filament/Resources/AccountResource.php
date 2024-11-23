@@ -7,6 +7,7 @@ use App\Filament\Resources\AccountResource\Pages\ListAccounts;
 use App\Filament\Resources\AccountResource\Pages\ViewAccount;
 use App\Filament\Resources\AccountResource\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\AccountResource\RelationManagers\TransactionRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\AccountsRelationManager;
 use App\Models\Account;
 use Exception;
 use Filament\Forms;
@@ -177,7 +178,7 @@ class AccountResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('account.buttons.delete_heading'))
-                    ->disabled(fn(Account $record): bool => $record->transactions()->count() > 0)
+                    ->disabled(fn(Account $record): bool => $record->transactions()->exists() || $record->trades()->exists()),
             ])
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('account.empty'))
@@ -192,6 +193,7 @@ class AccountResource extends Resource
 
     public static function tableColumns(): array
     {
+        $hidden = AccountsRelationManager::class;
         return [
             ImageColumn::make('logo')
                 ->label(__('account.columns.logo'))
@@ -208,6 +210,7 @@ class AccountResource extends Resource
                 ->sortable(),
             TextColumn::make('balance')
                 ->label(__('account.columns.balance'))
+                ->hiddenOn($hidden)
                 ->badge()
                 ->color(fn(float $state): string => match (true) {
                     $state == 0 => 'gray',
@@ -219,6 +222,7 @@ class AccountResource extends Resource
                 ->toggleable(),
             TextColumn::make('description')
                 ->label(__('account.columns.description'))
+                ->hiddenOn($hidden)
                 ->wrap()
                 ->sortable()
                 ->toggleable(),

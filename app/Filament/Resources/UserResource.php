@@ -58,7 +58,6 @@ class UserResource extends Resource
                     ->schema([
                         TextInput::make('first_name')
                             ->label(__('user.columns.first_name'))
-                            ->autofocus()
                             ->maxLength(255)
                             ->required()
                             ->string(),
@@ -72,12 +71,14 @@ class UserResource extends Resource
                             ->maxLength(255)
                             ->required()
                             ->string()
-                            ->unique(ignoreRecord: true),
+                            ->unique(ignoreRecord: true)
+                            ->validationMessages(['unique' => __('user.columns.name_unique_warning')]),
                         TextInput::make('email')
                             ->label(__('user.columns.email'))
                             ->maxLength(255)
                             ->email()
-                            ->unique(ignoreRecord: true),
+                            ->unique(ignoreRecord: true)
+                            ->validationMessages(['unique' => __('user.columns.email_unique_warning')])
                     ])
                     ->columns(2),
                 Section::make()

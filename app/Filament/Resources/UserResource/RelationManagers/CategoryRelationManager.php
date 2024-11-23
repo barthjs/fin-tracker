@@ -75,6 +75,7 @@ class CategoryRelationManager extends RelationManager
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('category.buttons.delete_heading'))
+                    ->disabled(fn(Category $record): bool => $record->transactions()->withoutGlobalScopes()->exists())
             ])
             ->bulkActions(CategoryResource::getBulkActions())
             ->emptyStateHeading(__('category.empty'))

@@ -6,6 +6,9 @@ use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\UserResource;
+use App\Http\Middleware\CheckVerified;
+use App\Livewire\CustomPersonalInfo;
+use App\Livewire\CustomUpdatePassword;
 use Exception;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
@@ -22,6 +25,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\App;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -36,7 +40,6 @@ class AppPanelProvider extends PanelProvider
             ->path('')
             ->spa()
             ->login(Login::class)
-            ->profile(EditProfile::class, isSimple: false)
             ->unsavedChangesAlerts()
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
@@ -49,6 +52,18 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->plugin(
+                BreezyCore::make()
+                    ->myProfile(
+                        slug: __('user.profile-slug')
+                    )
+                    ->customMyProfilePage(EditProfile::class)
+                    ->myProfileComponents([
+                        'update_password' => CustomUpdatePassword::class,
+                        'personal_info' => CustomPersonalInfo::class
+                    ])
+                    ->enableTwoFactorAuthentication()
+            )
             ->userMenuItems([
                 'settings' => MenuItem::make()
                     ->label(__('settings.navigation_label'))
@@ -71,6 +86,7 @@ class AppPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                CheckVerified::class
             ])
             ->authMiddleware([
                 Authenticate::class,

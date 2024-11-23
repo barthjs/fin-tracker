@@ -8,6 +8,7 @@
         "php": "^8.3",
         "filament/filament": "^3.2",
         "guzzlehttp/guzzle": "^7.9",
+        "jeffgreco13/filament-breezy": "^2.4",
         "laravel/framework": "^11.21",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.5"

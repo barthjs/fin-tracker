@@ -75,6 +75,7 @@ class AccountsRelationManager extends RelationManager
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('account.buttons.delete_heading'))
+                    ->disabled(fn(Account $record): bool => $record->transactions()->withoutGlobalScopes()->exists() || $record->trades()->withoutGlobalScopes()->exists())
             ])
             ->bulkActions(AccountResource::getBulkActions())
             ->emptyStateHeading(__('account.empty'))

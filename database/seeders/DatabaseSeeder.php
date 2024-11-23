@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +21,7 @@ class DatabaseSeeder extends Seeder
                     'last_name' => 'Admin',
                     'email' => 'admin@example.com',
                     'password' => Hash::make('admin'),
-                    'verified' => true,
+                    'verified' => !App::isProduction(),
                     'is_admin' => true,
                     'active' => true,
                 ]
