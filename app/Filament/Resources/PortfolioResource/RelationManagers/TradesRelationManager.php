@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources\PortfolioResource\RelationManagers;
 
@@ -13,6 +13,7 @@ class TradesRelationManager extends RelationManager
 {
     protected static string $relationship = 'trades';
     protected static ?string $icon = 'tabler-exchange';
+
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('trade.navigation_label');

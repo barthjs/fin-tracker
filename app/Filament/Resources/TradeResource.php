@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -33,6 +33,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Number;
 
 class TradeResource extends Resource
 {
@@ -63,8 +64,10 @@ class TradeResource extends Resource
             Section::make()
                 ->schema([
                     DateTimePicker::make('date_time')
-                        ->label(__('trade.columns.date'))
+                        ->label(__('transaction.columns.date'))
                         ->autofocus()
+                        ->native(false)
+                        ->displayFormat('d.m.Y, H:i')
                         ->seconds(false)
                         ->default(today())
                         ->required(),
@@ -74,7 +77,7 @@ class TradeResource extends Resource
                         ->placeholder(__('trade.form.security_placeholder'))
                         ->validationMessages(['required' => __('trade.form.security_validation_message')])
                         ->preload()
-                        ->default(fn(): string => $security->id ?? "")
+                        ->default(fn(): int|string => $security->id ?? "")
                         ->required()
                         ->searchable()
                         ->createOptionForm(SecurityResource::formParts())
@@ -116,7 +119,7 @@ class TradeResource extends Resource
                     TextInput::make('fee')
                         ->label(__('trade.columns.fee'))
                         ->required()
-                        ->numeric(2)
+                        ->numeric()
                         ->default(0)
                         ->minValue(0)
                         ->live(true, 500)
@@ -125,7 +128,7 @@ class TradeResource extends Resource
                         }),
                     TextInput::make('total_amount')
                         ->label(__('trade.columns.total_amount'))
-                        ->suffix(fn($get) => Account::whereId($get('account_id'))->first()->currency->name ?? "")
+                        ->suffix(fn($get): string => Account::whereId($get('account_id'))->first()->currency->name ?? "")
                         ->disabled(),
                     Select::make('type')
                         ->label(__('trade.columns.type'))
@@ -140,7 +143,7 @@ class TradeResource extends Resource
                                 ->placeholder(__('trade.form.account_placeholder'))
                                 ->validationMessages(['required' => __('trade.form.account_validation_message')])
                                 ->preload()
-                                ->default(fn(): string => $account->id ?? "")
+                                ->default(fn(): int|string => $account->id ?? "")
                                 ->live(true)
                                 ->required()
                                 ->searchable()
@@ -152,7 +155,7 @@ class TradeResource extends Resource
                                 ->placeholder(__('trade.form.portfolio_placeholder'))
                                 ->validationMessages(['required' => __('trade.form.portfolio_validation_message')])
                                 ->preload()
-                                ->default(fn(): string => $portfolio->id ?? "")
+                                ->default(fn(): int|string => $portfolio->id ?? "")
                                 ->required()
                                 ->searchable()
                                 ->createOptionForm(PortfolioResource::formParts())
@@ -188,36 +191,41 @@ class TradeResource extends Resource
                 TextColumn::make('total_amount')
                     ->label(__('trade.columns.total_amount'))
                     ->fontFamily('mono')
+                    ->copyable()
+                    ->copyableState(fn($state) => Number::format($state, 2))
                     ->numeric(2)
                     ->badge()
-                    ->color(fn($record): string => match ($record->type) {
+                    ->color(fn(Trade $record): string => match ($record->type) {
                         TradeType::BUY => 'danger',
                         TradeType::SELL => 'success',
-                        default => 'warning',
                     })
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('quantity')
                     ->label(__('trade.columns.quantity'))
                     ->fontFamily('mono')
+                    ->copyable()
                     ->numeric(2)
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('price')
                     ->label(__('trade.columns.price'))
                     ->fontFamily('mono')
+                    ->copyable()
                     ->numeric(2)
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('tax')
                     ->label(__('trade.columns.tax'))
                     ->fontFamily('mono')
+                    ->copyable()
                     ->numeric(2)
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('fee')
                     ->label(__('trade.columns.fee'))
                     ->fontFamily('mono')
+                    ->copyable()
                     ->numeric(2)
                     ->sortable()
                     ->toggleable(),
@@ -404,8 +412,8 @@ class TradeResource extends Resource
                             $deletedPortfolioIds[] = $record->portfolio_id;
                         }
 
-                        if (!in_array($record->account_id, $deletedSecurityIds)) {
-                            $deletedSecurityIds[] = $record->account_id;
+                        if (!in_array($record->security_id, $deletedSecurityIds)) {
+                            $deletedSecurityIds[] = $record->security_id;
                         }
                     }
 
@@ -440,7 +448,7 @@ class TradeResource extends Resource
                     $records->each->update(['account_id' => $data['account_id']]);
 
                     // update balance for new account
-                    Account::updateAccountBalance($data['account_id']);
+                    Account::updateAccountBalance(intval($data['account_id']));
 
                     // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {
@@ -467,7 +475,7 @@ class TradeResource extends Resource
                     $records->each->update(['portfolio_id' => $data['portfolio_id']]);
 
                     // update market value for new portfolio
-                    Portfolio::updatePortfolioMarketValue($data['portfolio_id']);
+                    Portfolio::updatePortfolioMarketValue(intval($data['portfolio_id']));
 
                     // update market value for old portfolios
                     foreach ($oldPortfolioIds as $oldPortfolioId) {

@@ -40,7 +40,7 @@ class SecuritiesRelationManager extends RelationManager
      */
     public function table(Table $table): Table
     {
-        $columns = SecurityResource::getTableColumns();
+        $columns = SecurityResource::getTableColumns(true);
         return $table
             ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes())
             ->heading('')

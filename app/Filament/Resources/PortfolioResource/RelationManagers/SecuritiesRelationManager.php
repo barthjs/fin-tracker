@@ -31,6 +31,7 @@ class SecuritiesRelationManager extends RelationManager
      */
     public function table(Table $table): Table
     {
+        $columns = SecurityResource::getTableColumns(true);
         return SecurityResource::table($table)
             ->query(function () {
                 $securities = Trade::distinct()
@@ -41,6 +42,7 @@ class SecuritiesRelationManager extends RelationManager
                     ->whereIn('id', $securities);
             })
             ->heading('')
+            ->columns($columns)
             ->recordUrl(fn(Security $record): string => SecurityResource\Pages\ViewSecurity::getUrl([$record->id]), true);
     }
 }

@@ -217,7 +217,7 @@ class SecurityResource extends Resource
             ]);
     }
 
-    public static function getTableColumns(): array
+    public static function getTableColumns(bool $inRelationManager = false): array
     {
         return [
             ImageColumn::make('logo')
@@ -243,6 +243,7 @@ class SecurityResource extends Resource
             TextColumn::make('total_quantity')
                 ->label(__('security.columns.total_quantity'))
                 ->hiddenOn(SecuritiesRelationManager::class)
+                ->formatStateUsing(fn(Security $record, $state) => Trade::whereSecurityId($record->id)->sum('quantity') ? $inRelationManager : $state)
                 ->numeric(2)
                 ->searchable()
                 ->sortable(),

@@ -54,7 +54,7 @@ class Transaction extends Model
                 $transaction->user_id = auth()->user()->id;
             }
 
-            $transaction->destination = trim($transaction->destination) ?? null;
+            $transaction->destination = trim($transaction->destination);
         });
 
         static::created(function (Transaction $transaction) {
@@ -64,7 +64,7 @@ class Transaction extends Model
         });
 
         static::updating(function (Transaction $transaction) {
-            $transaction->destination = trim($transaction->destination) ?? null;
+            $transaction->destination = trim($transaction->destination);
         });
     }
 

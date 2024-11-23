@@ -316,8 +316,18 @@ class TransactionResource extends Resource
             DeleteBulkAction::make()
                 ->modalHeading(__('transaction.buttons.bulk_delete_heading'))
                 ->after(function (Collection $records) {
+                    $deletedAccountIds = [];
+
                     foreach ($records as $record) {
-                        Account::updateAccountBalance($record->account_id);
+                        if (!in_array($record->account_id, $deletedAccountIds)) {
+                            $deletedAccountIds[] = $record->account_id;
+                        }
+                    }
+                    foreach ($deletedAccountIds as $accountId) {
+                        Account::updateAccountBalance($accountId);
+                    }
+
+                    foreach ($records as $record) {
                         Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
                     }
                 }),

@@ -1,7 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
+use App\Enums\TradeType;
 use App\Models\Trade;
 use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
@@ -20,19 +21,22 @@ class TradeExporter extends Exporter
                 ->label(__('trade.columns.date')),
             ExportColumn::make('total_amount')
                 ->label(__('trade.columns.total_amount'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn($state): string => Number::format($state, 2)),
             ExportColumn::make('quantity')
                 ->label(__('trade.columns.quantity'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn($state): string => Number::format($state, 6)),
             ExportColumn::make('price')
                 ->label(__('trade.columns.price'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn($state): string => Number::format($state, 6)),
             ExportColumn::make('tax')
                 ->label(__('trade.columns.tax'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn($state): string => Number::format($state, 6)),
             ExportColumn::make('fee')
                 ->label(__('trade.columns.fee'))
-                ->formatStateUsing(fn($state): string => Number::format($state)),
+                ->formatStateUsing(fn($state): string => Number::format($state, 6)),
+            ExportColumn::make('type')
+                ->label(__('trade.columns.type'))
+                ->formatStateUsing(fn(TradeType $state): string => __('trade.types')[$state->name]),
             ExportColumn::make('account.name')
                 ->label(__('trade.columns.account')),
             ExportColumn::make('portfolio.name')
@@ -63,6 +67,6 @@ class TradeExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('trade.notifications.export.file_name') . Carbon::now()->format('Y-m-d-h-i') . "_{$export->getKey()}";
+        return __('trade.notifications.export.file_name') . Carbon::now()->format('Y-m-d-H-i');
     }
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Models;
 
@@ -32,13 +32,18 @@ class Trade extends Model
     ];
 
     protected $casts = [
-        'date_time' => 'datetime',
+        'date_time' => 'datetime',  // Carbon object
         'total_amount' => MoneyCast::class,
         'quantity' => 'decimal:6',
         'price' => 'decimal:6',
         'tax' => 'decimal:2',
         'fee' => 'decimal:2',
         'type' => TradeType::class,
+        'account_id' => 'integer',
+        'portfolio_id' => 'integer',
+        'category_id' => 'integer',
+        'security_id' => 'integer',
+        'user_id' => 'integer',
     ];
 
     protected static function booted(): void
@@ -58,7 +63,7 @@ class Trade extends Model
 
             // Only needed in importer
             if (is_null($trade->security_id)) {
-                $trade->portfolio_id = self::getDefaultSecurityId();
+                $trade->security_id = self::getDefaultSecurityId();
             }
 
             // Only needed in importer and web
@@ -66,7 +71,7 @@ class Trade extends Model
                 $trade->user_id = auth()->user()->id;
             }
 
-            $trade->notes = trim($trade->notes) ?? null;
+            $trade->notes = trim($trade->notes ?? "");
 
             // Set the type factor based on trade type
             $amountSign = 1;
@@ -95,7 +100,7 @@ class Trade extends Model
         });
 
         static::updating(function (Trade $trade) {
-            $trade->notes = trim($trade->notes) ?? null;
+            $trade->notes = trim($trade->notes ?? "");
 
             // Set the type factor based on trade type
             $amountSign = 1;
