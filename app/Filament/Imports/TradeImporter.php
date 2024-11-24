@@ -36,22 +36,22 @@ class TradeImporter extends Importer
                 ->label(__('trade.columns.quantity'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Trade $record, string $state) => $record->quantity = Convertor::formatNumber($state)),
+                ->fillRecordUsing(fn(Trade $record, string $state) => $record->quantity = abs(Convertor::formatNumber($state))),
             ImportColumn::make('price')
                 ->label(__('trade.columns.price'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Trade $record, string $state) => $record->price = Convertor::formatNumber($state)),
+                ->fillRecordUsing(fn(Trade $record, string $state) => $record->price = abs(Convertor::formatNumber($state))),
             ImportColumn::make('tax')
                 ->label(__('trade.columns.tax'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Trade $record, string $state) => $record->tax = Convertor::formatNumber($state)),
+                ->fillRecordUsing(fn(Trade $record, string $state) => $record->tax = abs(Convertor::formatNumber($state))),
             ImportColumn::make('fee')
                 ->label(__('trade.columns.fee'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Trade $record, string $state) => $record->fee = Convertor::formatNumber($state)),
+                ->fillRecordUsing(fn(Trade $record, string $state) => $record->fee = abs(Convertor::formatNumber($state))),
             ImportColumn::make('type')
                 ->label(__('trade.columns.type'))
                 ->requiredMapping()

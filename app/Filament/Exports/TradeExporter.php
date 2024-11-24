@@ -24,16 +24,16 @@ class TradeExporter extends Exporter
                 ->formatStateUsing(fn($state): string => Number::format($state, 2)),
             ExportColumn::make('quantity')
                 ->label(__('trade.columns.quantity'))
-                ->formatStateUsing(fn($state): string => Number::format($state, 6)),
+                ->formatStateUsing(fn($state): string => Number::format(floatval($state), 6)),
             ExportColumn::make('price')
                 ->label(__('trade.columns.price'))
-                ->formatStateUsing(fn($state): string => Number::format($state, 6)),
+                ->formatStateUsing(fn($state): string => Number::format(floatval($state), 6)),
             ExportColumn::make('tax')
                 ->label(__('trade.columns.tax'))
-                ->formatStateUsing(fn($state): string => Number::format($state, 6)),
+                ->formatStateUsing(fn($state): string => Number::format(floatval($state), 2)),
             ExportColumn::make('fee')
                 ->label(__('trade.columns.fee'))
-                ->formatStateUsing(fn($state): string => Number::format($state, 6)),
+                ->formatStateUsing(fn($state): string => Number::format(floatval($state), 2)),
             ExportColumn::make('type')
                 ->label(__('trade.columns.type'))
                 ->formatStateUsing(fn(TradeType $state): string => __('trade.types')[$state->name]),
@@ -41,6 +41,8 @@ class TradeExporter extends Exporter
                 ->label(__('trade.columns.account')),
             ExportColumn::make('portfolio.name')
                 ->label(__('trade.columns.portfolio')),
+            ExportColumn::make('security.isin')
+                ->label(__('security.columns.isin')),
             ExportColumn::make('security.name')
                 ->label(__('trade.columns.security')),
             ExportColumn::make('notes')
