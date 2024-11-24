@@ -74,6 +74,7 @@ class TradeResource extends Resource
                     Select::make('security_id')
                         ->label(__('trade.columns.security'))
                         ->relationship('security', 'name')
+                        ->options(Security::query()->whereActive(true)->pluck('name', 'id'))
                         ->placeholder(__('trade.form.security_placeholder'))
                         ->validationMessages(['required' => __('trade.form.security_validation_message')])
                         ->preload()
@@ -86,6 +87,7 @@ class TradeResource extends Resource
                         ->label(__('trade.columns.quantity'))
                         ->required()
                         ->numeric()
+                        ->default(0)
                         ->minValue(0)
                         ->live(true, 500)
                         ->formatStateUsing(function ($state) {
@@ -101,6 +103,7 @@ class TradeResource extends Resource
                         ->label(__('trade.columns.price'))
                         ->required()
                         ->numeric()
+                        ->default(0)
                         ->minValue(0)
                         ->live(true, 500)
                         ->afterStateUpdated(function ($state, callable $get, callable $set) {

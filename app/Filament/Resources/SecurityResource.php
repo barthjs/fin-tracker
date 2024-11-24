@@ -33,6 +33,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Number;
 
 class SecurityResource extends Resource
 {
@@ -160,6 +161,7 @@ class SecurityResource extends Resource
      */
     public static function table(Table $table): Table
     {
+        $columns = self::getTableColumns();
         return $table
             ->modifyQueryUsing(function (Builder $query, Table $table) {
                 if (!$table->getActiveFiltersCount()) {
@@ -168,7 +170,7 @@ class SecurityResource extends Resource
                     return $query;
                 }
             })
-            ->columns(self::getTableColumns())
+            ->columns($columns)
             ->paginated(fn(): bool => Security::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
@@ -217,7 +219,7 @@ class SecurityResource extends Resource
             ]);
     }
 
-    public static function getTableColumns(bool $inRelationManager = false): array
+    public static function getTableColumns(int $portfolioId = null): array
     {
         return [
             ImageColumn::make('logo')
@@ -243,8 +245,10 @@ class SecurityResource extends Resource
             TextColumn::make('total_quantity')
                 ->label(__('security.columns.total_quantity'))
                 ->hiddenOn(SecuritiesRelationManager::class)
-                ->formatStateUsing(fn(Security $record, $state) => Trade::whereSecurityId($record->id)->sum('quantity') ? $inRelationManager : $state)
-                ->numeric(2)
+                ->formatStateUsing(function (Security $record, $state) use ($portfolioId): string {
+                    $quantity = $portfolioId ? Trade::whereSecurityId($record->id)->wherePortfolioId($portfolioId)->sum('quantity') : $state;
+                    return Number::format(floatval($quantity), 2);
+                })
                 ->searchable()
                 ->sortable(),
             TextColumn::make('isin')

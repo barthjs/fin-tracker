@@ -31,18 +31,22 @@ class SecuritiesRelationManager extends RelationManager
      */
     public function table(Table $table): Table
     {
-        $columns = SecurityResource::getTableColumns(true);
+        $columns = SecurityResource::getTableColumns($this->ownerRecord->id);
         return SecurityResource::table($table)
             ->query(function () {
-                $securities = Trade::distinct()
-                    ->wherePortfolioId($this->ownerRecord->id)
-                    ->pluck('id')
+                $securityIds = Trade::wherePortfolioId($this->ownerRecord->id)
+                    ->select('security_id')
+                    ->selectRaw('SUM(quantity) as total_quantity')
+                    ->groupBy('security_id')
+                    ->having('total_quantity', '>', 0)
+                    ->pluck('security_id')
                     ->toArray();
-                return Security::where('total_quantity', '>', 0)
-                    ->whereIn('id', $securities);
+
+                return Security::whereIn('id', $securityIds)->where('total_quantity', '>', 0);
             })
             ->heading('')
             ->columns($columns)
-            ->recordUrl(fn(Security $record): string => SecurityResource\Pages\ViewSecurity::getUrl([$record->id]), true);
+            ->recordUrl(fn(Security $record): string => SecurityResource\Pages\ViewSecurity::getUrl([$record->id]), true)
+            ->emptyStateActions([]);
     }
 }

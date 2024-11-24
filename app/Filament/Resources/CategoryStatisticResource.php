@@ -39,7 +39,6 @@ class CategoryStatisticResource extends Resource
      */
     public static function table(Table $table): Table
     {
-        $summarizer = Sum::make()->label('')->money(Account::getCurrency(), 100);
         return $table
             ->modifyQueryUsing(function (Builder $query, Table $table) {
                 $query->whereHas('category', function (Builder $query) {
@@ -59,73 +58,73 @@ class CategoryStatisticResource extends Resource
                     ->label(__('category_statistic.columns.jan'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('feb')
                     ->label(__('category_statistic.columns.feb'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('mar')
                     ->label(__('category_statistic.columns.mar'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('apr')
                     ->label(__('category_statistic.columns.apr'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('may')
                     ->label(__('category_statistic.columns.may'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('jun')
                     ->label(__('category_statistic.columns.jun'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('jul')
                     ->label(__('category_statistic.columns.jul'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('aug')
                     ->label(__('category_statistic.columns.aug'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('sep')
                     ->label(__('category_statistic.columns.sep'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('oct')
                     ->label(__('category_statistic.columns.oct'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('nov')
                     ->label(__('category_statistic.columns.nov'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
                 TextColumn::make('dec')
                     ->label(__('category_statistic.columns.dec'))
                     ->alignEnd()
                     ->numeric(2)
-                    ->summarize($summarizer)
+                    ->summarize(Sum::make()->label('')->money(Account::getCurrency(), 100))
                     ->toggleable(),
             ])
             ->paginated(false)
