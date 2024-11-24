@@ -3,14 +3,23 @@ services:
     image: barthjs/fin-tracker:latest
     container_name: fin-tracker
     restart: unless-stopped
+    depends_on:
+      fin-tracker-db:
+        condition: service_healthy
     ports:
-      - ${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80
+      - '${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80'
     env_file:
       - .env
   fin-tracker-db:
     image: mariadb:11.4
     container_name: fin-tracker-db
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
     volumes:
       - ./db-data:/var/lib/mysql
     environment:
