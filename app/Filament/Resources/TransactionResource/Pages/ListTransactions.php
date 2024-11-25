@@ -89,7 +89,7 @@ class ListTransactions extends ListRecords
                     });
                 }),
             'Revenues' => Tab::make()
-                ->label(__('table.filter.expenses'))
+                ->label(__('table.filter.revenues'))
                 ->modifyQueryUsing(function (Builder $query) {
                     $query->whereHas('category', function ($query) {
                         $query->where('type', '=', TransactionType::revenue);
