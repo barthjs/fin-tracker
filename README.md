@@ -73,10 +73,8 @@ understanding of the [Laravel](https://larvel.com) framework.
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-It is highly recommended to run it behind a reverse proxy and bind the port to `localhost`. A good and easy solution
-is [Nginx Proxy Manager](https://nginxproxymanager.com/guide/). Avoid exposing it to the public internet unless
-absolutely necessary. Instead, use a VPN, such as [WireGuard](https://www.wireguard.com/), to securely access it from
-outside your home network.
+It is highly recommended to run it behind a reverse proxy and bind the port to `localhost` as there is currently no ssl
+supported by the docker image.
 
 ### Installation
 
@@ -86,8 +84,8 @@ mkdir fin-tracker && cd ./fin-tracker
 
 Create a `.env` file using the values from the [.env.example](.env.example) and set your preferred configurations. If
 you plan to use your
-own database, ensure you specify the correct `DB_CONNECTION` in the `.env` file. Note that the only officially supported
-database is MariaDB. While MySQL may work, compatibility with future updates is not guaranteed
+own database, ensure you specify the correct `DB_CONNECTION` in the `.env` file. Note that the only supported
+database is MariaDB. While MySQL or PostgresSQL may work, compatibility with future updates is not guaranteed.
 
 ```shell
 curl https://raw.githubusercontent.com/barthjs/fin-tracker/main/.env.example -o .env
@@ -109,10 +107,13 @@ Login at: [http://localhost:8080](http://localhost:8080) or your custom host/por
 
 Use the following credentials:
 
-- Username: `admin`
-- Password: `admin`
+```
+Username: admin
+Password: admin
+```
 
-Make sure to change these values after the installation is complete.
+Immediately after logging in with this default user you will be redirected to the profile page
+and asked to change your password, unlocking the rest of the app.
 
 ### How to Update
 
@@ -186,8 +187,10 @@ the [.env.development](.env.development) for customization.
 
 Login at: [http://localhost:80](http://localhost:80)
 
-- Username: admin
-- Password: admin
+```
+Username: admin
+Password: admin
+```
 
 ### Built With
 
