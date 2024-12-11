@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Str;
-
 return [
 
     'driver' => 'database',
@@ -10,9 +8,9 @@ return [
 
     'encrypt' => env('SESSION_ENCRYPT', true),
 
-    'cookie' => env(
-        'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'fin-tracker'), '_') . '_session'
-    ),
+    'cookie' => 'fin-tracker_session',
+
+    // one month
+    'lifetime' => 43800,
 
 ];

@@ -1,8 +1,8 @@
 services:
   fin-tracker:
-    build:
-      context: .docker
-      dockerfile: Dockerfile-dev
+    build: ./docker/Dockerfile-dev
+    pull_policy: never
+    image: barthjs/fin-tracker-dev
     container_name: fin-tracker
     depends_on:
       fin-tracker-db:
@@ -12,7 +12,7 @@ services:
     volumes:
       - ./:/app
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
   fin-tracker-db:
     image: mariadb:11.4
     container_name: fin-tracker-db

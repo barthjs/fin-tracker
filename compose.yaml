@@ -1,11 +1,13 @@
 services:
   fin-tracker:
-    image: barthjs/fin-tracker:latest
+    image: barthjs/fin-tracker:0.2.0
     container_name: fin-tracker
     restart: unless-stopped
     depends_on:
       fin-tracker-db:
         condition: service_healthy
+    volumes:
+      - './logos:/app/storage/app/public/logos'
     ports:
       - '${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80'
     env_file:
@@ -15,13 +17,13 @@ services:
     container_name: fin-tracker-db
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       start_period: 10s
       interval: 10s
       timeout: 5s
       retries: 3
     volumes:
-      - ./db-data:/var/lib/mysql
+      - './db-data:/var/lib/mysql'
     environment:
       - MARIADB_DATABASE=${DB_DATABASE}
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
