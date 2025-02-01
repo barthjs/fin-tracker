@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Run migrations and seeds
 echo "Starting database migrations..."
 if ! php artisan migrate --force; then
     echo "Error: Migration failed."
@@ -13,7 +12,6 @@ if ! php artisan db:seed --force; then
     exit 1
 fi
 
-# Optimize the application
 echo "Optimizing the application..."
 if ! php artisan optimize; then
     echo "Error: Optimization failed."

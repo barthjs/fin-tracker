@@ -1,17 +1,17 @@
 services:
   fin-tracker:
-    image: barthjs/fin-tracker:0.2.0
+    image: barthjs/fin-tracker:latest
     container_name: fin-tracker
     restart: unless-stopped
     depends_on:
       fin-tracker-db:
         condition: service_healthy
     volumes:
-      - './logos:/app/storage/app/public/logos'
+      - ./logos:/app/storage/app/public/logos
     ports:
-      - '${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80'
-    env_file:
-      - .env
+      - '8080:80'
+    env_file: .env
+
   fin-tracker-db:
     image: mariadb:11.4
     container_name: fin-tracker-db
@@ -23,12 +23,7 @@ services:
       timeout: 5s
       retries: 3
     volumes:
-      - './db-data:/var/lib/mysql'
+      - ./db-data:/var/lib/mysql
     environment:
       - MARIADB_DATABASE=${DB_DATABASE}
       - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
-# Optional network for reverse proxy
-# networks:
-#   default:
-#     external: true
-#     name: fin-tracker

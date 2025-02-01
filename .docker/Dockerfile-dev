@@ -1,32 +1,29 @@
 # Base image for PHP and NGINX
 FROM webdevops/php-nginx-dev:8.3-alpine
 
-# Labels
-LABEL vendor="barthjs" \
-      maintainer="barthjs" \
-      org.opencontainers.image.url="https://github.com/barthjs/fin-tracker" \
-      org.opencontainers.image.source="https://github.com/barthjs/fin-tracker" \
-      org.opencontainers.image.license="MIT" \
-      org.opencontainers.image.title="Fin-Tracker" \
-      org.opencontainers.image.description="Household Finance Manager"
-
-ENV PHP_DEBUGGER=xdebug \
+ARG VERSION=dev
+ENV APP_VERSION=${VERSION} \
+    WEB_DOCUMENT_ROOT=/app/public \
+    PHP_DEBUGGER=xdebug \
     PHP_DISPLAY_ERRORS=1 \
     PHP_IDE_CONFIG="serverName=fin-tracker" \
     WEB_DOCUMENT_ROOT=/app/public \
-    XDEBUG_CLIENT_PORT=9003 \
     XDEBUG_CLIENT_HOST=host.docker.internal \
+    XDEBUG_CLIENT_PORT=9003 \
     XDEBUG_START_WITH_REQUEST=yes
 
-# Node.js, NPM
+# Labels
+LABEL org.opencontainers.image.url="https://github.com/barthjs/fin-tracker" \
+      org.opencontainers.image.source="https://github.com/barthjs/fin-tracker" \
+      org.opencontainers.image.version=${VERSION} \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.title="Fin-Tracker" \
+      org.opencontainers.image.description="Household Finance Manager"
+
+# Install Node.js and NPM
 RUN apk add --no-cache nodejs npm
-RUN npm install npm@latest -g
 
 WORKDIR /app
 
 # Copy configuration files for container entrypoint setup
 COPY worker.conf /opt/docker/etc/supervisor.d/worker.conf
-
-# Healthcheck configuration
-HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=1 \
-  CMD curl --fail http://localhost/up || exit 1

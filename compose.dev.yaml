@@ -1,33 +1,30 @@
 services:
   fin-tracker:
-    build: ./docker/Dockerfile-dev
+    build:
+      context: .docker
+      dockerfile: Dockerfile-dev
     pull_policy: never
-    image: barthjs/fin-tracker-dev
+    image: barthjs/fin-tracker:dev
     container_name: fin-tracker
     depends_on:
-      fin-tracker-db:
-        condition: service_healthy
+      - fin-tracker-db
     ports:
-      - '${APP_PORT:-8080}:80'
+      - '80:80'
     volumes:
       - ./:/app
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+
   fin-tracker-db:
     image: mariadb:11.4
     container_name: fin-tracker-db
-    healthcheck:
-      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
-      start_period: 10s
-      interval: 10s
-      timeout: 5s
-      retries: 3
     ports:
       - '3306:3306'
     volumes:
-      - 'db:/var/lib/mysql'
+      - db:/var/lib/mysql
     environment:
-      - MARIADB_DATABASE=${DB_DATABASE:-fin-tracker}
-      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD:-root}
+      - MARIADB_DATABASE=${DB_DATABASE}
+      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+
 volumes:
   db:
