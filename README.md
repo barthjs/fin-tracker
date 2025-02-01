@@ -103,9 +103,7 @@ Start the app:
 docker compose up -d
 ```
 
-Login at: [http://localhost:8080](http://localhost:8080) or your custom host/port from the `.env` file.
-
-Use the following credentials:
+Login at [http://localhost:8080](http://localhost:8080) with the following credentials:
 
 ```
 Username: admin
@@ -124,12 +122,9 @@ cd fin-tracker
 docker compose pull && docker compose up -d
 ```
 
-### How to Backup
+### How to back up
 
-If you are using the unmodified compose.yaml file, simply back up the `./db-data directory` You will need administrative
-privileges to access this directory. If you created your own database volume, refer
-to [Back up a volume](https://docs.docker.com/engine/storage/volumes/#back-up-a-volume) for more
-information.
+Backup all volumes mentioned in the [compose.yaml](compose.yaml) as well as the `.env`.
 
 ## FAQ
 
@@ -164,8 +159,6 @@ in `Settings > PHP > Servers` for debugging, using the following values:
 
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
-- Optional: PHP 8.3
-- Optional: NPM
 
 ### Building
 
