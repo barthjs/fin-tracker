@@ -6,10 +6,10 @@ services:
     depends_on:
       fin-tracker-db:
         condition: service_healthy
-    volumes:
-      - ./logos:/app/storage/app/public/logos
     ports:
       - '8080:80'
+    volumes:
+      - ./logos:/app/storage/app/public/logos
     env_file: .env
 
   fin-tracker-db:
