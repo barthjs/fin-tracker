@@ -3,7 +3,6 @@ FROM webdevops/php-nginx-dev:8.3-alpine
 
 ARG VERSION=dev
 ENV APP_VERSION=${VERSION} \
-    WEB_DOCUMENT_ROOT=/app/public \
     PHP_DEBUGGER=xdebug \
     PHP_DISPLAY_ERRORS=1 \
     PHP_IDE_CONFIG="serverName=fin-tracker" \
@@ -24,6 +23,3 @@ LABEL org.opencontainers.image.url="https://github.com/barthjs/fin-tracker" \
 RUN apk add --no-cache nodejs npm
 
 WORKDIR /app
-
-# Copy configuration files for container entrypoint setup
-COPY worker.conf /opt/docker/etc/supervisor.d/worker.conf

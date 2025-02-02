@@ -1,4 +1,5 @@
 .git/
+.github
 .idea/
 .run/
 
@@ -16,10 +17,11 @@ tests/
 
 .dockerignore
 .editorconfig
-*.env
-.gitignore
+.env*
 .gitattributes
+.gitignore
 *.yaml
 
+Dockerfile
 phpunit.xml
 setup-dev.sh

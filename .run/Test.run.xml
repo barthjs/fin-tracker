@@ -1,11 +1,16 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="Test" type="PestRunConfigurationType">
-        <option name="pestRunnerSettings">
-            <PestRunner directory="./vendor/pestphp/pest/bin/pest" method="" scope="ConfigurationFile" />
-        </option>
-        <option name="runnerSettings">
-            <PhpTestRunnerSettings directory="./vendor/pestphp/pest/bin/pest" method="" scope="ConfigurationFile" />
-        </option>
-        <method v="2" />
-    </configuration>
+  <configuration default="false" name="Test" type="PestRunConfigurationType">
+    <CommandLine>
+      <PhpTestInterpreterSettings>
+        <option name="interpreterName" value="fin-tracker" />
+      </PhpTestInterpreterSettings>
+    </CommandLine>
+    <option name="pestRunnerSettings">
+      <PestRunner directory="./vendor/pestphp/pest/bin/pest" method="" scope="ConfigurationFile" />
+    </option>
+    <option name="runnerSettings">
+      <PhpTestRunnerSettings directory="./vendor/pestphp/pest/bin/pest" method="" scope="ConfigurationFile" />
+    </option>
+    <method v="2" />
+  </configuration>
 </component>
