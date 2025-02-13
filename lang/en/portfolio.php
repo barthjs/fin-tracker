@@ -3,7 +3,7 @@
 return [
 
     'slug' => 'portfolio',
-    'navigation_label' => 'portfolios',
+    'navigation_label' => 'Portfolios',
 
     'buttons' => [
         'create_button_label' => 'New portfolio',

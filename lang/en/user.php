@@ -4,7 +4,7 @@ return [
 
     'slug' => 'users',
     'navigation_label' => 'Users',
-    'profile' => 'profile',
+    'profile-slug' => 'profile',
     'unverified_message' => 'Please change the password',
 
     'buttons' => [
