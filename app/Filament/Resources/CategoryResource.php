@@ -197,6 +197,15 @@ class CategoryResource extends Resource
                     default => 'warning',
                 })
                 ->searchable()
+                ->searchable(true, function (Builder $query, string $search): Builder {
+                    $groups = [];
+                    foreach (__('category.groups') as $group => $value) {
+                        if (stripos($value, $search) !== false) {
+                            $groups[] = $group;
+                        }
+                    }
+                    return $query->whereIn('group', $groups);
+                })
                 ->sortable(),
             IconColumn::make('active')
                 ->label(__('table.active'))

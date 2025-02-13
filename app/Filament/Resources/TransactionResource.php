@@ -186,12 +186,20 @@ class TransactionResource extends Resource
                     ->wrap()
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('category.group.name')
+                TextColumn::make('category.group')
                     ->label(__('transaction.columns.group'))
                     ->hiddenOn([CategoryResource\RelationManagers\TransactionRelationManager::class, ListTransactions::class])
-                    ->formatStateUsing(fn($state): string => __('category.groups')[$state])
+                    ->formatStateUsing(fn($state): string => __('category.groups')[$state->name])
                     ->wrap()
-                    ->searchable()
+                    ->searchable(true, function (Builder $query, string $search): Builder {
+                        $groups = [];
+                        foreach (__('category.groups') as $group => $value) {
+                            if (stripos($value, $search) !== false) {
+                                $groups[] = $group;
+                            }
+                        }
+                        return $query->whereHas('category', fn($q) => $q->whereIn('group', $groups));
+                    })
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('notes')
