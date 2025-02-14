@@ -10,6 +10,7 @@ use App\Filament\Resources\UserResource\RelationManagers\SecuritiesRelationManag
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
+use App\Tables\Columns\LogoColumn;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\ColorPicker;
@@ -28,7 +29,6 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -222,18 +222,12 @@ class SecurityResource extends Resource
     public static function getTableColumns(int $portfolioId = null): array
     {
         return [
-            ImageColumn::make('logo')
-                ->label(__('security.columns.logo'))
-                ->circular()
-                ->extraImgAttributes(fn(Security $record): array => [
-                    'alt' => "{$record->name} logo",
-                ])
-                ->toggleable(),
-            TextColumn::make('name')
+            LogoColumn::make('name')
                 ->label(__('security.columns.name'))
-                ->size(TextColumn\TextColumnSize::Medium)
-                ->weight(FontWeight::SemiBold)
-                ->wrap()
+                ->state(fn(Security $record): array => [
+                    'logo' => $record->logo,
+                    'name' => $record->name,
+                ])
                 ->searchable()
                 ->sortable(),
             TextColumn::make('price')

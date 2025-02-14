@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\TradeType;
 use App\Filament\Resources\TradeResource\Pages\ListTrades;
 use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
+use App\Tables\Columns\LogoColumn;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Components\DatePicker;
@@ -24,8 +24,8 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -198,66 +198,70 @@ class TradeResource extends Resource
                     ->copyableState(fn($state) => Number::format($state, 2))
                     ->numeric(2)
                     ->badge()
-                    ->color(fn(Trade $record): string => match ($record->type) {
-                        TradeType::BUY => 'danger',
-                        TradeType::SELL => 'success',
-                    })
+                    ->color(fn(Trade $record): string => $record->type->name == 'BUY' ? 'danger' : 'success')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->alignEnd(),
                 TextColumn::make('quantity')
                     ->label(__('trade.columns.quantity'))
                     ->fontFamily('mono')
                     ->copyable()
                     ->numeric(2)
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->alignEnd(),
                 TextColumn::make('price')
                     ->label(__('trade.columns.price'))
                     ->fontFamily('mono')
                     ->copyable()
                     ->numeric(2)
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->alignEnd(),
                 TextColumn::make('tax')
                     ->label(__('trade.columns.tax'))
                     ->fontFamily('mono')
                     ->copyable()
                     ->numeric(2)
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->alignEnd(),
                 TextColumn::make('fee')
                     ->label(__('trade.columns.fee'))
                     ->fontFamily('mono')
                     ->copyable()
                     ->numeric(2)
                     ->sortable()
-                    ->toggleable(),
-                ImageColumn::make('account.logo')
-                    ->label('')
-                    ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
-                    ->circular()
+                    ->wrap()
+                    ->toggleable()
                     ->alignEnd(),
-                TextColumn::make('account.name')
+                LogoColumn::make('account.name')
                     ->label(__('trade.columns.account'))
+                    ->state(fn(Trade $record): array => [
+                        'logo' => $record->account->logo,
+                        'name' => $record->account->name,
+                    ])
                     ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
-                    ->badge()
-                    ->color('info')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('portfolio.name')
+                LogoColumn::make('portfolio.name')
                     ->label(__('trade.columns.portfolio'))
+                    ->state(fn(Trade $record): array => [
+                        'logo' => $record->portfolio->logo,
+                        'name' => $record->portfolio->name,
+                    ])
                     ->hiddenOn(PortfolioResource\RelationManagers\TradesRelationManager::class)
-                    ->badge()
-                    ->color('info')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('security.name')
+                LogoColumn::make('security.name')
                     ->label(__('trade.columns.security'))
+                    ->state(fn(Trade $record): array => [
+                        'logo' => $record->security->logo,
+                        'name' => $record->security->name,
+                    ])
                     ->hiddenOn(SecurityResource\RelationManagers\TradesRelationManager::class)
-                    ->badge()
-                    ->color('info')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
@@ -324,7 +328,7 @@ class TradeResource extends Resource
             ->filtersFormColumns(function ($livewire) {
                 return $livewire instanceof ListTrades ? 4 : 3;
             })
-            ->actions(self::getActions())
+            ->actions(self::getActions(), ActionsPosition::BeforeColumns)
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('trade.empty'))
             ->emptyStateDescription('')

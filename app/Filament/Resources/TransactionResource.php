@@ -6,6 +6,7 @@ use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Tables\Columns\LogoColumn;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Components\DatePicker;
@@ -22,7 +23,6 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -161,16 +161,13 @@ class TransactionResource extends Resource
                     ->wrap()
                     ->searchable()
                     ->toggleable(),
-                ImageColumn::make('account.logo')
-                    ->label('')
-                    ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
-                    ->circular()
-                    ->alignEnd(),
-                TextColumn::make('account.name')
+                LogoColumn::make('account.name')
                     ->label(__('transaction.columns.account'))
+                    ->state(fn(Transaction $record): array => [
+                        'logo' => $record->account->logo,
+                        'name' => $record->account->name,
+                    ])
                     ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
-                    ->badge()
-                    ->color('info')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),

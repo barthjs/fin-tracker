@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources\TradeResource\Pages;
 
+use App\Enums\TradeType;
+use App\Enums\TransactionGroup;
+use App\Enums\TransactionType;
 use App\Filament\Exports\TradeExporter;
 use App\Filament\Imports\TradeImporter;
 use App\Filament\Resources\TradeResource;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\File;
@@ -56,6 +60,24 @@ class ListTrades extends ListRecords
                 ->failureNotificationTitle(__('trade.notifications.export.failure_heading'))
                 ->successNotificationTitle(__('trade.notifications.export.success_heading'))
                 ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id()))
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'All' => Tab::make()
+                ->label(__('table.filter.all')),
+            'Buy' => Tab::make()
+                ->label(__('trade.types.BUY'))
+                ->modifyQueryUsing(function ($query) {
+                    $query->where('type', '=', TradeType::BUY);
+                }),
+            'Sell' => Tab::make()
+                ->label(__('trade.types.SELL'))
+                ->modifyQueryUsing(function ($query) {
+                    $query->where('type', '=', TradeType::SELL);
+                }),
         ];
     }
 }

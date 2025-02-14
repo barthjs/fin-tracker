@@ -9,6 +9,7 @@ use App\Filament\Resources\PortfolioResource\RelationManagers\TradesRelationMana
 use App\Filament\Resources\UserResource\RelationManagers\PortfoliosRelationManager;
 use App\Models\Account;
 use App\Models\Portfolio;
+use App\Tables\Columns\LogoColumn;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\ColorPicker;
@@ -26,7 +27,6 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -182,17 +182,12 @@ class PortfolioResource extends Resource
     public static function getTableColumns(): array
     {
         return [
-            ImageColumn::make('logo')
-                ->label(__('portfolio.columns.logo'))
-                ->circular()
-                ->extraImgAttributes(fn(Portfolio $record): array => [
-                    'alt' => "{$record->name} logo",
-                ])
-                ->toggleable(),
-            TextColumn::make('name')
+            LogoColumn::make('name')
                 ->label(__('portfolio.columns.name'))
-                ->size(TextColumn\TextColumnSize::Medium)
-                ->weight(FontWeight::SemiBold)
+                ->state(fn(Portfolio $record): array => [
+                    'logo' => $record->logo,
+                    'name' => $record->name,
+                ])
                 ->searchable()
                 ->sortable(),
             TextColumn::make('market_value')
