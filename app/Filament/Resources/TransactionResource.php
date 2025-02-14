@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
-use App\Models\Trade;
 use App\Models\Transaction;
 use App\Tables\Columns\LogoColumn;
 use Carbon\Carbon;
@@ -24,7 +23,6 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -74,6 +72,12 @@ class TransactionResource extends Resource
                     Select::make('account_id')
                         ->label(__('transaction.columns.account'))
                         ->relationship('account', 'name')
+                        ->options(fn(): array => Account::query()
+                            ->orderBy('name')
+                            ->where('active', true)
+                            ->pluck('name', 'id')
+                            ->toArray()
+                        )
                         ->placeholder(__('transaction.form.account_placeholder'))
                         ->validationMessages(['required' => __('transaction.form.account_validation_message')])
                         ->preload()
@@ -97,7 +101,7 @@ class TransactionResource extends Resource
                     TextInput::make('destination')
                         ->label(__('transaction.columns.destination'))
                         ->datalist(Transaction::query()
-                            ->whereYear('date_time', now()->year)
+                            ->whereBetween('date_time', [today()->subYear()->toDateString(), today()->toDateString()])
                             ->select('destination')
                             ->distinct()
                             ->orderBy('destination')
@@ -109,6 +113,12 @@ class TransactionResource extends Resource
                     Select::make('category_id')
                         ->label(__('transaction.columns.category'))
                         ->relationship('category', 'name')
+                        ->options(fn(): array => Category::query()
+                            ->orderBy('name')
+                            ->where('active', true)
+                            ->pluck('name', 'id')
+                            ->toArray()
+                        )
                         ->placeholder(__('transaction.form.category_placeholder'))
                         ->validationMessages(['required' => __('transaction.form.category_validation_message')])
                         ->preload()
@@ -216,14 +226,24 @@ class TransactionResource extends Resource
                 SelectFilter::make('account')
                     ->label(__('transaction.columns.account'))
                     ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
-                    ->relationship('account', 'name')
+                    ->options(fn(): array => Account::query()
+                        ->orderBy('name')
+                        ->where('active', true)
+                        ->pluck('name', 'id')
+                        ->toArray()
+                    )
                     ->multiple()
                     ->preload()
                     ->searchable(),
                 SelectFilter::make('category')
                     ->label(__('transaction.columns.category'))
                     ->hiddenOn(CategoryResource\RelationManagers\TransactionRelationManager::class)
-                    ->relationship('category', 'name')
+                    ->options(fn(): array => Category::query()
+                        ->orderBy('name')
+                        ->where('active', true)
+                        ->pluck('name', 'id')
+                        ->toArray()
+                    )
                     ->multiple()
                     ->preload()
                     ->searchable(),

@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\TradeType;
 use App\Filament\Resources\TradeResource\Pages\ListTrades;
 use App\Models\Account;
-use App\Models\Category;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
@@ -26,9 +24,7 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -78,7 +74,12 @@ class TradeResource extends Resource
                     Select::make('security_id')
                         ->label(__('trade.columns.security'))
                         ->relationship('security', 'name')
-                        ->options(Security::query()->whereActive(true)->pluck('name', 'id'))
+                        ->options(fn(): array => Security::query()
+                            ->orderBy('name')
+                            ->where('active', true)
+                            ->pluck('name', 'id')
+                            ->toArray()
+                        )
                         ->placeholder(__('trade.form.security_placeholder'))
                         ->validationMessages(['required' => __('trade.form.security_validation_message')])
                         ->preload()
@@ -147,6 +148,12 @@ class TradeResource extends Resource
                             Select::make('account_id')
                                 ->label(__('trade.columns.account'))
                                 ->relationship('account', 'name')
+                                ->options(fn(): array => Account::query()
+                                    ->orderBy('name')
+                                    ->where('active', true)
+                                    ->pluck('name', 'id')
+                                    ->toArray()
+                                )
                                 ->placeholder(__('trade.form.account_placeholder'))
                                 ->validationMessages(['required' => __('trade.form.account_validation_message')])
                                 ->preload()
@@ -159,6 +166,12 @@ class TradeResource extends Resource
                             Select::make('portfolio_id')
                                 ->label(__('trade.columns.portfolio'))
                                 ->relationship('portfolio', 'name')
+                                ->options(fn(): array => Portfolio::query()
+                                    ->orderBy('name')
+                                    ->where('active', true)
+                                    ->pluck('name', 'id')
+                                    ->toArray()
+                                )
                                 ->placeholder(__('trade.form.portfolio_placeholder'))
                                 ->validationMessages(['required' => __('trade.form.portfolio_validation_message')])
                                 ->preload()
@@ -287,21 +300,36 @@ class TradeResource extends Resource
                 SelectFilter::make('account')
                     ->label(__('trade.columns.account'))
                     ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
-                    ->relationship('account', 'name')
+                    ->options(fn(): array => Account::query()
+                        ->orderBy('name')
+                        ->where('active', true)
+                        ->pluck('name', 'id')
+                        ->toArray()
+                    )
                     ->multiple()
                     ->preload()
                     ->searchable(),
                 SelectFilter::make('portfolio')
                     ->label(__('trade.columns.portfolio'))
                     ->hiddenOn(PortfolioResource\RelationManagers\TradesRelationManager::class)
-                    ->relationship('portfolio', 'name')
+                    ->options(fn(): array => Portfolio::query()
+                        ->orderBy('name')
+                        ->where('active', true)
+                        ->pluck('name', 'id')
+                        ->toArray()
+                    )
                     ->multiple()
                     ->preload()
                     ->searchable(),
                 SelectFilter::make('security')
                     ->label(__('trade.columns.security'))
                     ->hiddenOn(SecurityResource\RelationManagers\TradesRelationManager::class)
-                    ->relationship('security', 'name')
+                    ->options(fn(): array => Security::query()
+                        ->orderBy('name')
+                        ->where('active', true)
+                        ->pluck('name', 'id')
+                        ->toArray()
+                    )
                     ->multiple()
                     ->preload()
                     ->searchable(),
