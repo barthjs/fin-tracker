@@ -14,7 +14,7 @@ LABEL org.opencontainers.image.url="https://github.com/barthjs/fin-tracker" \
       org.opencontainers.image.description="Household Finance Manager"
 
 # Install build dependencies
-RUN apk add --no-cache nodejs npm
+RUN apk update && apk upgrade && apk add --no-cache nodejs npm
 
 # App setup
 WORKDIR /app
