@@ -8,7 +8,10 @@ use App\Filament\Resources\AccountResource\Pages\ViewAccount;
 use App\Filament\Resources\AccountResource\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\AccountResource\RelationManagers\TransactionRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\AccountsRelationManager;
+use App\Infolists\Components\LogoEntry;
 use App\Models\Account;
+use App\Models\Trade;
+use App\Tables\Columns\LogoColumn;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\ColorPicker;
@@ -20,6 +23,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
@@ -194,17 +198,12 @@ class AccountResource extends Resource
     {
         $hidden = AccountsRelationManager::class;
         return [
-            ImageColumn::make('logo')
-                ->label(__('account.columns.logo'))
-                ->circular()
-                ->extraImgAttributes(fn(Account $record): array => [
-                    'alt' => "{$record->name} logo",
-                ])
-                ->toggleable(),
-            TextColumn::make('name')
+            LogoColumn::make('name')
                 ->label(__('account.columns.name'))
-                ->size(TextColumn\TextColumnSize::Medium)
-                ->weight(FontWeight::SemiBold)
+                ->state(fn(Account $record): array => [
+                    'logo' => $record->logo,
+                    'name' => $record->name,
+                ])
                 ->searchable()
                 ->sortable(),
             TextColumn::make('balance')

@@ -5,7 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Trade;
 use App\Models\Transaction;
+use App\Tables\Columns\LogoColumn;
 use Carbon\Carbon;
 use Exception;
 use Filament\Forms\Components\DatePicker;
@@ -161,16 +163,13 @@ class TransactionResource extends Resource
                     ->wrap()
                     ->searchable()
                     ->toggleable(),
-                ImageColumn::make('account.logo')
-                    ->label('')
-                    ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
-                    ->circular()
-                    ->alignEnd(),
-                TextColumn::make('account.name')
+                LogoColumn::make('account.name')
                     ->label(__('transaction.columns.account'))
+                    ->state(fn(Transaction $record): array => [
+                        'logo' => $record->account->logo,
+                        'name' => $record->account->name,
+                    ])
                     ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
-                    ->badge()
-                    ->color('info')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
