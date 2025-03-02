@@ -1,18 +1,7 @@
 .git/
-.github
-.idea/
+.github/
 .run/
 
-node_modules/
-vendor/
-
-bootstrap/cache/*
-storage/debugbar/
-storage/framework/cache/data/*
-storage/framework/sessions/*
-storage/framework/views/*
-storage/framework/testing/
-storage/logs/*
 tests/
 
 .dockerignore
@@ -20,8 +9,9 @@ tests/
 .env*
 .gitattributes
 .gitignore
-*.yaml
 
+*.yaml
 Dockerfile
 phpunit.xml
+pint.json
 setup-dev.sh

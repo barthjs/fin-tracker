@@ -15,7 +15,7 @@ LABEL org.opencontainers.image.title="Fin-Tracker" \
     org.opencontainers.image.description="Household Finance Manager" \
     org.opencontainers.image.url="https://github.com/barthjs/fin-tracker" \
     org.opencontainers.image.source="https://github.com/barthjs/fin-tracker" \
-    org.opencontainers.image.version=${VERSION}
+    org.opencontainers.image.version=${VERSION} \
     org.opencontainers.image.licenses="MIT"
 
 # Install build dependencies
