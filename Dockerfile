@@ -14,7 +14,7 @@ LABEL org.opencontainers.image.url="https://github.com/barthjs/fin-tracker" \
       org.opencontainers.image.description="Household Finance Manager"
 
 # Install build dependencies
-RUN apk add --no-cache nodejs npm
+RUN apk add --no-cache sqlite-dev nodejs npm
 
 # App setup
 WORKDIR /app
@@ -32,7 +32,7 @@ RUN mv /app/.docker/worker.conf /opt/docker/etc/supervisor.d/worker.conf \
 
 # Clean up unnecessary files and remove build dependencies
 RUN rm -rf .docker *.js \
-    && apk del git nodejs npm
+    && apk del sqlite-dev nodejs npm
 
 # Healthcheck configuration
 HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=1 \
