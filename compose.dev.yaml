@@ -9,18 +9,18 @@ services:
     depends_on:
       - fin-tracker-db
     ports:
-      - '80:80'
-      - '5173:5173'
+      - 80:80
+      - 5173:5173
     volumes:
       - ./:/app
     extra_hosts:
-      - 'host.docker.internal:host-gateway'
+      - host.docker.internal:host-gateway
 
   fin-tracker-db:
     image: mariadb:11.4
     container_name: fin-tracker-db
     ports:
-      - '3306:3306'
+      - 3306:3306
     volumes:
       - db:/var/lib/mysql
     environment:

@@ -5,12 +5,14 @@ return [
     'default' => 'database',
 
     'connections' => [
+
         'database' => [
             'driver' => 'database',
             'table' => 'sys_jobs',
             'queue' => 'default',
             'retry_after' => 90,
         ],
+
     ],
 
     'batching' => [
