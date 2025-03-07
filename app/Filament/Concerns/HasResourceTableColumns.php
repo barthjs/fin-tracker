@@ -60,7 +60,7 @@ trait HasResourceTableColumns
     {
         return TextColumn::make($name)
             ->label(__('fields.created_at'))
-            ->dateTime('Y-m-d, H:i:s')
+            ->dateTime('Y-m-d, H:i:s', auth()->user()->timezone)
             ->sortable()
             ->toggleable(isToggledHiddenByDefault: true);
     }
@@ -69,7 +69,7 @@ trait HasResourceTableColumns
     {
         return TextColumn::make($name)
             ->label(__('fields.updated_at'))
-            ->dateTime('Y-m-d, H:i:s')
+            ->dateTime('Y-m-d, H:i:s', auth()->user()->timezone)
             ->sortable()
             ->toggleable(isToggledHiddenByDefault: true);
     }
@@ -78,7 +78,7 @@ trait HasResourceTableColumns
     {
         return TextColumn::make($name)
             ->label(__('fields.date_time'))
-            ->dateTime('Y-m-d, H:i')
+            ->dateTime('Y-m-d, H:i', auth()->user()->timezone)
             ->fontFamily('mono')
             ->sortable()
             ->toggleable();

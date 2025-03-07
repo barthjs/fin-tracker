@@ -73,9 +73,9 @@ trait HasResourceImportColumns
             ->rules(['required'])
             ->castStateUsing(function (string $state): CarbonImmutable {
                 try {
-                    $carbon = CarbonImmutable::parse($state);
+                    $carbon = CarbonImmutable::parse($state)->timezone(auth()->user()->timezone);
                 } catch (Exception) {
-                    $carbon = CarbonImmutable::now();
+                    $carbon = CarbonImmutable::now()->timezone(auth()->user()->timezone);
                 }
 
                 return $carbon;
@@ -89,7 +89,7 @@ trait HasResourceImportColumns
             ->rules(['required'])
             ->castStateUsing(function (?string $state): ?CarbonImmutable {
                 try {
-                    $carbon = CarbonImmutable::parse($state)->startOfDay();
+                    $carbon = CarbonImmutable::parse($state)->timezone(auth()->user()->timezone)->startOfDay();
                 } catch (Exception) {
                     $carbon = null;
                 }

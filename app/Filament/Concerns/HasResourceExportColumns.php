@@ -54,7 +54,7 @@ trait HasResourceExportColumns
     {
         return ExportColumn::make($name)
             ->label(__('fields.date_time'))
-            ->formatStateUsing(fn (CarbonImmutable $state): string => $state->format('Y-m-d, H:i'));
+            ->formatStateUsing(fn (CarbonImmutable $state): string => $state->timezone(auth()->user()->timezone)->format('Y-m-d H:i:s'));
     }
 
     public static function dateColumn(string $name): ExportColumn
