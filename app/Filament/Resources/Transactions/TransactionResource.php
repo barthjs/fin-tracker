@@ -98,7 +98,10 @@ final class TransactionResource extends Resource
                     TextInput::make('payee')
                         ->label(__('transaction.fields.payee'))
                         ->datalist(fn (): array => Transaction::query()
-                            ->whereBetween('date_time', [today()->subYear(), today()])
+                            ->whereBetween('date_time', [
+                                now()->setTimezone(auth()->user()->timezone)->startOfDay()->subYear()->utc(),
+                                now()->setTimezone(auth()->user()->timezone)->endOfDay()->utc(),
+                            ])
                             ->distinct()
                             ->orderBy('payee')
                             ->pluck('payee')
