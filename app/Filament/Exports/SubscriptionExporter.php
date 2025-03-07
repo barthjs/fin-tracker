@@ -74,7 +74,7 @@ final class SubscriptionExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('subscription.export.file_name').Carbon::now()->format('Y-m-d-H-i');
+        return __('subscription.export.file_name').Carbon::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
     public function getJobBatchName(): string
