@@ -49,28 +49,6 @@ final class Transaction extends Model
     ];
 
     /**
-     * Updates the transaction statistics.
-     */
-    public static function updateCategoryStatistics(string $categoryId, CarbonInterface $date): void
-    {
-        $year = $date->year;
-        $month = $date->month;
-        $monthColumn = mb_strtolower($date->format('M'));
-
-        $sumPerMonth = self::where('category_id', $categoryId)
-            ->where('type', '!=', TransactionType::Transfer)
-            ->whereYear('date_time', $year)
-            ->whereMonth('date_time', $month)
-            ->sum('amount');
-
-        $stat = CategoryStatistic::updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
-
-        if ($stat->yearlySum() === 0.0) {
-            $stat->delete();
-        }
-    }
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
