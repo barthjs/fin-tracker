@@ -5,9 +5,9 @@ if [ -z "$APP_KEY" ]; then
     exit 1
 fi
 
-echo "Optimizing the application..."
-if ! php artisan optimize; then
-    echo "Error: Optimization failed."
+echo "Caching the configuration..."
+if ! php artisan config:cache; then
+    echo "Error: Failed to cache the configuration."
     exit 1
 fi
 

@@ -32,7 +32,7 @@ RUN mv /app/.docker/worker.conf /opt/docker/etc/supervisor.d/worker.conf \
     && mv /app/.docker/start.sh /opt/docker/provision/entrypoint.d/start.sh
 
 # Clean up unnecessary files
-RUN rm -rf .docker node_modules resources/css package.json package-lock.json *.js
+RUN rm -rf .docker node_modules resources/css composer.lock package.json package-lock.json *.js
 
 # Remove build dependencies
 RUN apk del sqlite-dev nodejs npm
