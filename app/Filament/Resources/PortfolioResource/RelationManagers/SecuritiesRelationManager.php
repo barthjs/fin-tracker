@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\PortfolioResource\RelationManagers;
 
@@ -14,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 class SecuritiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'securities';
+
     protected static ?string $icon = 'tabler-file-percent';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
@@ -32,6 +35,7 @@ class SecuritiesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         $columns = SecurityResource::getTableColumns($this->ownerRecord->id);
+
         return SecurityResource::table($table)
             ->query(function () {
                 $securityIds = Trade::wherePortfolioId($this->ownerRecord->id)
@@ -46,7 +50,7 @@ class SecuritiesRelationManager extends RelationManager
             })
             ->heading('')
             ->columns($columns)
-            ->recordUrl(fn(Security $record): string => SecurityResource\Pages\ViewSecurity::getUrl([$record->id]), true)
+            ->recordUrl(fn (Security $record): string => SecurityResource\Pages\ViewSecurity::getUrl([$record->id]), true)
             ->emptyStateActions([]);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Dashboard;
 use App\Models\User;
@@ -8,7 +10,6 @@ it('redirects to the login page', function () {
     $response = $this->get('/');
     $response->assertRedirect('/login');
 });
-
 
 it('displays the login page', function () {
     $response = $this->get('/login');

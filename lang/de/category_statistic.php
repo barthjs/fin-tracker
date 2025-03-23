@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'statistik',
@@ -18,6 +20,6 @@ return [
         'oct' => 'Oktober',
         'nov' => 'November',
         'dec' => 'Dezember',
-    ]
+    ],
 
 ];

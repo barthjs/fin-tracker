@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
@@ -18,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 class AccountsRelationManager extends RelationManager
 {
     protected static string $relationship = 'accounts';
+
     protected static ?string $icon = 'tabler-bank-building';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
@@ -27,7 +30,7 @@ class AccountsRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        return (string)Account::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
+        return (string) Account::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
     public function form(Form $form): Form
@@ -41,11 +44,12 @@ class AccountsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         $columns = AccountResource::tableColumns();
+
         return $table
-            ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes())
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes())
             ->heading('')
             ->columns($columns)
-            ->paginated(fn(): bool => Account::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
+            ->paginated(fn (): bool => Account::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -53,7 +57,7 @@ class AccountsRelationManager extends RelationManager
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->headerActions([
@@ -63,8 +67,9 @@ class AccountsRelationManager extends RelationManager
                     ->modalHeading(__('account.buttons.create_heading'))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
-                    })
+                    }),
             ])
             ->actions([
                 EditAction::make()
@@ -75,7 +80,7 @@ class AccountsRelationManager extends RelationManager
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('account.buttons.delete_heading'))
-                    ->disabled(fn(Account $record): bool => $record->transactions()->withoutGlobalScopes()->exists() || $record->trades()->withoutGlobalScopes()->exists())
+                    ->disabled(fn (Account $record): bool => $record->transactions()->withoutGlobalScopes()->exists() || $record->trades()->withoutGlobalScopes()->exists()),
             ])
             ->bulkActions(AccountResource::getBulkActions())
             ->emptyStateHeading(__('account.empty'))
@@ -87,8 +92,9 @@ class AccountsRelationManager extends RelationManager
                     ->modalHeading(__('account.buttons.create_heading'))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
-                    })
+                    }),
             ]);
     }
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
@@ -18,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 class SecuritiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'securities';
+
     protected static ?string $icon = 'tabler-file-percent';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
@@ -27,7 +30,7 @@ class SecuritiesRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        return (string)Security::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
+        return (string) Security::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
     public function form(Form $form): Form
@@ -41,11 +44,12 @@ class SecuritiesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         $columns = SecurityResource::getTableColumns();
+
         return $table
-            ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes())
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes())
             ->heading('')
             ->columns($columns)
-            ->paginated(fn(): bool => Security::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
+            ->paginated(fn (): bool => Security::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -53,7 +57,7 @@ class SecuritiesRelationManager extends RelationManager
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->headerActions([
@@ -63,8 +67,9 @@ class SecuritiesRelationManager extends RelationManager
                     ->modalHeading(__('security.buttons.create_heading'))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
-                    })
+                    }),
             ])
             ->actions([
                 EditAction::make()
@@ -75,7 +80,7 @@ class SecuritiesRelationManager extends RelationManager
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('security.buttons.delete_heading'))
-                    ->disabled(fn(Security $record): bool => $record->trades()->withoutGlobalScopes()->exists())
+                    ->disabled(fn (Security $record): bool => $record->trades()->withoutGlobalScopes()->exists()),
             ])
             ->emptyStateHeading(__('security.empty'))
             ->emptyStateDescription('')
@@ -86,8 +91,9 @@ class SecuritiesRelationManager extends RelationManager
                     ->modalHeading(__('security.buttons.create_heading'))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
-                    })
+                    }),
             ]);
     }
 }

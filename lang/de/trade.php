@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'trades',
@@ -61,8 +63,8 @@ return [
             'body_heading' => 'Der Tradesexport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Trades_'
-        ]
+            'file_name' => 'Trades_',
+        ],
     ],
 
     'empty' => 'Keine Trades gefunden',

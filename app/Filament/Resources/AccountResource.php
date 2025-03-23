@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -39,7 +41,9 @@ use Illuminate\Support\Collection;
 class AccountResource extends Resource
 {
     protected static ?string $model = Account::class;
+
     protected static ?int $navigationSort = 3;
+
     protected static ?string $navigationIcon = 'tabler-bank-building';
 
     public static function getSlug(): string
@@ -117,29 +121,29 @@ class AccountResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('account.columns.name'))
-                            ->tooltip(fn(Account $record) => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn(Account $record) => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn (Account $record) => ! $record->active ? __('table.status_inactive') : '')
+                            ->color(fn (Account $record) => ! $record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('balance')
                             ->label(__('account.columns.balance'))
-                            ->color(fn(float $state): string => match (true) {
+                            ->color(fn (float $state): string => match (true) {
                                 $state == 0 => 'gray',
                                 $state < 0 => 'danger',
                                 default => 'success'
                             })
-                            ->money(fn(Account $record): string => $record->currency->name)
+                            ->money(fn (Account $record): string => $record->currency->name)
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('description')
                             ->label(__('account.columns.description'))
                             ->size(TextEntry\TextEntrySize::Small)
-                            ->hidden(fn(Account $record) => !$record->description)
+                            ->hidden(fn (Account $record) => ! $record->description),
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 3
-                    ])
+                        'md' => 3,
+                    ]),
             ]);
     }
 
@@ -150,14 +154,14 @@ class AccountResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query, Table $table) {
-                if (!$table->getActiveFiltersCount()) {
+                if (! $table->getActiveFiltersCount()) {
                     return $query->where('active', true);
                 } else {
                     return $query;
                 }
             })
             ->columns(self::tableColumns())
-            ->paginated(fn(): bool => Account::count() > 20)
+            ->paginated(fn (): bool => Account::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -165,7 +169,7 @@ class AccountResource extends Resource
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -177,7 +181,7 @@ class AccountResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('account.buttons.delete_heading'))
-                    ->disabled(fn(Account $record): bool => $record->transactions()->exists() || $record->trades()->exists()),
+                    ->disabled(fn (Account $record): bool => $record->transactions()->exists() || $record->trades()->exists()),
             ])
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('account.empty'))
@@ -193,10 +197,11 @@ class AccountResource extends Resource
     public static function tableColumns(): array
     {
         $hidden = AccountsRelationManager::class;
+
         return [
             LogoColumn::make('name')
                 ->label(__('account.columns.name'))
-                ->state(fn(Account $record): array => [
+                ->state(fn (Account $record): array => [
                     'logo' => $record->logo,
                     'name' => $record->name,
                 ])
@@ -206,12 +211,12 @@ class AccountResource extends Resource
                 ->label(__('account.columns.balance'))
                 ->hiddenOn($hidden)
                 ->badge()
-                ->color(fn(float $state): string => match (true) {
+                ->color(fn (float $state): string => match (true) {
                     $state == 0 => 'gray',
                     $state < 0 => 'danger',
                     default => 'success'
                 })
-                ->money(currency: fn(Account $record): string => $record->currency->name)
+                ->money(currency: fn (Account $record): string => $record->currency->name)
                 ->summarize(Sum::make()->money(Account::getCurrency(), 100))
                 ->toggleable(),
             TextColumn::make('description')
@@ -226,7 +231,7 @@ class AccountResource extends Resource
                 ->toggleable(isToggledHiddenByDefault: true),
             IconColumn::make('active')
                 ->label(__('table.active'))
-                ->tooltip(fn(bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
+                ->tooltip(fn (bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
@@ -252,7 +257,7 @@ class AccountResource extends Resource
                 ->action(function (Collection $records, array $data): void {
                     $records->each->update(['currency' => $data['currency']]);
                 })
-                ->deselectRecordsAfterCompletion()
+                ->deselectRecordsAfterCompletion(),
         ];
     }
 

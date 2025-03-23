@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'created_at' => 'Created',
@@ -19,6 +21,6 @@ return [
         'transfers' => 'Transfers',
         'created_from' => 'From',
         'created_until' => 'Until',
-    ]
+    ],
 
 ];

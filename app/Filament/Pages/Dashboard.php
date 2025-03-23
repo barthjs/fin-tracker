@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Pages;
 
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
-use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
+use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
 
 class Dashboard extends BaseDashboard
@@ -24,7 +26,7 @@ class Dashboard extends BaseDashboard
                         ->label(__('table.filter.created_from'))
                         ->default(Carbon::today()->startOfYear()),
                     DatePicker::make('created_until')
-                        ->label(__('table.filter.created_until'))
+                        ->label(__('table.filter.created_until')),
                 ]),
         ];
     }

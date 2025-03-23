@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
@@ -20,7 +22,7 @@ class PortfolioExporter extends Exporter
                 ->label(__('portfolio.columns.name')),
             ExportColumn::make('market_value')
                 ->label(__('portfolio.columns.market_value'))
-                ->formatStateUsing(fn(float $state): string => Number::format($state, 2)),
+                ->formatStateUsing(fn (float $state): string => Number::format($state, 2)),
             ExportColumn::make('description')
                 ->label(__('portfolio.columns.description')),
             ExportColumn::make('color')
@@ -33,11 +35,11 @@ class PortfolioExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = __('portfolio.notifications.export.body_heading') . "\n\r" .
-            __('portfolio.notifications.export.body_success') . number_format($export->successful_rows);
+        $body = __('portfolio.notifications.export.body_heading')."\n\r".
+            __('portfolio.notifications.export.body_success').number_format($export->successful_rows);
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= "\n\r" . __('portfolio.notifications.export.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r".__('portfolio.notifications.export.body_failure').number_format($failedRowsCount);
         }
 
         return $body;
@@ -50,6 +52,6 @@ class PortfolioExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('portfolio.notifications.export.file_name') . Carbon::now()->format('Y-m-d-H-i');
+        return __('portfolio.notifications.export.file_name').Carbon::now()->format('Y-m-d-H-i');
     }
 }

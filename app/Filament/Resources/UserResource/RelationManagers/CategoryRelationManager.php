@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
@@ -18,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 class CategoryRelationManager extends RelationManager
 {
     protected static string $relationship = 'categories';
+
     protected static ?string $icon = 'tabler-category';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
@@ -27,7 +30,7 @@ class CategoryRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        return (string)Category::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
+        return (string) Category::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
     public function form(Form $form): Form
@@ -41,11 +44,12 @@ class CategoryRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         $tableParts = CategoryResource::tableColumns();
+
         return $table
-            ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes())
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes())
             ->heading('')
             ->columns($tableParts)
-            ->paginated(fn(): bool => Category::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
+            ->paginated(fn (): bool => Category::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -53,7 +57,7 @@ class CategoryRelationManager extends RelationManager
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->headerActions([
                 CreateAction::make()
@@ -62,8 +66,9 @@ class CategoryRelationManager extends RelationManager
                     ->modalHeading(__('category.buttons.create_heading'))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
-                    })
+                    }),
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -75,7 +80,7 @@ class CategoryRelationManager extends RelationManager
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('category.buttons.delete_heading'))
-                    ->disabled(fn(Category $record): bool => $record->transactions()->withoutGlobalScopes()->exists())
+                    ->disabled(fn (Category $record): bool => $record->transactions()->withoutGlobalScopes()->exists()),
             ])
             ->bulkActions(CategoryResource::getBulkActions())
             ->emptyStateHeading(__('category.empty'))
@@ -87,8 +92,9 @@ class CategoryRelationManager extends RelationManager
                     ->modalHeading(__('category.buttons.create_heading'))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
-                    })
+                    }),
             ]);
     }
 }

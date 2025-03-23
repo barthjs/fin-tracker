@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'kategorien',
@@ -24,7 +26,7 @@ return [
             'Mobilität',
             'Gehalt',
             'Zinsen',
-            'Umbuchung'
+            'Umbuchung',
         ],
         'group' => 'Gruppe',
         'group_examples' => [
@@ -34,7 +36,7 @@ return [
             'Variable Ausgaben',
             'Fixe Einnahmen',
             'Variable Einnahmen',
-            'Umbuchungen'
+            'Umbuchungen',
         ],
         'type' => 'Typ',
     ],
@@ -46,7 +48,7 @@ return [
     'types' => [
         'expense' => 'Ausgabe',
         'revenue' => 'Einnahme',
-        'transfer' => 'Umbuchung'
+        'transfer' => 'Umbuchung',
     ],
 
     'groups' => [
@@ -71,10 +73,10 @@ return [
             'body_heading' => 'Der Kategorienexport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Kategorien_'
-        ]
+            'file_name' => 'Kategorien_',
+        ],
     ],
 
-    'empty' => 'Keine Kategorien gefunden'
+    'empty' => 'Keine Kategorien gefunden',
 
 ];

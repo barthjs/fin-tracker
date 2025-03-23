@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -23,18 +25,18 @@ class Category extends Model
         'type',
         'color',
         'active',
-        'user_id'
+        'user_id',
     ];
 
     protected $casts = [
         'active' => 'boolean',
         'group' => TransactionGroup::class,
-        'type' => TransactionType::class
+        'type' => TransactionType::class,
     ];
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new UserScope());
+        static::addGlobalScope(new UserScope);
 
         static::creating(function (Category $category) {
             // Needed for seeder, importer and in web

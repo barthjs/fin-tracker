@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tables\Columns;
 
-use Closure;
 use Filament\Tables\Columns\Column;
 
 class LogoColumn extends Column

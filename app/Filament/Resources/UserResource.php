@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -33,6 +35,7 @@ use Illuminate\Validation\Rules\Password;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+
     protected static ?string $navigationIcon = 'tabler-users';
 
     public static function getSlug(): string
@@ -78,7 +81,7 @@ class UserResource extends Resource
                             ->maxLength(255)
                             ->email()
                             ->unique(ignoreRecord: true)
-                            ->validationMessages(['unique' => __('user.columns.email_unique_warning')])
+                            ->validationMessages(['unique' => __('user.columns.email_unique_warning')]),
                     ])
                     ->columns(2),
                 Section::make()
@@ -86,13 +89,13 @@ class UserResource extends Resource
                         TextInput::make('password')
                             ->label(__('user.buttons.password'))
                             ->validationMessages(['same' => __('user.buttons.password_confirmation_warning')])
-                            ->required(fn(string $context): bool => $context === 'create')
+                            ->required(fn (string $context): bool => $context === 'create')
                             ->password()
                             ->revealable()
                             ->rule(Password::default())
                             ->autocomplete('new-password')
-                            ->dehydrated(fn($state): bool => filled($state))
-                            ->dehydrateStateUsing(fn($state): string => Hash::make($state))
+                            ->dehydrated(fn ($state): bool => filled($state))
+                            ->dehydrateStateUsing(fn ($state): string => Hash::make($state))
                             ->live(debounce: 200)
                             ->same('passwordConfirmation'),
                         TextInput::make('passwordConfirmation')
@@ -100,15 +103,17 @@ class UserResource extends Resource
                             ->password()
                             ->revealable()
                             ->required(function (callable $get) {
-                                if (!$get('password')) {
+                                if (! $get('password')) {
                                     return false;
                                 }
+
                                 return true;
                             })
                             ->disabled(function (callable $get) {
-                                if (!$get('password')) {
+                                if (! $get('password')) {
                                     return true;
                                 }
+
                                 return false;
                             })
                             ->dehydrated(false),
@@ -116,9 +121,10 @@ class UserResource extends Resource
                             ->label(__('user.columns.is_admin'))
                             ->disabled(function ($record) {
                                 // Prevent current user from removing his admin status
-                                if (!$record) {
+                                if (! $record) {
                                     return false;
                                 }
+
                                 return $record->id == auth()->user()->id;
                             })
                             ->default(false)
@@ -126,14 +132,15 @@ class UserResource extends Resource
                         Toggle::make('active')
                             ->label(__('table.active'))
                             ->disabled(function ($record) {
-                                if (!$record) {
+                                if (! $record) {
                                     // Prevent current user from making his account inactive
                                     return false;
                                 }
+
                                 return $record->id == auth()->user()->id;
                             })
                             ->default(true)
-                            ->inline(false)
+                            ->inline(false),
                     ])
                     ->columns(2),
             ]);
@@ -147,31 +154,31 @@ class UserResource extends Resource
                     ->schema([
                         TextEntry::make('full_name')
                             ->label(__('user.columns.full_name'))
-                            ->state(fn(User $record): string => $record->getFilamentName())
-                            ->tooltip(fn(User $record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
-                            ->color(fn($record): string => !$record->active ? 'danger' : 'success')
+                            ->state(fn (User $record): string => $record->getFilamentName())
+                            ->tooltip(fn (User $record): string => ! $record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->color(fn ($record): string => ! $record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('name')
                             ->label(__('user.columns.name'))
-                            ->tooltip(fn(User $record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
-                            ->color(fn(User $record): string => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn (User $record): string => ! $record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->color(fn (User $record): string => ! $record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('email')
                             ->label(__('user.columns.email'))
-                            ->tooltip(fn(User $record): string => !$record->active ? __('table.status_inactive') : __('table.status_active'))
-                            ->color(fn(User $record): string => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn (User $record): string => ! $record->active ? __('table.status_inactive') : __('table.status_active'))
+                            ->color(fn (User $record): string => ! $record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         IconEntry::make('is_admin')
                             ->label(__('user.columns.is_admin'))
-                            ->boolean()
+                            ->boolean(),
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 4
-                    ])
+                        'md' => 4,
+                    ]),
             ]);
     }
 
@@ -208,7 +215,7 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->paginated(fn(): bool => User::count() > 20)
+            ->paginated(fn (): bool => User::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -219,15 +226,15 @@ class UserResource extends Resource
                 DeleteAction::make()
                     ->iconButton()
                     ->icon('tabler-trash')
-                    ->modalHeading(__('user.buttons.delete_heading'))
+                    ->modalHeading(__('user.buttons.delete_heading')),
             ])
-            ->recordUrl(fn(User $record): string => ViewUser::getUrl([$record->id]))
+            ->recordUrl(fn (User $record): string => ViewUser::getUrl([$record->id]))
             ->emptyStateHeading(__('user.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
                 CreateAction::make()
                     ->icon('tabler-plus')
-                    ->label(__('user.buttons.create_button_label'))
+                    ->label(__('user.buttons.create_button_label')),
             ]);
     }
 

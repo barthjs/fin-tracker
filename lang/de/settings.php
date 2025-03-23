@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'einstellungen',
@@ -8,6 +10,6 @@ return [
     'about' => 'Über',
     'current_version' => 'Aktuelle Version',
     'latest_version' => 'Neueste Version',
-    'report_bug' => 'Fehler melden'
+    'report_bug' => 'Fehler melden',
 
 ];

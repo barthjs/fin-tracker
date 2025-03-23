@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Database\Seeders;
 
@@ -46,8 +48,6 @@ class DemoSeeder extends Seeder
      * - Creates 3 bank accounts for the user.
      * - Generates 216 transactions for each bank account, assigning them randomly to the transaction categories.
      * Total transactions for 4 users: 864
-     * @param User $user
-     * @return void
      */
     private function createTestTransactions(User $user): void
     {
@@ -59,13 +59,13 @@ class DemoSeeder extends Seeder
                     for ($i = 0; $i < 2; $i++) {
                         $category = $categories->random();
                         $amount = fake()->numberBetween(0, 1000);
-                        $amount *= ($category->type->name == "expense") ? -1 : 1;
+                        $amount *= ($category->type->name == 'expense') ? -1 : 1;
                         Transaction::factory()->create([
                             'date_time' => Carbon::now()->subYears($y)->month($m),
                             'amount' => $amount,
                             'account_id' => $account->id,
                             'category_id' => $category->id,
-                            'user_id' => $user->id
+                            'user_id' => $user->id,
                         ]);
                     }
                 }
@@ -80,8 +80,8 @@ class DemoSeeder extends Seeder
      * - Creates 3 bank accounts for the user.
      * - Generates 216 transactions for each bank account, assigning them randomly to the transaction categories.
      * Total transactions for 4 users: 864
-     * @param User $user The user for whom the test data is generated.
-     * @return void
+     *
+     * @param  User  $user  The user for whom the test data is generated.
      */
     private function createTestValuesTrades(User $user): void
     {
@@ -99,7 +99,7 @@ class DemoSeeder extends Seeder
                             'account_id' => $account->id,
                             'portfolio_id' => $portfolio->id,
                             'security_id' => $security->id,
-                            'user_id' => $user->id
+                            'user_id' => $user->id,
                         ]);
                     }
                 }

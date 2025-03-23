@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -36,22 +38,22 @@ class TradeImporter extends Importer
                 ->label(__('trade.columns.quantity'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Trade $record, string $state) => $record->quantity = abs(Convertor::formatNumber($state))),
+                ->fillRecordUsing(fn (Trade $record, string $state) => $record->quantity = abs(Convertor::formatNumber($state))),
             ImportColumn::make('price')
                 ->label(__('trade.columns.price'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Trade $record, string $state) => $record->price = abs(Convertor::formatNumber($state))),
+                ->fillRecordUsing(fn (Trade $record, string $state) => $record->price = abs(Convertor::formatNumber($state))),
             ImportColumn::make('tax')
                 ->label(__('trade.columns.tax'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Trade $record, string $state) => $record->tax = abs(Convertor::formatNumber($state))),
+                ->fillRecordUsing(fn (Trade $record, string $state) => $record->tax = abs(Convertor::formatNumber($state))),
             ImportColumn::make('fee')
                 ->label(__('trade.columns.fee'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Trade $record, string $state) => $record->fee = abs(Convertor::formatNumber($state))),
+                ->fillRecordUsing(fn (Trade $record, string $state) => $record->fee = abs(Convertor::formatNumber($state))),
             ImportColumn::make('type')
                 ->label(__('trade.columns.type'))
                 ->requiredMapping()
@@ -101,16 +103,16 @@ class TradeImporter extends Importer
 
     public function resolveRecord(): ?Trade
     {
-        return new Trade();
+        return new Trade;
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = __('trade.notifications.import.body_heading') . "\n\r" .
-            __('trade.notifications.import.body_success') . number_format($import->successful_rows);
+        $body = __('trade.notifications.import.body_heading')."\n\r".
+            __('trade.notifications.import.body_success').number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= "\n\r" . __('trade.notifications.import.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r".__('trade.notifications.import.body_failure').number_format($failedRowsCount);
         }
 
         return $body;

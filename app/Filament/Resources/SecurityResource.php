@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -38,7 +40,9 @@ use Number;
 class SecurityResource extends Resource
 {
     protected static ?string $model = Security::class;
+
     protected static ?int $navigationSort = 7;
+
     protected static ?string $navigationIcon = 'tabler-file-percent';
 
     public static function getSlug(): string
@@ -83,7 +87,7 @@ class SecurityResource extends Resource
                     TextInput::make('price')
                         ->label(__('security.columns.price'))
                         ->required()
-                        ->numeric()
+                        ->numeric(),
                 ])->columns(2),
             Forms\Components\Section::make()
                 ->schema([
@@ -129,8 +133,8 @@ class SecurityResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('security.columns.name'))
-                            ->tooltip(fn(Security $record) => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn(Security $record) => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn (Security $record) => ! $record->active ? __('table.status_inactive') : '')
+                            ->color(fn (Security $record) => ! $record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('price')
@@ -145,14 +149,14 @@ class SecurityResource extends Resource
                             ->numeric(6),
                         TextEntry::make('type')
                             ->label(__('security.columns.type'))
-                            ->formatStateUsing(fn($state): string => __('security.types')[$state->name])
+                            ->formatStateUsing(fn ($state): string => __('security.types')[$state->name])
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 4
-                    ])
+                        'md' => 4,
+                    ]),
             ]);
     }
 
@@ -162,16 +166,17 @@ class SecurityResource extends Resource
     public static function table(Table $table): Table
     {
         $columns = self::getTableColumns();
+
         return $table
             ->modifyQueryUsing(function (Builder $query, Table $table) {
-                if (!$table->getActiveFiltersCount()) {
+                if (! $table->getActiveFiltersCount()) {
                     return $query->where('active', true);
                 } else {
                     return $query;
                 }
             })
             ->columns($columns)
-            ->paginated(fn(): bool => Security::count() > 20)
+            ->paginated(fn (): bool => Security::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -179,7 +184,7 @@ class SecurityResource extends Resource
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -195,19 +200,20 @@ class SecurityResource extends Resource
                                 ->pluck('portfolio_id')
                                 ->unique()
                                 ->toArray();
-                            if (!empty($portfolios)) {
+                            if (! empty($portfolios)) {
                                 foreach ($portfolios as $portfolio) {
                                     Portfolio::updatePortfolioMarketValue($portfolio);
                                 }
                             }
                         }
+
                         return $record;
                     }),
                 DeleteAction::make()
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('security.buttons.delete_heading'))
-                    ->disabled(fn(Security $record): bool => $record->trades()->count() > 0)
+                    ->disabled(fn (Security $record): bool => $record->trades()->count() > 0),
             ])
             ->emptyStateHeading(__('security.empty'))
             ->emptyStateDescription('')
@@ -219,12 +225,12 @@ class SecurityResource extends Resource
             ]);
     }
 
-    public static function getTableColumns(int $portfolioId = null): array
+    public static function getTableColumns(?int $portfolioId = null): array
     {
         return [
             LogoColumn::make('name')
                 ->label(__('security.columns.name'))
-                ->state(fn(Security $record): array => [
+                ->state(fn (Security $record): array => [
                     'logo' => $record->logo,
                     'name' => $record->name,
                 ])
@@ -241,6 +247,7 @@ class SecurityResource extends Resource
                 ->hiddenOn(SecuritiesRelationManager::class)
                 ->formatStateUsing(function (Security $record, $state) use ($portfolioId): string {
                     $quantity = $portfolioId ? Trade::whereSecurityId($record->id)->wherePortfolioId($portfolioId)->sum('quantity') : $state;
+
                     return Number::format(floatval($quantity), 2);
                 })
                 ->searchable()
@@ -261,7 +268,7 @@ class SecurityResource extends Resource
                 ->toggleable(isToggledHiddenByDefault: true),
             IconColumn::make('active')
                 ->label(__('table.active'))
-                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
+                ->tooltip(fn ($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),

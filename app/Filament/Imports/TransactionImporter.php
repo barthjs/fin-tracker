@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -45,7 +47,7 @@ class TransactionImporter extends Importer
                 ->label(__('transaction.columns.amount'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Transaction $record, string $state) => $record->amount = Convertor::formatNumber($state)),
+                ->fillRecordUsing(fn (Transaction $record, string $state) => $record->amount = Convertor::formatNumber($state)),
             ImportColumn::make('destination')
                 ->label(__('transaction.columns.destination'))
                 ->rules(['max:255']),
@@ -76,8 +78,7 @@ class TransactionImporter extends Importer
                 }),
             ImportColumn::make('group')
                 ->label(__('transaction.columns.group'))
-                ->fillRecordUsing(function (Transaction $record, string $state): void {
-                }),
+                ->fillRecordUsing(function (Transaction $record, string $state): void {}),
             ImportColumn::make('notes')
                 ->label(__('transaction.columns.notes'))
                 ->rules(['max:255'])];
@@ -85,16 +86,16 @@ class TransactionImporter extends Importer
 
     public function resolveRecord(): ?Transaction
     {
-        return new Transaction();
+        return new Transaction;
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = __('transaction.notifications.import.body_heading') . "\n\r" .
-            __('transaction.notifications.import.body_success') . number_format($import->successful_rows);
+        $body = __('transaction.notifications.import.body_heading')."\n\r".
+            __('transaction.notifications.import.body_success').number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= "\n\r" . __('transaction.notifications.import.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r".__('transaction.notifications.import.body_failure').number_format($failedRowsCount);
         }
 
         return $body;

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Casts;
 
@@ -12,7 +14,7 @@ class MoneyCast implements CastsAttributes
     /**
      * Cast the given value.
      *
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): float
     {
@@ -22,13 +24,14 @@ class MoneyCast implements CastsAttributes
     /**
      * Prepare the given value for storage.
      *
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): string|float
     {
-        if ((!$model instanceof Transaction) && (!$model instanceof Trade)) {
+        if ((! $model instanceof Transaction) && (! $model instanceof Trade)) {
             return $value;
         }
+
         return round(floatval($value) * 100);
     }
 }

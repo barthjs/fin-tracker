@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'accounts',
@@ -21,21 +23,21 @@ return [
         'name_examples' => [
             'Bank of America',
             'ING',
-            'HSBC'
+            'HSBC',
         ],
         'balance' => 'Balance',
         'currency' => 'Currency',
         'currency_examples' => [
             'EUR',
             'GBP',
-            'USD'
+            'USD',
         ],
         'description' => 'Description',
         'description_examples' => [
             'Lorem ipsum dolor sit amet',
             'Lorem ipsum dolor sit amet',
-            'Lorem ipsum dolor sit amet'
-        ]
+            'Lorem ipsum dolor sit amet',
+        ],
     ],
 
     'form' => [
@@ -57,10 +59,10 @@ return [
             'body_heading' => 'The account export has been completed.',
             'body_failure' => 'Failed rows: ',
             'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'accounts_'
-        ]
+            'file_name' => 'accounts_',
+        ],
     ],
 
-    'empty' => 'No accounts found'
+    'empty' => 'No accounts found',
 
 ];

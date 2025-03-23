@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -41,8 +43,9 @@ class CategoryImporter extends Importer
                 ->examples(function (): array {
                     $colors = [];
                     for ($i = 1; $i <= 7; $i++) {
-                        $colors[] = strtolower(sprintf("#%06X", mt_rand(0, 0xFFFFFF)));
+                        $colors[] = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
                     }
+
                     return $colors;
                 })
                 ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
@@ -63,11 +66,11 @@ class CategoryImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = __('category.notifications.import.body_heading') . "\n\r" .
-            __('category.notifications.import.body_success') . number_format($import->successful_rows);
+        $body = __('category.notifications.import.body_heading')."\n\r".
+            __('category.notifications.import.body_success').number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= "\n\r" . __('category.notifications.import.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r".__('category.notifications.import.body_failure').number_format($failedRowsCount);
         }
 
         return $body;

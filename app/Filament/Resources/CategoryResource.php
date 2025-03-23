@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -35,7 +37,9 @@ use Illuminate\Support\Collection;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
+
     protected static ?int $navigationSort = 8;
+
     protected static ?string $navigationIcon = 'tabler-category';
 
     public static function getSlug(): string
@@ -98,14 +102,14 @@ class CategoryResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('category.columns.name'))
-                            ->tooltip(fn(Category $record): string => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn(Category $record): string => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn (Category $record): string => ! $record->active ? __('table.status_inactive') : '')
+                            ->color(fn (Category $record): string => ! $record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('group')
                             ->label(__('category.columns.group'))
-                            ->formatStateUsing(fn(TransactionGroup $state): string => __('category.groups')[$state->name])
-                            ->color(fn(Category $record): string => match ($record->type->name) {
+                            ->formatStateUsing(fn (TransactionGroup $state): string => __('category.groups')[$state->name])
+                            ->color(fn (Category $record): string => match ($record->type->name) {
                                 'expense' => 'danger',
                                 'revenue' => 'success',
                                 default => 'warning',
@@ -124,8 +128,8 @@ class CategoryResource extends Resource
                     ])
                     ->columns([
                         'default' => 2,
-                        'sm' => 3
-                    ])
+                        'sm' => 3,
+                    ]),
             ]);
     }
 
@@ -135,16 +139,17 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         $columns = self::tableColumns();
+
         return $table
             ->modifyQueryUsing(function (Builder $query, Table $table) {
-                if (!$table->getActiveFiltersCount()) {
+                if (! $table->getActiveFiltersCount()) {
                     return $query->where('active', true);
                 } else {
                     return $query;
                 }
             })
             ->columns($columns)
-            ->paginated(fn(): bool => Category::count() > 20)
+            ->paginated(fn (): bool => Category::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -152,7 +157,7 @@ class CategoryResource extends Resource
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -164,7 +169,7 @@ class CategoryResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('category.buttons.delete_heading'))
-                    ->disabled(fn(Category $record): bool => $record->transactions()->count() > 0)
+                    ->disabled(fn (Category $record): bool => $record->transactions()->count() > 0),
             ])
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('category.empty'))
@@ -189,9 +194,9 @@ class CategoryResource extends Resource
                 ->sortable(),
             TextColumn::make('group')
                 ->label(__('category.columns.group'))
-                ->formatStateUsing(fn($state): string => __('category.groups')[$state->name])
+                ->formatStateUsing(fn ($state): string => __('category.groups')[$state->name])
                 ->badge()
-                ->color(fn(Category $record): string => match ($record->type->name) {
+                ->color(fn (Category $record): string => match ($record->type->name) {
                     'expense' => 'danger',
                     'revenue' => 'success',
                     default => 'warning',
@@ -204,12 +209,13 @@ class CategoryResource extends Resource
                             $groups[] = $group;
                         }
                     }
+
                     return $query->whereIn('group', $groups);
                 })
                 ->sortable(),
             IconColumn::make('active')
                 ->label(__('table.active'))
-                ->tooltip(fn(bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
+                ->tooltip(fn (bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
@@ -240,7 +246,7 @@ class CategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            TransactionRelationManager::class
+            TransactionRelationManager::class,
         ];
     }
 

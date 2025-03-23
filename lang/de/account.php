@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'konten',
@@ -21,21 +23,21 @@ return [
         'name_examples' => [
             'Deutsche Bank',
             'Commerzbank',
-            'ING'
+            'ING',
         ],
         'balance' => 'Kontostand',
         'currency' => 'Währung',
         'currency_examples' => [
             'EUR',
             'EUR',
-            'EUR'
+            'EUR',
         ],
         'description' => 'Beschreibung',
         'description_examples' => [
             'Lorem ipsum dolor sit amet',
             'Lorem ipsum dolor sit amet',
-            'Lorem ipsum dolor sit amet'
-        ]
+            'Lorem ipsum dolor sit amet',
+        ],
     ],
 
     'form' => [
@@ -57,10 +59,10 @@ return [
             'body_heading' => 'Der Kontoexport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Konten_'
-        ]
+            'file_name' => 'Konten_',
+        ],
     ],
 
-    'empty' => 'Keine Konten gefunden'
+    'empty' => 'Keine Konten gefunden',
 
 ];

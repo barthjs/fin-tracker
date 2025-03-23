@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'securities',
@@ -51,10 +53,10 @@ return [
             'body_heading' => 'The security export has been completed.',
             'body_failure' => 'Failed rows: ',
             'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'securities_'
-        ]
+            'file_name' => 'securities_',
+        ],
     ],
 
-    'empty' => 'No securities found'
+    'empty' => 'No securities found',
 
 ];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Pages\Auth;
 
 use Filament\Forms\Components\Component;
@@ -10,7 +12,6 @@ use Illuminate\Validation\ValidationException;
 
 class Login extends BaseAuth
 {
-
     public function form(Form $form): Form
     {
         return $form

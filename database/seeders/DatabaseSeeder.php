@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Database\Seeders;
 
@@ -14,14 +16,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        if (!User::whereIsAdmin(1)->first()) {
+        if (! User::whereIsAdmin(1)->first()) {
             User::firstOrCreate(['name' => 'admin'],
                 [
                     'first_name' => 'Admin',
                     'last_name' => 'Admin',
                     'email' => 'admin@example.com',
                     'password' => Hash::make('admin'),
-                    'verified' => !App::isProduction(),
+                    'verified' => ! App::isProduction(),
                     'is_admin' => true,
                     'active' => true,
                 ]

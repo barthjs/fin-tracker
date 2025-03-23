@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -21,7 +23,9 @@ use Illuminate\Support\Carbon;
 class CategoryStatisticResource extends Resource
 {
     protected static ?string $model = CategoryStatistic::class;
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $navigationIcon = 'tabler-calendar-stats';
 
     public static function getSlug(): string
@@ -44,7 +48,7 @@ class CategoryStatisticResource extends Resource
                 $query->whereHas('category', function (Builder $query) {
                     $query->where('type', '!=', TransactionType::transfer)->where('active', '=', true);
                 });
-                if (!$table->getActiveFiltersCount()) {
+                if (! $table->getActiveFiltersCount()) {
                     return $query->where('year', '=', Carbon::now()->year);
                 } else {
                     return $query;
@@ -136,7 +140,7 @@ class CategoryStatisticResource extends Resource
                 Group::make('category.group')
                     ->label('')
                     ->collapsible()
-                    ->getTitleFromRecordUsing(fn(CategoryStatistic $record): string => __('category.groups')[$record->category->group->name])
+                    ->getTitleFromRecordUsing(fn (CategoryStatistic $record): string => __('category.groups')[$record->category->group->name]),
             ])
             ->striped()
             ->filters([
@@ -151,14 +155,15 @@ class CategoryStatisticResource extends Resource
                         if (empty($years)) {
                             return [Carbon::now()->year => Carbon::now()->year];
                         }
+
                         return $years;
                     })
                     ->placeholder(__('table.filter.year'))
-                    ->selectablePlaceholder(false)
+                    ->selectablePlaceholder(false),
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(1)
             ->persistFiltersInSession()
-            ->recordUrl(fn(CategoryStatistic $record): string => ViewCategory::getUrl([$record->category_id]))
+            ->recordUrl(fn (CategoryStatistic $record): string => ViewCategory::getUrl([$record->category_id]))
             ->emptyStateHeading('');
     }
 

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -33,7 +35,7 @@ class Portfolio extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new UserScope());
+        static::addGlobalScope(new UserScope);
 
         static::creating(function (Portfolio $portfolio) {
             // Only needed in importer and seeder
@@ -47,23 +49,23 @@ class Portfolio extends Model
             }
 
             $portfolio->name = trim($portfolio->name);
-            $portfolio->description = trim($portfolio->description ?? "");
+            $portfolio->description = trim($portfolio->description ?? '');
         });
 
         static::updating(function (Portfolio $portfolio) {
             $portfolio->name = trim($portfolio->name);
-            $portfolio->description = trim($portfolio->description ?? "");
+            $portfolio->description = trim($portfolio->description ?? '');
         });
 
         static::updated(function (Portfolio $portfolio) {
             $logo = $portfolio->getOriginal('logo');
-            if (is_null($portfolio->logo) && !is_null($logo) && Storage::disk('public')->exists($logo)) {
+            if (is_null($portfolio->logo) && ! is_null($logo) && Storage::disk('public')->exists($logo)) {
                 Storage::disk('public')->delete($logo);
             }
         });
 
         static::deleted(function (Portfolio $portfolio) {
-            if (!is_null($portfolio->logo) && Storage::disk('public')->exists($portfolio->logo)) {
+            if (! is_null($portfolio->logo) && Storage::disk('public')->exists($portfolio->logo)) {
                 Storage::disk('public')->delete($portfolio->logo);
             }
         });
@@ -71,9 +73,6 @@ class Portfolio extends Model
 
     /**
      * Recalculate and update the market value for the associated portfolio
-     *
-     * @param int $portfolioId
-     * @return void
      */
     public static function updatePortfolioMarketValue(int $portfolioId): void
     {

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -36,7 +38,9 @@ use Illuminate\Database\Eloquent\Builder;
 class PortfolioResource extends Resource
 {
     protected static ?string $model = Portfolio::class;
+
     protected static ?int $navigationSort = 4;
+
     protected static ?string $navigationIcon = 'tabler-wallet';
 
     public static function getSlug(): string
@@ -95,7 +99,7 @@ class PortfolioResource extends Resource
                         ->label(__('table.active'))
                         ->default(true)
                         ->inline(false),
-                ])->columns(2)
+                ])->columns(2),
         ];
     }
 
@@ -107,29 +111,29 @@ class PortfolioResource extends Resource
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('portfolio.columns.name'))
-                            ->tooltip(fn(Portfolio $record) => !$record->active ? __('table.status_inactive') : "")
-                            ->color(fn(Portfolio $record) => !$record->active ? 'danger' : 'success')
+                            ->tooltip(fn (Portfolio $record) => ! $record->active ? __('table.status_inactive') : '')
+                            ->color(fn (Portfolio $record) => ! $record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('market_value')
                             ->label(__('portfolio.columns.market_value'))
-                            ->color(fn(float $state): string => match (true) {
+                            ->color(fn (float $state): string => match (true) {
                                 $state == 0 => 'gray',
                                 $state < 0 => 'danger',
                                 default => 'success'
                             })
-                            ->money(fn(Portfolio $record) => Account::getCurrency())
+                            ->money(fn (Portfolio $record) => Account::getCurrency())
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('description')
                             ->label(__('portfolio.columns.description'))
                             ->size(TextEntry\TextEntrySize::Small)
-                            ->hidden(fn(Portfolio $record) => !$record->description)
+                            ->hidden(fn (Portfolio $record) => ! $record->description),
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 3
-                    ])
+                        'md' => 3,
+                    ]),
             ]);
     }
 
@@ -140,14 +144,14 @@ class PortfolioResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query, Table $table) {
-                if (!$table->getActiveFiltersCount()) {
+                if (! $table->getActiveFiltersCount()) {
                     return $query->where('active', true);
                 } else {
                     return $query;
                 }
             })
             ->columns(self::getTableColumns())
-            ->paginated(fn(): bool => Portfolio::count() > 20)
+            ->paginated(fn (): bool => Portfolio::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -155,7 +159,7 @@ class PortfolioResource extends Resource
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->actions([
@@ -167,7 +171,7 @@ class PortfolioResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('portfolio.buttons.delete_heading'))
-                    ->disabled(fn(Portfolio $record): bool => $record->trades()->exists()),
+                    ->disabled(fn (Portfolio $record): bool => $record->trades()->exists()),
             ])
             ->emptyStateHeading(__('portfolio.empty'))
             ->emptyStateDescription('')
@@ -184,7 +188,7 @@ class PortfolioResource extends Resource
         return [
             LogoColumn::make('name')
                 ->label(__('portfolio.columns.name'))
-                ->state(fn(Portfolio $record): array => [
+                ->state(fn (Portfolio $record): array => [
                     'logo' => $record->logo,
                     'name' => $record->name,
                 ])
@@ -194,7 +198,7 @@ class PortfolioResource extends Resource
                 ->label(__('portfolio.columns.market_value'))
                 ->hiddenOn(PortfoliosRelationManager::class)
                 ->badge()
-                ->color(fn(float $state): string => match (true) {
+                ->color(fn (float $state): string => match (true) {
                     $state == 0 => 'gray',
                     $state < 0 => 'danger',
                     default => 'success'
@@ -209,7 +213,7 @@ class PortfolioResource extends Resource
                 ->toggleable(),
             IconColumn::make('active')
                 ->label(__('table.active'))
-                ->tooltip(fn($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
+                ->tooltip(fn ($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),

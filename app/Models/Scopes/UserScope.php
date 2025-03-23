@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models\Scopes;
 
@@ -14,7 +16,7 @@ class UserScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        if (!App::runningInConsole()) {
+        if (! App::runningInConsole()) {
             $builder->where('user_id', auth()->id());
         }
     }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -40,6 +42,7 @@ class TradeResource extends Resource
     protected static ?string $model = Trade::class;
 
     protected static ?int $navigationSort = 6;
+
     protected static ?string $navigationIcon = 'tabler-exchange';
 
     public static function getSlug(): string
@@ -74,7 +77,7 @@ class TradeResource extends Resource
                     Select::make('security_id')
                         ->label(__('trade.columns.security'))
                         ->relationship('security', 'name')
-                        ->options(fn(): array => Security::query()
+                        ->options(fn (): array => Security::query()
                             ->orderBy('name')
                             ->where('active', true)
                             ->pluck('name', 'id')
@@ -83,7 +86,7 @@ class TradeResource extends Resource
                         ->placeholder(__('trade.form.security_placeholder'))
                         ->validationMessages(['required' => __('trade.form.security_validation_message')])
                         ->preload()
-                        ->default(fn(): int|string => $security->id ?? "")
+                        ->default(fn (): int|string => $security->id ?? '')
                         ->required()
                         ->searchable()
                         ->createOptionForm(SecurityResource::formParts())
@@ -99,6 +102,7 @@ class TradeResource extends Resource
                             if ($state < 0) {
                                 return $state * -1;
                             }
+
                             return $state;
                         })
                         ->afterStateUpdated(function ($state, callable $get, callable $set) {
@@ -136,7 +140,7 @@ class TradeResource extends Resource
                         }),
                     TextInput::make('total_amount')
                         ->label(__('trade.columns.total_amount'))
-                        ->suffix(fn($get): string => Account::whereId($get('account_id'))->first()->currency->name ?? "")
+                        ->suffix(fn ($get): string => Account::whereId($get('account_id'))->first()->currency->name ?? '')
                         ->disabled(),
                     Select::make('type')
                         ->label(__('trade.columns.type'))
@@ -148,7 +152,7 @@ class TradeResource extends Resource
                             Select::make('account_id')
                                 ->label(__('trade.columns.account'))
                                 ->relationship('account', 'name')
-                                ->options(fn(): array => Account::query()
+                                ->options(fn (): array => Account::query()
                                     ->orderBy('name')
                                     ->where('active', true)
                                     ->pluck('name', 'id')
@@ -157,7 +161,7 @@ class TradeResource extends Resource
                                 ->placeholder(__('trade.form.account_placeholder'))
                                 ->validationMessages(['required' => __('trade.form.account_validation_message')])
                                 ->preload()
-                                ->default(fn(): int|string => $account->id ?? "")
+                                ->default(fn (): int|string => $account->id ?? '')
                                 ->live(true)
                                 ->required()
                                 ->searchable()
@@ -166,7 +170,7 @@ class TradeResource extends Resource
                             Select::make('portfolio_id')
                                 ->label(__('trade.columns.portfolio'))
                                 ->relationship('portfolio', 'name')
-                                ->options(fn(): array => Portfolio::query()
+                                ->options(fn (): array => Portfolio::query()
                                     ->orderBy('name')
                                     ->where('active', true)
                                     ->pluck('name', 'id')
@@ -175,7 +179,7 @@ class TradeResource extends Resource
                                 ->placeholder(__('trade.form.portfolio_placeholder'))
                                 ->validationMessages(['required' => __('trade.form.portfolio_validation_message')])
                                 ->preload()
-                                ->default(fn(): int|string => $portfolio->id ?? "")
+                                ->default(fn (): int|string => $portfolio->id ?? '')
                                 ->required()
                                 ->searchable()
                                 ->createOptionForm(PortfolioResource::formParts())
@@ -191,7 +195,7 @@ class TradeResource extends Resource
                         ->columns(2),
 
                 ])
-                ->columns(2)
+                ->columns(2),
         ];
     }
 
@@ -212,10 +216,10 @@ class TradeResource extends Resource
                     ->label(__('trade.columns.total_amount'))
                     ->fontFamily('mono')
                     ->copyable()
-                    ->copyableState(fn($state) => Number::format($state, 2))
+                    ->copyableState(fn ($state) => Number::format($state, 2))
                     ->numeric(2)
                     ->badge()
-                    ->color(fn(Trade $record): string => $record->type->name == 'BUY' ? 'danger' : 'success')
+                    ->color(fn (Trade $record): string => $record->type->name == 'BUY' ? 'danger' : 'success')
                     ->sortable()
                     ->toggleable()
                     ->alignEnd(),
@@ -254,7 +258,7 @@ class TradeResource extends Resource
                     ->alignEnd(),
                 LogoColumn::make('account.name')
                     ->label(__('trade.columns.account'))
-                    ->state(fn(Trade $record): array => [
+                    ->state(fn (Trade $record): array => [
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
                     ])
@@ -264,7 +268,7 @@ class TradeResource extends Resource
                     ->toggleable(),
                 LogoColumn::make('portfolio.name')
                     ->label(__('trade.columns.portfolio'))
-                    ->state(fn(Trade $record): array => [
+                    ->state(fn (Trade $record): array => [
                         'logo' => $record->portfolio->logo,
                         'name' => $record->portfolio->name,
                     ])
@@ -274,7 +278,7 @@ class TradeResource extends Resource
                     ->toggleable(),
                 LogoColumn::make('security.name')
                     ->label(__('trade.columns.security'))
-                    ->state(fn(Trade $record): array => [
+                    ->state(fn (Trade $record): array => [
                         'logo' => $record->security->logo,
                         'name' => $record->security->name,
                     ])
@@ -287,7 +291,7 @@ class TradeResource extends Resource
                     ->wrap()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->paginated(fn(): bool => Trade::count() > 20)
+            ->paginated(fn (): bool => Trade::count() > 20)
             ->deferLoading()
             ->extremePaginationLinks()
             ->defaultSort('date_time', 'desc')
@@ -297,7 +301,7 @@ class TradeResource extends Resource
                 SelectFilter::make('account_id')
                     ->label(__('trade.columns.account'))
                     ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
-                    ->options(fn(): array => Account::query()
+                    ->options(fn (): array => Account::query()
                         ->orderBy('name')
                         ->where('active', true)
                         ->pluck('name', 'id')
@@ -309,7 +313,7 @@ class TradeResource extends Resource
                 SelectFilter::make('portfolio_id')
                     ->label(__('trade.columns.portfolio'))
                     ->hiddenOn(PortfolioResource\RelationManagers\TradesRelationManager::class)
-                    ->options(fn(): array => Portfolio::query()
+                    ->options(fn (): array => Portfolio::query()
                         ->orderBy('name')
                         ->where('active', true)
                         ->pluck('name', 'id')
@@ -321,7 +325,7 @@ class TradeResource extends Resource
                 SelectFilter::make('security_id')
                     ->label(__('trade.columns.security'))
                     ->hiddenOn(SecurityResource\RelationManagers\TradesRelationManager::class)
-                    ->options(fn(): array => Security::query()
+                    ->options(fn (): array => Security::query()
                         ->orderBy('name')
                         ->where('active', true)
                         ->pluck('name', 'id')
@@ -336,16 +340,16 @@ class TradeResource extends Resource
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
                         DatePicker::make('created_until')
-                            ->label(__('table.filter.created_until'))
+                            ->label(__('table.filter.created_until')),
                     ])
                     ->columns(2)
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when($data['created_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
+                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
                             ->when($data['created_until'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
-                    })
+                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
+                    }),
             ], FiltersLayout::AboveContentCollapsible)
             ->headerActions([
                 CreateAction::make('header-create')
@@ -368,7 +372,7 @@ class TradeResource extends Resource
                 CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('trade.buttons.create_button_label'))
-                    ->modalHeading(__('trade.buttons.create_heading'))
+                    ->modalHeading(__('trade.buttons.create_heading')),
             ]);
     }
 
@@ -398,21 +402,21 @@ class TradeResource extends Resource
                         if ($oldAccountId !== $accountId) {
                             Account::updateAccountBalance($oldAccountId);
                             Account::updateAccountBalance($accountId);
-                        } else if ($oldAmount !== $amount) {
+                        } elseif ($oldAmount !== $amount) {
                             Account::updateAccountBalance($accountId);
                         }
 
                         if ($oldPortfolioId !== $portfolioId) {
                             Portfolio::updatePortfolioMarketValue($oldPortfolioId);
                             Portfolio::updatePortfolioMarketValue($portfolioId);
-                        } else if ($oldQuantity !== $quantity) {
+                        } elseif ($oldQuantity !== $quantity) {
                             Portfolio::updatePortfolioMarketValue($portfolioId);
                         }
 
                         if ($oldSecurityId !== $securityId) {
                             Security::updateSecurityQuantity($oldSecurityId);
                             Security::updateSecurityQuantity($securityId);
-                        } else if ($oldQuantity !== $quantity) {
+                        } elseif ($oldQuantity !== $quantity) {
                             Security::updateSecurityQuantity($securityId);
                         }
                     });
@@ -427,8 +431,9 @@ class TradeResource extends Resource
                     Account::updateAccountBalance($record->account_id);
                     Portfolio::updatePortfolioMarketValue($record->portfolio_id);
                     Security::updateSecurityQuantity($record->security_id);
+
                     return $record;
-                })
+                }),
         ];
     }
 
@@ -443,15 +448,15 @@ class TradeResource extends Resource
                     $deletedSecurityIds = [];
 
                     foreach ($records as $record) {
-                        if (!in_array($record->account_id, $deletedAccountIds)) {
+                        if (! in_array($record->account_id, $deletedAccountIds)) {
                             $deletedAccountIds[] = $record->account_id;
                         }
 
-                        if (!in_array($record->portfolio_id, $deletedPortfolioIds)) {
+                        if (! in_array($record->portfolio_id, $deletedPortfolioIds)) {
                             $deletedPortfolioIds[] = $record->portfolio_id;
                         }
 
-                        if (!in_array($record->security_id, $deletedSecurityIds)) {
+                        if (! in_array($record->security_id, $deletedSecurityIds)) {
                             $deletedSecurityIds[] = $record->security_id;
                         }
                     }
@@ -479,7 +484,7 @@ class TradeResource extends Resource
                         ->validationMessages(['required' => __('trade.form.account_validation_message')])
                         ->preload()
                         ->required()
-                        ->searchable()
+                        ->searchable(),
                 ])
                 ->action(function (Collection $records, array $data): void {
                     // save old values before updating
@@ -506,7 +511,7 @@ class TradeResource extends Resource
                         ->validationMessages(['required' => __('trade.form.portfolio_validation_message')])
                         ->preload()
                         ->required()
-                        ->searchable()
+                        ->searchable(),
                 ])
                 ->action(function (Collection $records, array $data): void {
                     // save old values before updating

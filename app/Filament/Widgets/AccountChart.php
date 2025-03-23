@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
 use App\Models\Account;
@@ -9,7 +11,9 @@ use Illuminate\Contracts\Support\Htmlable;
 class AccountChart extends ChartWidget
 {
     protected static ?int $sort = 2;
+
     protected static ?string $maxHeight = '300px';
+
     protected static ?string $pollingInterval = null;
 
     protected static ?array $options = [
@@ -52,7 +56,7 @@ class AccountChart extends ChartWidget
                     'backgroundColor' => $backgroundColors,
                 ],
             ],
-            'labels' => $accountsLabels
+            'labels' => $accountsLabels,
         ];
     }
 

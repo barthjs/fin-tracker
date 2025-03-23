@@ -1,10 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\TradeResource\Pages;
 
 use App\Enums\TradeType;
-use App\Enums\TransactionGroup;
-use App\Enums\TransactionType;
 use App\Filament\Exports\TradeExporter;
 use App\Filament\Imports\TradeImporter;
 use App\Filament\Resources\TradeResource;
@@ -59,7 +59,7 @@ class ListTrades extends ListRecords
                 ->exporter(TradeExporter::class)
                 ->failureNotificationTitle(__('trade.notifications.export.failure_heading'))
                 ->successNotificationTitle(__('trade.notifications.export.success_heading'))
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id()))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
         ];
     }
 

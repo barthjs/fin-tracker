@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Database\Factories;
 
@@ -25,7 +27,7 @@ class TradeFactory extends Factory
             'tax' => $tax,
             'fee' => $fee,
             'notes' => $this->faker->words(3, true),
-            'type' => $this->faker->randomElement(TradeType::cases())->name
+            'type' => $this->faker->randomElement(TradeType::cases())->name,
         ];
     }
 }

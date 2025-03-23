@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\PortfolioResource\Pages;
 
@@ -50,7 +52,7 @@ class ListPortfolios extends ListRecords
                 ->exporter(PortfolioExporter::class)
                 ->failureNotificationTitle(__('portfolio.notifications.export.failure_heading'))
                 ->successNotificationTitle(__('portfolio.notifications.export.success_heading'))
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id()))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
         ];
     }
 }

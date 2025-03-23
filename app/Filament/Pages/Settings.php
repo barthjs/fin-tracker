@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
@@ -8,7 +10,9 @@ use Illuminate\Support\Facades\Http;
 class Settings extends Page
 {
     protected static string $view = 'filament.pages.settings';
+
     public ?string $latestVersion;
+
     public ?string $latestVersionUrl;
 
     public static function getSlug(): string
@@ -35,6 +39,6 @@ class Settings extends Page
     {
         $response = Http::get('https://hub.docker.com/v2/repositories/barthjs/fin-tracker/tags?page_size=2');
         $data = json_decode($response->getBody(), true);
-        $this->latestVersion = $data['results'][1]['name'] ?? "";
+        $this->latestVersion = $data['results'][1]['name'] ?? '';
     }
 }

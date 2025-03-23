@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'transactions',
@@ -49,8 +51,8 @@ return [
             'body_heading' => 'The transaction export has been completed.',
             'body_failure' => 'Failed rows: ',
             'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'transactions_'
-        ]
+            'file_name' => 'transactions_',
+        ],
     ],
 
     'empty' => 'No transactions found',

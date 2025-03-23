@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -42,7 +44,7 @@ class Security extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new UserScope());
+        static::addGlobalScope(new UserScope);
 
         static::creating(function (Security $security) {
             // Only needed in importer and seeder
@@ -61,29 +63,29 @@ class Security extends Model
             }
 
             $security->name = trim($security->name);
-            $security->isin = trim($security->isin ?? "");
-            $security->symbol = trim($security->symbol ?? "");
+            $security->isin = trim($security->isin ?? '');
+            $security->symbol = trim($security->symbol ?? '');
             $security->market_value = $security->price * $security->total_quantity;
-            $security->description = trim($security->description ?? "");
+            $security->description = trim($security->description ?? '');
         });
 
         static::updating(function (Security $security) {
             $security->name = trim($security->name);
-            $security->isin = trim($security->isin ?? "");
-            $security->symbol = trim($security->symbol ?? "");
+            $security->isin = trim($security->isin ?? '');
+            $security->symbol = trim($security->symbol ?? '');
             $security->market_value = $security->price * $security->total_quantity;
-            $security->description = trim($security->description ?? "");
+            $security->description = trim($security->description ?? '');
         });
 
         static::updated(function (Security $security) {
             $logo = $security->getOriginal('logo');
-            if (is_null($security->logo) && !is_null($logo) && Storage::disk('public')->exists($logo)) {
+            if (is_null($security->logo) && ! is_null($logo) && Storage::disk('public')->exists($logo)) {
                 Storage::disk('public')->delete($logo);
             }
         });
 
         static::deleted(function (Security $security) {
-            if (!is_null($security->logo) && Storage::disk('public')->exists($security->logo)) {
+            if (! is_null($security->logo) && Storage::disk('public')->exists($security->logo)) {
                 Storage::disk('public')->delete($security->logo);
             }
         });
@@ -91,9 +93,6 @@ class Security extends Model
 
     /**
      * Recalculate and update the total quantity for the associated security
-     *
-     * @param int $securityId
-     * @return void
      */
     public static function updateSecurityQuantity(int $securityId): void
     {

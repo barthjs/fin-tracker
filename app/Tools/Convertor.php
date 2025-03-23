@@ -1,13 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tools;
 
 class Convertor
 {
-    /**
-     * @param string $number
-     * @return float
-     */
     public static function formatNumber(string $number): float
     {
         // Sanitize the input by removing all characters except digits, commas, periods, and signs.
@@ -39,8 +37,9 @@ class Convertor
                 $sanitized = str_replace(',', '.', $sanitized);
             }
             // Convert sanitized string to a float and apply the sign.
-            $floatValue = (float)$sanitized * $sign;
+            $floatValue = (float) $sanitized * $sign;
         }
+
         return $floatValue;
     }
 }

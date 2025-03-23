@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
@@ -60,7 +62,7 @@ class AppPanelProvider extends PanelProvider
                     ->customMyProfilePage(EditProfile::class)
                     ->myProfileComponents([
                         'update_password' => CustomUpdatePassword::class,
-                        'personal_info' => CustomPersonalInfo::class
+                        'personal_info' => CustomPersonalInfo::class,
                     ])
                     ->enableTwoFactorAuthentication()
             )
@@ -68,13 +70,13 @@ class AppPanelProvider extends PanelProvider
                 'settings' => MenuItem::make()
                     ->label(__('settings.navigation_label'))
                     ->icon('tabler-settings')
-                    ->hidden(fn() => App::runningInConsole() || !auth()->user()->is_admin)
-                    ->url(fn(): string => Settings::getUrl()),
+                    ->hidden(fn () => App::runningInConsole() || ! auth()->user()->is_admin)
+                    ->url(fn (): string => Settings::getUrl()),
                 'users' => MenuItem::make()
                     ->label(__('user.navigation_label'))
                     ->icon('tabler-users')
-                    ->hidden(fn() => App::runningInConsole() || !auth()->user()->is_admin)
-                    ->url(fn(): string => UserResource::getUrl()),
+                    ->hidden(fn () => App::runningInConsole() || ! auth()->user()->is_admin)
+                    ->url(fn (): string => UserResource::getUrl()),
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -86,7 +88,7 @@ class AppPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                CheckVerified::class
+                CheckVerified::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

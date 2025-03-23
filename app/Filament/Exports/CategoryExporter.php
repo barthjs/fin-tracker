@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
@@ -21,10 +23,10 @@ class CategoryExporter extends Exporter
                 ->label(__('category.columns.name')),
             ExportColumn::make('group')
                 ->label(__('category.columns.group'))
-                ->formatStateUsing(fn(TransactionGroup $state): string => __('category.groups')[$state->name]),
+                ->formatStateUsing(fn (TransactionGroup $state): string => __('category.groups')[$state->name]),
             ExportColumn::make('type')
                 ->label(__('category.columns.type'))
-                ->formatStateUsing(fn(TransactionType $state): string => __('category.types')[$state->name]),
+                ->formatStateUsing(fn (TransactionType $state): string => __('category.types')[$state->name]),
             ExportColumn::make('color')
                 ->label(__('widget.color')),
             ExportColumn::make('active')
@@ -35,11 +37,11 @@ class CategoryExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = __('category.notifications.export.body_heading') . "\n\r" .
-            __('category.notifications.export.body_success') . number_format($export->successful_rows);
+        $body = __('category.notifications.export.body_heading')."\n\r".
+            __('category.notifications.export.body_success').number_format($export->successful_rows);
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= "\n\r" . __('category.notifications.export.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r".__('category.notifications.export.body_failure').number_format($failedRowsCount);
         }
 
         return $body;
@@ -52,6 +54,6 @@ class CategoryExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('category.notifications.export.file_name') . Carbon::now()->format('Y-m-d-H-i');
+        return __('category.notifications.export.file_name').Carbon::now()->format('Y-m-d-H-i');
     }
 }

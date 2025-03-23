@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -14,6 +16,7 @@ class Transaction extends Model
     use HasFactory;
 
     public $timestamps = false;
+
     protected $table = 'transactions';
 
     protected $fillable = [
@@ -36,7 +39,7 @@ class Transaction extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new UserScope());
+        static::addGlobalScope(new UserScope);
 
         static::creating(function (Transaction $transaction) {
             // Only needed in importer
@@ -79,18 +82,15 @@ class Transaction extends Model
     private static function getDefaultCategoryId(): int
     {
         $category = Category::whereName('Demo')->first();
-        if (!$category) {
+        if (! $category) {
             $category = Category::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
+
         return $category->id;
     }
 
     /**
      * Updates the transaction statistics
-     *
-     * @param int $categoryId
-     * @param Carbon $date
-     * @return void
      */
     public static function updateCategoryStatistics(int $categoryId, Carbon $date): void
     {

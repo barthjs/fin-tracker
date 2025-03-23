@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\CategoryResource\Pages;
 
@@ -52,7 +54,7 @@ class ListCategories extends ListRecords
                 ->exporter(CategoryExporter::class)
                 ->failureNotificationTitle(__('category.notifications.export.failure_heading'))
                 ->successNotificationTitle(__('category.notifications.export.success_heading'))
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id()))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
         ];
     }
 

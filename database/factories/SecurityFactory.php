@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Database\Factories;
 
@@ -14,11 +16,11 @@ class SecurityFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'isin' => chr(rand(65, 90)) . chr(rand(65, 90)) . str_pad((string)rand(0, 9999999999), 10, '0', STR_PAD_LEFT),
+            'isin' => chr(rand(65, 90)).chr(rand(65, 90)).str_pad((string) rand(0, 9999999999), 10, '0', STR_PAD_LEFT),
             'symbol' => strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, rand(3, 5))),
             'price' => $this->faker->randomFloat(3, 1, 100),
             'description' => $this->faker->text(),
-            'type' => $this->faker->randomElement(SecurityType::cases())->name
+            'type' => $this->faker->randomElement(SecurityType::cases())->name,
         ];
     }
 }

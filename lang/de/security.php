@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'wertpapiere',
@@ -51,10 +53,10 @@ return [
             'body_heading' => 'Der Wertpapierexport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Wertpapiere_'
-        ]
+            'file_name' => 'Wertpapiere_',
+        ],
     ],
 
-    'empty' => 'Keine Wertpapiere gefunden'
+    'empty' => 'Keine Wertpapiere gefunden',
 
 ];

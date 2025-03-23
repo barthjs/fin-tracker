@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\AccountResource\RelationManagers;
 
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 class TradesRelationManager extends RelationManager
 {
     protected static string $relationship = 'trades';
+
     protected static ?string $icon = 'tabler-exchange';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string

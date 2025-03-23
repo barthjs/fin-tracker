@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use Filament\Facades\Filament;
@@ -18,7 +20,7 @@ class CustomUpdatePassword extends UpdatePassword
             'verified' => $this->user->verified ?: true,
         ]);
 
-        session()->forget('password_hash_' . Filament::getCurrentPanel()->getAuthGuard());
+        session()->forget('password_hash_'.Filament::getCurrentPanel()->getAuthGuard());
         Filament::auth()->login($this->user);
         $this->reset(['data']);
 

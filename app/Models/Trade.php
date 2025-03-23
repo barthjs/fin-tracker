@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -14,6 +16,7 @@ class Trade extends Model
     use HasFactory;
 
     public $table = 'trades';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -48,7 +51,7 @@ class Trade extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new UserScope());
+        static::addGlobalScope(new UserScope);
 
         static::creating(function (Trade $trade) {
             // Only needed in importer
@@ -71,7 +74,7 @@ class Trade extends Model
                 $trade->user_id = auth()->user()->id;
             }
 
-            $trade->notes = trim($trade->notes ?? "");
+            $trade->notes = trim($trade->notes ?? '');
 
             // Set the type factor based on trade type
             $amountSign = 1;
@@ -100,7 +103,7 @@ class Trade extends Model
         });
 
         static::updating(function (Trade $trade) {
-            $trade->notes = trim($trade->notes ?? "");
+            $trade->notes = trim($trade->notes ?? '');
 
             // Set the type factor based on trade type
             $amountSign = 1;
@@ -134,9 +137,10 @@ class Trade extends Model
     private static function getDefaultPortfolioId(): int
     {
         $portfolio = Portfolio::whereName('Demo')->first();
-        if (!$portfolio) {
+        if (! $portfolio) {
             $portfolio = Portfolio::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
+
         return $portfolio->id;
     }
 
@@ -151,9 +155,10 @@ class Trade extends Model
     private static function getDefaultSecurityId(): int
     {
         $portfolio = Security::whereName('Demo')->first();
-        if (!$portfolio) {
+        if (! $portfolio) {
             $portfolio = Security::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
+
         return $portfolio->id;
     }
 

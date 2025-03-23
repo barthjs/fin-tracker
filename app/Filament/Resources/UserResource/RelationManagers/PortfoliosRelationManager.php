@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
@@ -18,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 class PortfoliosRelationManager extends RelationManager
 {
     protected static string $relationship = 'portfolios';
+
     protected static ?string $icon = 'tabler-wallet';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
@@ -27,7 +30,7 @@ class PortfoliosRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        return (string)Portfolio::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
+        return (string) Portfolio::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
     public function form(Form $form): Form
@@ -41,11 +44,12 @@ class PortfoliosRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         $columns = PortfolioResource::getTableColumns();
+
         return $table
-            ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes())
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes())
             ->heading('')
             ->columns($columns)
-            ->paginated(fn(): bool => Portfolio::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
+            ->paginated(fn (): bool => Portfolio::withoutGlobalScopes()->whereUserId($this->getOwnerRecord()->id)->count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
@@ -53,7 +57,7 @@ class PortfoliosRelationManager extends RelationManager
                 Filter::make('inactive')
                     ->label(__('table.status_inactive'))
                     ->toggle()
-                    ->query(fn(Builder $query): Builder => $query->where('active', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
             ->headerActions([
@@ -63,8 +67,9 @@ class PortfoliosRelationManager extends RelationManager
                     ->modalHeading(__('portfolio.buttons.create_heading'))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
-                    })
+                    }),
             ])
             ->actions([
                 EditAction::make()
@@ -75,7 +80,7 @@ class PortfoliosRelationManager extends RelationManager
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('portfolio.buttons.delete_heading'))
-                    ->disabled(fn(Portfolio $record): bool => $record->trades()->withoutGlobalScopes()->exists())
+                    ->disabled(fn (Portfolio $record): bool => $record->trades()->withoutGlobalScopes()->exists()),
             ])
             ->emptyStateHeading(__('portfolio.empty'))
             ->emptyStateDescription('')
@@ -86,8 +91,9 @@ class PortfoliosRelationManager extends RelationManager
                     ->modalHeading(__('portfolio.buttons.create_heading'))
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
-                    })
+                    }),
             ]);
     }
 }

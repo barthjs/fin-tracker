@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
@@ -33,7 +35,7 @@ class SecurityImporter extends Importer
                 ->exampleHeader(__('security.columns.price'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn(Security $record, string $state) => $record->price = Convertor::formatNumber($state)),
+                ->fillRecordUsing(fn (Security $record, string $state) => $record->price = Convertor::formatNumber($state)),
             ImportColumn::make('type')
                 ->label(__('security.columns.type'))
                 ->exampleHeader(__('security.columns.type'))
@@ -59,8 +61,9 @@ class SecurityImporter extends Importer
                 ->examples(function (): array {
                     $colors = [];
                     for ($i = 1; $i <= 3; $i++) {
-                        $colors[] = strtolower(sprintf("#%06X", mt_rand(0, 0xFFFFFF)));
+                        $colors[] = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
                     }
+
                     return $colors;
                 })
                 ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
@@ -82,11 +85,11 @@ class SecurityImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = __('security.notifications.import.body_heading') . "\n\r" .
-            __('security.notifications.import.body_success') . number_format($import->successful_rows);
+        $body = __('security.notifications.import.body_heading')."\n\r".
+            __('security.notifications.import.body_success').number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= "\n\r" . __('security.notifications.import.body_failure') . number_format($failedRowsCount);
+            $body .= "\n\r".__('security.notifications.import.body_failure').number_format($failedRowsCount);
         }
 
         return $body;

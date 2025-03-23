@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
 use App\Enums\TransactionType;
@@ -14,6 +16,7 @@ use Number;
 class StatsOverview extends BaseWidget
 {
     protected static ?int $sort = 1;
+
     protected static ?string $pollingInterval = null;
 
     protected function getStats(): array
@@ -25,13 +28,13 @@ class StatsOverview extends BaseWidget
         $year = Carbon::now()->year;
 
         $expenseSum = CategoryStatistic::where('year', '=', $year)->whereHas('category', function ($query) {
-                $query->where('type', TransactionType::expense);
-            })->sum($monthColumn) / 100;
+            $query->where('type', TransactionType::expense);
+        })->sum($monthColumn) / 100;
         $expenseSum = Number::currency($expenseSum, Account::getCurrency());
 
         $revenueSum = CategoryStatistic::where('year', '=', $year)->whereHas('category', function ($query) {
-                $query->where('type', TransactionType::revenue);
-            })->sum($monthColumn) / 100;
+            $query->where('type', TransactionType::revenue);
+        })->sum($monthColumn) / 100;
         $revenueSum = Number::currency($revenueSum, Account::getCurrency());
 
         return [

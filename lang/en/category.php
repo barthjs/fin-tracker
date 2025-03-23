@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'categories',
@@ -24,7 +26,7 @@ return [
             'Mobility',
             'Salary',
             'Interest',
-            'Transfer'
+            'Transfer',
         ],
         'group' => 'Group',
         'group_examples' => [
@@ -34,7 +36,7 @@ return [
             'Variable expenses',
             'Fixed revenues',
             'Variable revenues',
-            'Transfers'
+            'Transfers',
         ],
         'type' => 'Type',
     ],
@@ -46,7 +48,7 @@ return [
     'types' => [
         'expense' => 'Expense',
         'revenue' => 'Revenue',
-        'transfer' => 'Transfer'
+        'transfer' => 'Transfer',
     ],
 
     'groups' => [
@@ -71,10 +73,10 @@ return [
             'body_heading' => 'The category export has been completed.',
             'body_failure' => 'Failed rows: ',
             'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'categories_'
-        ]
+            'file_name' => 'categories_',
+        ],
     ],
 
-    'empty' => 'No categories found'
+    'empty' => 'No categories found',
 
 ];

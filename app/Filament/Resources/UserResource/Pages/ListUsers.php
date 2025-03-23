@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\UserResource\Pages;
 
@@ -28,7 +30,7 @@ class ListUsers extends ListRecords
         return [
             CreateAction::make()
                 ->icon('tabler-plus')
-                ->label(__('user.buttons.create_button_label'))
+                ->label(__('user.buttons.create_button_label')),
         ];
     }
 
@@ -41,11 +43,11 @@ class ListUsers extends ListRecords
             'inactive' => Tab::make()
                 ->label(__('table.status_inactive'))
                 ->badge(User::whereActive(false)->count())
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('active', false)),
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('active', false)),
             'unverified' => Tab::make()
                 ->label(__('user.filter.unverified'))
                 ->badge(User::whereVerified(false)->count())
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->where('verified', false)),
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('verified', false)),
         ];
     }
 }

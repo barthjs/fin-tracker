@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'umsaetze',
@@ -49,8 +51,8 @@ return [
             'body_heading' => 'Der Umsatzexport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Umsätze_'
-        ]
+            'file_name' => 'Umsätze_',
+        ],
     ],
 
     'empty' => 'Keine Umsätze gefunden',

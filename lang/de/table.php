@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'created_at' => 'Erstellt',
@@ -19,6 +21,6 @@ return [
         'transfers' => 'Umbuchungen',
         'created_from' => 'Von',
         'created_until' => 'Bis',
-    ]
+    ],
 
 ];

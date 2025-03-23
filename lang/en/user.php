@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'users',
@@ -38,6 +40,6 @@ return [
         'user_or_email' => 'Username or email',
     ],
 
-    'empty' => 'No users found'
+    'empty' => 'No users found',
 
 ];

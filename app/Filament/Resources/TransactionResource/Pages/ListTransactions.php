@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\TransactionResource\Pages;
 
@@ -58,7 +60,7 @@ class ListTransactions extends ListRecords
                 ->exporter(TransactionExporter::class)
                 ->failureNotificationTitle(__('transaction.notifications.export.failure_heading'))
                 ->successNotificationTitle(__('transaction.notifications.export.success_heading'))
-                ->modifyQueryUsing(fn(Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id()))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
         ];
     }
 

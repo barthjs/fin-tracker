@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -13,6 +15,7 @@ class CategoryStatistic extends Model
     use HasFactory;
 
     public $timestamps = false;
+
     protected $table = 'category_statistics';
 
     protected $fillable = [
@@ -49,7 +52,7 @@ class CategoryStatistic extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new CategoryStatisticScope());
+        static::addGlobalScope(new CategoryStatisticScope);
     }
 
     public function category(): BelongsTo

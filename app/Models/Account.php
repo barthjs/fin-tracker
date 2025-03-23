@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -25,7 +27,7 @@ class Account extends Model
         'logo',
         'color',
         'active',
-        'user_id'
+        'user_id',
     ];
 
     protected $casts = [
@@ -36,7 +38,7 @@ class Account extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new UserScope());
+        static::addGlobalScope(new UserScope);
 
         static::creating(function (Account $account) {
             // Only needed in seeder
@@ -55,23 +57,23 @@ class Account extends Model
             }
 
             $account->name = trim($account->name);
-            $account->description = trim($account->description ?? "");
+            $account->description = trim($account->description ?? '');
         });
 
         static::updating(function (Account $account) {
             $account->name = trim($account->name);
-            $account->description = trim($portfolio->description ?? "");
+            $account->description = trim($portfolio->description ?? '');
         });
 
         static::updated(function (Account $account) {
             $logo = $account->getOriginal('logo');
-            if (is_null($account->logo) && !is_null($logo) && Storage::disk('public')->exists($logo)) {
+            if (is_null($account->logo) && ! is_null($logo) && Storage::disk('public')->exists($logo)) {
                 Storage::disk('public')->delete($logo);
             }
         });
 
         static::deleted(function (Account $account) {
-            if (!is_null($account->logo) && Storage::disk('public')->exists($account->logo)) {
+            if (! is_null($account->logo) && Storage::disk('public')->exists($account->logo)) {
                 Storage::disk('public')->delete($account->logo);
             }
         });
@@ -85,20 +87,20 @@ class Account extends Model
      * is null or invalid, it falls back to the default currency configured in the application.
      * If that is also invalid, it defaults to USD.
      *
-     * @param string|null $inputCurrency The currency code to check against available currencies.
+     * @param  string|null  $inputCurrency  The currency code to check against available currencies.
      * @return string The name of the valid currency.
      */
     public static function getCurrency(?string $inputCurrency = null): string
     {
-        if (!is_null($inputCurrency)) {
+        if (! is_null($inputCurrency)) {
             $currency = Currency::tryFrom($inputCurrency);
-            if (!is_null($currency)) {
+            if (! is_null($currency)) {
                 return $currency->name;
             }
         }
 
         $currency = Currency::tryFrom(config('app.currency'));
-        if (!is_null($currency)) {
+        if (! is_null($currency)) {
             return $currency->name;
         }
 
@@ -116,16 +118,13 @@ class Account extends Model
     public static function getDefaultAccountId(): int
     {
         $account = Account::whereName('Demo')->first();
-        if (!$account) {
+        if (! $account) {
             $account = Account::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
+
         return $account->id;
     }
 
-    /**
-     * @param int $accountId
-     * @return void
-     */
     public static function updateAccountBalance(int $accountId): void
     {
         $transactionAmount = Transaction::whereAccountId($accountId)->sum('amount');

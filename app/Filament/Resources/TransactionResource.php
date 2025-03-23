@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
@@ -37,7 +39,9 @@ use Number;
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
+
     protected static ?int $navigationSort = 5;
+
     protected static ?string $navigationIcon = 'tabler-credit-card';
 
     public static function getSlug(): string
@@ -55,7 +59,7 @@ class TransactionResource extends Resource
         return $form->schema(self::formParts());
     }
 
-    public static function formParts(Model $account = null, Model $category = null): array
+    public static function formParts(?Model $account = null, ?Model $category = null): array
     {
         // account and category for default values in relation manager
         return [
@@ -72,7 +76,7 @@ class TransactionResource extends Resource
                     Select::make('account_id')
                         ->label(__('transaction.columns.account'))
                         ->relationship('account', 'name')
-                        ->options(fn(): array => Account::query()
+                        ->options(fn (): array => Account::query()
                             ->orderBy('name')
                             ->where('active', true)
                             ->pluck('name', 'id')
@@ -82,14 +86,14 @@ class TransactionResource extends Resource
                         ->validationMessages(['required' => __('transaction.form.account_validation_message')])
                         ->preload()
                         ->live(true)
-                        ->default(fn(): int|string => $account->id ?? "")
+                        ->default(fn (): int|string => $account->id ?? '')
                         ->required()
                         ->searchable()
                         ->createOptionForm(AccountResource::formParts())
                         ->createOptionModalHeading(__('account.buttons.create_heading')),
                     TextInput::make('amount')
                         ->label(__('transaction.columns.amount'))
-                        ->suffix(fn($get) => Account::whereId($get('account_id'))->first()->currency->name ?? "")
+                        ->suffix(fn ($get) => Account::whereId($get('account_id'))->first()->currency->name ?? '')
                         ->numeric()
                         ->minValue(-922337203685477580)
                         ->maxValue(9223372036854775807)
@@ -113,7 +117,7 @@ class TransactionResource extends Resource
                     Select::make('category_id')
                         ->label(__('transaction.columns.category'))
                         ->relationship('category', 'name')
-                        ->options(fn(): array => Category::query()
+                        ->options(fn (): array => Category::query()
                             ->orderBy('name')
                             ->where('active', true)
                             ->pluck('name', 'id')
@@ -123,8 +127,8 @@ class TransactionResource extends Resource
                         ->validationMessages(['required' => __('transaction.form.category_validation_message')])
                         ->preload()
                         ->live(true)
-                        ->default(fn(): int|string => $category->id ?? "")
-                        ->hint(fn($get): string => __('category.types')[Category::whereId($get('category_id'))->first()->type->name ?? ""] ?? "")
+                        ->default(fn (): int|string => $category->id ?? '')
+                        ->hint(fn ($get): string => __('category.types')[Category::whereId($get('category_id'))->first()->type->name ?? ''] ?? '')
                         ->required()
                         ->searchable()
                         ->createOptionForm(CategoryResource::formParts())
@@ -137,7 +141,7 @@ class TransactionResource extends Resource
                         ->rows(1)
                         ->string(),
                 ])
-                ->columns(2)
+                ->columns(2),
         ];
     }
 
@@ -158,10 +162,10 @@ class TransactionResource extends Resource
                     ->label(__('transaction.columns.amount'))
                     ->fontFamily('mono')
                     ->copyable()
-                    ->copyableState(fn($state) => Number::format($state, 2))
+                    ->copyableState(fn ($state) => Number::format($state, 2))
                     ->numeric(2)
                     ->badge()
-                    ->color(fn(Transaction $record): string => match ($record->category->type->name) {
+                    ->color(fn (Transaction $record): string => match ($record->category->type->name) {
                         'expense' => 'danger',
                         'revenue' => 'success',
                         default => 'warning',
@@ -175,7 +179,7 @@ class TransactionResource extends Resource
                     ->toggleable(),
                 LogoColumn::make('account.name')
                     ->label(__('transaction.columns.account'))
-                    ->state(fn(Transaction $record): array => [
+                    ->state(fn (Transaction $record): array => [
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
                     ])
@@ -187,7 +191,7 @@ class TransactionResource extends Resource
                     ->label(__('transaction.columns.category'))
                     ->hiddenOn(CategoryResource\RelationManagers\TransactionRelationManager::class)
                     ->badge()
-                    ->color(fn(Transaction $record): string => match ($record->category->type->name) {
+                    ->color(fn (Transaction $record): string => match ($record->category->type->name) {
                         'expense' => 'danger',
                         'revenue' => 'success',
                         default => 'warning',
@@ -198,7 +202,7 @@ class TransactionResource extends Resource
                 TextColumn::make('category.group')
                     ->label(__('transaction.columns.group'))
                     ->hiddenOn([CategoryResource\RelationManagers\TransactionRelationManager::class, ListTransactions::class])
-                    ->formatStateUsing(fn($state): string => __('category.groups')[$state->name])
+                    ->formatStateUsing(fn ($state): string => __('category.groups')[$state->name])
                     ->wrap()
                     ->searchable(true, function (Builder $query, string $search): Builder {
                         $groups = [];
@@ -207,16 +211,17 @@ class TransactionResource extends Resource
                                 $groups[] = $group;
                             }
                         }
-                        return $query->whereHas('category', fn($q) => $q->whereIn('group', $groups));
+
+                        return $query->whereHas('category', fn ($q) => $q->whereIn('group', $groups));
                     })
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('notes')
                     ->label(__('transaction.columns.notes'))
                     ->wrap()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->paginated(fn(): bool => Transaction::count() > 20)
+            ->paginated(fn (): bool => Transaction::count() > 20)
             ->deferLoading()
             ->extremePaginationLinks()
             ->defaultSort('date_time', 'desc')
@@ -226,7 +231,7 @@ class TransactionResource extends Resource
                 SelectFilter::make('account_id')
                     ->label(__('transaction.columns.account'))
                     ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
-                    ->options(fn(): array => Account::query()
+                    ->options(fn (): array => Account::query()
                         ->orderBy('name')
                         ->where('active', true)
                         ->pluck('name', 'id')
@@ -238,7 +243,7 @@ class TransactionResource extends Resource
                 SelectFilter::make('category_id')
                     ->label(__('transaction.columns.category'))
                     ->hiddenOn(CategoryResource\RelationManagers\TransactionRelationManager::class)
-                    ->options(fn(): array => Category::query()
+                    ->options(fn (): array => Category::query()
                         ->orderBy('name')
                         ->where('active', true)
                         ->pluck('name', 'id')
@@ -253,16 +258,16 @@ class TransactionResource extends Resource
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
                         DatePicker::make('created_until')
-                            ->label(__('table.filter.created_until'))
+                            ->label(__('table.filter.created_until')),
                     ])
                     ->columns(2)
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when($data['created_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
+                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
                             ->when($data['created_until'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
-                    })
+                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
+                    }),
             ], FiltersLayout::AboveContentCollapsible)
             ->headerActions([
                 CreateAction::make('header-create')
@@ -285,7 +290,7 @@ class TransactionResource extends Resource
                 CreateAction::make()
                     ->icon('tabler-plus')
                     ->label(__('transaction.buttons.create_button_label'))
-                    ->modalHeading(__('transaction.buttons.create_heading'))
+                    ->modalHeading(__('transaction.buttons.create_heading')),
             ]);
     }
 
@@ -332,8 +337,9 @@ class TransactionResource extends Resource
                 ->after(function (Transaction $record): Transaction {
                     Account::updateAccountBalance($record->account_id);
                     Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
+
                     return $record;
-                })
+                }),
         ];
     }
 
@@ -346,7 +352,7 @@ class TransactionResource extends Resource
                     $deletedAccountIds = [];
 
                     foreach ($records as $record) {
-                        if (!in_array($record->account_id, $deletedAccountIds)) {
+                        if (! in_array($record->account_id, $deletedAccountIds)) {
                             $deletedAccountIds[] = $record->account_id;
                         }
                     }
@@ -369,7 +375,7 @@ class TransactionResource extends Resource
                         ->validationMessages(['required' => __('transaction.form.account_validation_message')])
                         ->preload()
                         ->required()
-                        ->searchable()
+                        ->searchable(),
                 ])
                 ->action(function (Collection $records, array $data): void {
                     // save old values before updating
@@ -384,7 +390,7 @@ class TransactionResource extends Resource
                         Account::updateAccountBalance($oldAccountId);
                     }
                 })
-                ->deselectRecordsAfterCompletion()
+                ->deselectRecordsAfterCompletion(),
             /*
             BulkAction::make('category')
                 ->icon('tabler-edit')

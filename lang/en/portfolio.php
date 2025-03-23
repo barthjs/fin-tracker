@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'portfolio',
@@ -20,15 +22,15 @@ return [
         'name_examples' => [
             'Bank of America',
             'ING',
-            'HSBC'
+            'HSBC',
         ],
         'market_value' => 'Volume',
         'description' => 'Description',
         'description_examples' => [
             'Lorem ipsum dolor sit amet',
             'Lorem ipsum dolor sit amet',
-            'Lorem ipsum dolor sit amet'
-        ]
+            'Lorem ipsum dolor sit amet',
+        ],
     ],
 
     'notifications' => [
@@ -45,10 +47,10 @@ return [
             'body_heading' => 'The portfolio export has been completed.',
             'body_failure' => 'Failed rows: ',
             'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'portfolios_'
-        ]
+            'file_name' => 'portfolios_',
+        ],
     ],
 
-    'empty' => 'No portfolios found'
+    'empty' => 'No portfolios found',
 
 ];

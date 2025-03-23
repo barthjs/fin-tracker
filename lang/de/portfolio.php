@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'slug' => 'depot',
@@ -20,15 +22,15 @@ return [
         'name_examples' => [
             'Deutsche Bank',
             'Commerzbank',
-            'ING'
+            'ING',
         ],
         'market_value' => 'Depotvolumen',
         'description' => 'Beschreibung',
         'description_examples' => [
             'Lorem ipsum dolor sit amet',
             'Lorem ipsum dolor sit amet',
-            'Lorem ipsum dolor sit amet'
-        ]
+            'Lorem ipsum dolor sit amet',
+        ],
     ],
 
     'notifications' => [
@@ -45,10 +47,10 @@ return [
             'body_heading' => 'Der Depotexport wurde abgeschlossen.',
             'body_failure' => 'Fehlgeschlagene Zeilen: ',
             'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Depots_'
-        ]
+            'file_name' => 'Depots_',
+        ],
     ],
 
-    'empty' => 'Keine Depots gefunden'
+    'empty' => 'Keine Depots gefunden',
 
 ];
