@@ -16,7 +16,7 @@ class CategoryChart extends ChartWidget
 {
     use InteractsWithPageFilters;
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected static ?string $maxHeight = '300px';
 

@@ -16,6 +16,11 @@ class Dashboard extends BaseDashboard
 
     protected static ?string $navigationIcon = 'tabler-home';
 
+    public function getColumns(): int|string|array
+    {
+        return 3;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
