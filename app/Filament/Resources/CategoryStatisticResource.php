@@ -7,6 +7,7 @@ namespace App\Filament\Resources;
 use App\Enums\TransactionType;
 use App\Filament\Resources\CategoryResource\Pages\ViewCategory;
 use App\Filament\Resources\CategoryStatisticResource\Pages\ListCategoryStatistics;
+use App\Filament\Resources\CategoryStatisticResource\Widgets\CategoryStatisticChart;
 use App\Models\Account;
 use App\Models\CategoryStatistic;
 use Exception;
@@ -36,6 +37,13 @@ class CategoryStatisticResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('category_statistic.navigation_label');
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            CategoryStatisticChart::class,
+        ];
     }
 
     /**

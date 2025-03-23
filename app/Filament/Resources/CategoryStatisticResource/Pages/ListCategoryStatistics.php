@@ -6,12 +6,16 @@ namespace App\Filament\Resources\CategoryStatisticResource\Pages;
 
 use App\Enums\TransactionType;
 use App\Filament\Resources\CategoryStatisticResource;
+use App\Filament\Resources\CategoryStatisticResource\Widgets\CategoryStatisticChart;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListCategoryStatistics extends ListRecords
 {
+    use ExposesTableToWidgets;
+
     protected static string $resource = CategoryStatisticResource::class;
 
     public function getTitle(): string
@@ -29,9 +33,18 @@ class ListCategoryStatistics extends ListRecords
         return [];
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            CategoryStatisticChart::class,
+        ];
+    }
+
     public function getTabs(): array
     {
         return [
+            'All' => Tab::make()
+                ->label(__('table.filter.all')),
             'Expenses' => Tab::make()
                 ->icon('tabler-minus')
                 ->label(__('table.filter.expenses'))
