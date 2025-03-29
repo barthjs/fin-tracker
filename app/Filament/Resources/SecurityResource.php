@@ -31,8 +31,10 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Number;
@@ -177,8 +179,15 @@ class SecurityResource extends Resource
             })
             ->columns($columns)
             ->paginated(fn (): bool => Security::count() > 20)
-            ->defaultSort('name')
             ->persistSortInSession()
+            ->defaultGroup('type')
+            ->groupingSettingsHidden()
+            ->groups([
+                Group::make('type')
+                    ->label('')
+                    ->collapsible()
+                    ->getTitleFromRecordUsing(fn (Security $record): string => __('security.types')[$record->type->name]),
+            ])
             ->striped()
             ->filters([
                 Filter::make('inactive')
@@ -240,7 +249,6 @@ class SecurityResource extends Resource
                 ->label(__('security.columns.price'))
                 ->badge()
                 ->numeric(2)
-                ->searchable()
                 ->sortable(),
             TextColumn::make('total_quantity')
                 ->label(__('security.columns.total_quantity'))
@@ -250,6 +258,11 @@ class SecurityResource extends Resource
 
                     return Number::format(floatval($quantity), 2);
                 })
+                ->sortable(),
+            TextColumn::make('market_value')
+                ->label(__('security.columns.market_value'))
+                ->numeric(2)
+                ->summarize(Sum::make()->label('')->money(config('app.currency')))
                 ->searchable()
                 ->sortable(),
             TextColumn::make('isin')

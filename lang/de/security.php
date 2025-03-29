@@ -23,6 +23,7 @@ return [
         'symbol' => 'Symbol',
         'price' => 'Kurs',
         'total_quantity' => 'Anzahl',
+        'market_value' => 'Marktwert',
         'description' => 'Beschreibung',
         'type' => 'Typ',
     ],

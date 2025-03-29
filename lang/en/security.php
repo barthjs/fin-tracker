@@ -23,6 +23,7 @@ return [
         'symbol' => 'Symbol',
         'price' => 'Price',
         'total_quantity' => 'Quantity',
+        'market_value' => 'Marketvalue',
         'description' => 'Description',
         'type' => 'Type',
     ],
