@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
-use App\Models\Account;
+use App\Models\Security;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
 
-class AccountChart extends ChartWidget
+class SecuritiesChart extends ChartWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 4;
 
     protected static ?string $pollingInterval = null;
 
@@ -32,29 +32,29 @@ class AccountChart extends ChartWidget
 
     public function getHeading(): Htmlable|string|null
     {
-        return __('account.navigation_label');
+        return __('security.navigation_label');
     }
 
     protected function getData(): array
     {
-        $accounts = Account::whereActive(true)->get();
-        $accountsLabels = [];
-        $accountsData = [];
+        $securities = Security::whereActive(true)->get();
+        $securitiesLabels = [];
+        $securitiesData = [];
         $backgroundColors = [];
-        foreach ($accounts as $account) {
-            $accountsLabels[] = $account->name;
-            $accountsData[] = $account->balance;
-            $backgroundColors[] = $account->color;
+        foreach ($securities as $security) {
+            $securitiesLabels[] = $security->name;
+            $securitiesData[] = $security->total_quantity;
+            $backgroundColors[] = $security->color;
         }
 
         return [
             'datasets' => [
                 [
-                    'data' => $accountsData,
+                    'data' => $securitiesData,
                     'backgroundColor' => $backgroundColors,
                 ],
             ],
-            'labels' => $accountsLabels,
+            'labels' => $securitiesLabels,
         ];
     }
 

@@ -12,8 +12,6 @@ class PortfolioChart extends ChartWidget
 {
     protected static ?int $sort = 3;
 
-    protected static ?string $maxHeight = '300px';
-
     protected static ?string $pollingInterval = null;
 
     protected static ?array $options = [
