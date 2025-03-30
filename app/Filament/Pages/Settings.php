@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 class Settings extends Page
@@ -37,8 +38,14 @@ class Settings extends Page
 
     public function mount(): void
     {
-        $response = Http::get('https://hub.docker.com/v2/repositories/barthjs/fin-tracker/tags?page_size=2');
-        $data = json_decode($response->getBody(), true);
-        $this->latestVersion = $data['results'][1]['name'] ?? '';
+        try {
+            $response = Http::get('https://hub.docker.com/v2/repositories/barthjs/fin-tracker/tags');
+        } catch (ConnectionException) {
+            $this->latestVersion = null;
+
+            return;
+        }
+
+        $this->latestVersion = $response->json()['results'][2]['name'] ?? '';
     }
 }
