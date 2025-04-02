@@ -1,7 +1,7 @@
 # Base image with PHP and nginx
 FROM webdevops/php-nginx:8.3-alpine
 
-ARG VERSION=dev
+ARG VERSION=latest
 ENV APP_VERSION=${VERSION} \
     WEB_DOCUMENT_ROOT=/app/public
 
