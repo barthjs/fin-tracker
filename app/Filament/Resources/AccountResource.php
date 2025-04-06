@@ -223,7 +223,7 @@ class AccountResource extends Resource
                 ->label(__('account.columns.description'))
                 ->hiddenOn($hidden)
                 ->wrap()
-                ->sortable()
+                ->searchable()
                 ->toggleable(),
             TextColumn::make('currency')
                 ->label(__('account.columns.currency'))

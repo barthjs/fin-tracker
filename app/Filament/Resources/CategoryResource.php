@@ -201,7 +201,6 @@ class CategoryResource extends Resource
                     'revenue' => 'success',
                     default => 'warning',
                 })
-                ->searchable()
                 ->searchable(true, function (Builder $query, string $search): Builder {
                     $groups = [];
                     foreach (__('category.groups') as $group => $value) {

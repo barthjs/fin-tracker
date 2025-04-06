@@ -179,6 +179,7 @@ class SecurityResource extends Resource
             })
             ->columns($columns)
             ->paginated(fn (): bool => Security::count() > 20)
+            ->defaultSort('name')
             ->persistSortInSession()
             ->defaultGroup('type')
             ->groupingSettingsHidden()
@@ -236,6 +237,8 @@ class SecurityResource extends Resource
 
     public static function getTableColumns(?int $portfolioId = null): array
     {
+        $hidden = SecuritiesRelationManager::class;
+
         return [
             LogoColumn::make('name')
                 ->label(__('security.columns.name'))
@@ -252,7 +255,7 @@ class SecurityResource extends Resource
                 ->sortable(),
             TextColumn::make('total_quantity')
                 ->label(__('security.columns.total_quantity'))
-                ->hiddenOn(SecuritiesRelationManager::class)
+                ->hiddenOn($hidden)
                 ->formatStateUsing(function (Security $record, $state) use ($portfolioId): string {
                     $quantity = $portfolioId ? Trade::whereSecurityId($record->id)->wherePortfolioId($portfolioId)->sum('quantity') : $state;
 
@@ -263,7 +266,6 @@ class SecurityResource extends Resource
                 ->label(__('security.columns.market_value'))
                 ->numeric(2)
                 ->summarize(Sum::make()->label('')->money(config('app.currency')))
-                ->searchable()
                 ->sortable(),
             TextColumn::make('isin')
                 ->label(__('security.columns.isin'))
@@ -277,6 +279,7 @@ class SecurityResource extends Resource
                 ->toggleable(),
             TextColumn::make('description')
                 ->label(__('security.columns.description'))
+                ->hiddenOn($hidden)
                 ->wrap()
                 ->toggleable(isToggledHiddenByDefault: true),
             IconColumn::make('active')

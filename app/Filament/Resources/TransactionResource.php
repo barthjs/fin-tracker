@@ -219,6 +219,7 @@ class TransactionResource extends Resource
                 TextColumn::make('notes')
                     ->label(__('transaction.columns.notes'))
                     ->wrap()
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->paginated(fn (): bool => Transaction::count() > 20)

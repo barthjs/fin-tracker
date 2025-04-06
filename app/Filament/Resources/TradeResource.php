@@ -289,6 +289,7 @@ class TradeResource extends Resource
                 TextColumn::make('notes')
                     ->label(__('trade.columns.notes'))
                     ->wrap()
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->paginated(fn (): bool => Trade::count() > 20)

@@ -185,6 +185,8 @@ class PortfolioResource extends Resource
 
     public static function getTableColumns(): array
     {
+        $hidden = PortfoliosRelationManager::class;
+
         return [
             LogoColumn::make('name')
                 ->label(__('portfolio.columns.name'))
@@ -196,7 +198,7 @@ class PortfolioResource extends Resource
                 ->sortable(),
             TextColumn::make('market_value')
                 ->label(__('portfolio.columns.market_value'))
-                ->hiddenOn(PortfoliosRelationManager::class)
+                ->hiddenOn($hidden)
                 ->badge()
                 ->color(fn (float $state): string => match (true) {
                     $state == 0 => 'gray',
@@ -208,8 +210,9 @@ class PortfolioResource extends Resource
                 ->toggleable(),
             TextColumn::make('description')
                 ->label(__('portfolio.columns.description'))
+                ->hiddenOn($hidden)
                 ->wrap()
-                ->sortable()
+                ->searchable()
                 ->toggleable(),
             IconColumn::make('active')
                 ->label(__('table.active'))
