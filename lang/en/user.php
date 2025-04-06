@@ -16,7 +16,10 @@ return [
         'delete_heading' => 'Delete user',
         'password' => 'Password',
         'password_confirmation' => 'Confirm password',
-        'password_confirmation_warning' => 'Passwords do not match.',
+        'password_new_confirmation' => 'Confirm new password',
+        'password_confirmation_warning' => 'Passwords do not match',
+        'password_wrong_warning' => 'Wrong password',
+        'password_length_warning' => 'The password must be at least 8 characters long',
     ],
 
     'columns' => [

@@ -87,19 +87,18 @@ class UserResource extends Resource
                 Section::make()
                     ->schema([
                         TextInput::make('password')
-                            ->label(__('user.buttons.password'))
-                            ->validationMessages(['same' => __('user.buttons.password_confirmation_warning')])
-                            ->required(fn (string $context): bool => $context === 'create')
+                            ->label(__('filament-breezy::default.fields.new_password'))
+                            ->validationMessages(['min' => __('user.buttons.password_length_warning')])
                             ->password()
                             ->revealable()
+                            ->required(fn (string $context): bool => $context === 'create')
                             ->rule(Password::default())
-                            ->autocomplete('new-password')
                             ->dehydrated(fn ($state): bool => filled($state))
                             ->dehydrateStateUsing(fn ($state): string => Hash::make($state))
-                            ->live(debounce: 200)
-                            ->same('passwordConfirmation'),
+                            ->live(debounce: 200),
                         TextInput::make('passwordConfirmation')
                             ->label(__('user.buttons.password_confirmation'))
+                            ->validationMessages(['same' => __('user.buttons.password_confirmation_warning')])
                             ->password()
                             ->revealable()
                             ->required(function (callable $get) {
@@ -109,6 +108,7 @@ class UserResource extends Resource
 
                                 return true;
                             })
+                            ->dehydrated(false)
                             ->disabled(function (callable $get) {
                                 if (! $get('password')) {
                                     return true;
@@ -116,7 +116,7 @@ class UserResource extends Resource
 
                                 return false;
                             })
-                            ->dehydrated(false),
+                            ->same('password'),
                         Toggle::make('is_admin')
                             ->label(__('user.columns.is_admin'))
                             ->disabled(function ($record) {

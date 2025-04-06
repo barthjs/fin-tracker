@@ -16,7 +16,10 @@ return [
         'delete_heading' => 'Benutzer löschen',
         'password' => 'Passwort',
         'password_confirmation' => 'Passwort wiederholen',
-        'password_confirmation_warning' => 'Passwörter stimmen nicht überein.',
+        'password_new_confirmation' => 'Neues Passwort wiederholen',
+        'password_confirmation_warning' => 'Passwörter stimmen nicht überein',
+        'password_wrong_warning' => 'Falsches Passwort',
+        'password_length_warning' => 'Das Passwort muss mindestens 8 Zeichen lang sein',
     ],
 
     'columns' => [

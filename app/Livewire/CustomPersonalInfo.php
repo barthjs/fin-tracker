@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Models\User;
-use Filament\Forms;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\TextInput;
 use Jeffgreco13\FilamentBreezy\Livewire\PersonalInfo;
 
 class CustomPersonalInfo extends PersonalInfo
@@ -14,7 +15,7 @@ class CustomPersonalInfo extends PersonalInfo
 
     protected function getProfileFormSchema(): array
     {
-        $groupFields = Forms\Components\Group::make([
+        $groupFields = Group::make([
             $this->getFirstNameComponent(),
             $this->getLastNameComponent(),
             $this->getNameComponent(),
@@ -26,42 +27,37 @@ class CustomPersonalInfo extends PersonalInfo
             : [$groupFields];
     }
 
-    protected function getFirstNameComponent(): Forms\Components\TextInput
+    protected function getFirstNameComponent(): TextInput
     {
-        return Forms\Components\TextInput::make('first_name')
+        return TextInput::make('first_name')
             ->label(__('user.columns.first_name'))
-            ->maxLength(255)
-            ->required()
-            ->string();
+            ->maxLength(255);
     }
 
-    protected function getLastNameComponent(): Forms\Components\TextInput
+    protected function getLastNameComponent(): TextInput
     {
-        return Forms\Components\TextInput::make('last_name')
+        return TextInput::make('last_name')
             ->label(__('user.columns.last_name'))
-            ->maxLength(255)
-            ->required()
-            ->string();
+            ->maxLength(255);
     }
 
-    protected function getNameComponent(): Forms\Components\TextInput
+    protected function getNameComponent(): TextInput
     {
-        return Forms\Components\TextInput::make('name')
+        return TextInput::make('name')
             ->label(__('user.columns.name'))
-            ->maxLength(255)
+            ->validationMessages(['unique' => __('user.columns.name_unique_warning')])
             ->required()
-            ->string()
-            ->unique(User::class, ignorable: $this->user)
-            ->validationMessages(['unique' => __('user.columns.name_unique_warning')]);
+            ->maxLength(255)
+            ->unique(User::class, ignorable: $this->user);
     }
 
-    protected function getEmailComponent(): Forms\Components\TextInput
+    protected function getEmailComponent(): TextInput
     {
-        return Forms\Components\TextInput::make('email')
+        return TextInput::make('email')
             ->label(__('user.columns.email'))
-            ->maxLength(255)
+            ->validationMessages(['unique' => __('user.columns.email_unique_warning')])
             ->email()
-            ->unique(User::class, ignorable: $this->user)
-            ->validationMessages(['unique' => __('user.columns.email_unique_warning')]);
+            ->maxLength(255)
+            ->unique(User::class, ignorable: $this->user);
     }
 }
