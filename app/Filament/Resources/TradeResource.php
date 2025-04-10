@@ -27,7 +27,6 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -365,7 +364,7 @@ class TradeResource extends Resource
             ->filtersFormColumns(function ($livewire) {
                 return $livewire instanceof ListTrades ? 4 : 3;
             })
-            ->actions(self::getActions(), ActionsPosition::BeforeColumns)
+            ->actions(self::getActions())
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('trade.empty'))
             ->emptyStateDescription('')

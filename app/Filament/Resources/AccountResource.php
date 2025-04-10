@@ -181,7 +181,7 @@ class AccountResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('account.buttons.delete_heading'))
-                    ->disabled(fn (Account $record): bool => $record->transactions()->exists() || $record->trades()->exists()),
+                    ->visible(fn (Account $record): bool => ! $record->transactions()->exists() && ! $record->trades()->exists()),
             ])
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('account.empty'))

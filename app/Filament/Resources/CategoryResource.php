@@ -169,7 +169,7 @@ class CategoryResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('category.buttons.delete_heading'))
-                    ->disabled(fn (Category $record): bool => $record->transactions()->count() > 0),
+                    ->visible(fn (Category $record): bool => ! $record->transactions()->exists()),
             ])
             ->bulkActions(self::getBulkActions())
             ->emptyStateHeading(__('category.empty'))

@@ -223,7 +223,7 @@ class SecurityResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('security.buttons.delete_heading'))
-                    ->disabled(fn (Security $record): bool => $record->trades()->count() > 0),
+                    ->visible(fn (Security $record): bool => ! $record->trades()->exists()),
             ])
             ->emptyStateHeading(__('security.empty'))
             ->emptyStateDescription('')

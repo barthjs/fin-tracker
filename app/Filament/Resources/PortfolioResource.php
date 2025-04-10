@@ -171,7 +171,7 @@ class PortfolioResource extends Resource
                     ->iconButton()
                     ->icon('tabler-trash')
                     ->modalHeading(__('portfolio.buttons.delete_heading'))
-                    ->disabled(fn (Portfolio $record): bool => $record->trades()->exists()),
+                    ->visible(fn (Portfolio $record): bool => ! $record->trades()->exists()),
             ])
             ->emptyStateHeading(__('portfolio.empty'))
             ->emptyStateDescription('')

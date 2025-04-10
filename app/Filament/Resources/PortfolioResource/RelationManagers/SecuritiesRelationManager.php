@@ -50,7 +50,7 @@ class SecuritiesRelationManager extends RelationManager
             })
             ->heading('')
             ->columns($columns)
-            ->recordUrl(fn (Security $record): string => SecurityResource\Pages\ViewSecurity::getUrl([$record->id]), true)
+            ->recordUrl(fn (Security $record): string => SecurityResource\Pages\ViewSecurity::getUrl([$record->id]))
             ->emptyStateActions([]);
     }
 }

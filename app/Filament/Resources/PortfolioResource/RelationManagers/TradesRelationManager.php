@@ -33,6 +33,6 @@ class TradesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return TradeResource::table($table)
-            ->heading(__('trade.navigation_label'));
+            ->heading('');
     }
 }
