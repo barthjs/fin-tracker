@@ -6,10 +6,12 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\UserResource;
 use App\Http\Middleware\CheckVerified;
 use App\Livewire\CustomPersonalInfo;
+use App\Livewire\CustomTwoFactorAuthentication;
 use App\Livewire\CustomUpdatePassword;
 use Exception;
 use Filament\Enums\ThemeMode;
@@ -36,7 +38,11 @@ class AppPanelProvider extends PanelProvider
      */
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        if (config('app.allow_registration')) {
+            $panel->registration(Register::class);
+        }
+
+        $panel
             ->default()
             ->id('app')
             ->path('')
@@ -61,10 +67,11 @@ class AppPanelProvider extends PanelProvider
                     )
                     ->customMyProfilePage(EditProfile::class)
                     ->myProfileComponents([
-                        'update_password' => CustomUpdatePassword::class,
                         'personal_info' => CustomPersonalInfo::class,
+                        'update_password' => CustomUpdatePassword::class,
+                        'two_factor_authentication' => CustomTwoFactorAuthentication::class,
                     ])
-                    ->enableTwoFactorAuthentication()
+                    ->enableTwoFactorAuthentication(),
             )
             ->userMenuItems([
                 'settings' => MenuItem::make()
@@ -93,5 +100,7 @@ class AppPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+
+        return $panel;
     }
 }

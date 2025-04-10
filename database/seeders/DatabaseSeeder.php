@@ -29,5 +29,16 @@ class DatabaseSeeder extends Seeder
                 ]
             );
         }
+
+        if (App::isLocal()) {
+            User::firstOrCreate(['name' => 'user'],
+                [
+                    'first_name' => 'User',
+                    'last_name' => 'User',
+                    'email' => 'user@example.com',
+                    'password' => Hash::make('user'),
+                    'verified' => true,
+                ]);
+        }
     }
 }

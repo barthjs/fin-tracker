@@ -18,10 +18,10 @@ class CheckVerified
     public function handle(Request $request, Closure $next): Response
     {
         $profileUri = __('user.profile-slug');
-        if ($request->route()->uri() !== $profileUri && $request->route()->uri() !== 'login') {
-            if (! auth()->user()->verified) {
-                return redirect($profileUri);
-            }
+        $currentUri = $request->route()->uri();
+
+        if (! in_array($currentUri, [$profileUri, 'login', 'register']) && ! auth()->user()->verified) {
+            return redirect($profileUri);
         }
 
         return $next($request);

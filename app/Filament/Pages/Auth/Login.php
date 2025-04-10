@@ -6,24 +6,11 @@ namespace App\Filament\Pages\Auth;
 
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Pages\Auth\Login as BaseAuth;
+use Filament\Pages\Auth\Login as BaseLogin;
 use Illuminate\Validation\ValidationException;
 
-class Login extends BaseAuth
+class Login extends BaseLogin
 {
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                $this->getLoginFormComponent()
-                    ->label(__('user.login.user_or_email')),
-                $this->getPasswordFormComponent(),
-                $this->getRememberFormComponent(),
-            ])
-            ->statePath('data');
-    }
-
     protected function throwFailureValidationException(): never
     {
         throw ValidationException::withMessages([
@@ -31,7 +18,7 @@ class Login extends BaseAuth
         ]);
     }
 
-    protected function getLoginFormComponent(): Component
+    protected function getEmailFormComponent(): Component
     {
         return TextInput::make('login')
             ->label(__('user.login.user_or_email'))
