@@ -92,4 +92,35 @@ class Category extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public static function getChartData(TransactionType $type): array
+    {
+        $categories = Category::whereActive(true)
+            ->where('type', '=', $type)
+            ->get();
+
+        $monthColumn = strtolower(Carbon::createFromDate(null, Carbon::today()->month)->format('M'));
+        $year = Carbon::now()->year;
+
+        $labels = [];
+        $series = [];
+        $colors = [];
+
+        foreach ($categories as $category) {
+            $labels[] = $category->name;
+
+            $sum = CategoryStatistic::where('year', $year)
+                ->where('category_id', $category->id)
+                ->value($monthColumn) ?? 0;
+
+            $series[] = abs((float) $sum);
+            $colors[] = $category->color;
+        }
+
+        return [
+            'labels' => $labels,
+            'series' => $series,
+            'colors' => $colors,
+        ];
+    }
 }

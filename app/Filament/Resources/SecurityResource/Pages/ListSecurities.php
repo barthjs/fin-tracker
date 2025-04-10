@@ -7,6 +7,7 @@ namespace App\Filament\Resources\SecurityResource\Pages;
 use App\Filament\Exports\SecurityExporter;
 use App\Filament\Imports\SecurityImporter;
 use App\Filament\Resources\SecurityResource;
+use App\Filament\Resources\SecurityResource\Widgets\SecurityChart;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
@@ -26,6 +27,13 @@ class ListSecurities extends ListRecords
     public function getHeading(): string
     {
         return __('security.navigation_label');
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            SecurityChart::class,
+        ];
     }
 
     protected function getHeaderActions(): array

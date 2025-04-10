@@ -21,29 +21,51 @@ class StatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $totalAssets = Account::getActiveSum() + Portfolio::getActiveSum();
-        $totalAssets = Number::currency($totalAssets, Account::getCurrency());
-
-        $monthColumn = strtolower(Carbon::createFromDate(null, Carbon::today()->month)->format('M'));
+        $currency = Account::getCurrency();
         $year = Carbon::now()->year;
+        $monthColumn = strtolower(Carbon::now()->format('M'));
+        $months = array_keys(__('category_statistic.columns'));
 
-        $expenseSum = CategoryStatistic::where('year', '=', $year)->whereHas('category', function ($query) {
-            $query->where('type', TransactionType::expense);
-        })->sum($monthColumn) / 100;
-        $expenseSum = Number::currency($expenseSum, Account::getCurrency());
+        $totalAssets = Number::currency(
+            Account::getActiveSum() + Portfolio::getActiveSum(),
+            $currency
+        );
 
-        $revenueSum = CategoryStatistic::where('year', '=', $year)->whereHas('category', function ($query) {
-            $query->where('type', TransactionType::revenue);
-        })->sum($monthColumn) / 100;
-        $revenueSum = Number::currency($revenueSum, Account::getCurrency());
+        $expenseSum = $this->getCategorySumByMonth(TransactionType::expense, $year, $monthColumn);
+        $revenueSum = $this->getCategorySumByMonth(TransactionType::revenue, $year, $monthColumn);
+
+        $expenseChart = $this->getCategoryChartData(TransactionType::expense, $year, $months);
+        $revenueChart = $this->getCategoryChartData(TransactionType::revenue, $year, $months);
 
         return [
             Stat::make(__('widget.stats.total_assets'), $totalAssets)
-                ->color('warning'),
+                ->color('info'),
+
             Stat::make(__('widget.stats.expenses_this_month'), $expenseSum)
-                ->color('danger'),
+                ->color('danger')
+                ->chart($expenseChart),
+
             Stat::make(__('widget.stats.revenues_this_month'), $revenueSum)
-                ->color('success'),
+                ->color('success')
+                ->chart($revenueChart),
         ];
+    }
+
+    private function getCategorySumByMonth(TransactionType $type, int $year, string $month): string
+    {
+        $sum = CategoryStatistic::where('year', $year)
+            ->whereHas('category', fn ($query) => $query->where('type', $type))
+            ->sum($month) / 100;
+
+        return Number::currency($sum, Account::getCurrency());
+    }
+
+    private function getCategoryChartData(TransactionType $type, int $year, array $months): array
+    {
+        return array_map(fn ($month) => CategoryStatistic::where('year', $year)
+            ->whereHas('category', fn ($query) => $query->where('type', $type))
+            ->sum($month) / 100,
+            $months
+        );
     }
 }

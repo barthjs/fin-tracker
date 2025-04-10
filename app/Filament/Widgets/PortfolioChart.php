@@ -5,61 +5,48 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Models\Portfolio;
-use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
+use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
-class PortfolioChart extends ChartWidget
+class PortfolioChart extends ApexChartWidget
 {
     protected static ?int $sort = 3;
 
-    protected static ?string $pollingInterval = null;
+    protected static ?string $chartId = 'portfolioChart';
 
-    protected static ?array $options = [
-        'plugins' => [
-            'legend' => [
-                'display' => false,
-            ],
-        ],
-        'scales' => [
-            'y' => [
-                'display' => false,
-            ],
-            'x' => [
-                'display' => false,
-            ],
-        ],
-    ];
+    protected static bool $deferLoading = true;
+
+    protected static ?string $pollingInterval = null;
 
     public function getHeading(): Htmlable|string|null
     {
         return __('portfolio.navigation_label');
     }
 
-    protected function getData(): array
+    protected function getOptions(): array
     {
         $portfolios = Portfolio::whereActive(true)->get();
-        $portfoliosLabels = [];
-        $portfoliosData = [];
-        $backgroundColors = [];
+
+        $labels = [];
+        $series = [];
+        $colors = [];
+
         foreach ($portfolios as $portfolio) {
-            $portfoliosLabels[] = $portfolio->name;
-            $portfoliosData[] = $portfolio->market_value;
-            $backgroundColors[] = $portfolio->color;
+            $labels[] = $portfolio->name;
+            $series[] = (float) $portfolio->market_value;
+            $colors[] = $portfolio->color;
         }
 
         return [
-            'datasets' => [
-                [
-                    'data' => $portfoliosData,
-                    'backgroundColor' => $backgroundColors,
-                ],
+            'chart' => [
+                'type' => 'pie',
             ],
-            'labels' => $portfoliosLabels,
+            'labels' => $labels,
+            'series' => $series,
+            'colors' => $colors,
+            'legend' => [
+                'show' => false,
+            ],
         ];
-    }
-
-    protected function getType(): string
-    {
-        return 'pie';
     }
 }

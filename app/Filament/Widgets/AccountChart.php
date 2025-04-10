@@ -5,61 +5,48 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Models\Account;
-use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
+use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
-class AccountChart extends ChartWidget
+class AccountChart extends ApexChartWidget
 {
     protected static ?int $sort = 2;
 
-    protected static ?string $pollingInterval = null;
+    protected static ?string $chartId = 'accountChart';
 
-    protected static ?array $options = [
-        'plugins' => [
-            'legend' => [
-                'display' => false,
-            ],
-        ],
-        'scales' => [
-            'y' => [
-                'display' => false,
-            ],
-            'x' => [
-                'display' => false,
-            ],
-        ],
-    ];
+    protected static bool $deferLoading = true;
+
+    protected static ?string $pollingInterval = null;
 
     public function getHeading(): Htmlable|string|null
     {
         return __('account.navigation_label');
     }
 
-    protected function getData(): array
+    protected function getOptions(): array
     {
         $accounts = Account::whereActive(true)->get();
-        $accountsLabels = [];
-        $accountsData = [];
-        $backgroundColors = [];
+
+        $labels = [];
+        $series = [];
+        $colors = [];
+
         foreach ($accounts as $account) {
-            $accountsLabels[] = $account->name;
-            $accountsData[] = $account->balance;
-            $backgroundColors[] = $account->color;
+            $labels[] = $account->name;
+            $series[] = $account->balance;
+            $colors[] = $account->color;
         }
 
         return [
-            'datasets' => [
-                [
-                    'data' => $accountsData,
-                    'backgroundColor' => $backgroundColors,
-                ],
+            'chart' => [
+                'type' => 'pie',
             ],
-            'labels' => $accountsLabels,
+            'series' => $series,
+            'labels' => $labels,
+            'colors' => $colors,
+            'legend' => [
+                'show' => false,
+            ],
         ];
-    }
-
-    protected function getType(): string
-    {
-        return 'pie';
     }
 }

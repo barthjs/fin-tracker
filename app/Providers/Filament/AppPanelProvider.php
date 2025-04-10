@@ -30,6 +30,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\App;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -60,7 +61,7 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->plugin(
+            ->plugins([
                 BreezyCore::make()
                     ->myProfile(
                         slug: __('user.profile-slug')
@@ -72,7 +73,8 @@ class AppPanelProvider extends PanelProvider
                         'two_factor_authentication' => CustomTwoFactorAuthentication::class,
                     ])
                     ->enableTwoFactorAuthentication(),
-            )
+                FilamentApexChartsPlugin::make(),
+            ])
             ->userMenuItems([
                 'settings' => MenuItem::make()
                     ->label(__('settings.navigation_label'))
