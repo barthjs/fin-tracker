@@ -20,7 +20,7 @@ class CheckVerified
         $profileUri = __('user.profile-slug');
         $currentUri = $request->route()->uri();
 
-        if (! in_array($currentUri, [$profileUri, 'login', 'register']) && ! auth()->user()->verified) {
+        if (! in_array($currentUri, [$profileUri, 'login', 'register', 'logout', 'two-factor-authentication']) && ! auth()->user()->verified) {
             return redirect($profileUri);
         }
 

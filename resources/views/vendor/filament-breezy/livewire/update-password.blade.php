@@ -1,7 +1,8 @@
-<x-filament-breezy::grid-section md=2 :title="__('filament-breezy::default.profile.password.heading')" :description="__('filament-breezy::default.profile.password.subheading')">
+<x-filament-breezy::grid-section md=2 :title="__('filament-breezy::default.profile.password.heading')"
+                                 :description="__('filament-breezy::default.profile.password.subheading')">
     <x-filament::card>
         @if(!$this->user->verified)
-            <div class="py-2 mb-4">
+            <div class="mb-6 rounded-lg border-l-4 border-warning-500 bg-warning-100 p-4 text-lg text-warning-600">
                 {{ __('user.unverified_message') }}
             </div>
         @endif

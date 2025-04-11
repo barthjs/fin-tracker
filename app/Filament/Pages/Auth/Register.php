@@ -7,11 +7,19 @@ namespace App\Filament\Pages\Auth;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Auth\Register as BaseRegister;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class Register extends BaseRegister
 {
+    protected function handleRegistration(array $data): Model
+    {
+        $data['verified'] = true;
+
+        return $this->getUserModel()::create($data);
+    }
+
     protected function getForms(): array
     {
         return [
