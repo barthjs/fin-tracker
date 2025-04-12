@@ -13,6 +13,7 @@ use App\Http\Middleware\CheckVerified;
 use App\Livewire\CustomPersonalInfo;
 use App\Livewire\CustomTwoFactorAuthentication;
 use App\Livewire\CustomUpdatePassword;
+use App\Tools\LocalAvatarProvider;
 use Exception;
 use Filament\Enums\ThemeMode;
 use Filament\FontProviders\LocalFontProvider;
@@ -58,6 +59,7 @@ class AppPanelProvider extends PanelProvider
                 asset('css/fonts/fonts.css'),
                 LocalFontProvider::class
             )
+            ->defaultAvatarProvider(LocalAvatarProvider::class)
             ->viteTheme('resources/css/filament/app/theme.css')
             ->defaultThemeMode(ThemeMode::Dark)
             ->maxContentWidth('full')
@@ -68,7 +70,7 @@ class AppPanelProvider extends PanelProvider
             ->plugins([
                 BreezyCore::make()
                     ->myProfile(
-                        slug: __('user.profile-slug')
+                        slug: __('user.profile-slug'),
                     )
                     ->customMyProfilePage(EditProfile::class)
                     ->myProfileComponents([

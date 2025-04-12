@@ -1,0 +1,52 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tools;
+
+use Filament\AvatarProviders\Contracts\AvatarProvider;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
+class LocalAvatarProvider implements AvatarProvider
+{
+    public function get(Model|Authenticatable $record): string
+    {
+        $initials = $this->extractInitials($record);
+
+        $html = $this->render($initials);
+
+        return 'data:image/svg+xml;base64,'.base64_encode($html);
+    }
+
+    private function extractInitials(Model|Authenticatable $record): string
+    {
+        $initials = '';
+
+        $first = trim((string) ($record->first_name ?? ''));
+        $last = trim((string) ($record->last_name ?? ''));
+
+        if ($first !== '') {
+            $initials .= Str::upper(Str::substr($first, 0, 1));
+        }
+
+        if ($last !== '') {
+            $initials .= Str::upper(Str::substr($last, 0, 1));
+        }
+
+        if ($initials === '') {
+            $name = trim((string) $record->name);
+            $initials = Str::upper(Str::substr($name, 0, 1));
+        }
+
+        return $initials;
+    }
+
+    private function render(string $initials): string
+    {
+        return view('components.avatar-svg', [
+            'initials' => $initials,
+        ])->toHtml();
+    }
+}
