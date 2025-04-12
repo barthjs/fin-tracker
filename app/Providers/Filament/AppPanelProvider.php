@@ -70,6 +70,7 @@ class AppPanelProvider extends PanelProvider
             ->plugins([
                 BreezyCore::make()
                     ->myProfile(
+                        hasAvatars: true,
                         slug: __('user.profile-slug'),
                     )
                     ->customMyProfilePage(EditProfile::class)

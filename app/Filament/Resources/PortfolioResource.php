@@ -88,6 +88,7 @@ class PortfolioResource extends Resource
                         ->maxLength(1000)
                         ->string(),
                     FileUpload::make('logo')
+                        ->label(__('portfolio.columns.logo'))
                         ->avatar()
                         ->image()
                         ->imageEditor()

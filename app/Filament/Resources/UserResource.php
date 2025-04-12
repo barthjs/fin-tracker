@@ -13,6 +13,7 @@ use App\Filament\Resources\UserResource\RelationManagers\CategoryRelationManager
 use App\Filament\Resources\UserResource\RelationManagers\PortfoliosRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\SecuritiesRelationManager;
 use App\Models\User;
+use App\Tables\Columns\LogoColumn;
 use Exception;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -189,8 +190,12 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                LogoColumn::make('name')
                     ->label(__('user.columns.name'))
+                    ->state(fn (User $record): array => [
+                        'logo' => $record->avatar,
+                        'name' => $record->name,
+                    ])
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')

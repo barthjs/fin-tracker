@@ -92,6 +92,7 @@ class AccountResource extends Resource
                         ->maxLength(1000)
                         ->string(),
                     FileUpload::make('logo')
+                        ->label(__('account.columns.logo'))
                         ->avatar()
                         ->image()
                         ->imageEditor()

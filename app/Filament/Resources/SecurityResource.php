@@ -110,6 +110,7 @@ class SecurityResource extends Resource
                         ->default(true)
                         ->inline(false),
                     FileUpload::make('logo')
+                        ->label(__('security.columns.logo'))
                         ->avatar()
                         ->image()
                         ->imageEditor()

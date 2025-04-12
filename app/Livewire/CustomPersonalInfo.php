@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Models\User;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\TextInput;
 use Jeffgreco13\FilamentBreezy\Livewire\PersonalInfo;
 
 class CustomPersonalInfo extends PersonalInfo
 {
-    public array $only = ['first_name', 'last_name', 'name', 'email'];
+    public array $only = ['avatar', 'first_name', 'last_name', 'name', 'email'];
 
     protected function getProfileFormSchema(): array
     {
@@ -23,8 +24,21 @@ class CustomPersonalInfo extends PersonalInfo
         ])->columnSpanFull()->columns(2);
 
         return ($this->hasAvatars)
-            ? [filament('filament-breezy')->getAvatarUploadComponent(), $groupFields]
+            ? [$this->getAvatarUploadComponent(), $groupFields]
             : [$groupFields];
+    }
+
+    public function getAvatarUploadComponent(): FileUpload
+    {
+        return FileUpload::make('avatar')
+            ->label(__('filament-breezy::default.fields.avatar'))
+            ->avatar()
+            ->image()
+            ->imageEditor()
+            ->circleCropper()
+            ->moveFiles()
+            ->directory('logos/avatars')
+            ->maxSize(1024);
     }
 
     protected function getFirstNameComponent(): TextInput

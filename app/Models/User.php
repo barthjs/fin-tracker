@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
 
-class User extends Authenticatable implements FilamentUser, HasName
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasName
 {
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
@@ -28,6 +30,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         'verified',
         'is_admin',
         'active',
+        'avatar',
     ];
 
     protected $hidden = [
@@ -53,6 +56,19 @@ class User extends Authenticatable implements FilamentUser, HasName
             Category::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
             Portfolio::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
             Security::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
+        });
+
+        static::updated(function (User $user) {
+            $avatar = $user->getOriginal('avatar');
+            if (is_null($user->avatar) && ! is_null($avatar) && Storage::disk('public')->exists($avatar)) {
+                Storage::disk('public')->delete($avatar);
+            }
+        });
+
+        static::deleted(function (User $user) {
+            if (! is_null($user->avatar) && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
         });
     }
 
@@ -84,5 +100,10 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function getFilamentName(): string
     {
         return "{$this->first_name} {$this->last_name}";
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatar ? Storage::url($this->avatar) : null;
     }
 }
