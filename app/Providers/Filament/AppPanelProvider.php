@@ -15,6 +15,7 @@ use App\Livewire\CustomTwoFactorAuthentication;
 use App\Livewire\CustomUpdatePassword;
 use Exception;
 use Filament\Enums\ThemeMode;
+use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -53,7 +54,10 @@ class AppPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             ->colors(config('colors'))
-            ->font('Poppins')
+            ->font('Poppins',
+                asset('css/fonts/fonts.css'),
+                LocalFontProvider::class
+            )
             ->viteTheme('resources/css/filament/app/theme.css')
             ->defaultThemeMode(ThemeMode::Dark)
             ->maxContentWidth('full')
