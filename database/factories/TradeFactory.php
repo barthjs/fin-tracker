@@ -15,17 +15,8 @@ class TradeFactory extends Factory
 
     public function definition(): array
     {
-        $quantity = $this->faker->randomFloat(2, 1, 100);
-        $price = $this->faker->randomFloat(2, 1, 100);
-        $tax = $this->faker->numberBetween(0, 100);
-        $fee = $this->faker->numberBetween(0, 100);
-
         return [
             'date_time' => Carbon::now(),
-            'quantity' => $quantity,
-            'price' => $price,
-            'tax' => $tax,
-            'fee' => $fee,
             'notes' => $this->faker->words(3, true),
             'type' => $this->faker->randomElement(TradeType::cases())->name,
         ];

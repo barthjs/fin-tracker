@@ -114,7 +114,7 @@ class TotalOverviewTable extends BaseWidget
                         }
 
                         return ViewPortfolio::getUrl([substr($record->id, 2)]);
-                    }),
+                    }, true),
             ])
             ->striped()
             ->recordUrl(function (CombinedModel $record): string {

@@ -19,7 +19,13 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
-        $group = fake()->randomElement(TransactionGroup::cases())->name;
+        $group = fake()
+            ->randomElement([
+                TransactionGroup::fix_expenses,
+                TransactionGroup::var_expenses,
+                TransactionGroup::fix_revenues,
+                TransactionGroup::var_revenues,
+            ])->name;
 
         return [
             'name' => fake()->word(),

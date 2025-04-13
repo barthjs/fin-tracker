@@ -29,7 +29,7 @@ class SecurityChart extends ApexChartWidget
 
         foreach ($securities as $security) {
             $labels[] = $security->name;
-            $series[] = (float) $security->total_quantity;
+            $series[] = (float) $security->market_value;
             $colors[] = $security->color;
         }
 

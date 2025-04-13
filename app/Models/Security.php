@@ -97,7 +97,12 @@ class Security extends Model
     public static function updateSecurityQuantity(int $securityId): void
     {
         $totalQuantity = Trade::whereSecurityId($securityId)->sum('quantity');
-        Security::whereId($securityId)->update(['total_quantity' => $totalQuantity]);
+        $security = Security::whereId($securityId)->first();
+
+        $security->update([
+            'total_quantity' => $totalQuantity,
+            'market_value' => $totalQuantity * $security->price,
+        ]);
     }
 
     public function portfolios(): BelongsToMany
