@@ -1,3 +1,4 @@
+# Only for development. Don't use it in production. Use compose.yaml instead.
 services:
   fin-tracker:
     build:
@@ -22,6 +23,7 @@ services:
     ports:
       - 3306:3306
     volumes:
+      - ./storage/app/db:/docker-entrypoint-initdb.d
       - db:/var/lib/mysql
     environment:
       - MARIADB_DATABASE=${DB_DATABASE}
