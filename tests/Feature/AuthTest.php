@@ -17,7 +17,7 @@ it('displays the login page', function () {
 });
 
 it('redirects an unverified user to the profile', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create(['verified' => false]);
     $this->actingAs($user);
     $response = $this->get('/');
 
