@@ -56,7 +56,7 @@ class AppPanelProvider extends PanelProvider
             ->databaseNotificationsPolling('30s')
             ->colors(config('colors'))
             ->font('Poppins',
-                asset('css/fonts/fonts.css'),
+                '/fonts/fonts.css',
                 LocalFontProvider::class
             )
             ->defaultAvatarProvider(LocalAvatarProvider::class)

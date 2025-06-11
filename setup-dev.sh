@@ -5,6 +5,9 @@ function setup_dev_commands {
     npm install
     npm run build
 
+    php artisan livewire:publish --assets
+    php artisan filament:assets
+
     php artisan key:generate
     php artisan migrate:fresh --seed
     php artisan storage:link

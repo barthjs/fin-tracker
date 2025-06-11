@@ -5,6 +5,16 @@ if [ -z "$APP_KEY" ]; then
     exit 1
 fi
 
+if [ ! -d "/app/public/vendor/livewire" ]; then
+    echo "Publishing Livewire assets..."
+    php artisan livewire:publish --assets
+fi
+
+if [ ! -d "/app/public/css" ] || [ ! -d "/app/public/js" ]; then
+    echo "Publishing Filament assets..."
+    php artisan filament:assets
+fi
+
 echo "Optimizing the application..."
 if ! php artisan optimize; then
     echo "Error: Optimization failed."

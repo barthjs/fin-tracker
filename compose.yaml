@@ -7,9 +7,9 @@ services:
       fin-tracker-db:
         condition: service_healthy
     ports:
-      - 8080:80
+      - 80:80
     volumes:
-      - ./logos:/app/storage/app/public/logos
+      - ./data:/app/storage/app
     env_file: .env
 
   fin-tracker-db:
