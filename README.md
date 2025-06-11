@@ -186,7 +186,7 @@ Default login at [http://localhost:80](http://localhost:80)
   <img alt="PHP 8.3" src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php">
   </a>
 - <a href="https://laravel.com">
-  <img alt="Laravel v11.x" src="https://img.shields.io/badge/Laravel-v11.x-FF2D20?style=flat-square&logo=laravel">
+  <img alt="Laravel v12.x" src="https://img.shields.io/badge/Laravel-v12.x-FF2D20?style=flat-square&logo=laravel">
   </a>
 - <a href="https://filamentphp.com/">
   <img alt="Filament v3.x" src="https://img.shields.io/badge/Filament-v3.x-e9b228?style=flat-square">
