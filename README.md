@@ -152,7 +152,7 @@ to [open an issue](https://github.com/barthjs/fin-tracker/issues/).
 
 A Linux environment is recommended for development. Development setup includes:
 
-- [Dockerfile-dev](.docker/Dockerfile-dev)
+- [Dockerfile-dev](docker/Dockerfile-dev)
 - [compose.dev.yaml](compose.dev.yaml)
 
 For the best experience use [PHP Storm](https://www.jetbrains.com/phpstorm/). Configure the IDE debugger:

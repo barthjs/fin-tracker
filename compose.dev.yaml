@@ -2,7 +2,7 @@
 services:
   fin-tracker:
     build:
-      context: .docker
+      context: docker
       dockerfile: Dockerfile-dev
     pull_policy: never
     image: barthjs/fin-tracker:dev
@@ -23,7 +23,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./storage/app/db:/docker-entrypoint-initdb.d
+      - ./database:/docker-entrypoint-initdb.d
       - db:/var/lib/mysql
     environment:
       - MARIADB_DATABASE=${DB_DATABASE}

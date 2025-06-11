@@ -1,0 +1,60 @@
+FROM php:8.3-fpm-alpine
+
+ARG VERSION=dev
+ENV APP_VERSION=${VERSION} \
+    PHP_IDE_CONFIG="serverName=fin-tracker"
+
+# Create application user
+RUN addgroup -g 1000 application && \
+    adduser -D -u 1000 -G application -h /home/application -s /bin/bash application
+
+LABEL org.opencontainers.image.title="Fin-Tracker" \
+    org.opencontainers.image.description="Household Finance Manager" \
+    org.opencontainers.image.url="https://github.com/barthjs/fin-tracker" \
+    org.opencontainers.image.source="https://github.com/barthjs/fin-tracker" \
+    org.opencontainers.image.version=${VERSION} \
+    org.opencontainers.image.licenses="MIT"
+
+# Install base packages
+RUN apk add --no-cache \
+        bash \
+        curl \
+        nginx \
+        nodejs \
+        npm \
+        supervisor && \
+    # Clear all php-fpm default configurations
+    rm -rf /usr/local/etc/php-fpm.d/*.conf
+
+# Install composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install php extensions
+COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions \
+        intl \
+        pdo_mysql \
+        xdebug \
+        zip && \
+        rm -f /usr/local/bin/install-php-extensions
+
+# Copy php configuration files
+RUN mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
+COPY php/php-dev.ini /usr/local/etc/php/conf.d/php.ini
+COPY php/application.conf /usr/local/etc/php-fpm.d/application.conf
+
+# Copy nginx configuration files
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/dev.conf /etc/nginx/conf.d/dev.conf
+
+# Copy Supervisor configuration files
+COPY supervisord.conf /etc/supervisord.conf
+COPY supervisor.d/nginx.conf /etc/supervisor.d/nginx.conf
+COPY supervisor.d/php-fpm.conf /etc/supervisor.d/php-fpm.conf
+
+# App setup
+WORKDIR /app
+
+EXPOSE 80 5173
+ENTRYPOINT []
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]

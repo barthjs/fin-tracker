@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ -z "$APP_KEY" ]; then
     echo "Error: APP_KEY is not set. Please set the APP_KEY environment variable."
@@ -26,3 +26,7 @@ fi
 echo "#############################"
 echo "Setup completed successfully."
 echo "#############################"
+
+chown -R application:application /app/storage/app/
+
+supervisord -c /etc/supervisord.conf
