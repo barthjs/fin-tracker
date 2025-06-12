@@ -67,14 +67,14 @@ class ListCategories extends ListRecords
                 ->icon('tabler-minus')
                 ->iconPosition('before')
                 ->label(__('table.filter.expenses'))
-                ->modifyQueryUsing(function ($query) {
+                ->modifyQueryUsing(function (Builder $query) {
                     $query->where('type', '=', TransactionType::expense);
                 }),
             'Revenues' => Tab::make()
                 ->icon('tabler-plus')
                 ->iconPosition('after')
                 ->label(__('table.filter.revenues'))
-                ->modifyQueryUsing(function ($query) {
+                ->modifyQueryUsing(function (Builder $query) {
                     $query->where('type', '=', TransactionType::revenue);
                 }),
         ];

@@ -49,7 +49,7 @@ class ListCategoryStatistics extends ListRecords
                 ->icon('tabler-minus')
                 ->label(__('table.filter.expenses'))
                 ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function ($query) {
+                    $query->whereHas('category', function (Builder $query) {
                         $query->where('type', '=', TransactionType::expense);
                     });
                 }),
@@ -58,7 +58,7 @@ class ListCategoryStatistics extends ListRecords
                 ->iconPosition('after')
                 ->label(__('table.filter.revenues'))
                 ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function ($query) {
+                    $query->whereHas('category', function (Builder $query) {
                         $query->where('type', '=', TransactionType::revenue);
                     });
                 }),

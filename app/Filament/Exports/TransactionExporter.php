@@ -24,7 +24,7 @@ class TransactionExporter extends Exporter
                 ->label(__('transaction.columns.date')),
             ExportColumn::make('amount')
                 ->label(__('transaction.columns.amount'))
-                ->formatStateUsing(fn ($state): string => Number::format($state, 2)),
+                ->formatStateUsing(fn (float $state): string => Number::format($state, 2)),
             ExportColumn::make('destination')
                 ->label(__('transaction.columns.destination')),
             ExportColumn::make('account.name')

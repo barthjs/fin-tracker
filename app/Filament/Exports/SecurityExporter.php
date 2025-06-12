@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
+use App\Enums\SecurityType;
 use App\Models\Security;
 use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
@@ -34,7 +35,7 @@ class SecurityExporter extends Exporter
                 ->label(__('security.columns.description')),
             ExportColumn::make('type')
                 ->label(__('security.columns.type'))
-                ->formatStateUsing(fn ($state): string => __('security.types')[$state->name]),
+                ->formatStateUsing(fn (SecurityType $state): string => __('security.types')[$state->name]),
             ExportColumn::make('color')
                 ->label(__('widget.color')),
             ExportColumn::make('active')

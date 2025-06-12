@@ -11,6 +11,7 @@ use App\Models\Portfolio;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
 use Number;
 
 class StatsOverview extends BaseWidget
@@ -54,7 +55,7 @@ class StatsOverview extends BaseWidget
     private function getCategorySumByMonth(TransactionType $type, int $year, string $month): string
     {
         $sum = CategoryStatistic::where('year', $year)
-            ->whereHas('category', fn ($query) => $query->where('type', $type))
+            ->whereHas('category', fn (Builder $query) => $query->where('type', $type))
             ->sum($month) / 100;
 
         return Number::currency($sum, Account::getCurrency());
@@ -62,8 +63,8 @@ class StatsOverview extends BaseWidget
 
     private function getCategoryChartData(TransactionType $type, int $year, array $months): array
     {
-        return array_map(fn ($month) => CategoryStatistic::where('year', $year)
-            ->whereHas('category', fn ($query) => $query->where('type', $type))
+        return array_map(fn (string $month) => CategoryStatistic::where('year', $year)
+            ->whereHas('category', fn (Builder $query) => $query->where('type', $type))
             ->sum($month) / 100,
             $months
         );

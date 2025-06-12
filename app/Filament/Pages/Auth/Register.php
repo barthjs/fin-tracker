@@ -82,7 +82,7 @@ class Register extends BaseRegister
             ->revealable()
             ->required()
             ->rule(Password::default())
-            ->dehydrateStateUsing(fn ($state): string => Hash::make($state));
+            ->dehydrateStateUsing(fn (string $state): string => Hash::make($state));
     }
 
     protected function getPasswordConfirmationFormComponent(): Component

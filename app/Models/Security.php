@@ -36,7 +36,7 @@ class Security extends Model
 
     protected $casts = [
         'price' => 'decimal:6',
-        'total_quantity' => 'decimal:6',
+        'total_quantity' => 'float',
         'market_value' => 'decimal:6',
         'active' => 'boolean',
         'type' => SecurityType::class,

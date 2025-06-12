@@ -94,8 +94,8 @@ class UserResource extends Resource
                             ->revealable()
                             ->required(fn (string $context): bool => $context === 'create')
                             ->rule(Password::default())
-                            ->dehydrated(fn ($state): bool => filled($state))
-                            ->dehydrateStateUsing(fn ($state): string => Hash::make($state))
+                            ->dehydrated(fn (string $state): bool => filled($state))
+                            ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                             ->live(debounce: 200),
                         TextInput::make('passwordConfirmation')
                             ->label(__('user.buttons.password_confirmation'))
@@ -120,7 +120,7 @@ class UserResource extends Resource
                             ->same('password'),
                         Toggle::make('is_admin')
                             ->label(__('user.columns.is_admin'))
-                            ->disabled(function ($record) {
+                            ->disabled(function (?User $record = null) {
                                 // Prevent current user from removing his admin status
                                 if (! $record) {
                                     return false;
@@ -132,7 +132,7 @@ class UserResource extends Resource
                             ->inline(false),
                         Toggle::make('active')
                             ->label(__('table.active'))
-                            ->disabled(function ($record) {
+                            ->disabled(function (?User $record = null) {
                                 if (! $record) {
                                     // Prevent current user from making his account inactive
                                     return false;
@@ -157,7 +157,7 @@ class UserResource extends Resource
                             ->label(__('user.columns.full_name'))
                             ->state(fn (User $record): string => $record->getFilamentName())
                             ->tooltip(fn (User $record): string => ! $record->active ? __('table.status_inactive') : __('table.status_active'))
-                            ->color(fn ($record): string => ! $record->active ? 'danger' : 'success')
+                            ->color(fn (User $record): string => ! $record->active ? 'danger' : 'success')
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('name')

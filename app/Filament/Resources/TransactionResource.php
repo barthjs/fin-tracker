@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\TransactionGroup;
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
@@ -18,6 +19,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -93,7 +95,7 @@ class TransactionResource extends Resource
                         ->createOptionModalHeading(__('account.buttons.create_heading')),
                     TextInput::make('amount')
                         ->label(__('transaction.columns.amount'))
-                        ->suffix(fn ($get) => Account::whereId($get('account_id'))->first()->currency->name ?? '')
+                        ->suffix(fn (Get $get) => Account::whereId($get('account_id'))->first()->currency->name ?? '')
                         ->numeric()
                         ->minValue(-922337203685477580)
                         ->maxValue(9223372036854775807)
@@ -128,7 +130,7 @@ class TransactionResource extends Resource
                         ->preload()
                         ->live(true)
                         ->default(fn (): int|string => $category->id ?? '')
-                        ->hint(fn ($get): string => __('category.types')[Category::whereId($get('category_id'))->first()->type->name ?? ''] ?? '')
+                        ->hint(fn (Get $get): string => __('category.types')[Category::whereId($get('category_id'))->first()->type->name ?? ''] ?? '')
                         ->required()
                         ->searchable()
                         ->createOptionForm(CategoryResource::formParts())
@@ -162,7 +164,7 @@ class TransactionResource extends Resource
                     ->label(__('transaction.columns.amount'))
                     ->fontFamily('mono')
                     ->copyable()
-                    ->copyableState(fn ($state) => Number::format($state, 2))
+                    ->copyableState(fn (float $state) => Number::format($state, 2))
                     ->numeric(2)
                     ->badge()
                     ->color(fn (Transaction $record): string => match ($record->category->type->name) {
@@ -202,7 +204,7 @@ class TransactionResource extends Resource
                 TextColumn::make('category.group')
                     ->label(__('transaction.columns.group'))
                     ->hiddenOn([CategoryResource\RelationManagers\TransactionRelationManager::class, ListTransactions::class])
-                    ->formatStateUsing(fn ($state): string => __('category.groups')[$state->name])
+                    ->formatStateUsing(fn (TransactionGroup $state): string => __('category.groups')[$state->name])
                     ->wrap()
                     ->searchable(true, function (Builder $query, string $search): Builder {
                         $groups = [];
@@ -212,7 +214,7 @@ class TransactionResource extends Resource
                             }
                         }
 
-                        return $query->whereHas('category', fn ($q) => $q->whereIn('group', $groups));
+                        return $query->whereHas('category', fn (Builder $query) => $query->whereIn('group', $groups));
                     })
                     ->sortable()
                     ->toggleable(),
@@ -265,22 +267,22 @@ class TransactionResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when($data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
+                                fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '>=', $date))
                             ->when($data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
+                                fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
                     }),
             ], FiltersLayout::AboveContentCollapsible)
             ->headerActions([
                 CreateAction::make('header-create')
                     ->icon('tabler-plus')
                     ->label(__('transaction.buttons.create_button_label'))
-                    ->hidden(function ($livewire) {
+                    ->hidden(function (mixed $livewire = null) {
                         return $livewire instanceof ListTransactions;
                     })
                     ->modalHeading(__('transaction.buttons.create_heading')),
             ])
             ->persistFiltersInSession()
-            ->filtersFormColumns(function ($livewire) {
+            ->filtersFormColumns(function (mixed $livewire = null) {
                 return $livewire instanceof ListTransactions ? 3 : 2;
             })
             ->actions(self::getActions())

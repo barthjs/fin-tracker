@@ -72,42 +72,42 @@ class ListTransactions extends ListRecords
             'Expenses' => Tab::make()
                 ->label(__('table.filter.expenses'))
                 ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function ($query) {
+                    $query->whereHas('category', function (Builder $query) {
                         $query->where('type', '=', TransactionType::expense);
                     });
                 }),
             'Variable Expenses' => Tab::make()
                 ->label(__('category.groups.var_expenses'))
                 ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function ($query) {
+                    $query->whereHas('category', function (Builder $query) {
                         $query->where('group', '=', TransactionGroup::var_expenses);
                     });
                 }),
             'Fixed Expenses' => Tab::make()
                 ->label(__('category.groups.fix_expenses'))
                 ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function ($query) {
+                    $query->whereHas('category', function (Builder $query) {
                         $query->where('group', '=', TransactionGroup::fix_expenses);
                     });
                 }),
             'Revenues' => Tab::make()
                 ->label(__('table.filter.revenues'))
                 ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function ($query) {
+                    $query->whereHas('category', function (Builder $query) {
                         $query->where('type', '=', TransactionType::revenue);
                     });
                 }),
             'Fixed Revenues' => Tab::make()
                 ->label(__('category.groups.fix_revenues'))
                 ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function ($query) {
+                    $query->whereHas('category', function (Builder $query) {
                         $query->where('group', '=', TransactionGroup::fix_revenues);
                     });
                 }),
             'Variable Revenues' => Tab::make()
                 ->label(__('category.groups.var_revenues'))
                 ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function ($query) {
+                    $query->whereHas('category', function (Builder $query) {
                         $query->where('group', '=', TransactionGroup::var_revenues);
                     });
                 }),

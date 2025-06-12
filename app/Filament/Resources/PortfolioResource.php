@@ -217,7 +217,7 @@ class PortfolioResource extends Resource
                 ->toggleable(),
             IconColumn::make('active')
                 ->label(__('table.active'))
-                ->tooltip(fn ($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
+                ->tooltip(fn (bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),

@@ -53,7 +53,7 @@ class TransactionImporter extends Importer
                 ->rules(['max:255']),
             ImportColumn::make('category_id')
                 ->label(__('transaction.columns.category'))
-                ->fillRecordUsing(function (Transaction $record, string $state, $data): void {
+                ->fillRecordUsing(function (Transaction $record, string $state, array $data): void {
                     $group = array_key_exists('group', $data) ? match ($data['group']) {
                         __('category.groups.fix_expenses') => 'fix_expenses',
                         __('category.groups.var_expenses') => 'var_expenses',

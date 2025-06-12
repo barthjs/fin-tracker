@@ -70,12 +70,12 @@ class ListTrades extends ListRecords
                 ->label(__('table.filter.all')),
             'Buy' => Tab::make()
                 ->label(__('trade.types.BUY'))
-                ->modifyQueryUsing(function ($query) {
+                ->modifyQueryUsing(function (Builder $query) {
                     $query->where('type', '=', TradeType::BUY);
                 }),
             'Sell' => Tab::make()
                 ->label(__('trade.types.SELL'))
-                ->modifyQueryUsing(function ($query) {
+                ->modifyQueryUsing(function (Builder $query) {
                     $query->where('type', '=', TradeType::SELL);
                 }),
         ];

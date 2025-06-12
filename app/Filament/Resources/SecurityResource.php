@@ -152,7 +152,7 @@ class SecurityResource extends Resource
                             ->numeric(6),
                         TextEntry::make('type')
                             ->label(__('security.columns.type'))
-                            ->formatStateUsing(fn ($state): string => __('security.types')[$state->name])
+                            ->formatStateUsing(fn (SecurityType $state): string => __('security.types')[$state->name])
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->weight(FontWeight::SemiBold),
                     ])
@@ -257,7 +257,7 @@ class SecurityResource extends Resource
             TextColumn::make('total_quantity')
                 ->label(__('security.columns.total_quantity'))
                 ->hiddenOn($hidden)
-                ->formatStateUsing(function (Security $record, $state) use ($portfolioId): string {
+                ->formatStateUsing(function (Security $record, float $state) use ($portfolioId): string {
                     $quantity = $portfolioId ? Trade::whereSecurityId($record->id)->wherePortfolioId($portfolioId)->sum('quantity') : $state;
 
                     return Number::format((float) $quantity, 2);
@@ -285,7 +285,7 @@ class SecurityResource extends Resource
                 ->toggleable(isToggledHiddenByDefault: true),
             IconColumn::make('active')
                 ->label(__('table.active'))
-                ->tooltip(fn ($state): string => $state ? __('table.status_active') : __('table.status_inactive'))
+                ->tooltip(fn (bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
                 ->boolean()
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),

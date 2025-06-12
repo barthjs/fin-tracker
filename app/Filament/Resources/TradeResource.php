@@ -19,6 +19,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -59,7 +60,7 @@ class TradeResource extends Resource
         return $form->schema(self::formParts());
     }
 
-    public static function formParts($account = null, $portfolio = null, $security = null): array
+    public static function formParts(?Account $account = null, ?Portfolio $portfolio = null, ?Security $security = null): array
     {
         // account, portfolio and security for default values in relation manager
         return [
@@ -97,14 +98,14 @@ class TradeResource extends Resource
                         ->default(0)
                         ->minValue(0)
                         ->live(true, 500)
-                        ->formatStateUsing(function ($state) {
+                        ->formatStateUsing(function (string|int $state) {
                             if ($state < 0) {
                                 return $state * -1;
                             }
 
                             return $state;
                         })
-                        ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                        ->afterStateUpdated(function (string|int $state, callable $get, callable $set) {
                             $set('total_amount', $get('price') * $state + $get('tax') + $get('fee'));
                         }),
                     TextInput::make('price')
@@ -114,7 +115,7 @@ class TradeResource extends Resource
                         ->default(0)
                         ->minValue(0)
                         ->live(true, 500)
-                        ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                        ->afterStateUpdated(function (string|int $state, callable $get, callable $set) {
                             $set('total_amount', round($state * $get('quantity') + $get('tax') + $get('fee'), 2));
                         }),
                     TextInput::make('tax')
@@ -124,7 +125,7 @@ class TradeResource extends Resource
                         ->default(0)
                         ->minValue(0)
                         ->live(true, 500)
-                        ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                        ->afterStateUpdated(function (string|int $state, callable $get, callable $set) {
                             $set('total_amount', $get('price') * $get('quantity') + $state + $get('fee'));
                         }),
                     TextInput::make('fee')
@@ -134,12 +135,12 @@ class TradeResource extends Resource
                         ->default(0)
                         ->minValue(0)
                         ->live(true, 500)
-                        ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                        ->afterStateUpdated(function (string|int $state, callable $get, callable $set) {
                             $set('total_amount', $get('price') * $get('quantity') + $get('tax') + $state);
                         }),
                     TextInput::make('total_amount')
                         ->label(__('trade.columns.total_amount'))
-                        ->suffix(fn ($get): string => Account::whereId($get('account_id'))->first()->currency->name ?? '')
+                        ->suffix(fn (Get $get): string => Account::whereId($get('account_id'))->first()->currency->name ?? '')
                         ->disabled(),
                     Select::make('type')
                         ->label(__('trade.columns.type'))
@@ -215,7 +216,7 @@ class TradeResource extends Resource
                     ->label(__('trade.columns.total_amount'))
                     ->fontFamily('mono')
                     ->copyable()
-                    ->copyableState(fn ($state) => Number::format($state, 2))
+                    ->copyableState(fn (float $state) => Number::format($state, 2))
                     ->numeric(2)
                     ->badge()
                     ->color(fn (Trade $record): string => $record->type->name === 'BUY' ? 'danger' : 'success')
@@ -346,22 +347,22 @@ class TradeResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when($data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '>=', $date))
+                                fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '>=', $date))
                             ->when($data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('date_time', '<=', $date));
+                                fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
                     }),
             ], FiltersLayout::AboveContentCollapsible)
             ->headerActions([
                 CreateAction::make('header-create')
                     ->icon('tabler-plus')
                     ->label(__('trade.buttons.create_button_label'))
-                    ->hidden(function ($livewire) {
+                    ->hidden(function (mixed $livewire): bool {
                         return $livewire instanceof ListTrades;
                     })
                     ->modalHeading(__('trade.buttons.create_heading')),
             ])
             ->persistFiltersInSession()
-            ->filtersFormColumns(function ($livewire) {
+            ->filtersFormColumns(function (mixed $livewire) {
                 return $livewire instanceof ListTrades ? 4 : 3;
             })
             ->actions(self::getActions())

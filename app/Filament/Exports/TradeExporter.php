@@ -23,19 +23,19 @@ class TradeExporter extends Exporter
                 ->label(__('trade.columns.date')),
             ExportColumn::make('total_amount')
                 ->label(__('trade.columns.total_amount'))
-                ->formatStateUsing(fn ($state): string => Number::format($state, 2)),
+                ->formatStateUsing(fn (float $state): string => Number::format($state, 2)),
             ExportColumn::make('quantity')
                 ->label(__('trade.columns.quantity'))
-                ->formatStateUsing(fn ($state): string => Number::format((float) $state, 6)),
+                ->formatStateUsing(fn (float $state): string => Number::format((float) $state, 6)),
             ExportColumn::make('price')
                 ->label(__('trade.columns.price'))
-                ->formatStateUsing(fn ($state): string => Number::format((float) $state, 6)),
+                ->formatStateUsing(fn (float $state): string => Number::format((float) $state, 6)),
             ExportColumn::make('tax')
                 ->label(__('trade.columns.tax'))
-                ->formatStateUsing(fn ($state): string => Number::format((float) $state, 2)),
+                ->formatStateUsing(fn (float $state): string => Number::format((float) $state, 2)),
             ExportColumn::make('fee')
                 ->label(__('trade.columns.fee'))
-                ->formatStateUsing(fn ($state): string => Number::format((float) $state, 2)),
+                ->formatStateUsing(fn (float $state): string => Number::format((float) $state, 2)),
             ExportColumn::make('type')
                 ->label(__('trade.columns.type'))
                 ->formatStateUsing(fn (TradeType $state): string => __('trade.types')[$state->name]),

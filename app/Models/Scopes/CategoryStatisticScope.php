@@ -17,7 +17,7 @@ class CategoryStatisticScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         if (! App::runningInConsole()) {
-            $builder->whereHas('category', function ($query) {
+            $builder->whereHas('category', function (Builder $query) {
                 $query->where('user_id', auth()->id());
             });
         }
