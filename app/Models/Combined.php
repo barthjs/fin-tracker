@@ -6,7 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CombinedModel extends Model
+class Combined extends Model
 {
     protected $table = 'combined_models';
 

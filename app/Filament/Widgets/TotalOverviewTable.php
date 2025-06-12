@@ -7,7 +7,7 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\AccountResource\Pages\ViewAccount;
 use App\Filament\Resources\PortfolioResource\Pages\ViewPortfolio;
 use App\Models\Account;
-use App\Models\CombinedModel;
+use App\Models\Combined;
 use App\Models\Portfolio;
 use App\Tables\Columns\LogoColumn;
 use Filament\Tables\Actions\ViewAction;
@@ -65,12 +65,12 @@ class TotalOverviewTable extends BaseWidget
                             ])
                     );
 
-                return CombinedModel::query()->fromSub($unionQuery, 'combined_models')->newQuery()->where('user_id', '=', auth()->id());
+                return Combined::query()->fromSub($unionQuery, 'combined_models')->newQuery()->where('user_id', '=', auth()->id());
             })
             ->columns([
                 LogoColumn::make('name')
                     ->label(__('account.columns.name'))
-                    ->state(fn (CombinedModel $record): array => [
+                    ->state(fn (Combined $record): array => [
                         'logo' => $record->logo,
                         'name' => $record->name,
                     ])
@@ -97,7 +97,7 @@ class TotalOverviewTable extends BaseWidget
             ->groups([
                 Group::make('type')
                     ->label('')
-                    ->getTitleFromRecordUsing(function (CombinedModel $record): string {
+                    ->getTitleFromRecordUsing(function (Combined $record): string {
                         if ($record->type === 'account') {
                             return __('account.navigation_label');
                         }
@@ -108,7 +108,7 @@ class TotalOverviewTable extends BaseWidget
             ->actions([
                 ViewAction::make('view')
                     ->iconButton()
-                    ->url(function (CombinedModel $record): string {
+                    ->url(function (Combined $record): string {
                         if ($record->type === 'account') {
                             return ViewAccount::getUrl([mb_substr($record->id, 2)]);
                         }
@@ -117,7 +117,7 @@ class TotalOverviewTable extends BaseWidget
                     }, true),
             ])
             ->striped()
-            ->recordUrl(function (CombinedModel $record): string {
+            ->recordUrl(function (Combined $record): string {
                 if ($record->type === 'account') {
                     return ViewAccount::getUrl([mb_substr($record->id, 2)]);
                 }
