@@ -74,14 +74,14 @@ class Trade extends Model
                 $trade->user_id = auth()->user()->id;
             }
 
-            $trade->notes = trim($trade->notes ?? '');
+            $trade->notes = mb_trim($trade->notes ?? '');
 
             // Set the type factor based on trade type
             $amountSign = 1;
             $quantitySign = 1;
             $feeSign = 1;
 
-            if ($trade->type == TradeType::BUY) {
+            if ($trade->type === TradeType::BUY) {
                 $amountSign = -1;
             } else {
                 $quantitySign = -1;
@@ -103,14 +103,14 @@ class Trade extends Model
         });
 
         static::updating(function (Trade $trade) {
-            $trade->notes = trim($trade->notes ?? '');
+            $trade->notes = mb_trim($trade->notes ?? '');
 
             // Set the type factor based on trade type
             $amountSign = 1;
             $quantitySign = 1;
             $feeSign = 1;
 
-            if ($trade->type == TradeType::BUY) {
+            if ($trade->type === TradeType::BUY) {
                 $amountSign = -1;
             } else {
                 $quantitySign = -1;

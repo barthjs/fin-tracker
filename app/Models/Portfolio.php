@@ -40,7 +40,7 @@ class Portfolio extends Model
         static::creating(function (Portfolio $portfolio) {
             // Only needed in importer and seeder
             if (is_null($portfolio->color)) {
-                $portfolio->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+                $portfolio->color = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
             }
 
             // Only needed in importer and web
@@ -48,13 +48,13 @@ class Portfolio extends Model
                 $portfolio->user_id = auth()->user()->id;
             }
 
-            $portfolio->name = trim($portfolio->name);
-            $portfolio->description = trim($portfolio->description ?? '');
+            $portfolio->name = mb_trim($portfolio->name);
+            $portfolio->description = mb_trim($portfolio->description ?? '');
         });
 
         static::updating(function (Portfolio $portfolio) {
-            $portfolio->name = trim($portfolio->name);
-            $portfolio->description = trim($portfolio->description ?? '');
+            $portfolio->name = mb_trim($portfolio->name);
+            $portfolio->description = mb_trim($portfolio->description ?? '');
         });
 
         static::updated(function (Portfolio $portfolio) {
@@ -93,7 +93,7 @@ class Portfolio extends Model
             $marketValue += $price * $quantity;
         }
 
-        Portfolio::whereId($portfolioId)
+        self::whereId($portfolioId)
             ->update(['market_value' => $marketValue]);
     }
 
@@ -115,6 +115,6 @@ class Portfolio extends Model
 
     public static function getActiveSum(): float
     {
-        return floatval(Portfolio::whereActive(true)->sum('market_value'));
+        return (float) (self::whereActive(true)->sum('market_value'));
     }
 }

@@ -45,7 +45,7 @@ class DemoSeeder extends Seeder
                 for ($i = 0; $i < 2; $i++) {
                     $category = $categories->random();
                     $amount = fake()->numberBetween(10, 1000);
-                    $amount *= ($category->type->name == 'expense') ? -1 : 2;
+                    $amount *= ($category->type->name === 'expense') ? -1 : 2;
 
                     Transaction::factory()->create([
                         'date_time' => Carbon::now()->subMonths($m),
@@ -81,7 +81,7 @@ class DemoSeeder extends Seeder
 
                     $price = fake()->randomFloat(2, 1, 100);
 
-                    if ($type == TradeType::BUY) {
+                    if ($type === TradeType::BUY) {
                         if ($account->balance <= 0) {
                             continue;
                         }

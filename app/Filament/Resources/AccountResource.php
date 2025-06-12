@@ -104,7 +104,7 @@ class AccountResource extends Resource
                         ->label(__('widget.color'))
                         ->validationMessages(['regex' => __('widget.color_validation_message')])
                         ->required()
-                        ->default(strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
+                        ->default(mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
                         ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
                     Toggle::make('active')
                         ->label(__('table.active'))
@@ -129,7 +129,7 @@ class AccountResource extends Resource
                         TextEntry::make('balance')
                             ->label(__('account.columns.balance'))
                             ->color(fn (float $state): string => match (true) {
-                                $state == 0 => 'gray',
+                                $state === 0 => 'gray',
                                 $state < 0 => 'danger',
                                 default => 'success'
                             })
@@ -157,9 +157,9 @@ class AccountResource extends Resource
             ->modifyQueryUsing(function (Builder $query, Table $table) {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('active', true);
-                } else {
-                    return $query;
                 }
+
+                return $query;
             })
             ->columns(self::tableColumns())
             ->paginated(fn (): bool => Account::count() > 20)
@@ -213,7 +213,7 @@ class AccountResource extends Resource
                 ->hiddenOn($hidden)
                 ->badge()
                 ->color(fn (float $state): string => match (true) {
-                    $state == 0 => 'gray',
+                    $state === 0 => 'gray',
                     $state < 0 => 'danger',
                     default => 'success'
                 })

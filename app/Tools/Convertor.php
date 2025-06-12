@@ -18,14 +18,14 @@ class Convertor
         } else {
             if (str_starts_with($sanitized, '-')) {
                 $sign = -1; // Set sign for negative numbers
-                $sanitized = substr($sanitized, 1);
+                $sanitized = mb_substr($sanitized, 1);
             } elseif (str_starts_with($sanitized, '+')) {
-                $sanitized = substr($sanitized, 1);
+                $sanitized = mb_substr($sanitized, 1);
             }
 
             // Handle different formats with both period and comma present.
             if (str_contains($sanitized, '.') && str_contains($sanitized, ',')) {
-                if (strrpos($sanitized, '.') < strrpos($sanitized, ',')) {
+                if (mb_strrpos($sanitized, '.') < mb_strrpos($sanitized, ',')) {
                     // Assume period as thousands separator, replace comma with period for decimal
                     $sanitized = str_replace(['.', ','], ['', '.'], $sanitized);
                 } else {

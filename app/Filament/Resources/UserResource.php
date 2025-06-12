@@ -126,7 +126,7 @@ class UserResource extends Resource
                                     return false;
                                 }
 
-                                return $record->id == auth()->user()->id;
+                                return $record->id === auth()->user()->id;
                             })
                             ->default(false)
                             ->inline(false),
@@ -138,7 +138,7 @@ class UserResource extends Resource
                                     return false;
                                 }
 
-                                return $record->id == auth()->user()->id;
+                                return $record->id === auth()->user()->id;
                             })
                             ->default(true)
                             ->inline(false),

@@ -57,7 +57,7 @@ class Transaction extends Model
                 $transaction->user_id = auth()->user()->id;
             }
 
-            $transaction->destination = trim($transaction->destination);
+            $transaction->destination = mb_trim($transaction->destination);
         });
 
         static::created(function (Transaction $transaction) {
@@ -67,7 +67,7 @@ class Transaction extends Model
         });
 
         static::updating(function (Transaction $transaction) {
-            $transaction->destination = trim($transaction->destination);
+            $transaction->destination = mb_trim($transaction->destination);
         });
     }
 
@@ -96,8 +96,8 @@ class Transaction extends Model
     {
         $year = Carbon::parse($date)->year;
         $month = Carbon::parse($date)->month;
-        $monthColumn = strtolower(Carbon::create(null, $month)->format('M'));
-        $sumPerMonth = Transaction::whereCategoryId($categoryId)
+        $monthColumn = mb_strtolower(Carbon::create(null, $month)->format('M'));
+        $sumPerMonth = self::whereCategoryId($categoryId)
             ->whereYear('date_time', $year)
             ->whereMonth('date_time', $month)
             ->sum('amount');

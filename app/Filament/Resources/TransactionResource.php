@@ -207,7 +207,7 @@ class TransactionResource extends Resource
                     ->searchable(true, function (Builder $query, string $search): Builder {
                         $groups = [];
                         foreach (__('category.groups') as $group => $value) {
-                            if (stripos($value, $search) !== false) {
+                            if (mb_stripos($value, $search) !== false) {
                                 $groups[] = $group;
                             }
                         }
@@ -384,7 +384,7 @@ class TransactionResource extends Resource
                     $records->each->update(['account_id' => $data['account_id']]);
 
                     // update balance for new account
-                    Account::updateAccountBalance(intval($data['account_id']));
+                    Account::updateAccountBalance((int) ($data['account_id']));
 
                     // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {

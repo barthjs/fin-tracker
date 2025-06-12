@@ -78,7 +78,7 @@ class PortfolioResource extends Resource
                         ->label(__('widget.color'))
                         ->validationMessages(['regex' => __('widget.color_validation_message')])
                         ->required()
-                        ->default(strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
+                        ->default(mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
                         ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
                     Textarea::make('description')
                         ->label(__('portfolio.columns.description'))
@@ -119,7 +119,7 @@ class PortfolioResource extends Resource
                         TextEntry::make('market_value')
                             ->label(__('portfolio.columns.market_value'))
                             ->color(fn (float $state): string => match (true) {
-                                $state == 0 => 'gray',
+                                $state === 0 => 'gray',
                                 $state < 0 => 'danger',
                                 default => 'success'
                             })
@@ -147,9 +147,9 @@ class PortfolioResource extends Resource
             ->modifyQueryUsing(function (Builder $query, Table $table) {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('active', true);
-                } else {
-                    return $query;
                 }
+
+                return $query;
             })
             ->columns(self::getTableColumns())
             ->paginated(fn (): bool => Portfolio::count() > 20)
@@ -202,7 +202,7 @@ class PortfolioResource extends Resource
                 ->hiddenOn($hidden)
                 ->badge()
                 ->color(fn (float $state): string => match (true) {
-                    $state == 0 => 'gray',
+                    $state === 0 => 'gray',
                     $state < 0 => 'danger',
                     default => 'success'
                 })

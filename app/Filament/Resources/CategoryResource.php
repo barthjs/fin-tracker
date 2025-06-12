@@ -83,7 +83,7 @@ class CategoryResource extends Resource
                         ->label(__('widget.color'))
                         ->validationMessages(['regex' => __('widget.color_validation_message')])
                         ->required()
-                        ->default(strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
+                        ->default(mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
                         ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
                     Toggle::make('active')
                         ->label(__('table.active'))
@@ -144,9 +144,9 @@ class CategoryResource extends Resource
             ->modifyQueryUsing(function (Builder $query, Table $table) {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('active', true);
-                } else {
-                    return $query;
                 }
+
+                return $query;
             })
             ->columns($columns)
             ->paginated(fn (): bool => Category::count() > 20)
@@ -204,7 +204,7 @@ class CategoryResource extends Resource
                 ->searchable(true, function (Builder $query, string $search): Builder {
                     $groups = [];
                     foreach (__('category.groups') as $group => $value) {
-                        if (stripos($value, $search) !== false) {
+                        if (mb_stripos($value, $search) !== false) {
                             $groups[] = $group;
                         }
                     }

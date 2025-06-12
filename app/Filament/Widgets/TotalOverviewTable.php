@@ -79,8 +79,8 @@ class TotalOverviewTable extends BaseWidget
                     ->label(__('security.columns.market_value'))
                     ->badge()
                     ->color(fn (float $state): string => match (true) {
-                        $state == 0 => 'gray',
-                        $state < 0 => 'danger',
+                        $state === 0.0 => 'gray',
+                        $state < 0.0 => 'danger',
                         default => 'success'
                     })
                     ->money(Account::getCurrency())
@@ -110,19 +110,19 @@ class TotalOverviewTable extends BaseWidget
                     ->iconButton()
                     ->url(function (CombinedModel $record): string {
                         if ($record->type === 'account') {
-                            return ViewAccount::getUrl([substr($record->id, 2)]);
+                            return ViewAccount::getUrl([mb_substr($record->id, 2)]);
                         }
 
-                        return ViewPortfolio::getUrl([substr($record->id, 2)]);
+                        return ViewPortfolio::getUrl([mb_substr($record->id, 2)]);
                     }, true),
             ])
             ->striped()
             ->recordUrl(function (CombinedModel $record): string {
                 if ($record->type === 'account') {
-                    return ViewAccount::getUrl([substr($record->id, 2)]);
+                    return ViewAccount::getUrl([mb_substr($record->id, 2)]);
                 }
 
-                return ViewPortfolio::getUrl([substr($record->id, 2)]);
+                return ViewPortfolio::getUrl([mb_substr($record->id, 2)]);
             }, true)
             ->emptyStateHeading('')
             ->emptyStateDescription('');

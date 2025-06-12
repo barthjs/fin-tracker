@@ -218,7 +218,7 @@ class TradeResource extends Resource
                     ->copyableState(fn ($state) => Number::format($state, 2))
                     ->numeric(2)
                     ->badge()
-                    ->color(fn (Trade $record): string => $record->type->name == 'BUY' ? 'danger' : 'success')
+                    ->color(fn (Trade $record): string => $record->type->name === 'BUY' ? 'danger' : 'success')
                     ->sortable()
                     ->toggleable()
                     ->alignEnd(),
@@ -492,7 +492,7 @@ class TradeResource extends Resource
                     $records->each->update(['account_id' => $data['account_id']]);
 
                     // update balance for new account
-                    Account::updateAccountBalance(intval($data['account_id']));
+                    Account::updateAccountBalance((int) ($data['account_id']));
 
                     // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {
@@ -519,7 +519,7 @@ class TradeResource extends Resource
                     $records->each->update(['portfolio_id' => $data['portfolio_id']]);
 
                     // update market value for new portfolio
-                    Portfolio::updatePortfolioMarketValue(intval($data['portfolio_id']));
+                    Portfolio::updatePortfolioMarketValue((int) ($data['portfolio_id']));
 
                     // update market value for old portfolios
                     foreach ($oldPortfolioIds as $oldPortfolioId) {

@@ -33,7 +33,7 @@ class PortfolioImporter extends Importer
                 ->examples(function (): array {
                     $colors = [];
                     for ($i = 1; $i <= 3; $i++) {
-                        $colors[] = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+                        $colors[] = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
                     }
 
                     return $colors;
@@ -50,7 +50,7 @@ class PortfolioImporter extends Importer
     public function resolveRecord(): ?Portfolio
     {
         return Portfolio::firstOrNew([
-            'name' => trim($this->data['name']),
+            'name' => mb_trim($this->data['name']),
         ]);
     }
 

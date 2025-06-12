@@ -24,8 +24,8 @@ class LocalAvatarProvider implements AvatarProvider
     {
         $initials = '';
 
-        $first = trim((string) ($record->first_name ?? ''));
-        $last = trim((string) ($record->last_name ?? ''));
+        $first = mb_trim((string) ($record->first_name ?? ''));
+        $last = mb_trim((string) ($record->last_name ?? ''));
 
         if ($first !== '') {
             $initials .= Str::upper(Str::substr($first, 0, 1));
@@ -36,7 +36,7 @@ class LocalAvatarProvider implements AvatarProvider
         }
 
         if ($initials === '') {
-            $name = trim((string) $record->name);
+            $name = mb_trim((string) $record->name);
             $initials = Str::upper(Str::substr($name, 0, 1));
         }
 

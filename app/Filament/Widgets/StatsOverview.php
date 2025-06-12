@@ -23,7 +23,7 @@ class StatsOverview extends BaseWidget
     {
         $currency = Account::getCurrency();
         $year = Carbon::now()->year;
-        $monthColumn = strtolower(Carbon::now()->format('M'));
+        $monthColumn = mb_strtolower(Carbon::now()->format('M'));
         $months = array_keys(__('category_statistic.columns'));
 
         $totalAssets = Number::currency(

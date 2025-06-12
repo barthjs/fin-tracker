@@ -94,7 +94,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->active == true;
+        return $this->active === true;
     }
 
     public function getFilamentName(): string

@@ -61,7 +61,7 @@ class SecurityImporter extends Importer
                 ->examples(function (): array {
                     $colors = [];
                     for ($i = 1; $i <= 3; $i++) {
-                        $colors[] = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+                        $colors[] = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
                     }
 
                     return $colors;
@@ -78,8 +78,8 @@ class SecurityImporter extends Importer
     public function resolveRecord(): Security
     {
         return Security::firstOrNew([
-            'name' => trim($this->data['name']),
-            'isin' => trim($this->data['isin']),
+            'name' => mb_trim($this->data['name']),
+            'isin' => mb_trim($this->data['isin']),
         ]);
     }
 

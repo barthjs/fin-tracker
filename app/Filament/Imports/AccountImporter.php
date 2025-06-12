@@ -40,7 +40,7 @@ class AccountImporter extends Importer
                 ->examples(function (): array {
                     $colors = [];
                     for ($i = 1; $i <= 3; $i++) {
-                        $colors[] = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+                        $colors[] = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
                     }
 
                     return $colors;
@@ -57,7 +57,7 @@ class AccountImporter extends Importer
     public function resolveRecord(): ?Account
     {
         return Account::firstOrNew([
-            'name' => trim($this->data['name']),
+            'name' => mb_trim($this->data['name']),
         ]);
     }
 

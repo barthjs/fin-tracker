@@ -48,7 +48,7 @@ class Category extends Model
 
             // Only needed in importer and seeder
             if (is_null($category->color)) {
-                $category->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+                $category->color = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
             }
 
             // Only in importer and web
@@ -56,12 +56,12 @@ class Category extends Model
                 $category->user_id = auth()->user()->id;
             }
 
-            $category->name = trim($category->name);
+            $category->name = mb_trim($category->name);
         });
 
         // Create an empty entry for the statistic after category creation
         static::created(function (Category $category) {
-            if ($category->type != TransactionType::transfer) {
+            if ($category->type !== TransactionType::transfer) {
                 CategoryStatistic::create(['year' => Carbon::now()->year, 'category_id' => $category->id]);
             }
         });
@@ -74,7 +74,7 @@ class Category extends Model
                 default => 'transfer'
             };
 
-            $category->name = trim($category->name);
+            $category->name = mb_trim($category->name);
         });
     }
 
@@ -95,11 +95,11 @@ class Category extends Model
 
     public static function getChartData(TransactionType $type): array
     {
-        $categories = Category::whereActive(true)
+        $categories = self::whereActive(true)
             ->where('type', '=', $type)
             ->get();
 
-        $monthColumn = strtolower(Carbon::createFromDate(null, Carbon::today()->month)->format('M'));
+        $monthColumn = mb_strtolower(Carbon::createFromDate(null, Carbon::today()->month)->format('M'));
         $year = Carbon::now()->year;
 
         $labels = [];

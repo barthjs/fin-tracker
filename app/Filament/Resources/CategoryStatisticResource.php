@@ -58,9 +58,9 @@ class CategoryStatisticResource extends Resource
                 });
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('year', '=', Carbon::now()->year);
-                } else {
-                    return $query;
                 }
+
+                return $query;
             })
             ->columns([
                 TextColumn::make('category.name')

@@ -49,7 +49,7 @@ class Security extends Model
         static::creating(function (Security $security) {
             // Only needed in importer and seeder
             if (is_null($security->color)) {
-                $security->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+                $security->color = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
             }
 
             // Only needed in importer
@@ -62,19 +62,19 @@ class Security extends Model
                 $security->user_id = auth()->user()->id;
             }
 
-            $security->name = trim($security->name);
-            $security->isin = trim($security->isin ?? '');
-            $security->symbol = trim($security->symbol ?? '');
+            $security->name = mb_trim($security->name);
+            $security->isin = mb_trim($security->isin ?? '');
+            $security->symbol = mb_trim($security->symbol ?? '');
             $security->market_value = $security->price * $security->total_quantity;
-            $security->description = trim($security->description ?? '');
+            $security->description = mb_trim($security->description ?? '');
         });
 
         static::updating(function (Security $security) {
-            $security->name = trim($security->name);
-            $security->isin = trim($security->isin ?? '');
-            $security->symbol = trim($security->symbol ?? '');
+            $security->name = mb_trim($security->name);
+            $security->isin = mb_trim($security->isin ?? '');
+            $security->symbol = mb_trim($security->symbol ?? '');
             $security->market_value = $security->price * $security->total_quantity;
-            $security->description = trim($security->description ?? '');
+            $security->description = mb_trim($security->description ?? '');
         });
 
         static::updated(function (Security $security) {
@@ -97,7 +97,7 @@ class Security extends Model
     public static function updateSecurityQuantity(int $securityId): void
     {
         $totalQuantity = Trade::whereSecurityId($securityId)->sum('quantity');
-        $security = Security::whereId($securityId)->first();
+        $security = self::whereId($securityId)->first();
 
         $security->update([
             'total_quantity' => $totalQuantity,
@@ -107,7 +107,7 @@ class Security extends Model
 
     public function portfolios(): BelongsToMany
     {
-        return $this->belongsToMany(Security::class, 'trades', 'security_id', 'portfolio_id');
+        return $this->belongsToMany(self::class, 'trades', 'security_id', 'portfolio_id');
     }
 
     public function trades(): HasMany

@@ -103,7 +103,7 @@ class SecurityResource extends Resource
                         ->label(__('widget.color'))
                         ->validationMessages(['regex' => __('widget.color_validation_message')])
                         ->required()
-                        ->default(strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
+                        ->default(mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
                         ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
                     Toggle::make('active')
                         ->label(__('table.active'))
@@ -174,9 +174,9 @@ class SecurityResource extends Resource
             ->modifyQueryUsing(function (Builder $query, Table $table) {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('active', true);
-                } else {
-                    return $query;
                 }
+
+                return $query;
             })
             ->columns($columns)
             ->paginated(fn (): bool => Security::count() > 20)
@@ -260,7 +260,7 @@ class SecurityResource extends Resource
                 ->formatStateUsing(function (Security $record, $state) use ($portfolioId): string {
                     $quantity = $portfolioId ? Trade::whereSecurityId($record->id)->wherePortfolioId($portfolioId)->sum('quantity') : $state;
 
-                    return Number::format(floatval($quantity), 2);
+                    return Number::format((float) $quantity, 2);
                 })
                 ->sortable(),
             TextColumn::make('market_value')

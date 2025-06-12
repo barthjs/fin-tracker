@@ -48,7 +48,7 @@ class Account extends Model
 
             // Only needed in importer and seeder
             if (is_null($account->color)) {
-                $account->color = strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
+                $account->color = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
             }
 
             // Only needed in importer and web
@@ -56,13 +56,13 @@ class Account extends Model
                 $account->user_id = auth()->user()->id;
             }
 
-            $account->name = trim($account->name);
-            $account->description = trim($account->description ?? '');
+            $account->name = mb_trim($account->name);
+            $account->description = mb_trim($account->description ?? '');
         });
 
         static::updating(function (Account $account) {
-            $account->name = trim($account->name);
-            $account->description = trim($account->description ?? '');
+            $account->name = mb_trim($account->name);
+            $account->description = mb_trim($account->description ?? '');
         });
 
         static::updated(function (Account $account) {
@@ -117,9 +117,9 @@ class Account extends Model
      */
     public static function getDefaultAccountId(): int
     {
-        $account = Account::whereName('Demo')->first();
+        $account = self::whereName('Demo')->first();
         if (! $account) {
-            $account = Account::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
+            $account = self::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
         }
 
         return $account->id;
@@ -130,7 +130,7 @@ class Account extends Model
         $transactionAmount = Transaction::whereAccountId($accountId)->sum('amount');
         $tradeAmount = Trade::whereAccountId($accountId)->sum('total_amount');
 
-        Account::whereId($accountId)->update(['balance' => $transactionAmount + $tradeAmount]);
+        self::whereId($accountId)->update(['balance' => $transactionAmount + $tradeAmount]);
     }
 
     public function transactions(): HasMany
@@ -150,6 +150,6 @@ class Account extends Model
 
     public static function getActiveSum(): float
     {
-        return Account::whereActive(true)->sum('balance') / 100;
+        return self::whereActive(true)->sum('balance') / 100;
     }
 }
