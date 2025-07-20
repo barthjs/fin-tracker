@@ -1,4 +1,3 @@
-# Only for development. Don't use it in production. Use compose.yaml instead.
 services:
   fin-tracker:
     build:
@@ -7,8 +6,6 @@ services:
     pull_policy: never
     image: barthjs/fin-tracker:dev
     container_name: fin-tracker
-    depends_on:
-      - fin-tracker-db
     ports:
       - 80:80
       - 5173:5173
@@ -17,7 +14,7 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
 
-  fin-tracker-db:
+  mariadb:
     image: mariadb:11.4
     container_name: fin-tracker-db
     ports:

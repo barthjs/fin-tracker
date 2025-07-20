@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 ARG VERSION=latest
 ENV APP_VERSION=${VERSION}
@@ -51,7 +51,7 @@ COPY --chown=application:application . /app
 # Install app dependencies and build frontend
 RUN apk add --no-cache --virtual .build-deps nodejs npm && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
-    composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader &&  \
+    composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader && \
     npm install &&  \
     npm run build && \
     php artisan storage:link && \
