@@ -8,7 +8,7 @@
 <!-- Badges -->
 <p>
   <a href="https://hub.docker.com/r/barthjs/fin-tracker/tags">
-    <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker&style=for-the-badge&style=flat" alt="Docker image">
+    <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker" alt="Docker image">
   </a>
   <a href="https://github.com/barthjs/fin-tracker/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/barthjs/fin-tracker" alt="License"/>
@@ -45,7 +45,6 @@
       </ul>
     </li>
     <li><a href="#license">License</a></li>
-    <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
 
@@ -71,14 +70,14 @@ financial activity across multiple bank accounts and investment portfolios.
 
 ### Installation
 
-Create an app directory and navigate into it:
+Create an app directory:
 
 ```shell
 mkdir fin-tracker && cd ./fin-tracker
 ```
 
 Create a `.env` file using the values from the [.env.example](.env.example) and adjust it as needed. If
-you plan to use your own external database, ensure you set the correct `DB_CONNECTION` in the `.env` file.
+you plan to use a different database, ensure you set the correct `DB_CONNECTION` in the `.env` file.
 The only supported databases are MariaDB and MySQL.
 
 ```shell
@@ -97,35 +96,32 @@ Start the application:
 docker compose up -d
 ```
 
-Access the app at [http://localhost:8080](http://localhost:8080) using the default credentials:
+Access the app at [http://localhost](http://localhost) using the default credentials:
 
 - **Username**: `admin`
 - **Password**: `admin`
 
-Upon first login, you will be redirected to the profile page to change the default password.
+Upon the first login, you will be redirected to the profile page to change the default password.
 
 ### Configuration
 
 Use the `.env` file to adjust configuration settings:
 
-| Environment variable     | Default          | Description                                                              |
-|--------------------------|------------------|--------------------------------------------------------------------------|
-| `APP_KEY`                | (required)       | The encryption key for your sessions. Must be a string of 32 characters. |
-| `APP_TIMEZONE`           | `UTC`            | Application timezone                                                     |
-| `APP_LOCALE`             | `en`             | Supported languages: `en`, `de`                                          |
-| `APP_ALLOW_REGISTRATION` | `false`          | Enable/disable user self-registration                                    |
-| `DB_CONNECTION`          | `mariadb`        | `mariadb` or `mysql`                                                     |
-| `DB_HOST`                | `fin-tracker-db` | Database host                                                            |
-| `DB_PORT`                | `3306`           | Database port                                                            |
-| `DB_DATABASE`            | `fin-tracker`    | Database name                                                            |
-| `DB_PASSWORD`            | (required)       | Database password                                                        |
+| Environment variable     | Default          | Description                                                                                         |
+|--------------------------|------------------|-----------------------------------------------------------------------------------------------------|
+| `APP_KEY`                | (required)       | The key the system uses for encryption. Generate with: `echo -n 'base64:'; openssl rand -base64 32` |
+| `APP_LOCALE`             | `en`             | Supported languages: `en`, `de`                                                                     |
+| `APP_ALLOW_REGISTRATION` | `false`          | Enable/disable user self-registration                                                               |
+| `DB_CONNECTION`          | `mariadb`        | `mariadb` or `mysql`                                                                                |
+| `DB_HOST`                | `fin-tracker-db` | Database host                                                                                       |
+| `DB_PORT`                | `3306`           | Database port                                                                                       |
+| `DB_DATABASE`            | `fin-tracker`    | Database name                                                                                       |
+| `DB_PASSWORD`            | (required)       | Database password                                                                                   |
 
 ### Updating
 
 Before updating, export your data using the CSV export feature. Check the changelog for any breaking changes or new
 configuration options.
-
-To update:
 
 ```shell
 cd fin-tracker
@@ -134,7 +130,7 @@ docker compose pull && docker compose up -d
 
 ### Backup
 
-Back up all Docker volumes mentioned in the [compose.yaml](compose.yaml) as well as the `.env`.
+Back up all Docker volumes used in the [compose.yaml](compose.yaml) as well as the `.env`.
 
 ## Screenshots
 
@@ -157,14 +153,14 @@ A Linux environment is recommended for development. Development setup includes:
 
 For the best experience use [PHP Storm](https://www.jetbrains.com/phpstorm/). Configure the IDE debugger:
 
-- **Name**: `fin-tracker`
+- **Name**: `survey`
 - **host:port**: `localhost:80`
 - **Debugger**: `Xdebug`
 - **Absolute path on the server**: `/app`
 
 ### Building
 
-Clone the repo prepare the development environment:
+Clone the repo and prepare the development environment:
 
 ```shell
 git clone https://github.com/barthjs/fin-tracker
@@ -175,7 +171,7 @@ cd fin-tracker
 This script sets up a development container and initializes the database with demo data. Customize
 via [.env.development](.env.development).
 
-Default login at [http://localhost:80](http://localhost:80)
+Default login at [http://localhost](http://localhost)
 
 - Username: `admin`
 - Password: `admin`
@@ -183,28 +179,23 @@ Default login at [http://localhost:80](http://localhost:80)
 ### Built With
 
 - <a href="https://php.net">
-  <img alt="PHP 8.3" src="https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php">
+    <img alt="PHP 8.4" src="https://img.shields.io/badge/PHP-8.4-777BB4?style=flat-square&logo=php">
   </a>
 - <a href="https://laravel.com">
-  <img alt="Laravel v12.x" src="https://img.shields.io/badge/Laravel-v12.x-FF2D20?style=flat-square&logo=laravel">
+    <img alt="Laravel v12.x" src="https://img.shields.io/badge/Laravel-v12.x-FF2D20?style=flat-square&logo=laravel">
   </a>
 - <a href="https://filamentphp.com/">
-  <img alt="Filament v3.x" src="https://img.shields.io/badge/Filament-v3.x-e9b228?style=flat-square">
+    <img alt="Filament v3.x" src="https://img.shields.io/badge/Filament-v3.x-e9b228?style=flat-square">
   </a>
 - <a href="https://tabler.io/icons">
-  <img alt="Tabler Icons" src="https://img.shields.io/badge/Tabler_Icons-grey?style=flat-square">
+    <img alt="Tabler Icons" src="https://img.shields.io/badge/Tabler_Icons-grey?style=flat-square">
   </a>
 - <a href="https://hub.docker.com/r/barthjs/fin-tracker/tags">
-  <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker&style=flat-square" alt="Docker image">
+    <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker&style=flat-square" alt="Docker image">
   </a>
 
 ## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
-
-## Acknowledgements
-
-- Built with [Laravel](https://laravel.com) and [Filament](https://filamentphp.com/)
-- Inspired by various household finance and expense tracker tools
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
