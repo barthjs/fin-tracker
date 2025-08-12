@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Resources\AccountResource\Pages\ViewAccount;
-use App\Filament\Resources\PortfolioResource\Pages\ViewPortfolio;
+use App\Filament\Resources\Accounts\Pages\ViewAccount;
+use App\Filament\Resources\Portfolios\Pages\ViewPortfolio;
 use App\Models\Account;
 use App\Models\Combined;
 use App\Models\Portfolio;
