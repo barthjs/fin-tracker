@@ -1,17 +1,13 @@
 import {defineConfig} from 'vite';
-import laravel, {refreshPaths} from 'laravel-vite-plugin';
+import laravel from 'laravel-vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
     plugins: [
         laravel({
-            input: [
-                'resources/css/filament/app/theme.css'
-            ],
-            refresh: [
-                ...refreshPaths,
-                'resources/**',
-                'app/Filament/**',
-            ],
+            input: ['resources/css/filament/app/theme.css'],
+            refresh: true,
         }),
+        tailwindcss(),
     ],
 });
