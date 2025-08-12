@@ -5,28 +5,31 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\TransactionGroup;
+use App\Filament\Resources\AccountResource\RelationManagers\TransactionRelationManager;
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Tables\Columns\LogoColumn;
+use BackedEnum;
 use Carbon\Carbon;
 use Exception;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
+use Filament\Panel;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -44,9 +47,9 @@ class TransactionResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
-    protected static ?string $navigationIcon = 'tabler-credit-card';
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-credit-card';
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return __('transaction.slug');
     }
@@ -56,9 +59,9 @@ class TransactionResource extends Resource
         return __('transaction.navigation_label');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(self::formParts());
+        return $schema->components(self::formParts());
     }
 
     public static function formParts(?Model $account = null, ?Model $category = null): array
@@ -185,7 +188,7 @@ class TransactionResource extends Resource
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
                     ])
-                    ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(TransactionRelationManager::class)
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
@@ -233,7 +236,7 @@ class TransactionResource extends Resource
             ->filters([
                 SelectFilter::make('account_id')
                     ->label(__('transaction.columns.account'))
-                    ->hiddenOn(AccountResource\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(TransactionRelationManager::class)
                     ->options(fn (): array => Account::query()
                         ->orderBy('name')
                         ->where('active', true)
@@ -256,7 +259,7 @@ class TransactionResource extends Resource
                     ->preload()
                     ->searchable(),
                 Filter::make('date')
-                    ->form([
+                    ->schema([
                         DatePicker::make('created_from')
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
@@ -285,8 +288,8 @@ class TransactionResource extends Resource
             ->filtersFormColumns(function (mixed $livewire = null) {
                 return $livewire instanceof ListTransactions ? 3 : 2;
             })
-            ->actions(self::getActions())
-            ->bulkActions(self::getBulkActions())
+            ->recordActions(self::getActions())
+            ->toolbarActions(self::getBulkActions())
             ->emptyStateHeading(__('transaction.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([

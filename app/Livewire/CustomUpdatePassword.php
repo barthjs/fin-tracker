@@ -6,18 +6,17 @@ namespace App\Livewire;
 
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Jeffgreco13\FilamentBreezy\Livewire\UpdatePassword;
 
-class CustomUpdatePassword extends UpdatePassword
+class CustomUpdatePassword
 {
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('current_password')
                     ->label(__('filament-breezy::default.password_confirm.current_password'))
                     ->validationMessages(['current_password' => __('user.buttons.password_wrong_warning')])
@@ -55,7 +54,7 @@ class CustomUpdatePassword extends UpdatePassword
             'verified' => $this->user->verified ?: true,
         ]);
 
-        session()->forget('password_hash_'.Filament::getCurrentPanel()->getAuthGuard());
+        session()->forget('password_hash_'.Filament::getCurrentOrDefaultPanel()->getAuthGuard());
         Filament::auth()->login($this->user);
         $this->reset(['data']);
 

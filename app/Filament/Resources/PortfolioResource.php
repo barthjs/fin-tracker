@@ -12,22 +12,23 @@ use App\Filament\Resources\UserResource\RelationManagers\PortfoliosRelationManag
 use App\Models\Account;
 use App\Models\Portfolio;
 use App\Tables\Columns\LogoColumn;
+use BackedEnum;
 use Exception;
-use Filament\Forms;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
+use Filament\Panel;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
@@ -41,9 +42,9 @@ class PortfolioResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $navigationIcon = 'tabler-wallet';
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-wallet';
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return __('portfolio.slug');
     }
@@ -58,15 +59,15 @@ class PortfolioResource extends Resource
         return __('portfolio.navigation_label');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(self::formParts());
+        return $schema->components(self::formParts());
     }
 
     public static function formParts(): array
     {
         return [
-            Forms\Components\Section::make()
+            Section::make()
                 ->schema([
                     TextInput::make('name')
                         ->label(__('portfolio.columns.name'))
@@ -104,17 +105,17 @@ class PortfolioResource extends Resource
         ];
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('portfolio.columns.name'))
                             ->tooltip(fn (Portfolio $record) => ! $record->active ? __('table.status_inactive') : '')
                             ->color(fn (Portfolio $record) => ! $record->active ? 'danger' : 'success')
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('market_value')
                             ->label(__('portfolio.columns.market_value'))
@@ -124,11 +125,11 @@ class PortfolioResource extends Resource
                                 default => 'success'
                             })
                             ->money(fn (Portfolio $record) => Account::getCurrency())
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('description')
                             ->label(__('portfolio.columns.description'))
-                            ->size(TextEntry\TextEntrySize::Small)
+                            ->size(TextSize::Small)
                             ->hidden(fn (Portfolio $record) => ! $record->description),
                     ])
                     ->columns([
@@ -163,7 +164,7 @@ class PortfolioResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->iconButton()
                     ->icon('tabler-edit')

@@ -10,7 +10,9 @@ use App\Filament\Resources\CategoryStatisticResource\Pages\ListCategoryStatistic
 use App\Filament\Resources\CategoryStatisticResource\Widgets\CategoryStatisticChart;
 use App\Models\Account;
 use App\Models\CategoryStatistic;
+use BackedEnum;
 use Exception;
+use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
@@ -27,9 +29,9 @@ class CategoryStatisticResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $navigationIcon = 'tabler-calendar-stats';
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-calendar-stats';
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return __('category_statistic.slug');
     }

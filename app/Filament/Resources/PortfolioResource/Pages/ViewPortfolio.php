@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PortfolioResource\Pages;
 
 use App\Filament\Resources\PortfolioResource;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewPortfolio extends ViewRecord
@@ -25,7 +25,7 @@ class ViewPortfolio extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make()
+            EditAction::make()
                 ->icon('tabler-edit')
                 ->modalHeading(__('portfolio.buttons.edit_heading')),
         ];

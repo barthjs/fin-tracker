@@ -14,20 +14,21 @@ use App\Filament\Resources\UserResource\RelationManagers\PortfoliosRelationManag
 use App\Filament\Resources\UserResource\RelationManagers\SecuritiesRelationManager;
 use App\Models\User;
 use App\Tables\Columns\LogoColumn;
+use BackedEnum;
 use Exception;
-use Filament\Forms\Components\Section;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Infolists\Components;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
+use Filament\Panel;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
@@ -37,9 +38,9 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'tabler-users';
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-users';
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return __('user.slug');
     }
@@ -54,10 +55,10 @@ class UserResource extends Resource
         return __('user.navigation_label');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->schema([
                         TextInput::make('first_name')
@@ -147,30 +148,30 @@ class UserResource extends Resource
             ]);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
-                Components\Section::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->schema([
                         TextEntry::make('full_name')
                             ->label(__('user.columns.full_name'))
                             ->state(fn (User $record): string => $record->getFilamentName())
                             ->tooltip(fn (User $record): string => ! $record->active ? __('table.status_inactive') : __('table.status_active'))
                             ->color(fn (User $record): string => ! $record->active ? 'danger' : 'success')
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('name')
                             ->label(__('user.columns.name'))
                             ->tooltip(fn (User $record): string => ! $record->active ? __('table.status_inactive') : __('table.status_active'))
                             ->color(fn (User $record): string => ! $record->active ? 'danger' : 'success')
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('email')
                             ->label(__('user.columns.email'))
                             ->tooltip(fn (User $record): string => ! $record->active ? __('table.status_inactive') : __('table.status_active'))
                             ->color(fn (User $record): string => ! $record->active ? 'danger' : 'success')
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                         IconEntry::make('is_admin')
                             ->label(__('user.columns.is_admin'))
@@ -224,7 +225,7 @@ class UserResource extends Resource
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->iconButton()
                     ->icon('tabler-edit'),

@@ -6,12 +6,13 @@ namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Filament\Resources\SecurityResource;
 use App\Models\Security;
+use BackedEnum;
 use Exception;
-use Filament\Forms\Form;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +22,7 @@ class SecuritiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'securities';
 
-    protected static ?string $icon = 'tabler-file-percent';
+    protected static string|BackedEnum|null $icon = 'tabler-file-percent';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -33,9 +34,9 @@ class SecuritiesRelationManager extends RelationManager
         return (string) Security::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return SecurityResource::form($form);
+        return SecurityResource::form($schema);
     }
 
     /**
@@ -65,13 +66,13 @@ class SecuritiesRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('security.buttons.create_button_label'))
                     ->modalHeading(__('security.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
 
                         return $data;
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->iconButton()
                     ->icon('tabler-edit')
@@ -89,7 +90,7 @@ class SecuritiesRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('security.buttons.create_button_label'))
                     ->modalHeading(__('security.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
 
                         return $data;

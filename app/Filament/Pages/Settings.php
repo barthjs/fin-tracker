@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
+use Filament\Panel;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 class Settings extends Page
 {
-    protected static string $view = 'filament.pages.settings';
+    protected string $view = 'filament.pages.settings';
 
     public ?string $latestVersion;
 
     public ?string $latestVersionUrl;
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return __('settings.slug');
     }

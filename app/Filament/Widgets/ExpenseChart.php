@@ -7,9 +7,8 @@ namespace App\Filament\Widgets;
 use App\Enums\TransactionType;
 use App\Models\Category;
 use Illuminate\Contracts\Support\Htmlable;
-use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
-class ExpenseChart extends ApexChartWidget
+class ExpenseChart
 {
     protected static ?int $sort = 4;
 

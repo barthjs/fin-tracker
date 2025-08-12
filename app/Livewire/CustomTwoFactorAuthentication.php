@@ -7,9 +7,8 @@ namespace App\Livewire;
 use App\Filament\Actions\PasswordButtonAction;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Jeffgreco13\FilamentBreezy\Livewire\TwoFactorAuthentication;
 
-class CustomTwoFactorAuthentication extends TwoFactorAuthentication
+class CustomTwoFactorAuthentication
 {
     public function enableAction(): Action
     {

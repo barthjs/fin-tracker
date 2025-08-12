@@ -13,23 +13,24 @@ use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
 use App\Tables\Columns\LogoColumn;
+use BackedEnum;
 use Exception;
-use Filament\Forms;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
+use Filament\Panel;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
@@ -45,9 +46,9 @@ class SecurityResource extends Resource
 
     protected static ?int $navigationSort = 7;
 
-    protected static ?string $navigationIcon = 'tabler-file-percent';
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-file-percent';
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return __('security.slug');
     }
@@ -62,15 +63,15 @@ class SecurityResource extends Resource
         return __('security.navigation_label');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(self::formParts());
+        return $schema->components(self::formParts());
     }
 
     public static function formParts(): array
     {
         return [
-            Forms\Components\Section::make()
+            Section::make()
                 ->schema([
                     TextInput::make('name')
                         ->label(__('security.columns.name'))
@@ -91,7 +92,7 @@ class SecurityResource extends Resource
                         ->required()
                         ->numeric(),
                 ])->columns(2),
-            Forms\Components\Section::make()
+            Section::make()
                 ->schema([
                     Select::make('type')
                         ->label(__('security.columns.type'))
@@ -128,32 +129,32 @@ class SecurityResource extends Resource
         ];
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('security.columns.name'))
                             ->tooltip(fn (Security $record) => ! $record->active ? __('table.status_inactive') : '')
                             ->color(fn (Security $record) => ! $record->active ? 'danger' : 'success')
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('price')
                             ->label(__('security.columns.price'))
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold)
                             ->numeric(6),
                         TextEntry::make('total_quantity')
                             ->label(__('security.columns.total_quantity'))
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold)
                             ->numeric(6),
                         TextEntry::make('type')
                             ->label(__('security.columns.type'))
                             ->formatStateUsing(fn (SecurityType $state): string => __('security.types')[$state->name])
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                     ])
                     ->columns([
@@ -198,7 +199,7 @@ class SecurityResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->iconButton()
                     ->icon('tabler-edit')

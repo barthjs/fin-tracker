@@ -8,8 +8,8 @@ use App\Enums\TransactionType;
 use App\Filament\Resources\CategoryStatisticResource;
 use App\Filament\Resources\CategoryStatisticResource\Widgets\CategoryStatisticChart;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
-use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListCategoryStatistics extends ListRecords

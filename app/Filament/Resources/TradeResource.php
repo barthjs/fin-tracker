@@ -4,29 +4,32 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\AccountResource\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\TradeResource\Pages\ListTrades;
 use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
 use App\Tables\Columns\LogoColumn;
+use BackedEnum;
 use Carbon\Carbon;
 use Exception;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
+use Filament\Panel;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -43,9 +46,9 @@ class TradeResource extends Resource
 
     protected static ?int $navigationSort = 6;
 
-    protected static ?string $navigationIcon = 'tabler-exchange';
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-exchange';
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return __('trade.slug');
     }
@@ -55,9 +58,9 @@ class TradeResource extends Resource
         return __('trade.navigation_label');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(self::formParts());
+        return $schema->components(self::formParts());
     }
 
     public static function formParts(?Account $account = null, ?Portfolio $portfolio = null, ?Security $security = null): array
@@ -262,7 +265,7 @@ class TradeResource extends Resource
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
                     ])
-                    ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
+                    ->hiddenOn(TradesRelationManager::class)
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
@@ -301,7 +304,7 @@ class TradeResource extends Resource
             ->filters([
                 SelectFilter::make('account_id')
                     ->label(__('trade.columns.account'))
-                    ->hiddenOn(AccountResource\RelationManagers\TradesRelationManager::class)
+                    ->hiddenOn(TradesRelationManager::class)
                     ->options(fn (): array => Account::query()
                         ->orderBy('name')
                         ->where('active', true)
@@ -336,7 +339,7 @@ class TradeResource extends Resource
                     ->preload()
                     ->searchable(),
                 Filter::make('date')
-                    ->form([
+                    ->schema([
                         DatePicker::make('created_from')
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
@@ -365,8 +368,8 @@ class TradeResource extends Resource
             ->filtersFormColumns(function (mixed $livewire) {
                 return $livewire instanceof ListTrades ? 4 : 3;
             })
-            ->actions(self::getActions())
-            ->bulkActions(self::getBulkActions())
+            ->recordActions(self::getActions())
+            ->toolbarActions(self::getBulkActions())
             ->emptyStateHeading(__('trade.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([

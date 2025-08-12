@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PortfolioResource\RelationManagers;
 
 use App\Filament\Resources\SecurityResource;
+use App\Filament\Resources\SecurityResource\Pages\ViewSecurity;
 use App\Models\Security;
 use App\Models\Trade;
+use BackedEnum;
 use Exception;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,16 +19,16 @@ class SecuritiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'securities';
 
-    protected static ?string $icon = 'tabler-file-percent';
+    protected static string|BackedEnum|null $icon = 'tabler-file-percent';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('security.navigation_label');
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return SecurityResource::form($form);
+        return SecurityResource::form($schema);
     }
 
     /**
@@ -50,7 +52,7 @@ class SecuritiesRelationManager extends RelationManager
             })
             ->heading('')
             ->columns($columns)
-            ->recordUrl(fn (Security $record): string => SecurityResource\Pages\ViewSecurity::getUrl([$record->id]))
+            ->recordUrl(fn (Security $record): string => ViewSecurity::getUrl([$record->id]))
             ->emptyStateActions([]);
     }
 }

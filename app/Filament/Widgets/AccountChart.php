@@ -6,9 +6,8 @@ namespace App\Filament\Widgets;
 
 use App\Models\Account;
 use Illuminate\Contracts\Support\Htmlable;
-use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
-class AccountChart extends ApexChartWidget
+class AccountChart
 {
     protected static ?int $sort = 2;
 

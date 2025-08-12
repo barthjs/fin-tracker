@@ -6,12 +6,13 @@ namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Filament\Resources\AccountResource;
 use App\Models\Account;
+use BackedEnum;
 use Exception;
-use Filament\Forms\Form;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +22,7 @@ class AccountsRelationManager extends RelationManager
 {
     protected static string $relationship = 'accounts';
 
-    protected static ?string $icon = 'tabler-bank-building';
+    protected static string|BackedEnum|null $icon = 'tabler-bank-building';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -33,9 +34,9 @@ class AccountsRelationManager extends RelationManager
         return (string) Account::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return AccountResource::form($form);
+        return AccountResource::form($schema);
     }
 
     /**
@@ -65,13 +66,13 @@ class AccountsRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('account.buttons.create_button_label'))
                     ->modalHeading(__('account.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
 
                         return $data;
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->iconButton()
                     ->icon('tabler-edit')
@@ -82,7 +83,7 @@ class AccountsRelationManager extends RelationManager
                     ->modalHeading(__('account.buttons.delete_heading'))
                     ->disabled(fn (Account $record): bool => $record->transactions()->withoutGlobalScopes()->exists() || $record->trades()->withoutGlobalScopes()->exists()),
             ])
-            ->bulkActions(AccountResource::getBulkActions())
+            ->toolbarActions(AccountResource::getBulkActions())
             ->emptyStateHeading(__('account.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
@@ -90,7 +91,7 @@ class AccountsRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('account.buttons.create_button_label'))
                     ->modalHeading(__('account.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
 
                         return $data;

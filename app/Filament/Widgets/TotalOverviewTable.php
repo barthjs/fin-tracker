@@ -10,7 +10,7 @@ use App\Models\Account;
 use App\Models\Combined;
 use App\Models\Portfolio;
 use App\Tables\Columns\LogoColumn;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
@@ -105,7 +105,7 @@ class TotalOverviewTable extends BaseWidget
                         return __('portfolio.navigation_label');
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make('view')
                     ->iconButton()
                     ->url(function (Combined $record): string {

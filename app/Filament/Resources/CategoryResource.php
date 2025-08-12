@@ -10,23 +10,24 @@ use App\Filament\Resources\CategoryResource\Pages\ViewCategory;
 use App\Filament\Resources\CategoryResource\RelationManagers\TransactionRelationManager;
 use App\Models\Account;
 use App\Models\Category;
+use BackedEnum;
 use Carbon\Carbon;
 use Exception;
-use Filament\Forms;
+use Filament\Actions\BulkAction;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
+use Filament\Panel;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -41,9 +42,9 @@ class CategoryResource extends Resource
 
     protected static ?int $navigationSort = 8;
 
-    protected static ?string $navigationIcon = 'tabler-category';
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-category';
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return __('category.slug');
     }
@@ -58,15 +59,15 @@ class CategoryResource extends Resource
         return __('category.navigation_label');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(self::formParts());
+        return $schema->components(self::formParts());
     }
 
     public static function formParts(): array
     {
         return [
-            Forms\Components\Section::make()
+            Section::make()
                 ->schema([
                     TextInput::make('name')
                         ->label(__('category.columns.name'))
@@ -95,17 +96,17 @@ class CategoryResource extends Resource
         ];
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
                             ->label(__('category.columns.name'))
                             ->tooltip(fn (Category $record): string => ! $record->active ? __('table.status_inactive') : '')
                             ->color(fn (Category $record): string => ! $record->active ? 'danger' : 'success')
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make('group')
                             ->label(__('category.columns.group'))
@@ -115,7 +116,7 @@ class CategoryResource extends Resource
                                 'revenue' => 'success',
                                 default => 'warning',
                             })
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                         TextEntry::make(Carbon::today()->format('Y'))
                             ->money(Account::getCurrency())
@@ -124,7 +125,7 @@ class CategoryResource extends Resource
                                     $query->whereYear('date_time', Carbon::now()->year);
                                 }])->whereId($record->id)->first()->transactions->sum('amount');
                             })
-                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                     ])
                     ->columns([
@@ -161,7 +162,7 @@ class CategoryResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->where('active', false)),
             ])
             ->persistFiltersInSession()
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->iconButton()
                     ->icon('tabler-edit')
@@ -172,7 +173,7 @@ class CategoryResource extends Resource
                     ->modalHeading(__('category.buttons.delete_heading'))
                     ->visible(fn (Category $record): bool => ! $record->transactions()->exists()),
             ])
-            ->bulkActions(self::getBulkActions())
+            ->toolbarActions(self::getBulkActions())
             ->emptyStateHeading(__('category.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
@@ -188,7 +189,7 @@ class CategoryResource extends Resource
         return [
             TextColumn::make('name')
                 ->label(__('category.columns.name'))
-                ->size(TextColumn\TextColumnSize::Medium)
+                ->size(TextSize::Medium)
                 ->weight(FontWeight::SemiBold)
                 ->wrap()
                 ->searchable()

@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
-use Filament\Pages\Auth\Register as BaseRegister;
+use Filament\Schemas\Components\Component;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
-class Register extends BaseRegister
+class Register extends \Filament\Auth\Pages\Register
 {
     protected function handleRegistration(array $data): Model
     {
@@ -25,7 +24,7 @@ class Register extends BaseRegister
         return [
             'form' => $this->form(
                 $this->makeForm()
-                    ->schema([
+                    ->components([
                         $this->getNameFormComponent(),
                         $this->getFirstNameComponent(),
                         $this->getLastNameComponent(),

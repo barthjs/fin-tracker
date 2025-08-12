@@ -6,12 +6,13 @@ namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Filament\Resources\CategoryResource;
 use App\Models\Category;
+use BackedEnum;
 use Exception;
-use Filament\Forms\Form;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +22,7 @@ class CategoryRelationManager extends RelationManager
 {
     protected static string $relationship = 'categories';
 
-    protected static ?string $icon = 'tabler-category';
+    protected static string|BackedEnum|null $icon = 'tabler-category';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
@@ -33,9 +34,9 @@ class CategoryRelationManager extends RelationManager
         return (string) Category::withoutGlobalScopes()->whereUserId($ownerRecord->id)->count();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return CategoryResource::form($form);
+        return CategoryResource::form($schema);
     }
 
     /**
@@ -64,14 +65,14 @@ class CategoryRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('category.buttons.create_button_label'))
                     ->modalHeading(__('category.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
 
                         return $data;
                     }),
             ])
             ->persistFiltersInSession()
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->iconButton()
                     ->icon('tabler-edit')
@@ -82,7 +83,7 @@ class CategoryRelationManager extends RelationManager
                     ->modalHeading(__('category.buttons.delete_heading'))
                     ->disabled(fn (Category $record): bool => $record->transactions()->withoutGlobalScopes()->exists()),
             ])
-            ->bulkActions(CategoryResource::getBulkActions())
+            ->toolbarActions(CategoryResource::getBulkActions())
             ->emptyStateHeading(__('category.empty'))
             ->emptyStateDescription('')
             ->emptyStateActions([
@@ -90,7 +91,7 @@ class CategoryRelationManager extends RelationManager
                     ->icon('tabler-plus')
                     ->label(__('category.buttons.create_button_label'))
                     ->modalHeading(__('category.buttons.create_heading'))
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         $data['user_id'] = $this->getOwnerRecord()->id;
 
                         return $data;

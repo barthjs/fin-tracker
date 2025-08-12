@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\UserResource;
 use App\Http\Middleware\CheckVerified;
-use App\Livewire\CustomPersonalInfo;
-use App\Livewire\CustomTwoFactorAuthentication;
-use App\Livewire\CustomUpdatePassword;
 use App\Tools\LocalAvatarProvider;
 use Exception;
 use Filament\Enums\ThemeMode;
@@ -31,8 +27,6 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\App;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Jeffgreco13\FilamentBreezy\BreezyCore;
-use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -67,21 +61,6 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->plugins([
-                BreezyCore::make()
-                    ->myProfile(
-                        hasAvatars: true,
-                        slug: __('user.profile-slug'),
-                    )
-                    ->customMyProfilePage(EditProfile::class)
-                    ->myProfileComponents([
-                        'personal_info' => CustomPersonalInfo::class,
-                        'update_password' => CustomUpdatePassword::class,
-                        'two_factor_authentication' => CustomTwoFactorAuthentication::class,
-                    ])
-                    ->enableTwoFactorAuthentication(),
-                FilamentApexChartsPlugin::make(),
-            ])
             ->userMenuItems([
                 'settings' => MenuItem::make()
                     ->label(__('settings.navigation_label'))

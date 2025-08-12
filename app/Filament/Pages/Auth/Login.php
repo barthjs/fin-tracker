@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
-use Filament\Pages\Auth\Login as BaseLogin;
+use Filament\Schemas\Components\Component;
 use Illuminate\Validation\ValidationException;
 
-class Login extends BaseLogin
+class Login extends \Filament\Auth\Pages\Login
 {
     protected function throwFailureValidationException(): never
     {

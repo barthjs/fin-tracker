@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use Filament\Support\View\Components\Modal;
+use Filament\Support\View\Components\ModalComponent;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        Modal::closedByClickingAway(false);
+        ModalComponent::closedByClickingAway(false);
     }
 
     /**

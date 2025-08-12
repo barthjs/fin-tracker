@@ -6,9 +6,8 @@ namespace App\Filament\Widgets;
 
 use App\Models\Portfolio;
 use Illuminate\Contracts\Support\Htmlable;
-use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
-class PortfolioChart extends ApexChartWidget
+class PortfolioChart
 {
     protected static ?int $sort = 3;
 

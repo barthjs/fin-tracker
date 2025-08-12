@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Actions;
 
 use Filament\Forms\Components\TextInput;
-use Jeffgreco13\FilamentBreezy\Actions\PasswordButtonAction as FilamentBreezyButtonAction;
 
-class PasswordButtonAction extends FilamentBreezyButtonAction
+class PasswordButtonAction
 {
     protected function setUp(): void
     {

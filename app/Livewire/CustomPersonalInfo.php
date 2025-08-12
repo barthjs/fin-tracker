@@ -6,11 +6,10 @@ namespace App\Livewire;
 
 use App\Models\User;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\TextInput;
-use Jeffgreco13\FilamentBreezy\Livewire\PersonalInfo;
+use Filament\Schemas\Components\Group;
 
-class CustomPersonalInfo extends PersonalInfo
+class CustomPersonalInfo
 {
     public array $only = ['avatar', 'first_name', 'last_name', 'name', 'email'];
 

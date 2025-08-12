@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources\SecurityResource\Widgets;
 
 use App\Models\Security;
-use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
-class SecurityChart extends ApexChartWidget
+class SecurityChart
 {
     protected static ?int $sort = 4;
 
