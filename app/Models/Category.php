@@ -102,25 +102,31 @@ class Category extends Model
         $monthColumn = mb_strtolower(Carbon::createFromDate(null, Carbon::today()->month)->format('M'));
         $year = Carbon::now()->year;
 
-        $labels = [];
-        $series = [];
-        $colors = [];
+        $data = [];
 
         foreach ($categories as $category) {
-            $labels[] = $category->name;
-
             $sum = CategoryStatistic::where('year', $year)
                 ->where('category_id', $category->id)
                 ->value($monthColumn) ?? 0;
 
-            $series[] = abs((float) $sum);
-            $colors[] = $category->color;
+            $data[] = [
+                'label' => $category->name,
+                'sum' => abs((float) $sum),
+                'color' => $category->color,
+            ];
         }
 
+        // Sort descending by sum
+        usort($data,
+            function (array $a, array $b): int {
+                return $b['sum'] <=> $a['sum'];
+            }
+        );
+
         return [
-            'labels' => $labels,
-            'series' => $series,
-            'colors' => $colors,
+            'labels' => array_column($data, 'label'),
+            'series' => array_column($data, 'sum'),
+            'colors' => array_column($data, 'color'),
         ];
     }
 }

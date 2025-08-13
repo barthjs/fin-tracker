@@ -5,26 +5,41 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Models\Account;
+use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
 
-class AccountChart
+class AccountChart extends ChartWidget
 {
     protected static ?int $sort = 2;
 
-    protected static ?string $chartId = 'accountChart';
+    protected ?string $pollingInterval = null;
 
-    protected static bool $deferLoading = true;
-
-    protected static ?string $pollingInterval = null;
+    protected ?array $options = [
+        'plugins' => [
+            'legend' => [
+                'display' => false,
+            ],
+        ],
+        'scales' => [
+            'y' => [
+                'display' => false,
+            ],
+            'x' => [
+                'display' => false,
+            ],
+        ],
+    ];
 
     public function getHeading(): Htmlable|string|null
     {
         return __('account.navigation_label');
     }
 
-    protected function getOptions(): array
+    protected function getData(): array
     {
-        $accounts = Account::whereActive(true)->get();
+        $accounts = Account::whereActive(true)
+            ->orderBy('balance', 'desc')
+            ->get();
 
         $labels = [];
         $series = [];
@@ -37,15 +52,18 @@ class AccountChart
         }
 
         return [
-            'chart' => [
-                'type' => 'pie',
+            'datasets' => [
+                [
+                    'data' => $series,
+                    'backgroundColor' => $colors,
+                ],
             ],
-            'series' => $series,
             'labels' => $labels,
-            'colors' => $colors,
-            'legend' => [
-                'show' => false,
-            ],
         ];
+    }
+
+    protected function getType(): string
+    {
+        return 'pie';
     }
 }

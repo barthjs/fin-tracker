@@ -6,37 +6,53 @@ namespace App\Filament\Widgets;
 
 use App\Enums\TransactionType;
 use App\Models\Category;
+use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
 
-class ExpenseChart
+class ExpenseChart extends ChartWidget
 {
     protected static ?int $sort = 4;
 
-    protected static ?string $chartId = 'expenseChart';
+    protected ?string $pollingInterval = null;
 
-    protected static bool $deferLoading = true;
-
-    protected static ?string $pollingInterval = null;
+    protected ?array $options = [
+        'plugins' => [
+            'legend' => [
+                'display' => false,
+            ],
+        ],
+        'scales' => [
+            'y' => [
+                'display' => false,
+            ],
+            'x' => [
+                'display' => false,
+            ],
+        ],
+    ];
 
     public function getHeading(): Htmlable|string|null
     {
         return __('table.filter.expenses');
     }
 
-    protected function getOptions(): array
+    protected function getData(): array
     {
         $data = Category::getChartData(TransactionType::expense);
 
         return [
-            'chart' => [
-                'type' => 'pie',
+            'datasets' => [
+                [
+                    'data' => $data['series'],
+                    'backgroundColor' => $data['colors'],
+                ],
             ],
-            'series' => $data['series'],
             'labels' => $data['labels'],
-            'colors' => $data['colors'],
-            'legend' => [
-                'show' => false,
-            ],
         ];
+    }
+
+    protected function getType(): string
+    {
+        return 'pie';
     }
 }

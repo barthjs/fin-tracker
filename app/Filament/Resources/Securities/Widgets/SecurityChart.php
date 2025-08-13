@@ -5,22 +5,35 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Securities\Widgets;
 
 use App\Models\Security;
+use Filament\Widgets\ChartWidget;
 
-class SecurityChart
+class SecurityChart extends ChartWidget
 {
-    protected static ?int $sort = 4;
-
     protected int|string|array $columnSpan = 'full';
 
-    protected static ?string $chartId = 'securityChart';
+    protected ?string $pollingInterval = null;
 
-    protected static bool $deferLoading = true;
+    protected ?array $options = [
+        'plugins' => [
+            'legend' => [
+                'display' => false,
+            ],
+        ],
+        'scales' => [
+            'y' => [
+                'display' => false,
+            ],
+            'x' => [
+                'display' => false,
+            ],
+        ],
+    ];
 
-    protected static ?string $pollingInterval = null;
-
-    protected function getOptions(): array
+    protected function getData(): array
     {
-        $securities = Security::whereActive(true)->get();
+        $securities = Security::whereActive(true)
+            ->orderBy('market_value', 'desc')
+            ->get();
 
         $labels = [];
         $series = [];
@@ -33,12 +46,18 @@ class SecurityChart
         }
 
         return [
-            'chart' => [
-                'type' => 'pie',
+            'datasets' => [
+                [
+                    'data' => $series,
+                    'backgroundColor' => $colors,
+                ],
             ],
             'labels' => $labels,
-            'series' => $series,
-            'colors' => $colors,
         ];
+    }
+
+    protected function getType(): string
+    {
+        return 'pie';
     }
 }
