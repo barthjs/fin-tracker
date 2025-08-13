@@ -38,6 +38,8 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static string|BackedEnum|null $navigationIcon = 'tabler-users';
 
     public static function getSlug(?Panel $panel = null): string
@@ -89,13 +91,13 @@ class UserResource extends Resource
                 Section::make()
                     ->schema([
                         TextInput::make('password')
-                            ->label(__('filament-breezy::default.fields.new_password'))
+                            ->label(__('user.buttons.password'))
                             ->validationMessages(['min' => __('user.buttons.password_length_warning')])
                             ->password()
                             ->revealable()
                             ->required(fn (string $context): bool => $context === 'create')
                             ->rule(Password::default())
-                            ->dehydrated(fn (string $state): bool => filled($state))
+                            ->dehydrated(fn (mixed $state): bool => filled($state))
                             ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
                             ->live(debounce: 200),
                         TextInput::make('passwordConfirmation')

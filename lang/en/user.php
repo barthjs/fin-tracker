@@ -32,6 +32,7 @@ return [
         'email_unique_warning' => 'Email already taken',
         'verified' => 'Verified',
         'is_admin' => 'Administrator',
+        'avatar' => 'Avatar',
     ],
 
     'filter' => [

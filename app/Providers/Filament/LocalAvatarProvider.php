@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Tools;
+namespace App\Providers\Filament;
 
 use Filament\AvatarProviders\Contracts\AvatarProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class LocalAvatarProvider implements AvatarProvider
+final class LocalAvatarProvider implements AvatarProvider
 {
+    /**
+     * Return the avatar as base64 encoded svg
+     */
     public function get(Model|Authenticatable $record): string
     {
         $initials = $this->extractInitials($record);

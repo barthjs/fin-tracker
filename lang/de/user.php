@@ -32,6 +32,7 @@ return [
         'email_unique_warning' => 'E-Mail bereits vergeben',
         'verified' => 'Verifiziert',
         'is_admin' => 'Administrator',
+        'avatar' => 'Profilbild',
     ],
 
     'filter' => [

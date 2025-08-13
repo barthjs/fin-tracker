@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\Users\UserResource;
 use App\Http\Middleware\CheckVerified;
-use App\Tools\LocalAvatarProvider;
 use Exception;
+use Filament\Actions\Action;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Enums\ThemeMode;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -25,7 +26,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\App;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AppPanelProvider extends PanelProvider
@@ -43,8 +43,13 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->path('')
-            ->spa()
+            ->spa(hasPrefetching: true)
             ->login(Login::class)
+            ->profile(page: EditProfile::class)
+            ->multiFactorAuthentication(
+                AppAuthentication::make()
+                    ->recoverable()
+            )
             ->unsavedChangesAlerts()
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
@@ -62,15 +67,16 @@ class AppPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->userMenuItems([
-                'settings' => MenuItem::make()
-                    ->label(__('settings.navigation_label'))
+                'profile' => fn (Action $action): Action => $action->url(fn (): string => EditProfile::getUrl()),
+                Action::make('settings')
                     ->icon('tabler-settings')
-                    ->hidden(fn () => App::runningInConsole() || ! auth()->user()->is_admin)
+                    ->label(__('settings.navigation_label'))
+                    ->hidden(fn (): bool => ! auth()->user()->is_admin)
                     ->url(fn (): string => Settings::getUrl()),
-                'users' => MenuItem::make()
-                    ->label(__('user.navigation_label'))
+                Action::make('users')
                     ->icon('tabler-users')
-                    ->hidden(fn () => App::runningInConsole() || ! auth()->user()->is_admin)
+                    ->label(__('user.navigation_label'))
+                    ->hidden(fn (): bool => ! auth()->user()->is_admin)
                     ->url(fn (): string => UserResource::getUrl()),
             ])
             ->middleware([
