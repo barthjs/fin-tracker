@@ -6,8 +6,10 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use Filament\Panel;
-use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class Settings extends Page
 {
@@ -39,14 +41,53 @@ class Settings extends Page
 
     public function mount(): void
     {
-        try {
-            $response = Http::get('https://hub.docker.com/v2/repositories/barthjs/fin-tracker/tags');
-        } catch (ConnectionException) {
-            $this->latestVersion = null;
+        $this->latestVersion = self::getLatestVersion();
+    }
 
-            return;
-        }
+    /**
+     * Get the latest tagged version from the GitHub repository.
+     *
+     * @return string|null Returns the version tag (e.g., "v1.2.3") or null on failure
+     */
+    public static function getLatestVersion(): ?string
+    {
+        return Cache::remember('github.latest_version', now()->addHour(), function () {
+            try {
+                $response = Http::retry(3, 100)
+                    ->timeout(10)
+                    ->withHeaders([
+                        'Accept' => 'application/vnd.github.v3+json',
+                        'User-Agent' => 'fin-tracker',
+                    ])
+                    ->get('https://api.github.com/repos/barthjs/fin-tracker/releases/latest');
 
-        $this->latestVersion = $response->json()['results'][2]['name'] ?? '';
+                if (! $response->successful()) {
+                    Log::warning('Failed to fetch latest version from GitHub API', [
+                        'status' => $response->status(),
+                        'response' => $response->body(),
+                    ]);
+
+                    return null;
+                }
+
+                $data = $response->json();
+
+                if (! isset($data['tag_name'])) {
+                    Log::warning('GitHub API response missing tag_name field', ['response' => $data]);
+
+                    return null;
+                }
+
+                return mb_ltrim($data['tag_name'], 'v');
+            } catch (Throwable $e) {
+                Log::error('Exception occurred while fetching latest version from GitHub', [
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]);
+
+                return null;
+            }
+        });
     }
 }
