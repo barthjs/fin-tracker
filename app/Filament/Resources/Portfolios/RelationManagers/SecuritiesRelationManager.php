@@ -41,14 +41,12 @@ class SecuritiesRelationManager extends RelationManager
         return SecurityResource::table($table)
             ->query(function () {
                 $securityIds = Trade::wherePortfolioId($this->ownerRecord->id)
-                    ->select('security_id')
-                    ->selectRaw('SUM(quantity) as total_quantity')
-                    ->groupBy('security_id')
-                    ->having('total_quantity', '>', 0)
+                    ->groupBy(['security_id'])
+                    ->havingRaw('SUM(quantity) > 0')
                     ->pluck('security_id')
                     ->toArray();
 
-                return Security::whereIn('id', $securityIds)->where('total_quantity', '>', 0);
+                return Security::whereIn('id', $securityIds);
             })
             ->heading('')
             ->columns($columns)

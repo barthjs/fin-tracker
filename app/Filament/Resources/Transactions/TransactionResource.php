@@ -376,7 +376,7 @@ class TransactionResource extends Resource
             BulkAction::make('account')
                 ->icon('tabler-edit')
                 ->label(__('transaction.buttons.bulk_account'))
-                ->form([
+                ->schema([
                     Select::make('account_id')
                         ->label(__('transaction.columns.account'))
                         ->relationship('account', 'name')

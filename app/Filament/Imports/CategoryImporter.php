@@ -61,6 +61,7 @@ class CategoryImporter extends Importer
     {
         return Category::firstOrNew([
             'name' => mb_trim($this->data['name']),
+            'user_id' => auth()->user()->id,
         ]);
     }
 

@@ -1,11 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Main" type="PestRunConfigurationType" singleton="false">
-    <option name="pestRunnerSettings">
-      <PestRunner directory="./vendor/pestphp/pest/bin/pest" method="" scope="ConfigurationFile" />
-    </option>
-    <option name="runnerSettings">
-      <PhpTestRunnerSettings directory="./vendor/pestphp/pest/bin/pest" method="" scope="ConfigurationFile" />
-    </option>
+    <PestRunner directory="$PROJECT_DIR$" method="" scope="ConfigurationFile" parallel_testing_enabled="true" />
     <method v="2" />
   </configuration>
 </component>

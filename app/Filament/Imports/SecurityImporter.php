@@ -80,6 +80,7 @@ class SecurityImporter extends Importer
         return Security::firstOrNew([
             'name' => mb_trim($this->data['name']),
             'isin' => mb_trim($this->data['isin']),
+            'user_id' => auth()->user()->id,
         ]);
     }
 

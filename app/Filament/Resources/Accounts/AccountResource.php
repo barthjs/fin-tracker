@@ -130,7 +130,7 @@ class AccountResource extends Resource
                         TextEntry::make('balance')
                             ->label(__('account.columns.balance'))
                             ->color(fn (float $state): string => match (true) {
-                                $state === 0 => 'gray',
+                                $state === 0.0 => 'gray',
                                 $state < 0 => 'danger',
                                 default => 'success'
                             })
@@ -214,7 +214,7 @@ class AccountResource extends Resource
                 ->hiddenOn($hidden)
                 ->badge()
                 ->color(fn (float $state): string => match (true) {
-                    $state === 0 => 'gray',
+                    $state === .0 => 'gray',
                     $state < 0 => 'danger',
                     default => 'success'
                 })
@@ -246,7 +246,7 @@ class AccountResource extends Resource
             BulkAction::make('currency')
                 ->icon('tabler-edit')
                 ->label(__('account.buttons.bulk_currency'))
-                ->form([
+                ->schema([
                     Select::make('currency')
                         ->label(__('account.columns.currency'))
                         ->placeholder(__('account.form.currency_placeholder'))

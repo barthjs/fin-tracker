@@ -33,7 +33,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 
 class CategoryResource extends Resource
@@ -121,9 +120,11 @@ class CategoryResource extends Resource
                         TextEntry::make(Carbon::today()->format('Y'))
                             ->money(Account::getCurrency())
                             ->state(function (Category $record): float {
-                                return Category::with(['transactions' => function (HasMany $query) {
-                                    $query->whereYear('date_time', Carbon::now()->year);
-                                }])->whereId($record->id)->first()->transactions->sum('amount');
+                                $amount = $record->transactions()
+                                    ->whereYear('date_time', now()->year)
+                                    ->sum('amount');
+
+                                return round((float) $amount / 100, precision: 2);
                             })
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
@@ -229,7 +230,7 @@ class CategoryResource extends Resource
             BulkAction::make('group')
                 ->icon('tabler-edit')
                 ->label(__('category.buttons.bulk_group'))
-                ->form([
+                ->schema([
                     Select::make('group')
                         ->label(__('category.columns.group'))
                         ->placeholder(__('category.form.group_placeholder'))

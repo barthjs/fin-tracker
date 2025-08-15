@@ -185,7 +185,7 @@ Default login at [http://localhost](http://localhost)
     <img alt="Laravel v12.x" src="https://img.shields.io/badge/Laravel-v12.x-FF2D20?style=flat-square&logo=laravel">
   </a>
 - <a href="https://filamentphp.com/">
-    <img alt="Filament v3.x" src="https://img.shields.io/badge/Filament-v3.x-e9b228?style=flat-square">
+    <img alt="Filament v4.x" src="https://img.shields.io/badge/Filament-v4.x-e9b228?style=flat-square">
   </a>
 - <a href="https://tabler.io/icons">
     <img alt="Tabler Icons" src="https://img.shields.io/badge/Tabler_Icons-grey?style=flat-square">

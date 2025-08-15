@@ -120,7 +120,7 @@ class PortfolioResource extends Resource
                         TextEntry::make('market_value')
                             ->label(__('portfolio.columns.market_value'))
                             ->color(fn (float $state): string => match (true) {
-                                $state === 0 => 'gray',
+                                $state === 0.0 => 'gray',
                                 $state < 0 => 'danger',
                                 default => 'success'
                             })
@@ -203,7 +203,7 @@ class PortfolioResource extends Resource
                 ->hiddenOn($hidden)
                 ->badge()
                 ->color(fn (float $state): string => match (true) {
-                    $state === 0 => 'gray',
+                    $state === 0.0 => 'gray',
                     $state < 0 => 'danger',
                     default => 'success'
                 })

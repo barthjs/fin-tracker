@@ -58,6 +58,7 @@ class AccountImporter extends Importer
     {
         return Account::firstOrNew([
             'name' => mb_trim($this->data['name']),
+            'user_id' => auth()->user()->id,
         ]);
     }
 

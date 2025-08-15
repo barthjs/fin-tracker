@@ -19,7 +19,7 @@ RUN apk add --no-cache \
         curl \
         nginx \
         supervisor && \
-    # Clear all php-fpm default configurations
+    # Clear all php-fpm default configurations \
     rm -rf /usr/local/etc/php-fpm.d/*.conf
 
 # Install php extensions
@@ -55,7 +55,7 @@ RUN apk add --no-cache --virtual .build-deps nodejs npm && \
     npm install &&  \
     npm run build && \
     php artisan storage:link && \
-    # Remove build dependencies
+    # Remove build dependencies \
     apk del .build-deps &&  \
     rm -rf /usr/local/bin/composer \
     docker node_modules resources/css composer.lock package*.json *.js

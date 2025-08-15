@@ -485,7 +485,7 @@ class TradeResource extends Resource
             BulkAction::make('account')
                 ->icon('tabler-edit')
                 ->label(__('trade.buttons.bulk_account'))
-                ->form([
+                ->schema([
                     Select::make('account_id')
                         ->label(__('trade.columns.account'))
                         ->relationship('account', 'name')
@@ -512,7 +512,7 @@ class TradeResource extends Resource
             BulkAction::make('portfolio')
                 ->icon('tabler-edit')
                 ->label(__('trade.buttons.bulk_portfolio'))
-                ->form([
+                ->schema([
                     Select::make('portfolio_id')
                         ->label(__('trade.columns.portfolio'))
                         ->relationship('portfolio', 'name')

@@ -10,7 +10,7 @@ if [ ! -d "/app/public/vendor/livewire" ]; then
     php artisan livewire:publish --assets
 fi
 
-if [ ! -d "/app/public/css" ] || [ ! -d "/app/public/js" ]; then
+if [ ! -d "/app/public/vendor/filament" ]; then
     echo "Publishing Filament assets..."
     php artisan filament:assets
 fi

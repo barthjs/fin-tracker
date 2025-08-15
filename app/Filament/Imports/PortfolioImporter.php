@@ -51,6 +51,7 @@ class PortfolioImporter extends Importer
     {
         return Portfolio::firstOrNew([
             'name' => mb_trim($this->data['name']),
+            'user_id' => auth()->user()->id,
         ]);
     }
 
