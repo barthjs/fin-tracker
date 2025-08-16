@@ -46,4 +46,15 @@ return [
 
     'empty' => 'Keine Benutzer gefunden',
 
+    'sessions' => [
+        'heading' => 'Geräte & Sitzungen',
+        'delete' => 'Andere Browser-Sitzungen abmelden',
+        'unknown_platform' => 'Unbekannte Plattform',
+        'unknown_browser' => 'Unbekannter Browser',
+        'this_device' => 'Dieses Gerät',
+        'last_active' => 'Zuletzt aktiv',
+        'incorrect_password' => 'Das eingegebene Passwort war falsch. Bitte versuche es erneut.',
+        'logout_success' => 'Alle anderen Browser-Sitzungen wurden erfolgreich abgemeldet.',
+    ],
+
 ];

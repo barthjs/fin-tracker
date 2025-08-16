@@ -5,24 +5,110 @@ declare(strict_types=1);
 namespace App\Filament\Pages\Auth;
 
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Panel;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Jenssegers\Agent\Agent;
 
 class EditProfile extends \Filament\Auth\Pages\EditProfile
 {
     private bool $wasUnverified = false;
+
+    public array $sessions = [];
 
     protected string $view = 'filament.pages.auth.edit-profile';
 
     public static function getSlug(?Panel $panel = null): string
     {
         return __('user.profile-slug');
+    }
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->sessions = $this->getSessions();
+    }
+
+    private function getSessions(): array
+    {
+        $sessions = DB::table(config('session.table'))
+            ->where('user_id', auth()->user()->id)
+            ->latest('last_activity')
+            ->get();
+
+        return $sessions->map(function (object $session): array {
+            $agent = new Agent();
+            $agent->setUserAgent($session->user_agent);
+
+            return [
+                'device' => [
+                    'is_desktop' => $agent->isDesktop(),
+                    'platform' => $agent->platform(),
+                    'browser' => $agent->browser(),
+                ],
+                'ip_address' => $session->ip_address,
+                'is_current_device' => $session->id === request()->session()->getId(),
+                'last_active' => Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
+            ];
+        })->toArray();
+    }
+
+    public function logoutOtherBrowserSessions(): Action
+    {
+        return Action::make('logoutOtherBrowserSessions')
+            ->icon('tabler-trash')
+            ->label(__('user.sessions.delete'))
+            ->size('sm')
+            ->color('danger')
+            ->modalHeading(__('user.sessions.delete'))
+            ->requiresConfirmation()
+            ->schema([
+                TextInput::make('password')
+                    ->label(__('user.buttons.password'))
+                    ->password()
+                    ->revealable()
+                    ->required(),
+            ])
+            ->action(function (array $data): void {
+                if (! Hash::check($data['password'], auth()->user()->password)) {
+                    Notification::make()
+                        ->danger()
+                        ->title(__('user.sessions.incorrect_password'))
+                        ->send();
+
+                    return;
+                }
+
+                Auth::logoutOtherDevices($data['password']);
+
+                request()->session()->put([
+                    'password_hash_'.Auth::getDefaultDriver() => auth()->user()->password,
+                ]);
+
+                DB::table(config('session.table'))
+                    ->where('user_id', '=', auth()->user()->id)
+                    ->where('id', '!=', request()->session()->getId())
+                    ->delete();
+
+                Notification::make()
+                    ->success()
+                    ->title(__('user.sessions.logout_success'))
+                    ->send();
+
+                $this->mount();
+            });
     }
 
     public static function isSimple(): bool

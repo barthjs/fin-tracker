@@ -46,4 +46,15 @@ return [
 
     'empty' => 'No users found',
 
+    'sessions' => [
+        'heading' => 'Devices & Sessions',
+        'delete' => 'Log Out Other Browser Sessions',
+        'unknown_platform' => 'Unknown platform',
+        'unknown_browser' => 'Unknown browser',
+        'this_device' => 'This device',
+        'last_active' => 'Last active',
+        'incorrect_password' => 'The password you entered was incorrect. Please try again.',
+        'logout_success' => 'All other browser sessions have been logged out successfully.',
+    ],
+
 ];
