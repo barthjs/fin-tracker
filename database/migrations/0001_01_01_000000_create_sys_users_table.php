@@ -14,35 +14,43 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sys_users', function (Blueprint $table) {
-            $table->unsignedTinyInteger('id')->autoIncrement();
+            $table->ulid('id')->primary();
             $table->timestamps();
 
             $table->string('first_name')->nullable()->index();
             $table->string('last_name')->nullable()->index();
-            $table->string('name')->unique();
+            $table->string('full_name')->storedAs("
+                NULLIF(
+                    COALESCE(first_name, '') ||
+                    CASE
+                        WHEN first_name IS NOT NULL AND last_name IS NOT NULL
+                        THEN ' '
+                        ELSE ''
+                    END ||
+                    COALESCE(last_name, ''),
+                '')
+            ")->nullable()->index();
+            $table->string('username')->unique();
             $table->string('email')->nullable()->unique();
+            $table->string('avatar')->nullable();
+
             $table->string('password');
-            $table->boolean('verified')->default(false)->index();
-            $table->boolean('is_admin')->default(false)->index();
-            $table->boolean('active')->default(true)->index();
             $table->rememberToken();
+            $table->text('app_authentication_secret')->nullable();
+            $table->text('app_authentication_recovery_codes')->nullable();
+
+            $table->boolean('is_active')->default(true)->index();
+            $table->boolean('is_verified')->default(false)->index();
+            $table->boolean('is_admin')->default(false);
         });
 
         Schema::create('sys_sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->foreignUlid('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('sys_users');
     }
 };

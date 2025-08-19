@@ -38,23 +38,12 @@ return new class extends Migration
 
         Schema::create('sys_failed_jobs', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('failed_at')->useCurrent();
-            $table->text('queue');
-
             $table->string('uuid')->unique();
             $table->text('connection');
+            $table->text('queue');
             $table->longText('payload');
             $table->longText('exception');
+            $table->timestamp('failed_at')->useCurrent();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('sys_jobs');
-        Schema::dropIfExists('sys_job_batches');
-        Schema::dropIfExists('sys_failed_jobs');
     }
 };

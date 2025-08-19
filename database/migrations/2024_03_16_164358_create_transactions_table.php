@@ -14,29 +14,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->unsignedInteger('id')->autoIncrement();
+            $table->ulid('id')->primary();
             $table->dateTime('date_time')->index();
 
             $table->bigInteger('amount')->default(0);
             $table->string('destination')->nullable()->index();
             $table->string('notes')->nullable();
 
-            $table->unsignedSmallInteger('account_id')->index();
-            $table->foreign('account_id')->references('id')->on('accounts')->cascadeOnDelete()->cascadeOnUpdate();
-
-            $table->unsignedInteger('category_id')->index();
-            $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete()->cascadeOnUpdate();
-
-            $table->unsignedTinyInteger('user_id')->index();
-            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('account_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('category_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('transactions');
     }
 };

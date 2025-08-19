@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('category_statistics', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary();
             $table->smallInteger('year')->nullable()->index();
 
             $table->bigInteger('jan')->default(0)->index();
@@ -30,16 +30,7 @@ return new class extends Migration
             $table->bigInteger('nov')->default(0)->index();
             $table->bigInteger('dec')->default(0)->index();
 
-            $table->unsignedInteger('category_id')->index();
-            $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('category_id')->references('id')->on('categories')->cascadeOnDelete()->cascadeOnUpdate();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('category_statistics');
     }
 };

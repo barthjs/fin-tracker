@@ -15,7 +15,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('accounts', function (Blueprint $table) {
-            $table->unsignedSmallInteger('id')->autoIncrement();
+            $table->ulid('id')->primary();
             $table->timestamps();
 
             $table->string('name')->index();
@@ -28,16 +28,7 @@ return new class extends Migration
             $table->string('color');
             $table->boolean('active')->default(true)->index();
 
-            $table->unsignedTinyInteger('user_id')->index();
-            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('accounts');
     }
 };

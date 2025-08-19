@@ -15,7 +15,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('trades', function (Blueprint $table) {
-            $table->unsignedInteger('id')->autoIncrement();
+            $table->ulid('id')->primary();
             $table->dateTime('date_time')->index();
 
             $table->bigInteger('total_amount')->default(0);
@@ -27,25 +27,10 @@ return new class extends Migration
             $table->enum('type', $types)->index();
             $table->string('notes')->nullable();
 
-            $table->unsignedSmallInteger('account_id')->index();
-            $table->foreign('account_id')->references('id')->on('accounts')->cascadeOnDelete()->cascadeOnUpdate();
-
-            $table->unsignedSmallInteger('portfolio_id')->index();
-            $table->foreign('portfolio_id')->references('id')->on('portfolios')->cascadeOnDelete()->cascadeOnUpdate();
-
-            $table->unsignedInteger('security_id')->index();
-            $table->foreign('security_id')->references('id')->on('securities')->cascadeOnDelete()->cascadeOnUpdate();
-
-            $table->unsignedTinyInteger('user_id')->index();
-            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('account_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('portfolio_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('security_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('trades');
     }
 };
