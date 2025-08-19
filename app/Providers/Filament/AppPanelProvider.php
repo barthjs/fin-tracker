@@ -10,7 +10,6 @@ use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\Users\UserResource;
 use App\Http\Middleware\CheckVerified;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Enums\ThemeMode;
@@ -28,11 +27,8 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AppPanelProvider extends PanelProvider
+final class AppPanelProvider extends PanelProvider
 {
-    /**
-     * @throws Exception
-     */
     public function panel(Panel $panel): Panel
     {
         if (config('app.allow_registration')) {
@@ -43,9 +39,10 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->path('')
-            ->spa(hasPrefetching: true)
+            ->spa()
+            ->globalSearch(false)
             ->login(Login::class)
-            ->profile(page: EditProfile::class)
+            ->profile(page: EditProfile::class, isSimple: auth()->user()->is_admin ?? false)
             ->multiFactorAuthentication(
                 AppAuthentication::make()
                     ->recoverable()
@@ -53,7 +50,7 @@ class AppPanelProvider extends PanelProvider
             ->unsavedChangesAlerts()
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
-            ->colors(config('colors'))
+            ->colors(fn (): array => config()->array('colors'))
             ->font('Poppins',
                 '/fonts/fonts.css',
                 LocalFontProvider::class
@@ -71,12 +68,12 @@ class AppPanelProvider extends PanelProvider
                 Action::make('settings')
                     ->icon('tabler-settings')
                     ->label(__('settings.navigation_label'))
-                    ->hidden(fn (): bool => ! auth()->user()->is_admin)
+                    ->hidden(fn (): bool => ! (auth()->user()->is_admin ?? false))
                     ->url(fn (): string => Settings::getUrl()),
                 Action::make('users')
                     ->icon('tabler-users')
                     ->label(__('user.navigation_label'))
-                    ->hidden(fn (): bool => ! auth()->user()->is_admin)
+                    ->hidden(fn (): bool => ! (auth()->user()->is_admin ?? false))
                     ->url(fn (): string => UserResource::getUrl()),
             ])
             ->middleware([
