@@ -15,6 +15,7 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.14",
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.0",
         "laravel/pint": "^1.13",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
@@ -46,13 +47,15 @@
             "@php artisan filament:upgrade"
         ],
         "lint": "pint",
-        "test:lint": "pint --test",
         "test:type-coverage": "pest --type-coverage --compact --min=100",
         "test:unit": "pest --parallel",
+        "test:lint": "pint --test",
+        "analyze": "phpstan",
         "test": [
             "@test:type-coverage",
             "@test:unit",
-            "@test:lint"
+            "@test:lint",
+            "analyze"
         ]
     },
     "extra": {
