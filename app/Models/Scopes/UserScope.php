@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 
-class UserScope implements Scope
+final class UserScope implements Scope
 {
     /**
      * Query only for records belonging to the authenticated user
@@ -17,7 +17,7 @@ class UserScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         if (! App::runningInConsole()) {
-            $builder->where('user_id', auth()->id());
+            $builder->where('user_id', '=', auth()->id());
         }
     }
 }

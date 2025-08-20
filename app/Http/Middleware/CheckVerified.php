@@ -8,19 +8,28 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckVerified
+final class CheckVerified
 {
     /**
-     * Check if the user is verified
+     * Check if the user is verified.
+     *
+     * Redirects to the profile page if not verified.
      *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $profileUri = __('user.profile-slug');
-        $currentUri = $request->route()->uri();
+        $currentUri = $request->route()?->uri();
 
-        if (! in_array($currentUri, [$profileUri, 'login', 'register', 'logout', 'two-factor-authentication']) && ! auth()->user()->verified) {
+        $allowedRoutes = [
+            $profileUri,
+            'login',
+            'register',
+            'logout',
+        ];
+
+        if (! in_array($currentUri, $allowedRoutes, true) && ! auth()->user()->is_verified) {
             return redirect($profileUri);
         }
 

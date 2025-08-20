@@ -9,35 +9,35 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class DatabaseSeeder extends Seeder
+final class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        if (! User::whereIsAdmin(1)->first()) {
-            User::firstOrCreate(['name' => 'admin'],
+        if (User::where('is_admin', '=', true)->first() === null) {
+            User::firstOrCreate(['username' => 'admin', 'email' => 'admin@example.com'],
                 [
                     'first_name' => 'Admin',
                     'last_name' => 'Admin',
-                    'email' => 'admin@example.com',
                     'password' => Hash::make('admin'),
-                    'verified' => ! App::isProduction(),
+                    'is_active' => true,
+                    'is_verified' => ! App::isProduction(),
                     'is_admin' => true,
-                    'active' => true,
                 ]
             );
         }
 
         if (App::isLocal()) {
-            User::firstOrCreate(['name' => 'user'],
+            User::firstOrCreate(['username' => 'user', 'email' => 'user@example.com'],
                 [
                     'first_name' => 'User',
                     'last_name' => 'User',
-                    'email' => 'user@example.com',
                     'password' => Hash::make('user'),
-                    'verified' => true,
+                    'is_active' => true,
+                    'is_verified' => true,
+                    'is_admin' => false,
                 ]);
         }
     }
