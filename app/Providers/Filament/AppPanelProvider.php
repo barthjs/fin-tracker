@@ -42,7 +42,7 @@ final class AppPanelProvider extends PanelProvider
             ->spa()
             ->globalSearch(false)
             ->login(Login::class)
-            ->profile(page: EditProfile::class, isSimple: auth()->user()->is_admin ?? false)
+            ->profile(EditProfile::class)
             ->multiFactorAuthentication(
                 AppAuthentication::make()
                     ->recoverable()

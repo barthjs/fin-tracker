@@ -9,3 +9,6 @@ parameters:
         - routes
 
     level: max
+
+    ignoreErrors:
+        - '#Cannot access property \$[a-zA-Z0-9\\_]+ on App\\Models\\User\|null#'

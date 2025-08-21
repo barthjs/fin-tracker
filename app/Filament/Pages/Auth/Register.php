@@ -11,15 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
-class Register extends \Filament\Auth\Pages\Register
+final class Register extends \Filament\Auth\Pages\Register
 {
-    protected function handleRegistration(array $data): Model
-    {
-        $data['verified'] = true;
-
-        return $this->getUserModel()::create($data);
-    }
-
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -33,9 +26,16 @@ class Register extends \Filament\Auth\Pages\Register
             ]);
     }
 
+    protected function handleRegistration(array $data): Model
+    {
+        $data['is_verified'] = true;
+
+        return $this->getUserModel()::create($data);
+    }
+
     protected function getNameFormComponent(): Component
     {
-        return TextInput::make('name')
+        return TextInput::make('username')
             ->label(__('user.columns.name'))
             ->validationMessages(['unique' => __('user.columns.name_unique_warning')])
             ->required()

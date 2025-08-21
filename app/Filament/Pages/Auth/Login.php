@@ -8,7 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Illuminate\Validation\ValidationException;
 
-class Login extends \Filament\Auth\Pages\Login
+final class Login extends \Filament\Auth\Pages\Login
 {
     protected function throwFailureValidationException(): never
     {
@@ -29,7 +29,7 @@ class Login extends \Filament\Auth\Pages\Login
 
     protected function getCredentialsFromFormData(array $data): array
     {
-        $loginType = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        $loginType = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
         return [
             $loginType => $data['login'],
