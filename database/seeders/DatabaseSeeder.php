@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App;
+use App\Models\Account;
+use App\Models\Category;
+use App\Models\Portfolio;
+use App\Models\Security;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +21,8 @@ final class DatabaseSeeder extends Seeder
     public function run(): void
     {
         if (User::where('is_admin', '=', true)->first() === null) {
-            User::firstOrCreate(['username' => 'admin', 'email' => 'admin@example.com'],
+            /** @var User $user */
+            $user = User::firstOrCreate(['username' => 'admin', 'email' => 'admin@example.com'],
                 [
                     'first_name' => 'Admin',
                     'last_name' => 'Admin',
@@ -27,10 +32,13 @@ final class DatabaseSeeder extends Seeder
                     'is_admin' => true,
                 ]
             );
+
+            $this->generateDefaults($user);
         }
 
-        if (App::isLocal()) {
-            User::firstOrCreate(['username' => 'user', 'email' => 'user@example.com'],
+        if (! App::isLocal()) {
+            /** @var User $user */
+            $user = User::firstOrCreate(['username' => 'user', 'email' => 'user@example.com'],
                 [
                     'first_name' => 'User',
                     'last_name' => 'User',
@@ -39,6 +47,16 @@ final class DatabaseSeeder extends Seeder
                     'is_verified' => true,
                     'is_admin' => false,
                 ]);
+
+            $this->generateDefaults($user);
         }
+    }
+
+    private function generateDefaults(User $user): void
+    {
+        Account::getOrCreateDefaultAccount($user);
+        Portfolio::getOrCreateDefaultPortfolio($user);
+        Security::getOrCreateDefaultSecurity($user);
+        Category::getOrCreateDefaultCategory($user);
     }
 }

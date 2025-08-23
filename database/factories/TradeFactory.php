@@ -7,18 +7,28 @@ namespace Database\Factories;
 use App\Enums\TradeType;
 use App\Models\Trade;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 
-class TradeFactory extends Factory
+/**
+ * @extends Factory<Trade>
+ */
+final class TradeFactory extends Factory
 {
     protected $model = Trade::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
-            'date_time' => Carbon::now(),
-            'notes' => $this->faker->words(3, true),
-            'type' => $this->faker->randomElement(TradeType::cases())->name,
+            'trade_date' => fake()->dateTimeBetween('-1 year', 'now'),
+            'type' => fake()->randomElement(TradeType::cases()),
+            'price' => fake()->randomFloat(2, 1, 100),
+            'fee' => fake()->randomFloat(2, 0, 10),
+            'tax' => fake()->randomFloat(2, 0, 10),
+            'notes' => fake()->sentence(),
         ];
     }
 }

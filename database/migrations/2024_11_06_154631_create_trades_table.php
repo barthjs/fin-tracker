@@ -16,21 +16,35 @@ return new class extends Migration
     {
         Schema::create('trades', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->dateTime('date_time')->index();
 
-            $table->bigInteger('total_amount')->default(0);
+            $table->dateTime('trade_date')->index();
+            $types = array_column(TradeType::cases(), 'value');
+            $table->enum('type', $types)->default(TradeType::Buy)->index();
+            $table->decimal('total_amount', 18, 6)
+                ->storedAs("
+                    CASE
+                        WHEN type = 'buy' THEN (price * quantity + tax + fee)
+                        WHEN type = 'sell' THEN (price * quantity - (tax + fee))
+                        ELSE 0
+                    END
+                ");
             $table->decimal('quantity', 18, 6)->default(0);
             $table->decimal('price', 18, 6)->default(0);
-            $table->decimal('tax', 13)->default(0);
-            $table->decimal('fee', 13)->default(0);
-            $types = array_column(TradeType::cases(), 'name');
-            $table->enum('type', $types)->index();
+            $table->decimal('tax', 18, 6)->default(0);
+            $table->decimal('fee', 18, 6)->default(0);
             $table->string('notes')->nullable();
 
             $table->foreignUlid('account_id')->constrained()->cascadeOnDelete();
             $table->foreignUlid('portfolio_id')->constrained()->cascadeOnDelete();
             $table->foreignUlid('security_id')->constrained()->cascadeOnDelete();
-            $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
+
+            $table->index(['account_id', 'type']);
+            $table->index(['portfolio_id', 'type']);
+            $table->index(['security_id', 'type']);
+
+            $table->index(['account_id', 'trade_date']);
+            $table->index(['portfolio_id', 'trade_date']);
+            $table->index(['security_id', 'trade_date']);
         });
     }
 };
