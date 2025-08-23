@@ -7,7 +7,10 @@ namespace Database\Factories;
 use App\Models\Account;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AccountFactory extends Factory
+/**
+ * @extends Factory<Account>
+ */
+final class AccountFactory extends Factory
 {
     protected $model = Account::class;
 
@@ -19,9 +22,11 @@ class AccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->word(),
+            'name' => fake()->word(),
             'currency' => Account::getCurrency(),
             'description' => fake()->sentence(),
+            'color' => fake()->hexColor(),
+            'is_active' => fake()->boolean(),
         ];
     }
 }

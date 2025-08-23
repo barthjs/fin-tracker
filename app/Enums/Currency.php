@@ -8,11 +8,6 @@ use Filament\Support\Contracts\HasLabel;
 
 enum Currency: string implements HasLabel
 {
-    public function getLabel(): ?string
-    {
-        return $this->name;
-    }
-
     case AED = 'AED'; // United Arab Emirates Dirham
     case AFN = 'AFN'; // Afghan Afghani
     case ALL = 'ALL'; // Albanian Lek
@@ -173,4 +168,9 @@ enum Currency: string implements HasLabel
     case ZAR = 'ZAR'; // South African Rand
     case ZMW = 'ZMW'; // Zambian Kwacha
     case ZWL = 'ZWL'; // Zimbabwean Dollar
+
+    public function getLabel(): string
+    {
+        return $this->name;
+    }
 }

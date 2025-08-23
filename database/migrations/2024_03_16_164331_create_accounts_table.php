@@ -16,19 +16,19 @@ return new class extends Migration
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->timestamps();
 
             $table->string('name')->index();
-            $table->bigInteger('balance')->default(0)->index();
-            $currencies = array_column(Currency::cases(), 'value');
-            $table->enum('currency', $currencies)->default(Currency::USD->name)->index();
+            $table->decimal('balance', 18, 2)->default(0);
+            $table->char('currency', 3)->default(Currency::EUR->value)->index();
             $table->text('description')->nullable();
 
             $table->string('logo')->nullable();
             $table->string('color');
-            $table->boolean('active')->default(true)->index();
+            $table->boolean('is_active')->default(true)->index();
 
             $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
+
+            $table->timestamps();
         });
     }
 };
