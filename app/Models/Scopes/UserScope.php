@@ -17,7 +17,7 @@ final class UserScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         if (! App::runningInConsole()) {
-            $builder->where('user_id', '=', auth()->id());
+            $builder->where('user_id', auth()->id());
         }
     }
 }

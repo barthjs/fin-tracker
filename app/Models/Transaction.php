@@ -4,119 +4,149 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Casts\MoneyCast;
-use App\Models\Scopes\UserScope;
-use Carbon\Carbon;
+use App\Enums\TransactionType;
+use App\Models\Scopes\UserRelationScope;
+use Carbon\CarbonInterface;
+use Database\Factories\TransactionFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Transaction extends Model
+/**
+ * @property-read string $id
+ * @property CarbonInterface $transaction_date
+ * @property TransactionType $type
+ * @property float $amount
+ * @property string|null $payee
+ * @property string|null $notes
+ * @property string $account_id
+ * @property string|null $transfer_account_id
+ * @property string $category_id
+ * @property-read Account $account
+ * @property-read Account|null $transferAccount
+ * @property-read Category $category
+ * @property-read string $color
+ */
+final class Transaction extends Model
 {
-    use HasFactory;
+    /** @use HasFactory<TransactionFactory> */
+    use HasFactory, HasUlids;
 
     public $timestamps = false;
 
-    protected $table = 'transactions';
-
-    protected $fillable = [
-        'date_time',
-        'amount',
-        'destination',
-        'notes',
-        'account_id',
-        'category_id',
-        'user_id',
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'type' => TransactionType::Expense->value,
+        'amount' => 0.0,
     ];
 
-    protected $casts = [
-        'date_time' => 'datetime', // Carbon object
-        'amount' => MoneyCast::class,
-        'account_id' => 'integer',
-        'category_id' => 'integer',
-        'user_id' => 'integer',
-    ];
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope(new UserScope);
-
-        static::creating(function (Transaction $transaction) {
-            // Only needed in importer
-            if (is_null($transaction->account_id)) {
-                $transaction->account_id = Account::getDefaultAccountId();
-            }
-
-            // Only needed in importer
-            if (is_null($transaction->category_id)) {
-                $transaction->category_id = self::getDefaultCategoryId();
-            }
-
-            // Only needed in importer and web
-            if (is_null($transaction->user_id)) {
-                $transaction->user_id = auth()->user()->id;
-            }
-
-            $transaction->destination = mb_trim($transaction->destination);
-        });
-
-        static::created(function (Transaction $transaction) {
-            // Recalculate and update the balance for the associated account and all statistics
-            Account::updateAccountBalance($transaction->account_id);
-            self::updateCategoryStatistics($transaction->category_id, $transaction->date_time);
-        });
-
-        static::updating(function (Transaction $transaction) {
-            $transaction->destination = mb_trim($transaction->destination);
-        });
-    }
-
     /**
-     * Get the default transaction category ID for the current user.
-     *
-     * Retrieves the category with the name 'Demo' for the currently
-     * authenticated user. If it does not exist, it creates one with that name.
-     *
-     * @return int The ID of the default transaction category.
+     * Updates the transaction statistics.
      */
-    private static function getDefaultCategoryId(): int
+    public static function updateCategoryStatistics(string $categoryId, CarbonInterface $date): void
     {
-        $category = Category::whereName('Demo')->first();
-        if (! $category) {
-            $category = Category::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
-        }
+        $year = $date->year;
+        $month = $date->month;
+        $monthColumn = mb_strtolower($date->format('M'));
 
-        return $category->id;
-    }
-
-    /**
-     * Updates the transaction statistics
-     */
-    public static function updateCategoryStatistics(int $categoryId, Carbon $date): void
-    {
-        $year = Carbon::parse($date)->year;
-        $month = Carbon::parse($date)->month;
-        $monthColumn = mb_strtolower(Carbon::create(null, $month)->format('M'));
-        $sumPerMonth = self::whereCategoryId($categoryId)
-            ->whereYear('date_time', $year)
-            ->whereMonth('date_time', $month)
+        $sumPerMonth = self::where('category_id', $categoryId)
+            ->where('type', '!=', TransactionType::Transfer)
+            ->whereYear('transaction_date', $year)
+            ->whereMonth('transaction_date', $month)
             ->sum('amount');
 
         CategoryStatistic::updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
     }
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    public function casts(): array
+    {
+        return [
+            'transaction_date' => 'datetime',
+            'type' => TransactionType::class,
+            'amount' => 'float',
+        ];
+    }
+
+    /**
+     * Account this transaction belongs to.
+     *
+     * @return BelongsTo<Account, $this>
+     */
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'account_id');
     }
 
+    /**
+     * Target account for transfers.
+     *
+     * @return BelongsTo<Account, $this>
+     */
+    public function transferAccount(): BelongsTo
+    {
+        return $this->belongsTo(Account::class, 'transfer_account_id');
+    }
+
+    /**
+     * Category of the transaction.
+     *
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    public function user(): BelongsTo
+    protected static function booted(): void
     {
-        return $this->belongsTo(User::class, 'user_id');
+        self::addGlobalScope(new UserRelationScope());
+
+        self::creating(function (Transaction $transaction): void {
+            $transaction->payee = $transaction->payee === null ? null : mb_trim($transaction->payee);
+
+            // Only needed in importer
+            if ($transaction->account_id === null) {
+                $transaction->account_id = Account::getOrCreateDefaultAccount()->id;
+            }
+
+            // Only needed in importer
+            if ($transaction->category_id === null) {
+                $transaction->category_id = Category::getOrCreateDefaultCategory()->id;
+            }
+        });
+
+        self::created(function (Transaction $transaction): void {
+            Account::updateAccountBalance($transaction->account_id);
+            self::updateCategoryStatistics($transaction->category_id, $transaction->transaction_date);
+        });
+
+        self::updating(function (Transaction $transaction): void {
+            $transaction->payee = $transaction->payee === null ? null : mb_trim($transaction->payee);
+        });
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function color(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): string => match ($this->type) {
+                TransactionType::Expense => 'danger',
+                TransactionType::Revenue => 'success',
+                TransactionType::Transfer => 'warning',
+            }
+        );
     }
 }
