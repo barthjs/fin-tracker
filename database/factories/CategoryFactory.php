@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\TransactionGroup;
+use App\Enums\CategoryGroup;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class CategoryFactory extends Factory
+/**
+ * @extends Factory<Category>
+ */
+final class CategoryFactory extends Factory
 {
     protected $model = Category::class;
 
@@ -21,15 +24,17 @@ class CategoryFactory extends Factory
     {
         $group = fake()
             ->randomElement([
-                TransactionGroup::fix_expenses,
-                TransactionGroup::var_expenses,
-                TransactionGroup::fix_revenues,
-                TransactionGroup::var_revenues,
-            ])->name;
+                CategoryGroup::FixExpenses,
+                CategoryGroup::VarExpenses,
+                CategoryGroup::FixRevenues,
+                CategoryGroup::VarRevenues,
+            ]);
 
         return [
             'name' => fake()->word(),
             'group' => $group,
+            'color' => fake()->hexColor(),
+            'is_active' => fake()->boolean(),
         ];
     }
 }

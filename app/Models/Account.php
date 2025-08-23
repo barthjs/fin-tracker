@@ -115,19 +115,19 @@ final class Account extends Model
     public static function updateAccountBalance(string $accountId): void
     {
         $revenue = (float) Transaction::where('account_id', $accountId)
-            ->where('type', TransactionType::revenue)
+            ->where('type', TransactionType::Revenue)
             ->sum('amount');
 
         $expense = (float) Transaction::where('account_id', $accountId)
-            ->where('type', TransactionType::expense)
+            ->where('type', TransactionType::Expense)
             ->sum('amount');
 
         $outgoingTransfers = (float) Transaction::where('account_id', $accountId)
-            ->where('type', TransactionType::transfer)
+            ->where('type', TransactionType::Transfer)
             ->sum('amount');
 
         $incomingTransfers = (float) Transaction::where('transfer_account_id', $accountId)
-            ->where('type', TransactionType::transfer)
+            ->where('type', TransactionType::Transfer)
             ->sum('amount');
 
         $buyTrades = (float) Trade::where('account_id', $accountId)

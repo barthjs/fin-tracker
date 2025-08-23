@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum TransactionType
+use Filament\Support\Contracts\HasLabel;
+
+enum TransactionType: string implements HasLabel
 {
-    case expense;
-    case revenue;
-    case transfer;
+    case Expense = 'expense';
+    case Revenue = 'revenue';
+    case Transfer = 'transfer';
+
+    public function getLabel(): string
+    {
+        return __('transaction.type.'.$this->value);
+    }
 }
