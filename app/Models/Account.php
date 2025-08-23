@@ -131,11 +131,11 @@ final class Account extends Model
             ->sum('amount');
 
         $buyTrades = (float) Trade::where('account_id', $accountId)
-            ->where('type', TradeType::BUY)
+            ->where('type', TradeType::Buy)
             ->sum('total_amount');
 
         $sellTrades = (float) Trade::where('account_id', $accountId)
-            ->where('type', TradeType::SELL)
+            ->where('type', TradeType::Sell)
             ->sum('total_amount');
 
         $balance = $revenue - $expense - $outgoingTransfers + $incomingTransfers - $buyTrades + $sellTrades;

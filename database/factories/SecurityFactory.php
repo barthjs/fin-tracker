@@ -8,21 +8,29 @@ use App\Enums\SecurityType;
 use App\Models\Security;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class SecurityFactory extends Factory
+/**
+ * @extends Factory<Security>
+ */
+final class SecurityFactory extends Factory
 {
     protected $model = Security::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company(),
-            'isin' => chr(mt_rand(65, 90)).chr(mt_rand(65, 90)).mb_str_pad((string) mt_rand(0, 9999999999), 10, '0', STR_PAD_LEFT),
-            'symbol' => implode('', array_map(function () {
-                return chr(mt_rand(65, 90)); // ASCII A–Z
-            }, range(0, mt_rand(2, 4)))),
-            'price' => $this->faker->randomFloat(3, 1, 100),
-            'description' => $this->faker->text(20),
-            'type' => $this->faker->randomElement(SecurityType::cases())->name,
+            'name' => fake()->company(),
+            'isin' => mb_strtoupper(fake()->lexify('??')).fake()->numerify('##########'),
+            'symbol' => mb_strtoupper(fake()->lexify('???')),
+            'type' => fake()->randomElement(SecurityType::cases()),
+            'price' => fake()->randomFloat(6, 1, 100),
+            'description' => fake()->text(20),
+            'color' => fake()->hexColor(),
+            'is_active' => fake()->boolean(),
         ];
     }
 }

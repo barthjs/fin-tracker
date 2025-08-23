@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SecurityType;
+use App\Enums\TradeType;
 use App\Models\Scopes\UserScope;
+use Carbon\CarbonInterface;
+use Database\Factories\SecurityFactory;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,110 +18,168 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
-class Security extends Model
+/**
+ * @property-read string $id
+ * @property string $name
+ * @property string|null $isin
+ * @property string|null $symbol
+ * @property SecurityType $type
+ * @property float $price
+ * @property-read float $total_quantity
+ * @property-read float $market_value
+ * @property string|null $description
+ * @property string|null $logo
+ * @property string $color
+ * @property bool $is_active
+ * @property string $user_id
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
+ * @property-read User $user
+ * @property-read Collection<int, Trade> $trades
+ */
+final class Security extends Model
 {
-    use HasFactory;
+    /** @use HasFactory<SecurityFactory> */
+    use HasFactory, HasUlids;
 
-    public $table = 'securities';
-
-    protected $fillable = [
-        'name',
-        'isin',
-        'symbol',
-        'price',
-        'total_quantity',
-        'market_value',
-        'description',
-        'logo',
-        'color',
-        'type',
-        'active',
-        'user_id',
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'type' => SecurityType::Stock->value,
+        'price' => 0.0,
+        'total_quantity' => 0.0,
+        'is_active' => true,
     ];
 
-    protected $casts = [
-        'price' => 'decimal:6',
-        'total_quantity' => 'float',
-        'market_value' => 'decimal:6',
-        'active' => 'boolean',
-        'type' => SecurityType::class,
-    ];
+    /**
+     * Retrieve or create the default security for the current user.
+     *
+     * Attempts to find a security named 'Demo' for the authenticated user.
+     * If no such security exists, a new one is created with that name
+     * and a randomly generated color.
+     */
+    public static function getOrCreateDefaultSecurity(?User $user = null): self
+    {
+        $user ??= auth()->user();
+
+        return self::where('user_id', $user->id)->where('name', 'Demo')->first() ??
+            self::create([
+                'name' => 'Demo',
+                'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
+                'user_id' => $user->id,
+            ]);
+    }
+
+    /**
+     * Recalculate and update the total quantity for the security.
+     */
+    public static function updateSecurityQuantity(string $securityId): void
+    {
+        $security = self::find($securityId);
+        if (! $security) {
+            return;
+        }
+
+        $buys = (float) Trade::where('security_id', $securityId)
+            ->where('type', TradeType::Buy)
+            ->sum('quantity');
+
+        $sells = (float) Trade::where('security_id', $securityId)
+            ->where('type', TradeType::Sell)
+            ->sum('quantity');
+
+        $totalQuantity = $buys - $sells;
+
+        $security->update(['total_quantity' => $totalQuantity]);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    public function casts(): array
+    {
+        return [
+            'type' => SecurityType::class,
+            'price' => 'float',
+            'total_quantity' => 'float',
+            'market_value' => 'float',
+            'is_active' => 'bool',
+        ];
+    }
+
+    /**
+     * Owner of the security.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * @return BelongsToMany<Portfolio, $this>
+     */
+    public function portfolios(): BelongsToMany
+    {
+        return $this->belongsToMany(Portfolio::class, 'trades', 'security_id', 'portfolio_id')
+            ->withoutGlobalScopes();
+    }
+
+    /**
+     * Trades of this security.
+     *
+     * @return HasMany<Trade, $this>
+     */
+    public function trades(): HasMany
+    {
+        return $this->hasMany(Trade::class, 'security_id');
+    }
 
     protected static function booted(): void
     {
-        static::addGlobalScope(new UserScope);
+        self::addGlobalScope(new UserScope);
 
-        static::creating(function (Security $security) {
-            // Only needed in importer and seeder
-            if (is_null($security->color)) {
-                $security->color = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
-            }
+        self::creating(function (Security $security): void {
+            self::setCoreFields($security);
 
-            // Only needed in importer
-            if (is_null($security->type)) {
-                $security->type = SecurityType::STOCK;
-            }
-
-            // Only needed in importer and web
-            if (is_null($security->user_id)) {
+            if ($security->user_id === null) {
                 $security->user_id = auth()->user()->id;
             }
-
-            $security->name = mb_trim($security->name);
-            $security->isin = mb_trim($security->isin ?? '');
-            $security->symbol = mb_trim($security->symbol ?? '');
-            $security->market_value = $security->price * $security->total_quantity;
-            $security->description = mb_trim($security->description ?? '');
         });
 
-        static::updating(function (Security $security) {
-            $security->name = mb_trim($security->name);
-            $security->isin = mb_trim($security->isin ?? '');
-            $security->symbol = mb_trim($security->symbol ?? '');
-            $security->market_value = $security->price * $security->total_quantity;
-            $security->description = mb_trim($security->description ?? '');
+        self::updating(function (Security $security): void {
+            self::setCoreFields($security);
         });
 
-        static::updated(function (Security $security) {
-            $logo = $security->getOriginal('logo');
-            if (is_null($security->logo) && ! is_null($logo) && Storage::disk('public')->exists($logo)) {
-                Storage::disk('public')->delete($logo);
+        self::updated(function (Security $security): void {
+            /** @var string|null $originalLogo */
+            $originalLogo = $security->getOriginal('logo');
+
+            if ($originalLogo !== null && $originalLogo !== $security->logo) {
+                if (Storage::disk('public')->exists($originalLogo)) {
+                    Storage::disk('public')->delete($originalLogo);
+                }
             }
         });
 
-        static::deleted(function (Security $security) {
-            if (! is_null($security->logo) && Storage::disk('public')->exists($security->logo)) {
+        self::deleted(function (Security $security): void {
+            if ($security->logo !== null && Storage::disk('public')->exists($security->logo)) {
                 Storage::disk('public')->delete($security->logo);
             }
         });
     }
 
-    /**
-     * Recalculate and update the total quantity for the associated security
-     */
-    public static function updateSecurityQuantity(int $securityId): void
+    private static function setCoreFields(self $security): void
     {
-        $totalQuantity = Trade::whereSecurityId($securityId)->sum('quantity');
-        $security = self::whereId($securityId)->first();
-
-        $security->update([
-            'total_quantity' => $totalQuantity,
-            'market_value' => $totalQuantity * $security->price,
-        ]);
-    }
-
-    public function portfolios(): BelongsToMany
-    {
-        return $this->belongsToMany(self::class, 'trades', 'security_id', 'portfolio_id');
-    }
-
-    public function trades(): HasMany
-    {
-        return $this->hasMany(Trade::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
+        $security->name = mb_trim($security->name);
+        $security->isin = $security->isin === null ? null : mb_trim($security->isin);
+        $security->symbol = $security->symbol === null ? null : mb_trim($security->symbol);
+        $security->description = $security->description === null ? null : mb_trim($security->description);
     }
 }

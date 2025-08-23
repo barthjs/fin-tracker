@@ -8,14 +8,14 @@ use Filament\Support\Contracts\HasLabel;
 
 enum SecurityType: string implements HasLabel
 {
-    public function getLabel(): ?string
-    {
-        return $this->name;
-    }
+    case Bond = 'bond';
+    case Derivative = 'derivative';
+    case ETF = 'etf';
+    case Fund = 'fund';
+    case Stock = 'stock';
 
-    case BOND = 'BOND';
-    case DERIVATIVE = 'DERIVATIVE';
-    case ETF = 'ETF';
-    case FUND = 'FUND';
-    case STOCK = 'STOCK';
+    public function getLabel(): string
+    {
+        return __('security.type.'.$this->value);
+    }
 }
