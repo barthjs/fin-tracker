@@ -4,57 +4,38 @@ declare(strict_types=1);
 
 return [
 
-    'slug' => 'umsaetze',
-    'navigation_label' => 'Umsätze',
+    'label' => 'Umsatz',
+    'plural_label' => 'Umsätze',
+    'slug' => 'umsätze',
 
-    'buttons' => [
-        'create_button_label' => 'Neuer Umsatz',
-        'create_heading' => 'Neuen Umsatz hinzufügen',
-        'edit_heading' => 'Umsatz bearbeiten',
-        'delete_heading' => 'Umsatz löschen',
-        'bulk_delete_heading' => 'Ausgewählte Umsätze löschen',
-        'bulk_account' => 'Konto bearbeiten',
-        'bulk_category' => 'Kategorie bearbeiten',
-        'export_heading' => 'Umsätze exportieren',
-        'import_heading' => 'Umsätze importieren',
-    ],
-
-    'columns' => [
-        'date' => 'Datum',
+    'fields' => [
         'amount' => 'Betrag',
-        'destination' => 'Ziel',
-        'notes' => 'Notizen',
-        'account' => 'Konto',
-        'category' => 'Kategorie',
-        'group' => 'Gruppe',
-        'type' => 'Typ',
+        'payee' => 'Ziel',
     ],
 
-    'form' => [
-        'account_placeholder' => 'Konto wählen',
-        'account_validation_message' => 'Bitte ein Konto angeben',
-        'category_placeholder' => 'Kategorie wählen',
-        'category_validation_message' => 'Bitte eine Kategorie angeben',
+    'type' => [
+        'expense' => 'Ausgabe',
+        'revenue' => 'Einnahme',
+        'transfer' => 'Umbuchung',
     ],
 
-    'notifications' => [
-        'import' => [
-            'failure_heading' => 'Umsatzimport fehlgeschlagen',
-            'success_heading' => 'Umsatzimport erfolgreich',
-            'body_heading' => 'Der Umsatzimport wurde abgeschlossen.',
-            'body_failure' => 'Fehlgeschlagene Zeilen: ',
-            'body_success' => 'Erfolgreich importierte Zeilen: ',
-        ],
-        'export' => [
-            'failure_heading' => 'Umsatzexport fehlgeschlagen',
-            'success_heading' => 'Umsatzexport erfolgreich',
-            'body_heading' => 'Der Umsatzexport wurde abgeschlossen.',
-            'body_failure' => 'Fehlgeschlagene Zeilen: ',
-            'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Umsätze_',
-        ],
+    'import' => [
+        'modal_heading' => 'Umsätze importieren',
+        'failure_heading' => 'Umsatzimport fehlgeschlagen',
+        'success_heading' => 'Umsatzimport erfolgreich',
+        'body_heading' => 'Der Umsatzimport wurde abgeschlossen.',
+        'body_failure' => 'Fehlgeschlagene Zeilen: ',
+        'body_success' => 'Erfolgreich importierte Zeilen: ',
     ],
 
-    'empty' => 'Keine Umsätze gefunden',
+    'export' => [
+        'modal_heading' => 'Umsätze exportieren',
+        'failure_heading' => 'Umsatzexport fehlgeschlagen',
+        'success_heading' => 'Umsatzexport erfolgreich',
+        'body_heading' => 'Der Umsatzexport wurde abgeschlossen.',
+        'body_failure' => 'Fehlgeschlagene Zeilen: ',
+        'body_success' => 'Erfolgreiche exportierte Zeilen: ',
+        'file_name' => 'Umsätze_',
+    ],
 
 ];

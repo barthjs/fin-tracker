@@ -17,10 +17,10 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->ulid('id')->primary();
 
-            $table->dateTime('transaction_date')->index();
+            $table->dateTime('date_time')->index();
             $types = array_column(TransactionType::cases(), 'value');
             $table->enum('type', $types)->default(TransactionType::Expense->value)->index();
-            $table->decimal('amount', 18, 2)->default(0.00);
+            $table->decimal('amount', 18)->default(0);
             $table->string('payee')->nullable()->index();
             $table->string('notes')->nullable();
 
@@ -29,8 +29,9 @@ return new class extends Migration
             $table->foreignUlid('category_id')->nullable()->constrained()->cascadeOnDelete();
 
             $table->index(['account_id', 'type']);
-            $table->index(['account_id', 'transaction_date']);
-            $table->index(['category_id', 'transaction_date']);
+
+            $table->index(['account_id', 'date_time']);
+            $table->index(['category_id', 'date_time']);
         });
     }
 };

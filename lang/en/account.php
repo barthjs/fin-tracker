@@ -10,6 +10,11 @@ return [
 
     'fields' => [
         'balance' => 'Balance',
+        'transfer_account_id' => 'Target account',
+    ],
+
+    'buttons' => [
+        'bulk_edit_account' => 'Edit account',
     ],
 
     'import' => [

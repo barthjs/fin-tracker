@@ -20,6 +20,10 @@ final class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (App::environment('testing')) {
+            return;
+        }
+
         if (User::where('is_admin', '=', true)->first() === null) {
             /** @var User $user */
             $user = User::firstOrCreate(['username' => 'admin', 'email' => 'admin@example.com'],
@@ -37,19 +41,25 @@ final class DatabaseSeeder extends Seeder
         }
 
         if (! App::isLocal()) {
-            /** @var User $user */
-            $user = User::firstOrCreate(['username' => 'user', 'email' => 'user@example.com'],
-                [
-                    'first_name' => 'User',
-                    'last_name' => 'User',
-                    'password' => Hash::make('user'),
-                    'is_active' => true,
-                    'is_verified' => true,
-                    'is_admin' => false,
-                ]);
-
-            $this->generateDefaults($user);
+            return;
         }
+
+        /** @var User $user */
+        $user = User::firstOrCreate(['username' => 'user', 'email' => 'user@example.com'],
+            [
+                'first_name' => 'User',
+                'last_name' => 'User',
+                'password' => Hash::make('user'),
+                'is_active' => true,
+                'is_verified' => true,
+                'is_admin' => false,
+            ]);
+
+        $this->generateDefaults($user);
+
+        $this->call([
+            DemoSeeder::class,
+        ]);
     }
 
     private function generateDefaults(User $user): void

@@ -23,7 +23,7 @@ final class TransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'transaction_date' => fake()->dateTimeBetween('-1 year', 'now'),
+            'date_time' => fake()->dateTimeBetween('-1 year', 'now'),
             'type' => fake()->randomElement([TransactionType::Expense, TransactionType::Revenue]),
             'amount' => fake()->randomFloat(2, 10, 10000),
             'payee' => fake()->company(),

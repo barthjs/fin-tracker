@@ -6,12 +6,11 @@ namespace App\Filament\Resources\Categories\RelationManagers;
 
 use App\Filament\Resources\Transactions\TransactionResource;
 use BackedEnum;
-use Exception;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 
-class TransactionRelationManager extends RelationManager
+final class TransactionRelationManager extends RelationManager
 {
     protected static string $relationship = 'transactions';
 
@@ -19,15 +18,12 @@ class TransactionRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components(TransactionResource::formParts(category: $this->ownerRecord));
+        return TransactionResource::form($schema, account: $this->ownerRecord);
     }
 
-    /**
-     * @throws Exception
-     */
     public function table(Table $table): Table
     {
         return TransactionResource::table($table)
-            ->heading(__('transaction.navigation_label'));
+            ->heading(__('transaction.plural_label'));
     }
 }

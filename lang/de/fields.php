@@ -4,16 +4,29 @@ declare(strict_types=1);
 
 return [
 
+    // Konten, Kategorien, Depots, Wertpapiere
     'name' => 'Name',
-    'market_value' => 'Marktwert',
-    'price' => 'Kurs',
-    'currency' => 'Währung',
     'description' => 'Beschreibung',
-    'type' => 'Typ',
     'color' => 'Farbe',
     'logo' => 'Logo',
     'status' => 'Status',
     'status_active' => 'Aktiv',
     'status_inactive' => 'Inaktiv',
+
+    // Kategorien, Umsätze, Trades
+    'type' => 'Typ',
+
+    //  Konten, Depots
+    'currency' => 'Währung',
+
+    // Depots, Wertpapiere
+    'market_value' => 'Marktwert',
+
+    //  Wertpapiere, Trades
+    'price' => 'Kurs',
+
+    //  Umsätze, Trades
+    'date_time' => 'Datum',
+    'notes' => 'Notizen',
 
 ];

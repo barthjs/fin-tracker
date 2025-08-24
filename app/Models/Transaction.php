@@ -8,7 +8,6 @@ use App\Enums\TransactionType;
 use App\Models\Scopes\UserRelationScope;
 use Carbon\CarbonInterface;
 use Database\Factories\TransactionFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read string $id
- * @property CarbonInterface $transaction_date
+ * @property CarbonInterface $date_time
  * @property TransactionType $type
  * @property float $amount
  * @property string|null $payee
@@ -27,7 +26,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Account $account
  * @property-read Account|null $transferAccount
  * @property-read Category $category
- * @property-read string $color
  */
 final class Transaction extends Model
 {
@@ -57,8 +55,8 @@ final class Transaction extends Model
 
         $sumPerMonth = self::where('category_id', $categoryId)
             ->where('type', '!=', TransactionType::Transfer)
-            ->whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
+            ->whereYear('date_time', $year)
+            ->whereMonth('date_time', $month)
             ->sum('amount');
 
         CategoryStatistic::updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
@@ -72,7 +70,7 @@ final class Transaction extends Model
     public function casts(): array
     {
         return [
-            'transaction_date' => 'datetime',
+            'date_time' => 'datetime',
             'type' => TransactionType::class,
             'amount' => 'float',
         ];
@@ -115,6 +113,11 @@ final class Transaction extends Model
         self::creating(function (Transaction $transaction): void {
             $transaction->payee = $transaction->payee === null ? null : mb_trim($transaction->payee);
 
+            // Normalize transfer target for non-transfer types
+            if ($transaction->type !== TransactionType::Transfer) {
+                $transaction->transfer_account_id = null;
+            }
+
             // Only needed in importer
             if ($transaction->account_id === null) {
                 $transaction->account_id = Account::getOrCreateDefaultAccount()->id;
@@ -128,25 +131,21 @@ final class Transaction extends Model
 
         self::created(function (Transaction $transaction): void {
             Account::updateAccountBalance($transaction->account_id);
-            self::updateCategoryStatistics($transaction->category_id, $transaction->transaction_date);
+
+            if ($transaction->type === TransactionType::Transfer && $transaction->transfer_account_id !== null) {
+                Account::updateAccountBalance($transaction->transfer_account_id);
+            }
+
+            self::updateCategoryStatistics($transaction->category_id, $transaction->date_time);
         });
 
         self::updating(function (Transaction $transaction): void {
             $transaction->payee = $transaction->payee === null ? null : mb_trim($transaction->payee);
-        });
-    }
 
-    /**
-     * @return Attribute<string, never>
-     */
-    protected function color(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): string => match ($this->type) {
-                TransactionType::Expense => 'danger',
-                TransactionType::Revenue => 'success',
-                TransactionType::Transfer => 'warning',
+            // Normalize transfer target for non-transfer types
+            if ($transaction->type !== TransactionType::Transfer) {
+                $transaction->transfer_account_id = null;
             }
-        );
+        });
     }
 }

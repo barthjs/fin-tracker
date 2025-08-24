@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Concerns;
 
 use App\Enums\Currency;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Exports\ExportColumn;
+use Illuminate\Support\Number;
 
 trait HasResourceExportColumns
 {
@@ -39,5 +41,36 @@ trait HasResourceExportColumns
         return ExportColumn::make($name)
             ->label(__('fields.status'))
             ->enabledByDefault(false);
+    }
+
+    public static function dateTimeColum(?string $name = 'date_time'): ExportColumn
+    {
+        return ExportColumn::make($name)
+            ->label(__('fields.date_time'))
+            ->formatStateUsing(fn (CarbonImmutable $state): string => $state->format('Y-m-d, H:i'));
+    }
+
+    public static function typeColum(?string $name = 'type'): ExportColumn
+    {
+        return ExportColumn::make($name)
+            ->label(__('fields.type'));
+    }
+
+    public static function tradeAmountColum(string $name): ExportColumn
+    {
+        return ExportColumn::make($name)
+            ->formatStateUsing(fn (float $state): string|false => Number::format($state, 6));
+    }
+
+    public static function accountColumn(?string $name = 'account.name'): ExportColumn
+    {
+        return ExportColumn::make($name)
+            ->label(__('account.label'));
+    }
+
+    public static function notesColumn(?string $name = 'notes'): ExportColumn
+    {
+        return ExportColumn::make($name)
+            ->label(__('fields.notes'));
     }
 }

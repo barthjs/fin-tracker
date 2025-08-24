@@ -60,7 +60,7 @@ final class DemoSeeder extends Seeder
                     $balance += $amount;
 
                     Transaction::factory()->create([
-                        'transaction_date' => Carbon::now()->subMonths($m),
+                        'date_time' => Carbon::now()->subMonths($m),
                         'type' => $type,
                         'amount' => $amount,
                         'account_id' => $account->id,
@@ -107,7 +107,7 @@ final class DemoSeeder extends Seeder
                     }
 
                     Trade::factory()->create([
-                        'trade_date' => Carbon::now()->subMonths($m),
+                        'date_time' => Carbon::now()->subMonths($m),
                         'type' => $type,
                         'quantity' => $quantity,
                         'price' => $price,

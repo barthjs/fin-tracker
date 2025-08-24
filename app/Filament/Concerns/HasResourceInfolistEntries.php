@@ -10,14 +10,6 @@ use Filament\Support\Enums\TextSize;
 
 trait HasResourceInfolistEntries
 {
-    public static function nameEntry(?string $name = 'name'): TextEntry
-    {
-        return TextEntry::make($name)
-            ->label(__('fields.name'))
-            ->size(TextSize::Medium)
-            ->weight(FontWeight::SemiBold);
-    }
-
     public static function totalValueEntry(string $name): TextEntry
     {
         return TextEntry::make($name)

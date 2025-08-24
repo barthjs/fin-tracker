@@ -57,4 +57,34 @@ trait HasResourceImportColumns
             ->examples([1, 1, 1])
             ->boolean();
     }
+
+    public static function dateTimeColumn(?string $name = 'date_time'): ImportColumn
+    {
+        return ImportColumn::make($name)
+            ->label(__('fields.date_time'))
+            ->requiredMapping()
+            ->rules(['required']);
+    }
+
+    public static function typeColumn(?string $name = 'type'): ImportColumn
+    {
+        return ImportColumn::make($name)
+            ->label(__('fields.type'))
+            ->requiredMapping()
+            ->rules(['required']);
+    }
+
+    public static function numericColumn(string $name): ImportColumn
+    {
+        return ImportColumn::make($name)
+            ->requiredMapping()
+            ->rules(['required']);
+    }
+
+    public static function notesColumn(?string $name = 'notes'): ImportColumn
+    {
+        return ImportColumn::make($name)
+            ->label(__('fields.notes'))
+            ->rules(['max:255']);
+    }
 }

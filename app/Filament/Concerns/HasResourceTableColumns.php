@@ -43,4 +43,23 @@ trait HasResourceTableColumns
             ->sortable()
             ->toggleable(isToggledHiddenByDefault: true);
     }
+
+    public static function notesColumn(?string $name = 'notes'): TextColumn
+    {
+        return TextColumn::make($name)
+            ->label(__('fields.notes'))
+            ->wrap()
+            ->searchable()
+            ->toggleable();
+    }
+
+    public static function dateTimeColumn(?string $name = 'date_time'): TextColumn
+    {
+        return TextColumn::make($name)
+            ->label(__('fields.date_time'))
+            ->dateTime('Y-m-d, H:i')
+            ->fontFamily('mono')
+            ->sortable()
+            ->toggleable();
+    }
 }

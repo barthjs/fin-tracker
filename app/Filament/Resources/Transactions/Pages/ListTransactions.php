@@ -4,113 +4,95 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Transactions\Pages;
 
-use App\Enums\TransactionGroup;
+use App\Enums\CategoryGroup;
 use App\Enums\TransactionType;
+use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\TransactionExporter;
 use App\Filament\Imports\TransactionImporter;
 use App\Filament\Resources\Transactions\TransactionResource;
-use Filament\Actions\CreateAction;
-use Filament\Actions\ExportAction;
-use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\File;
 
-class ListTransactions extends ListRecords
+final class ListTransactions extends ListRecords
 {
+    use HasResourceActions;
+
     protected static string $resource = TransactionResource::class;
-
-    public function getTitle(): string
-    {
-        return __('transaction.navigation_label');
-    }
-
-    public function getHeading(): string
-    {
-        return __('transaction.navigation_label');
-    }
 
     public function getBreadcrumbs(): array
     {
         return [];
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make()
-                ->icon('tabler-plus')
-                ->label(__('transaction.buttons.create_button_label'))
-                ->modalHeading(__('transaction.buttons.create_heading')),
-            ImportAction::make()
-                ->icon('tabler-table-import')
-                ->label(__('table.import'))
-                ->color('warning')
-                ->modalHeading(__('transaction.buttons.import_heading'))
-                ->importer(TransactionImporter::class)
-                ->failureNotificationTitle(__('transaction.notifications.import.failure_heading'))
-                ->successNotificationTitle(__('transaction.notifications.import.success_heading'))
-                ->fileRules([File::types(['csv'])->max(1024)]),
-            ExportAction::make()
-                ->icon('tabler-table-export')
-                ->label(__('table.export'))
-                ->color('warning')
-                ->modalHeading(__('transaction.buttons.export_heading'))
-                ->exporter(TransactionExporter::class)
-                ->failureNotificationTitle(__('transaction.notifications.export.failure_heading'))
-                ->successNotificationTitle(__('transaction.notifications.export.success_heading'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
-        ];
-    }
-
     public function getTabs(): array
     {
         return [
-            'All' => Tab::make()
+            'all' => Tab::make()
                 ->label(__('table.filter.all')),
-            'Expenses' => Tab::make()
+
+            TransactionType::Expense->value => Tab::make()
                 ->label(__('table.filter.expenses'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('type', '=', TransactionType::expense);
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', TransactionType::Expense)),
+
+            CategoryGroup::FixExpenses->value => Tab::make()
+                ->label(CategoryGroup::FixExpenses->getLabel())
+                ->modifyQueryUsing(function (Builder $query): void {
+                    $query->whereHas('category', function (Builder $query): void {
+                        $query->where('group', CategoryGroup::FixExpenses);
                     });
                 }),
-            'Variable Expenses' => Tab::make()
-                ->label(__('category.groups.var_expenses'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('group', '=', TransactionGroup::var_expenses);
+
+            CategoryGroup::VarExpenses->value => Tab::make()
+                ->label(CategoryGroup::VarExpenses->getLabel())
+                ->modifyQueryUsing(function (Builder $query): void {
+                    $query->whereHas('category', function (Builder $query): void {
+                        $query->where('group', CategoryGroup::VarExpenses);
                     });
                 }),
-            'Fixed Expenses' => Tab::make()
-                ->label(__('category.groups.fix_expenses'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('group', '=', TransactionGroup::fix_expenses);
-                    });
-                }),
-            'Revenues' => Tab::make()
+
+            TransactionType::Revenue->value => Tab::make()
                 ->label(__('table.filter.revenues'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('type', '=', TransactionType::revenue);
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', TransactionType::Revenue)),
+
+            CategoryGroup::VarRevenues->value => Tab::make()
+                ->label(CategoryGroup::VarRevenues->getLabel())
+                ->modifyQueryUsing(function (Builder $query): void {
+                    $query->whereHas('category', function (Builder $query): void {
+                        $query->where('group', CategoryGroup::VarRevenues);
                     });
                 }),
-            'Fixed Revenues' => Tab::make()
-                ->label(__('category.groups.fix_revenues'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('group', '=', TransactionGroup::fix_revenues);
+
+            CategoryGroup::FixRevenues->value => Tab::make()
+                ->label(CategoryGroup::FixRevenues->getLabel())
+                ->modifyQueryUsing(function (Builder $query): void {
+                    $query->whereHas('category', function (Builder $query): void {
+                        $query->where('group', CategoryGroup::FixRevenues);
                     });
                 }),
-            'Variable Revenues' => Tab::make()
-                ->label(__('category.groups.var_revenues'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('group', '=', TransactionGroup::var_revenues);
-                    });
-                }),
+        ];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            self::createAction(),
+
+            self::importAction()
+                ->modalHeading(__('transaction.import.modal_heading'))
+                ->importer(TransactionImporter::class)
+                ->failureNotificationTitle(__('transaction.import.failure_heading'))
+                ->successNotificationTitle(__('transaction.import.success_heading'))
+                ->fileRules([File::types(['csv'])->max(1024)]),
+
+            self::exportAction()
+                ->modalHeading(__('transaction.export.modal_heading'))
+                ->exporter(TransactionExporter::class)
+                ->failureNotificationTitle(__('transaction.export.failure_heading'))
+                ->successNotificationTitle(__('transaction.export.success_heading'))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()
+                    ->whereHas('account', fn (Builder $query): Builder => $query->where('user_id', auth()->id()))),
         ];
     }
 }

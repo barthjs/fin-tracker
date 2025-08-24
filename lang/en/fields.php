@@ -4,16 +4,29 @@ declare(strict_types=1);
 
 return [
 
+    // Accounts, Categories, Portfolios, Securities
     'name' => 'Name',
-    'market_value' => 'Market Value',
-    'price' => 'Price',
-    'currency' => 'Currency',
     'description' => 'Description',
-    'type' => 'Type',
     'color' => 'Color',
     'logo' => 'Logo',
     'status' => 'Status',
     'status_active' => 'Active',
     'status_inactive' => 'Inactive',
+
+    // Categories, Transactions, Trades
+    'type' => 'Type',
+
+    // Accounts, Portfolios
+    'currency' => 'Currency',
+
+    // Portfolios, Securities
+    'market_value' => 'Market value',
+
+    // Securities, Trades
+    'price' => 'Price',
+
+    // Transactions, Trades
+    'date_time' => 'Date',
+    'notes' => 'Notes',
 
 ];
