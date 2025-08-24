@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Categories;
 
-use App\Enums\TransactionGroup;
+use App\Enums\CategoryGroup;
+use App\Enums\Currency;
+use App\Filament\Concerns\HasResourceActions;
+use App\Filament\Concerns\HasResourceFormFields;
+use App\Filament\Concerns\HasResourceInfolistEntries;
+use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Categories\Pages\ListCategories;
 use App\Filament\Resources\Categories\Pages\ViewCategory;
 use App\Filament\Resources\Categories\RelationManagers\TransactionRelationManager;
-use App\Models\Account;
 use App\Models\Category;
 use BackedEnum;
 use Carbon\Carbon;
-use Exception;
 use Filament\Actions\BulkAction;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Field;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Panel;
 use Filament\Resources\Resource;
@@ -28,70 +25,54 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
-class CategoryResource extends Resource
+final class CategoryResource extends Resource
 {
+    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+
     protected static ?string $model = Category::class;
 
     protected static ?int $navigationSort = 8;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-category';
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getModelLabel(): string
+    {
+        return __('category.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('category.plural_label');
+    }
+
     public static function getSlug(?Panel $panel = null): string
     {
         return __('category.slug');
     }
 
-    public static function getNavigationLabel(): string
-    {
-        return __('category.navigation_label');
-    }
-
-    public static function getBreadcrumb(): string
-    {
-        return __('category.navigation_label');
-    }
-
     public static function form(Schema $schema): Schema
     {
-        return $schema->components(self::formParts());
+        return $schema->components(self::getFormFields());
     }
 
-    public static function formParts(): array
+    /**
+     * @return array<int, Field>
+     */
+    public static function getFormFields(): array
     {
         return [
-            Section::make()
-                ->schema([
-                    TextInput::make('name')
-                        ->label(__('category.columns.name'))
-                        ->autofocus()
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                    Select::make('group')
-                        ->label(__('category.columns.group'))
-                        ->placeholder(__('category.form.group_placeholder'))
-                        ->options(__('category.groups'))
-                        ->default(TransactionGroup::transfers->name)
-                        ->required(),
-                    ColorPicker::make('color')
-                        ->label(__('widget.color'))
-                        ->validationMessages(['regex' => __('widget.color_validation_message')])
-                        ->required()
-                        ->default(mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
-                        ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
-                    Toggle::make('active')
-                        ->label(__('table.active'))
-                        ->default(true)
-                        ->inline(false),
-                ])
-                ->columns(2),
+            self::nameField(),
+            self::categoryGroupField(),
+            self::colorField(),
+            self::statusToggleField(),
         ];
     }
 
@@ -100,31 +81,23 @@ class CategoryResource extends Resource
         return $schema
             ->components([
                 Section::make()
+                    ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('name')
-                            ->label(__('category.columns.name'))
-                            ->tooltip(fn (Category $record): string => ! $record->active ? __('table.status_inactive') : '')
-                            ->color(fn (Category $record): string => ! $record->active ? 'danger' : 'success')
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                        TextEntry::make('group')
-                            ->label(__('category.columns.group'))
-                            ->formatStateUsing(fn (TransactionGroup $state): string => __('category.groups')[$state->name])
-                            ->color(fn (Category $record): string => match ($record->type->name) {
-                                'expense' => 'danger',
-                                'revenue' => 'success',
-                                default => 'warning',
-                            })
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                        TextEntry::make(Carbon::today()->format('Y'))
-                            ->money(Account::getCurrency())
-                            ->state(function (Category $record): float {
-                                $amount = $record->transactions()
-                                    ->whereYear('date_time', now()->year)
-                                    ->sum('amount');
+                        self::nameEntry()
+                            ->tooltip(fn (Category $record): ?string => ! $record->is_active ? (string) __('fields.status_inactive') : null)
+                            ->color(fn (Category $record): string => ! $record->is_active ? 'danger' : 'success'),
 
-                                return round((float) $amount / 100, precision: 2);
+                        TextEntry::make('group')
+                            ->label(__('category.fields.group'))
+                            ->size(TextSize::Medium)
+                            ->weight(FontWeight::SemiBold),
+
+                        TextEntry::make(Carbon::today()->format('Y'))
+                            ->money(Currency::getCurrency())
+                            ->state(function (Category $record): float {
+                                return $record->statistics()
+                                    ->where('year', now()->year)
+                                    ->first()?->yearlySum() ?? 0.0;
                             })
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
@@ -136,78 +109,58 @@ class CategoryResource extends Resource
             ]);
     }
 
-    /**
-     * @throws Exception
-     */
     public static function table(Table $table): Table
     {
-        $columns = self::tableColumns();
-
         return $table
-            ->modifyQueryUsing(function (Builder $query, Table $table) {
+            ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
-                    return $query->where('active', true);
+                    return $query->where('is_active', true);
                 }
 
                 return $query;
             })
-            ->columns($columns)
+            ->columns(self::getTableColumns())
             ->paginated(fn (): bool => Category::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()
             ->filters([
-                Filter::make('inactive')
-                    ->label(__('table.status_inactive'))
-                    ->toggle()
-                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
+                self::inactiveFilter(),
             ])
             ->persistFiltersInSession()
             ->recordActions([
-                EditAction::make()
-                    ->iconButton()
-                    ->icon('tabler-edit')
-                    ->modalHeading(__('category.buttons.edit_heading')),
-                DeleteAction::make()
-                    ->iconButton()
-                    ->icon('tabler-trash')
-                    ->modalHeading(__('category.buttons.delete_heading'))
-                    ->visible(fn (Category $record): bool => ! $record->transactions()->exists()),
+                self::tableEditAction(),
+                self::tableDeleteAction(),
             ])
             ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('category.empty'))
-            ->emptyStateDescription('')
+            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]))
+            ->emptyStateDescription(null)
             ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('category.buttons.create_button_label'))
-                    ->modalHeading(__('category.buttons.create_heading')),
+                self::createAction(),
             ]);
     }
 
-    public static function tableColumns(): array
+    /**
+     * @return array<int, Column>
+     */
+    public static function getTableColumns(): array
     {
         return [
             TextColumn::make('name')
-                ->label(__('category.columns.name'))
-                ->size(TextSize::Medium)
+                ->label(__('fields.name'))
                 ->weight(FontWeight::SemiBold)
                 ->wrap()
                 ->searchable()
                 ->sortable(),
+
             TextColumn::make('group')
-                ->label(__('category.columns.group'))
-                ->formatStateUsing(fn (TransactionGroup $state): string => __('category.groups')[$state->name])
+                ->label(__('category.fields.group'))
                 ->badge()
-                ->color(fn (Category $record): string => match ($record->type->name) {
-                    'expense' => 'danger',
-                    'revenue' => 'success',
-                    default => 'warning',
-                })
+                ->size(TextSize::Medium)
                 ->searchable(true, function (Builder $query, string $search): Builder {
                     $groups = [];
-                    foreach (__('category.groups') as $group => $value) {
-                        if (mb_stripos($value, $search) !== false) {
+                    foreach (CategoryGroup::cases() as $group) {
+                        if (str_contains(mb_strtolower($group->getLabel()), mb_strtolower($search))) {
                             $groups[] = $group;
                         }
                     }
@@ -215,30 +168,25 @@ class CategoryResource extends Resource
                     return $query->whereIn('group', $groups);
                 })
                 ->sortable(),
-            IconColumn::make('active')
-                ->label(__('table.active'))
-                ->tooltip(fn (bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
-                ->boolean()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+
+            self::statusColumn(),
         ];
     }
 
+    /**
+     * @return array<int, BulkAction>
+     */
     public static function getBulkActions(): array
     {
         return [
             BulkAction::make('group')
                 ->icon('tabler-edit')
-                ->label(__('category.buttons.bulk_group'))
+                ->label(__('category.buttons.bulk_edit_group'))
                 ->schema([
-                    Select::make('group')
-                        ->label(__('category.columns.group'))
-                        ->placeholder(__('category.form.group_placeholder'))
-                        ->options(__('category.groups'))
-                        ->default(TransactionGroup::transfers->name)
-                        ->required(),
+                    self::categoryGroupField(),
                 ])
                 ->action(function (Collection $records, array $data): void {
+                    /** @var Collection<int, Category> $records */
                     $records->each->update(['group' => $data['group']]);
                 })
                 ->deselectRecordsAfterCompletion(),

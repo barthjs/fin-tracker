@@ -4,54 +4,15 @@ declare(strict_types=1);
 
 return [
 
+    'label' => 'Kategorie',
+    'plural_label' => 'Kategorien',
     'slug' => 'kategorien',
-    'navigation_label' => 'Kategorien',
 
-    'buttons' => [
-        'create_button_label' => 'Neue Kategorie',
-        'create_heading' => 'Neue Kategorie hinzufügen',
-        'edit_heading' => 'Kategorie bearbeiten',
-        'delete_heading' => 'Kategorie löschen',
-        'bulk_group' => 'Gruppe bearbeiten',
-        'export_heading' => 'Kategorien exportieren',
-        'import_heading' => 'Kategorien importieren',
-    ],
-
-    'columns' => [
-        'name' => 'Name',
-        'name_examples' => [
-            'Miete',
-            'Freizeit',
-            'Lebensmittel',
-            'Mobilität',
-            'Gehalt',
-            'Zinsen',
-            'Umbuchung',
-        ],
+    'fields' => [
         'group' => 'Gruppe',
-        'group_examples' => [
-            'Fixe Ausgaben',
-            'Variable Ausgaben',
-            'Variable Ausgaben',
-            'Variable Ausgaben',
-            'Fixe Einnahmen',
-            'Variable Einnahmen',
-            'Umbuchungen',
-        ],
-        'type' => 'Typ',
     ],
 
-    'form' => [
-        'group_placeholder' => 'Gruppe wählen',
-    ],
-
-    'types' => [
-        'expense' => 'Ausgabe',
-        'revenue' => 'Einnahme',
-        'transfer' => 'Umbuchung',
-    ],
-
-    'groups' => [
+    'group' => [
         'fix_expenses' => 'Fixe Ausgaben',
         'var_expenses' => 'Variable Ausgaben',
         'fix_revenues' => 'Fixe Einnahmen',
@@ -59,24 +20,44 @@ return [
         'transfers' => 'Umbuchungen',
     ],
 
-    'notifications' => [
-        'import' => [
-            'failure_heading' => 'Kategorien fehlgeschlagen',
-            'success_heading' => 'Kategorienimport erfolgreich',
-            'body_heading' => 'Der Kategorienimport wurde abgeschlossen.',
-            'body_failure' => 'Fehlgeschlagene Zeilen: ',
-            'body_success' => 'Erfolgreich importierte Zeilen: ',
-        ],
-        'export' => [
-            'failure_heading' => 'Kategorienexport fehlgeschlagen',
-            'success_heading' => 'Kategorienexport erfolgreich',
-            'body_heading' => 'Der Kategorienexport wurde abgeschlossen.',
-            'body_failure' => 'Fehlgeschlagene Zeilen: ',
-            'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Kategorien_',
+    'buttons' => [
+        'bulk_edit_group' => 'Gruppe bearbeiten',
+    ],
+
+    'import' => [
+        'modal_heading' => 'Kategorien importieren',
+        'failure_heading' => 'Kategorien fehlgeschlagen',
+        'success_heading' => 'Kategorienimport erfolgreich',
+        'body_heading' => 'Der Kategorienimport wurde abgeschlossen.',
+        'body_failure' => 'Fehlgeschlagene Zeilen: ',
+        'body_success' => 'Erfolgreich importierte Zeilen: ',
+
+        'examples' => [
+            'name' => [
+                'Miete',
+                'Freizeit',
+                'Gehalt',
+                'Zinsen',
+                'Umbuchung',
+            ],
+            'group' => [
+                'Fixe Ausgaben',
+                'Variable Ausgaben',
+                'Fixe Einnahmen',
+                'Variable Einnahmen',
+                'Umbuchungen',
+            ],
         ],
     ],
 
-    'empty' => 'Keine Kategorien gefunden',
+    'export' => [
+        'modal_heading' => 'Kategorien exportieren',
+        'failure_heading' => 'Kategorienexport fehlgeschlagen',
+        'success_heading' => 'Kategorienexport erfolgreich',
+        'body_heading' => 'Der Kategorienexport wurde abgeschlossen.',
+        'body_failure' => 'Fehlgeschlagene Zeilen: ',
+        'body_success' => 'Erfolgreiche exportierte Zeilen: ',
+        'file_name' => 'Kategorien_',
+    ],
 
 ];

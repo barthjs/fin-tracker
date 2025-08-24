@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Concerns;
 
+use App\Enums\CategoryGroup;
 use App\Enums\Currency;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
@@ -72,5 +73,15 @@ trait HasResourceFormFields
             ->autosize()
             ->rows(4)
             ->maxLength(1000);
+    }
+
+    public static function categoryGroupField(string $column = 'group'): Select
+    {
+        return Select::make($column)
+            ->label(__('category.fields.group'))
+            ->options(CategoryGroup::class)
+            ->default(CategoryGroup::VarExpenses)
+            ->selectablePlaceholder(false)
+            ->required();
     }
 }

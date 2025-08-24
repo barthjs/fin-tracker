@@ -4,54 +4,15 @@ declare(strict_types=1);
 
 return [
 
+    'label' => 'Category',
+    'plural_label' => 'Categories',
     'slug' => 'categories',
-    'navigation_label' => 'Categories',
 
-    'buttons' => [
-        'create_button_label' => 'New category',
-        'create_heading' => 'Create new category',
-        'edit_heading' => 'Edit category',
-        'delete_heading' => 'Delete category',
-        'bulk_group' => 'Edit group',
-        'export_heading' => 'Export categories',
-        'import_heading' => 'Import categories',
-    ],
-
-    'columns' => [
-        'name' => 'Name',
-        'name_examples' => [
-            'Rent',
-            'Leisure',
-            'Groceries',
-            'Mobility',
-            'Salary',
-            'Interest',
-            'Transfer',
-        ],
+    'fields' => [
         'group' => 'Group',
-        'group_examples' => [
-            'Fixed expenses',
-            'Variable expenses',
-            'Variable expenses',
-            'Variable expenses',
-            'Fixed revenues',
-            'Variable revenues',
-            'Transfers',
-        ],
-        'type' => 'Type',
     ],
 
-    'form' => [
-        'group_placeholder' => 'Select group',
-    ],
-
-    'types' => [
-        'expense' => 'Expense',
-        'revenue' => 'Revenue',
-        'transfer' => 'Transfer',
-    ],
-
-    'groups' => [
+    'group' => [
         'fix_expenses' => 'Fixed expenses',
         'var_expenses' => 'Variable expenses',
         'fix_revenues' => 'Fixed revenues',
@@ -59,24 +20,44 @@ return [
         'transfers' => 'Transfers',
     ],
 
-    'notifications' => [
-        'import' => [
-            'failure_heading' => 'Categories import failed',
-            'success_heading' => 'Categories import successful',
-            'body_heading' => 'The category import has been completed.',
-            'body_failure' => 'Failed rows: ',
-            'body_success' => 'Successfully imported rows: ',
-        ],
-        'export' => [
-            'failure_heading' => 'Categories export failed',
-            'success_heading' => 'Categories export successful',
-            'body_heading' => 'The category export has been completed.',
-            'body_failure' => 'Failed rows: ',
-            'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'categories_',
+    'buttons' => [
+        'bulk_edit_group' => 'Edit group',
+    ],
+
+    'import' => [
+        'modal_heading' => 'Import categories',
+        'failure_heading' => 'Category import failed',
+        'success_heading' => 'Category import successful',
+        'body_heading' => 'The category import has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully imported rows: ',
+
+        'examples' => [
+            'name' => [
+                'Rent',
+                'Leisure',
+                'Salary',
+                'Interest',
+                'Transfer',
+            ],
+            'group' => [
+                'Fixed expenses',
+                'Variable expenses',
+                'Fixed revenues',
+                'Variable revenues',
+                'Transfers',
+            ],
         ],
     ],
 
-    'empty' => 'No categories found',
+    'export' => [
+        'modal_heading' => 'Export categories',
+        'failure_heading' => 'Category export failed',
+        'success_heading' => 'Category export successful',
+        'body_heading' => 'The category export has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully exported rows: ',
+        'file_name' => 'Categories_',
+    ],
 
 ];

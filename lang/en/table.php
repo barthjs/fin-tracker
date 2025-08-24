@@ -4,15 +4,6 @@ declare(strict_types=1);
 
 return [
 
-    'created_at' => 'Created',
-    'updated_at' => 'Updated',
-    'active' => 'Status',
-    'status_active' => 'Active',
-    'status_inactive' => 'Inactive',
-
-    'export' => 'Export',
-    'import' => 'Import',
-
     'filter' => [
         'all' => 'All',
         'year' => 'Year',

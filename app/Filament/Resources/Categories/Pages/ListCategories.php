@@ -5,78 +5,59 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Categories\Pages;
 
 use App\Enums\TransactionType;
+use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\CategoryExporter;
 use App\Filament\Imports\CategoryImporter;
 use App\Filament\Resources\Categories\CategoryResource;
-use Filament\Actions\CreateAction;
-use Filament\Actions\ExportAction;
-use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\File;
 
-class ListCategories extends ListRecords
+final class ListCategories extends ListRecords
 {
+    use HasResourceActions;
+
     protected static string $resource = CategoryResource::class;
 
-    public function getTitle(): string
+    public function getTabs(): array
     {
-        return __('category.navigation_label');
-    }
+        return [
+            'all' => Tab::make()
+                ->label(__('table.filter.all')),
 
-    public function getHeading(): string
-    {
-        return __('category.navigation_label');
+            TransactionType::Expense->value => Tab::make()
+                ->icon('tabler-minus')
+                ->iconPosition('before')
+                ->label(__('table.filter.expenses'))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', TransactionType::Expense)),
+
+            TransactionType::Revenue->value => Tab::make()
+                ->icon('tabler-plus')
+                ->iconPosition('after')
+                ->label(__('table.filter.revenues'))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', TransactionType::Revenue)),
+        ];
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->icon('tabler-plus')
-                ->label(__('category.buttons.create_button_label'))
-                ->modalHeading(__('category.buttons.create_heading')),
-            ImportAction::make()
-                ->icon('tabler-table-import')
-                ->label(__('table.import'))
-                ->color('warning')
-                ->modalHeading(__('category.buttons.import_heading'))
-                ->importer(CategoryImporter::class)
-                ->failureNotificationTitle(__('category.notifications.import.failure_heading'))
-                ->successNotificationTitle(__('category.notifications.import.success_heading'))
-                ->fileRules([File::types(['csv'])->max(1024)]),
-            ExportAction::make()
-                ->icon('tabler-table-export')
-                ->label(__('table.export'))
-                ->color('warning')
-                ->modalHeading(__('category.buttons.export_heading'))
-                ->exporter(CategoryExporter::class)
-                ->failureNotificationTitle(__('category.notifications.export.failure_heading'))
-                ->successNotificationTitle(__('category.notifications.export.success_heading'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
-        ];
-    }
+            self::createAction(),
 
-    public function getTabs(): array
-    {
-        return [
-            'All' => Tab::make()
-                ->label(__('table.filter.all')),
-            'Expenses' => Tab::make()
-                ->icon('tabler-minus')
-                ->iconPosition('before')
-                ->label(__('table.filter.expenses'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->where('type', '=', TransactionType::expense);
-                }),
-            'Revenues' => Tab::make()
-                ->icon('tabler-plus')
-                ->iconPosition('after')
-                ->label(__('table.filter.revenues'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->where('type', '=', TransactionType::revenue);
-                }),
+            self::importAction()
+                ->modalHeading(__('category.import.modal_heading'))
+                ->importer(CategoryImporter::class)
+                ->failureNotificationTitle(__('category.import.failure_heading'))
+                ->successNotificationTitle(__('category.import.success_heading'))
+                ->fileRules([File::types(['csv'])->max(1024)]),
+
+            self::exportAction()
+                ->modalHeading(__('category.export.modal_heading'))
+                ->exporter(CategoryExporter::class)
+                ->failureNotificationTitle(__('category.export.failure_heading'))
+                ->successNotificationTitle(__('category.export.success_heading'))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
         ];
     }
 }
