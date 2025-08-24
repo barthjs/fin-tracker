@@ -6,8 +6,10 @@ return [
 
     'name' => 'Name',
     'market_value' => 'Market Value',
+    'price' => 'Price',
     'currency' => 'Currency',
     'description' => 'Description',
+    'type' => 'Type',
     'color' => 'Color',
     'logo' => 'Logo',
     'status' => 'Status',

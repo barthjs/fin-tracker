@@ -4,60 +4,41 @@ declare(strict_types=1);
 
 return [
 
+    'label' => 'Security',
+    'plural_label' => 'Securities',
     'slug' => 'securities',
-    'navigation_label' => 'Securities',
 
-    'buttons' => [
-        'create_button_label' => 'New security',
-        'create_heading' => 'Create new security',
-        'edit_heading' => 'Edit security',
-        'delete_heading' => 'Delete security',
-        'export_heading' => 'Export Securities',
-        'import_heading' => 'Import Securities',
-    ],
-
-    'columns' => [
-        'logo' => 'Logo',
-        'name' => 'Name',
+    'fields' => [
         'isin' => 'ISIN',
         'symbol' => 'Symbol',
-        'price' => 'Price',
         'total_quantity' => 'Quantity',
-        'market_value' => 'Marketvalue',
-        'description' => 'Description',
-        'type' => 'Type',
     ],
 
-    'form' => [
-        'type_placeholder' => 'Select Type',
+    'type' => [
+        'bond' => 'Bond',
+        'derivative' => 'Derivative',
+        'etf' => 'ETF',
+        'fund' => 'Fund',
+        'stock' => 'Stock',
     ],
 
-    'types' => [
-        'BOND' => 'Bond',
-        'DERIVATIVE' => 'Derivative',
-        'ETF' => 'ETF',
-        'FUND' => 'Fund',
-        'STOCK' => 'Stock',
+    'import' => [
+        'modal_heading' => 'Import securities',
+        'failure_heading' => 'Security import failed',
+        'success_heading' => 'Security import successful',
+        'body_heading' => 'The security import has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully imported rows: ',
     ],
 
-    'notifications' => [
-        'import' => [
-            'failure_heading' => 'Security import failed',
-            'success_heading' => 'Security import successful',
-            'body_heading' => 'The security import has been completed.',
-            'body_failure' => 'Failed rows: ',
-            'body_success' => 'Successfully imported rows: ',
-        ],
-        'export' => [
-            'failure_heading' => 'Security export failed',
-            'success_heading' => 'Security export successful',
-            'body_heading' => 'The security export has been completed.',
-            'body_failure' => 'Failed rows: ',
-            'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'securities_',
-        ],
+    'export' => [
+        'modal_heading' => 'Export securities',
+        'failure_heading' => 'Security export failed',
+        'success_heading' => 'Security export successful',
+        'body_heading' => 'The security export has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully exported rows: ',
+        'file_name' => 'Securities_',
     ],
-
-    'empty' => 'No securities found',
 
 ];

@@ -4,30 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Securities\Pages;
 
+use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\SecurityExporter;
 use App\Filament\Imports\SecurityImporter;
 use App\Filament\Resources\Securities\SecurityResource;
 use App\Filament\Resources\Securities\Widgets\SecurityChart;
-use Filament\Actions\CreateAction;
-use Filament\Actions\ExportAction;
-use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\File;
 
-class ListSecurities extends ListRecords
+final class ListSecurities extends ListRecords
 {
+    use HasResourceActions;
+
     protected static string $resource = SecurityResource::class;
-
-    public function getTitle(): string
-    {
-        return __('security.navigation_label');
-    }
-
-    public function getHeading(): string
-    {
-        return __('security.navigation_label');
-    }
 
     protected function getFooterWidgets(): array
     {
@@ -39,27 +29,20 @@ class ListSecurities extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->icon('tabler-plus')
-                ->label(__('security.buttons.create_button_label'))
-                ->modalHeading(__('security.buttons.create_heading')),
-            ImportAction::make()
-                ->icon('tabler-table-import')
-                ->label(__('table.import'))
-                ->color('warning')
-                ->modalHeading(__('security.buttons.import_heading'))
+            self::createAction(),
+
+            self::importAction()
+                ->modalHeading(__('security.import.modal_heading'))
                 ->importer(SecurityImporter::class)
-                ->failureNotificationTitle(__('security.notifications.import.failure_heading'))
-                ->successNotificationTitle(__('security.notifications.import.success_heading'))
+                ->failureNotificationTitle(__('security.import.failure_heading'))
+                ->successNotificationTitle(__('security.import.success_heading'))
                 ->fileRules([File::types(['csv'])->max(1024)]),
-            ExportAction::make()
-                ->icon('tabler-table-export')
-                ->label(__('table.export'))
-                ->color('warning')
-                ->modalHeading(__('security.buttons.export_heading'))
+
+            self::exportAction()
+                ->modalHeading(__('security.export.modal_heading'))
                 ->exporter(SecurityExporter::class)
-                ->failureNotificationTitle(__('security.notifications.export.failure_heading'))
-                ->successNotificationTitle(__('security.notifications.export.success_heading'))
+                ->failureNotificationTitle(__('security.export.failure_heading'))
+                ->successNotificationTitle(__('security.export.success_heading'))
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
         ];
     }

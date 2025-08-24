@@ -6,8 +6,10 @@ return [
 
     'name' => 'Name',
     'market_value' => 'Marktwert',
+    'price' => 'Kurs',
     'currency' => 'Währung',
     'description' => 'Beschreibung',
+    'type' => 'Typ',
     'color' => 'Farbe',
     'logo' => 'Logo',
     'status' => 'Status',

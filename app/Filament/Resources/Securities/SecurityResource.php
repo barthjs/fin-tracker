@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Securities;
 
+use App\Enums\Currency;
 use App\Enums\SecurityType;
+use App\Filament\Concerns\HasResourceActions;
+use App\Filament\Concerns\HasResourceFormFields;
+use App\Filament\Concerns\HasResourceInfolistEntries;
+use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Securities\Pages\ListSecurities;
 use App\Filament\Resources\Securities\Pages\ViewSecurity;
 use App\Filament\Resources\Securities\RelationManagers\TradesRelationManager;
@@ -12,18 +17,10 @@ use App\Filament\Resources\Users\RelationManagers\SecuritiesRelationManager;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
-use App\Tables\Columns\LogoColumn;
 use BackedEnum;
-use Exception;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Panel;
 use Filament\Resources\Resource;
@@ -31,101 +28,79 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Number;
 
-class SecurityResource extends Resource
+final class SecurityResource extends Resource
 {
+    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+
     protected static ?string $model = Security::class;
 
     protected static ?int $navigationSort = 7;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-file-percent';
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getModelLabel(): string
+    {
+        return __('security.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('security.plural_label');
+    }
+
     public static function getSlug(?Panel $panel = null): string
     {
         return __('security.slug');
     }
 
-    public static function getNavigationLabel(): string
-    {
-        return __('security.navigation_label');
-    }
-
-    public static function getBreadcrumb(): string
-    {
-        return __('security.navigation_label');
-    }
-
     public static function form(Schema $schema): Schema
     {
-        return $schema->components(self::formParts());
+        return $schema->components(self::getFormFields());
     }
 
-    public static function formParts(): array
+    /**
+     * @return array<int, Field>
+     */
+    public static function getFormFields(): array
     {
         return [
-            Section::make()
-                ->schema([
-                    TextInput::make('name')
-                        ->label(__('security.columns.name'))
-                        ->autofocus()
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                    TextInput::make('isin')
-                        ->label(__('security.columns.isin'))
-                        ->maxLength(255)
-                        ->string(),
-                    TextInput::make('symbol')
-                        ->label(__('security.columns.symbol'))
-                        ->maxLength(255)
-                        ->string(),
-                    TextInput::make('price')
-                        ->label(__('security.columns.price'))
-                        ->required()
-                        ->numeric(),
-                ])->columns(2),
-            Section::make()
-                ->schema([
-                    Select::make('type')
-                        ->label(__('security.columns.type'))
-                        ->placeholder(__('security.form.type_placeholder'))
-                        ->options(__('security.types'))
-                        ->default(SecurityType::STOCK)
-                        ->required(),
-                    ColorPicker::make('color')
-                        ->label(__('widget.color'))
-                        ->validationMessages(['regex' => __('widget.color_validation_message')])
-                        ->required()
-                        ->default(mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
-                        ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
-                    Toggle::make('active')
-                        ->label(__('table.active'))
-                        ->default(true)
-                        ->inline(false),
-                    FileUpload::make('logo')
-                        ->label(__('security.columns.logo'))
-                        ->avatar()
-                        ->image()
-                        ->imageEditor()
-                        ->circleCropper()
-                        ->moveFiles()
-                        ->directory('logos')
-                        ->maxSize(1024),
-                    Textarea::make('description')
-                        ->label(__('security.columns.description'))
-                        ->autosize()
-                        ->columnSpan(2)
-                        ->maxLength(1000)
-                        ->string(),
-                ])->columns(3),
+            self::nameField()
+                ->columnSpanFull(),
+
+            TextInput::make('isin')
+                ->label(__('security.fields.isin'))
+                ->maxLength(255),
+
+            TextInput::make('symbol')
+                ->label(__('security.fields.symbol'))
+                ->maxLength(255),
+
+            TextInput::make('price')
+                ->label(__('fields.price'))
+                ->required()
+                ->numeric(),
+
+            Select::make('type')
+                ->label(__('fields.type'))
+                ->options(SecurityType::class)
+                ->default(SecurityType::Stock)
+                ->selectablePlaceholder(false)
+                ->required(),
+
+            self::colorField(),
+            self::statusToggleField(),
+            self::logoField(),
+            self::descriptionField(),
         ];
     }
 
@@ -134,26 +109,26 @@ class SecurityResource extends Resource
         return $schema
             ->components([
                 Section::make()
+                    ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('name')
-                            ->label(__('security.columns.name'))
-                            ->tooltip(fn (Security $record) => ! $record->active ? __('table.status_inactive') : '')
-                            ->color(fn (Security $record) => ! $record->active ? 'danger' : 'success')
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold),
+                        self::nameEntry()
+                            ->tooltip(fn (Security $record): ?string => ! $record->is_active ? (string) __('fields.status_inactive') : null)
+                            ->color(fn (Security $record): string => ! $record->is_active ? 'danger' : 'success'),
+
                         TextEntry::make('price')
-                            ->label(__('security.columns.price'))
+                            ->label(__('fields.price'))
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold)
                             ->numeric(6),
+
                         TextEntry::make('total_quantity')
-                            ->label(__('security.columns.total_quantity'))
+                            ->label(__('security.fields.total_quantity'))
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold)
                             ->numeric(6),
+
                         TextEntry::make('type')
-                            ->label(__('security.columns.type'))
-                            ->formatStateUsing(fn (SecurityType $state): string => __('security.types')[$state->name])
+                            ->label(__('fields.type'))
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                     ])
@@ -164,22 +139,17 @@ class SecurityResource extends Resource
             ]);
     }
 
-    /**
-     * @throws Exception
-     */
     public static function table(Table $table): Table
     {
-        $columns = self::getTableColumns();
-
         return $table
-            ->modifyQueryUsing(function (Builder $query, Table $table) {
+            ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
-                    return $query->where('active', true);
+                    return $query->where('is_active', true);
                 }
 
                 return $query;
             })
-            ->columns($columns)
+            ->columns(self::getTableColumns())
             ->paginated(fn (): bool => Security::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
@@ -189,29 +159,27 @@ class SecurityResource extends Resource
                 Group::make('type')
                     ->label('')
                     ->collapsible()
-                    ->getTitleFromRecordUsing(fn (Security $record): string => __('security.types')[$record->type->name]),
+                    ->getTitleFromRecordUsing(fn (Security $record): string => $record->type->getLabel()),
             ])
             ->striped()
             ->filters([
-                Filter::make('inactive')
-                    ->label(__('table.status_inactive'))
-                    ->toggle()
-                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
+                self::inactiveFilter(),
             ])
             ->persistFiltersInSession()
             ->recordActions([
-                EditAction::make()
-                    ->iconButton()
-                    ->icon('tabler-edit')
-                    ->modalHeading(__('security.buttons.edit_heading'))
+                self::tableEditAction()
                     ->using(function (Security $record, array $data): Security {
-                        $price = $record->price;
+                        $oldPrice = $record->price;
+                        /** @var array<string, mixed> $data * */
                         $record->update($data);
-                        if ($data['price'] !== $price) {
-                            $portfolios = Trade::whereSecurityId($record->id)
+
+                        if ($data['price'] !== $oldPrice) {
+                            /** @var array<string> $portfolios */
+                            $portfolios = Trade::where('security_id', $record->id)
+                                ->distinct(['portfolio_id'])
                                 ->pluck('portfolio_id')
-                                ->unique()
                                 ->toArray();
+
                             if (! empty($portfolios)) {
                                 foreach ($portfolios as $portfolio) {
                                     Portfolio::updatePortfolioMarketValue($portfolio);
@@ -221,75 +189,68 @@ class SecurityResource extends Resource
 
                         return $record;
                     }),
-                DeleteAction::make()
-                    ->iconButton()
-                    ->icon('tabler-trash')
-                    ->modalHeading(__('security.buttons.delete_heading'))
-                    ->visible(fn (Security $record): bool => ! $record->trades()->exists()),
+
+                self::tableDeleteAction(),
             ])
-            ->emptyStateHeading(__('security.empty'))
-            ->emptyStateDescription('')
+            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]))
+            ->emptyStateDescription(null)
             ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('security.buttons.create_button_label'))
-                    ->modalHeading(__('security.buttons.create_heading')),
+                self::createAction(),
             ]);
     }
 
-    public static function getTableColumns(?int $portfolioId = null): array
+    /**
+     * @return array<int, Column>
+     */
+    public static function getTableColumns(?Portfolio $portfolio = null): array
     {
         $hidden = SecuritiesRelationManager::class;
 
         return [
-            LogoColumn::make('name')
-                ->label(__('security.columns.name'))
+            self::logoAndNameColumn()
                 ->state(fn (Security $record): array => [
                     'logo' => $record->logo,
                     'name' => $record->name,
-                ])
-                ->searchable()
-                ->sortable(),
+                ]),
+
             TextColumn::make('price')
-                ->label(__('security.columns.price'))
+                ->label(__('fields.price'))
                 ->badge()
                 ->numeric(2)
                 ->sortable(),
-            TextColumn::make('total_quantity')
-                ->label(__('security.columns.total_quantity'))
-                ->hiddenOn($hidden)
-                ->formatStateUsing(function (Security $record, float $state) use ($portfolioId): string {
-                    $quantity = $portfolioId ? Trade::whereSecurityId($record->id)->wherePortfolioId($portfolioId)->sum('quantity') : $state;
 
-                    return Number::format((float) $quantity, 2);
+            TextColumn::make('total_quantity')
+                ->hiddenOn($hidden)
+                ->label(__('security.fields.total_quantity'))
+                ->formatStateUsing(function (Security $record, float $state) use ($portfolio): ?string {
+                    // Show only the quantity of the current portfolio on the relation manager
+                    // Todo
+                    return $portfolio ? null : Number::format($state, 2);
                 })
                 ->sortable(),
+
             TextColumn::make('market_value')
-                ->label(__('security.columns.market_value'))
+                ->label(__('fields.market_value'))
                 ->numeric(2)
-                ->summarize(Sum::make()->label('')->money(config('app.currency')))
+                ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
                 ->sortable(),
+
             TextColumn::make('isin')
-                ->label(__('security.columns.isin'))
+                ->label(__('security.fields.isin'))
                 ->searchable()
                 ->sortable()
                 ->toggleable(),
+
             TextColumn::make('symbol')
-                ->label(__('security.columns.symbol'))
+                ->label(__('security.fields.symbol'))
                 ->searchable()
                 ->sortable()
                 ->toggleable(),
-            TextColumn::make('description')
-                ->label(__('security.columns.description'))
-                ->hiddenOn($hidden)
-                ->wrap()
-                ->toggleable(isToggledHiddenByDefault: true),
-            IconColumn::make('active')
-                ->label(__('table.active'))
-                ->tooltip(fn (bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
-                ->boolean()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+
+            self::descriptionColumn()
+                ->hiddenOn($hidden),
+
+            self::statusColumn(),
         ];
     }
 
