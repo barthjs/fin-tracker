@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\Currency;
 use App\Enums\TradeType;
 use App\Models\Scopes\UserScope;
 use Carbon\CarbonInterface;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read string $id
  * @property string $name
  * @property-read float $market_value
+ * @property Currency $currency
  * @property string|null $description
  * @property string|null $logo
  * @property string $color
@@ -62,6 +64,7 @@ final class Portfolio extends Model
         return self::where('user_id', $user->id)->where('name', 'Demo')->first() ??
             self::create([
                 'name' => 'Demo',
+                'currency' => Currency::getCurrency(),
                 'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
                 'user_id' => $user->id,
             ]);
@@ -73,7 +76,7 @@ final class Portfolio extends Model
      * The market value is derived from all trades in the portfolio:
      * - BUY trades increase position (positive quantity)
      * - SELL trades decrease position (negative quantity)
-     * - Market value is calculated as sum(quantity * current security price)
+     * - Market value is calculated as 'sum(quantity * current security price)'
      */
     public static function updatePortfolioMarketValue(string $portfolioId): void
     {
@@ -126,6 +129,7 @@ final class Portfolio extends Model
     public function casts(): array
     {
         return [
+            'currency' => Currency::class,
             'market_value' => 'float',
             'is_active' => 'bool',
         ];

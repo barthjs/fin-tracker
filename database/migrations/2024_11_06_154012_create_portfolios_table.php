@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Currency;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,7 @@ return new class extends Migration
 
             $table->string('name')->index();
             $table->decimal('market_value', 18, 6)->default(0);
+            $table->char('currency', 3)->default(Currency::EUR->value)->index();
             $table->text('description')->nullable();
 
             $table->string('logo')->nullable();
