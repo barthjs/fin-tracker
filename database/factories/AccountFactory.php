@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\Currency;
 use App\Models\Account;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,7 +24,7 @@ final class AccountFactory extends Factory
     {
         return [
             'name' => fake()->word(),
-            'currency' => Account::getCurrency(),
+            'currency' => Currency::getCurrency(),
             'description' => fake()->sentence(),
             'color' => fake()->hexColor(),
             'is_active' => fake()->boolean(),

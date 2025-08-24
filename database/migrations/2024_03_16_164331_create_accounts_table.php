@@ -18,7 +18,7 @@ return new class extends Migration
             $table->ulid('id')->primary();
 
             $table->string('name')->index();
-            $table->decimal('balance', 18, 2)->default(0);
+            $table->decimal('balance', 18)->default(0);
             $table->char('currency', 3)->default(Currency::EUR->value)->index();
             $table->text('description')->nullable();
 

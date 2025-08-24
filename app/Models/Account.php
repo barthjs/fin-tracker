@@ -66,39 +66,10 @@ final class Account extends Model
         return self::where('user_id', $user->id)->where('name', 'Demo')->first() ??
             self::create([
                 'name' => 'Demo',
-                'currency' => self::getCurrency(),
+                'currency' => Currency::getCurrency(),
                 'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
                 'user_id' => $user->id,
             ]);
-    }
-
-    /**
-     * Get a valid currency code.
-     *
-     * Returns an ISO4217 currency code based on the provided input
-     * or the application's configuration. The order of precedence is:
-     *   1. If a valid currency code is provided, it is returned.
-     *   2. Otherwise, the default currency in the config is used if valid.
-     *   3. If neither is valid, EUR is returned as a fallback.
-     *
-     * @param  string|null  $currencyCode  Optional ISO4217 currency code to validate.
-     * @return string A valid ISO4217 currency code.
-     */
-    public static function getCurrency(?string $currencyCode = null): string
-    {
-        if ($currencyCode !== null) {
-            $currency = Currency::tryFrom($currencyCode);
-            if ($currency !== null) {
-                return $currency->value;
-            }
-        }
-
-        $currency = Currency::tryFrom(config()->string('app.currency'));
-        if ($currency !== null) {
-            return $currency->value;
-        }
-
-        return Currency::EUR->value;
     }
 
     /**
