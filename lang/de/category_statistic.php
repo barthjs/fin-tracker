@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 return [
 
+    'label' => 'statistik',
+    'plural_label' => 'statistik',
     'slug' => 'statistik',
-    'navigation_label' => 'Statistik',
 
     'columns' => [
         'jan' => 'Januar',

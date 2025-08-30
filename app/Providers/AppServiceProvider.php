@@ -7,7 +7,6 @@ namespace App\Providers;
 use Carbon\CarbonImmutable;
 use Filament\Forms\Components\FileUpload;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Schemas\Components\Section;
 use Filament\Support\View\Components\ModalComponent;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
@@ -43,7 +42,6 @@ final class AppServiceProvider extends ServiceProvider
         ImageColumn::configureUsing(fn (ImageColumn $imageColumn): ImageColumn => $imageColumn->visibility('public'));
         ImageEntry::configureUsing(fn (ImageEntry $imageEntry): ImageEntry => $imageEntry->visibility('public'));
         ModalComponent::closedByClickingAway(false);
-        Section::configureUsing(fn (Section $section): Section => $section->columnSpanFull());
         Table::configureUsing(fn (Table $table): Table => $table
             ->deferFilters(false)
             ->paginationPageOptions([5, 10, 25, 50, 'all']));

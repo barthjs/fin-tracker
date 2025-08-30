@@ -12,7 +12,7 @@ final class Dashboard extends \Filament\Pages\Dashboard
 
     protected ?string $heading = '';
 
-    public function getColumns(): int|array
+    public function getColumns(): int
     {
         return 4;
     }

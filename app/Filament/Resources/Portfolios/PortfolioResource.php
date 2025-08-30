@@ -81,10 +81,6 @@ final class PortfolioResource extends Resource
                 Section::make()
                     ->columnSpanFull()
                     ->schema([
-                        self::nameEntry()
-                            ->tooltip(fn (Portfolio $record): ?string => ! $record->is_active ? (string) __('fields.status_inactive') : null)
-                            ->color(fn (Portfolio $record): string => ! $record->is_active ? 'danger' : 'success'),
-
                         self::totalValueEntry('market_value')
                             ->label(__('fields.market_value'))
                             ->color(fn (Portfolio $record): string => $record->marketValueColor)
@@ -95,7 +91,6 @@ final class PortfolioResource extends Resource
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 3,
                     ]),
             ]);
     }
@@ -112,6 +107,8 @@ final class PortfolioResource extends Resource
             })
             ->columns(self::getTableColumns())
             ->paginated(fn (): bool => Portfolio::count() > 20)
+            ->reorderableColumns()
+            ->deferColumnManager(false)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()

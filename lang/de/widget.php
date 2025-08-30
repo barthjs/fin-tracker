@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 return [
 
-    'color' => 'Farbe',
-    'color_validation_message' => 'Ungültige Farbe',
-
-    'period' => 'Zeitraum',
-
     'stats' => [
         'total_assets' => 'Gesamtvermögen',
         'expenses_this_month' => 'Ausgaben diesen Monat',

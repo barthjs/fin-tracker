@@ -83,10 +83,6 @@ final class CategoryResource extends Resource
                 Section::make()
                     ->columnSpanFull()
                     ->schema([
-                        self::nameEntry()
-                            ->tooltip(fn (Category $record): ?string => ! $record->is_active ? (string) __('fields.status_inactive') : null)
-                            ->color(fn (Category $record): string => ! $record->is_active ? 'danger' : 'success'),
-
                         TextEntry::make('group')
                             ->label(__('category.fields.group'))
                             ->size(TextSize::Medium)
@@ -104,7 +100,6 @@ final class CategoryResource extends Resource
                     ])
                     ->columns([
                         'default' => 2,
-                        'sm' => 3,
                     ]),
             ]);
     }
@@ -121,6 +116,8 @@ final class CategoryResource extends Resource
             })
             ->columns(self::getTableColumns())
             ->paginated(fn (): bool => Category::count() > 20)
+            ->reorderableColumns()
+            ->deferColumnManager(false)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()

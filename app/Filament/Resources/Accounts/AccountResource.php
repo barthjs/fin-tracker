@@ -81,10 +81,6 @@ final class AccountResource extends Resource
                 Section::make()
                     ->columnSpanFull()
                     ->schema([
-                        self::nameEntry()
-                            ->tooltip(fn (Account $record): ?string => ! $record->is_active ? (string) __('fields.status_inactive') : null)
-                            ->color(fn (Account $record): string => ! $record->is_active ? 'danger' : 'success'),
-
                         self::totalValueEntry('balance')
                             ->label(__('account.fields.balance'))
                             ->color(fn (Account $record): string => $record->balanceColor)
@@ -95,7 +91,6 @@ final class AccountResource extends Resource
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 3,
                     ]),
             ]);
     }
@@ -112,6 +107,8 @@ final class AccountResource extends Resource
             })
             ->columns(self::getTableColumns())
             ->paginated(fn (): bool => Account::count() > 20)
+            ->reorderableColumns()
+            ->deferColumnManager(false)
             ->defaultSort('name')
             ->persistSortInSession()
             ->striped()

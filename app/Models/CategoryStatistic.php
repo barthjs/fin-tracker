@@ -34,6 +34,11 @@ final class CategoryStatistic extends Model
     /** @use HasFactory<CategoryStatisticFactory> */
     use HasFactory, HasUlids;
 
+    public const array MONTHS = [
+        'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+        'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+    ];
+
     public $timestamps = false;
 
     protected $table = 'category_statistics';
@@ -63,14 +68,9 @@ final class CategoryStatistic extends Model
      */
     public function yearlySum(): float
     {
-        $months = [
-            'jan', 'feb', 'mar', 'apr', 'may', 'jun',
-            'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
-        ];
-
         $total = 0.0;
 
-        foreach ($months as $month) {
+        foreach (self::MONTHS as $month) {
             $total += $this->{$month} ?? 0.0;
         }
 

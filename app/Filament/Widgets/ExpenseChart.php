@@ -7,9 +7,8 @@ namespace App\Filament\Widgets;
 use App\Enums\TransactionType;
 use App\Models\Category;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\Support\Htmlable;
 
-class ExpenseChart extends ChartWidget
+final class ExpenseChart extends ChartWidget
 {
     protected static ?int $sort = 4;
 
@@ -31,14 +30,14 @@ class ExpenseChart extends ChartWidget
         ],
     ];
 
-    public function getHeading(): Htmlable|string|null
+    public function getHeading(): string
     {
         return __('table.filter.expenses');
     }
 
     protected function getData(): array
     {
-        $data = Category::getChartData(TransactionType::expense);
+        $data = Category::getChartData(TransactionType::Expense);
 
         return [
             'datasets' => [

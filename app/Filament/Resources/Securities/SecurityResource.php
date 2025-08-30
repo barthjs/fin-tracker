@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Securities;
 
-use App\Enums\Currency;
 use App\Enums\SecurityType;
 use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Concerns\HasResourceFormFields;
@@ -111,20 +110,16 @@ final class SecurityResource extends Resource
                 Section::make()
                     ->columnSpanFull()
                     ->schema([
-                        self::nameEntry()
-                            ->tooltip(fn (Security $record): ?string => ! $record->is_active ? (string) __('fields.status_inactive') : null)
-                            ->color(fn (Security $record): string => ! $record->is_active ? 'danger' : 'success'),
-
-                        TextEntry::make('price')
-                            ->label(__('fields.price'))
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold)
+                        self::totalValueEntry('market_value')
+                            ->label(__('fields.market_value'))
                             ->numeric(6),
 
-                        TextEntry::make('total_quantity')
+                        self::totalValueEntry('price')
+                            ->label(__('fields.price'))
+                            ->numeric(6),
+
+                        self::totalValueEntry('total_quantity')
                             ->label(__('security.fields.total_quantity'))
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold)
                             ->numeric(6),
 
                         TextEntry::make('type')
@@ -150,6 +145,8 @@ final class SecurityResource extends Resource
                 return $query;
             })
             ->columns(self::getTableColumns())
+            ->reorderableColumns()
+            ->deferColumnManager(false)
             ->paginated(fn (): bool => Security::count() > 20)
             ->defaultSort('name')
             ->persistSortInSession()
@@ -213,26 +210,26 @@ final class SecurityResource extends Resource
                     'name' => $record->name,
                 ]),
 
-            TextColumn::make('price')
-                ->label(__('fields.price'))
-                ->badge()
+            TextColumn::make('market_value')
+                ->label(__('fields.market_value'))
                 ->numeric(2)
+                ->summarize(Sum::make()->label(''))
                 ->sortable(),
 
             TextColumn::make('total_quantity')
                 ->hiddenOn($hidden)
                 ->label(__('security.fields.total_quantity'))
-                ->formatStateUsing(function (Security $record, float $state) use ($portfolio): ?string {
+                ->formatStateUsing(function (Security $record, float $state) use ($portfolio): string|false|null {
                     // Show only the quantity of the current portfolio on the relation manager
                     // Todo
                     return $portfolio ? null : Number::format($state, 2);
                 })
                 ->sortable(),
 
-            TextColumn::make('market_value')
-                ->label(__('fields.market_value'))
+            TextColumn::make('price')
+                ->label(__('fields.price'))
+                ->badge()
                 ->numeric(2)
-                ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
                 ->sortable(),
 
             TextColumn::make('isin')

@@ -6,9 +6,8 @@ namespace App\Filament\Widgets;
 
 use App\Models\Portfolio;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\Support\Htmlable;
 
-class PortfolioChart extends ChartWidget
+final class PortfolioChart extends ChartWidget
 {
     protected static ?int $sort = 3;
 
@@ -30,14 +29,14 @@ class PortfolioChart extends ChartWidget
         ],
     ];
 
-    public function getHeading(): Htmlable|string|null
+    public function getHeading(): string
     {
-        return __('portfolio.navigation_label');
+        return __('portfolio.plural_label');
     }
 
     protected function getData(): array
     {
-        $portfolios = Portfolio::whereActive(true)
+        $portfolios = Portfolio::where('is_active', true)
             ->orderBy('market_value', 'desc')
             ->get();
 

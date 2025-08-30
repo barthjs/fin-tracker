@@ -12,33 +12,11 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
-class ListCategoryStatistics extends ListRecords
+final class ListCategoryStatistics extends ListRecords
 {
     use ExposesTableToWidgets;
 
     protected static string $resource = CategoryStatisticResource::class;
-
-    public function getTitle(): string
-    {
-        return __('category_statistic.navigation_label');
-    }
-
-    public function getHeading(): string
-    {
-        return __('category_statistic.navigation_label');
-    }
-
-    public function getBreadcrumbs(): array
-    {
-        return [];
-    }
-
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            CategoryStatisticChart::class,
-        ];
-    }
 
     public function getTabs(): array
     {
@@ -48,20 +26,27 @@ class ListCategoryStatistics extends ListRecords
             'Expenses' => Tab::make()
                 ->icon('tabler-minus')
                 ->label(__('table.filter.expenses'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('type', '=', TransactionType::expense);
+                ->modifyQueryUsing(function (Builder $query): void {
+                    $query->whereHas('category', function (Builder $query): void {
+                        $query->where('type', TransactionType::Expense);
                     });
                 }),
             'Revenues' => Tab::make()
                 ->icon('tabler-plus')
                 ->iconPosition('after')
                 ->label(__('table.filter.revenues'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('type', '=', TransactionType::revenue);
+                ->modifyQueryUsing(function (Builder $query): void {
+                    $query->whereHas('category', function (Builder $query): void {
+                        $query->where('type', TransactionType::Revenue);
                     });
                 }),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            CategoryStatisticChart::class,
         ];
     }
 }

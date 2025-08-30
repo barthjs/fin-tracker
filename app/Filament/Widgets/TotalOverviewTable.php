@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Enums\Currency;
+use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Portfolios\Pages\ViewPortfolio;
 use App\Models\Account;
 use App\Models\Combined;
 use App\Models\Portfolio;
-use App\Tables\Columns\LogoColumn;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
@@ -18,8 +19,10 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Facades\DB;
 
-class TotalOverviewTable extends BaseWidget
+final class TotalOverviewTable extends BaseWidget
 {
+    use HasResourceTableColumns;
+
     protected static ?int $sort = 6;
 
     protected static ?string $pollingInterval = null;
@@ -42,51 +45,51 @@ class TotalOverviewTable extends BaseWidget
             ->query(function () {
                 $unionQuery = DB::table('accounts')
                     ->select([
-                        DB::raw('CONCAT("a_", id) as id'),
+                        DB::raw("CONCAT('a_', id) AS id"),
                         'name',
-                        DB::raw('(balance / 100) as market_value'),
+                        DB::raw('(balance / 100) AS market_value'),
                         'description',
                         'logo',
-                        'active',
-                        DB::raw('"account" as type'),
+                        'is_active',
+                        DB::raw("'account' AS type"),
                         'user_id',
                     ])
                     ->unionAll(
                         DB::table('portfolios')
                             ->select([
-                                DB::raw('CONCAT("p_", id) as id'),
+                                DB::raw("CONCAT('p_', id) AS id"),
                                 'name',
                                 DB::raw('market_value'),
                                 'description',
                                 'logo',
-                                'active',
-                                DB::raw('"portfolio" as type'),
+                                'is_active',
+                                DB::raw("'portfolio' AS type"),
                                 'user_id',
                             ])
                     );
 
-                return Combined::query()->fromSub($unionQuery, 'combined_models')->newQuery()->where('user_id', '=', auth()->id());
+                return Combined::query()->fromSub($unionQuery, 'combined_models')->newQuery()->where('user_id', auth()->id());
             })
             ->columns([
-                LogoColumn::make('name')
-                    ->label(__('account.columns.name'))
+                self::logoAndNameColumn()
+                    ->label(__('fields.name'))
                     ->state(fn (Combined $record): array => [
                         'logo' => $record->logo,
                         'name' => $record->name,
                     ])
                     ->sortable(),
                 TextColumn::make('market_value')
-                    ->label(__('security.columns.market_value'))
+                    ->label(__('fields.market_value'))
                     ->badge()
                     ->color(fn (float $state): string => match (true) {
                         $state === 0.0 => 'gray',
                         $state < 0.0 => 'danger',
                         default => 'success'
                     })
-                    ->money(Account::getCurrency())
-                    ->summarize(Sum::make()->label('')->money(config('app.currency'))),
+                    ->money(Currency::getCurrency())
+                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency())),
                 TextColumn::make('description')
-                    ->label(__('account.columns.description'))
+                    ->label(__('fields.description'))
                     ->wrap(),
             ])
             ->paginated(false)
@@ -99,10 +102,10 @@ class TotalOverviewTable extends BaseWidget
                     ->label('')
                     ->getTitleFromRecordUsing(function (Combined $record): string {
                         if ($record->type === 'account') {
-                            return __('account.navigation_label');
+                            return __('account.plural_label');
                         }
 
-                        return __('portfolio.navigation_label');
+                        return __('portfolio.plural_label');
                     }),
             ])
             ->recordActions([
@@ -124,7 +127,7 @@ class TotalOverviewTable extends BaseWidget
 
                 return ViewPortfolio::getUrl([mb_substr($record->id, 2)]);
             }, true)
-            ->emptyStateHeading('')
-            ->emptyStateDescription('');
+            ->emptyStateHeading(null)
+            ->emptyStateDescription(null);
     }
 }
