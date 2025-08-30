@@ -28,6 +28,7 @@ RUN install-php-extensions \
         intl \
         opcache \
         pdo_mysql \
+        pdo_pgsql \
         zip && \
         rm -f /usr/local/bin/install-php-extensions
 

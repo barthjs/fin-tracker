@@ -23,7 +23,7 @@ RUN apk add --no-cache \
         nodejs \
         npm \
         supervisor && \
-    # Clear all php-fpm default configurations
+    # Clear all php-fpm default configurations \
     rm -rf /usr/local/etc/php-fpm.d/*.conf
 
 # Install composer
@@ -34,6 +34,7 @@ COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensio
 RUN install-php-extensions \
         intl \
         pdo_mysql \
+        pdo_pgsql \
         xdebug \
         zip && \
         rm -f /usr/local/bin/install-php-extensions

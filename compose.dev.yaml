@@ -14,17 +14,19 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
 
-  mariadb:
-    image: mariadb:11.4
+  database:
+    image: postgres:17-alpine
     container_name: fin-tracker-db
+    working_dir: /pgsqldump
     ports:
-      - 3306:3306
+      - 5432:5432
     volumes:
-      - ./database:/docker-entrypoint-initdb.d
-      - db:/var/lib/mysql
+      - ./database:/pgsqldump
+      - db:/var/lib/postgresql/data
     environment:
-      - MARIADB_DATABASE=${DB_DATABASE}
-      - MARIADB_ROOT_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
 
 volumes:
   db:
