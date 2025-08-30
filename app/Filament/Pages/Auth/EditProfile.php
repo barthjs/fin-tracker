@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Auth;
 
+use App\Filament\Concerns\HasResourceFormFields;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Panel;
@@ -23,6 +23,8 @@ use Jenssegers\Agent\Agent;
 
 final class EditProfile extends \Filament\Auth\Pages\EditProfile
 {
+    use HasResourceFormFields;
+
     /** @var array<int, array<string, mixed>> */
     public array $sessions = [];
 
@@ -47,61 +49,13 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
         $this->sessions = $this->getSessions();
     }
 
-    public function logoutOtherBrowserSessions(): Action
-    {
-        return Action::make('logoutOtherBrowserSessions')
-            ->icon('tabler-trash')
-            ->label(__('user.sessions.delete'))
-            ->size('sm')
-            ->color('danger')
-            ->modalHeading(__('user.sessions.delete'))
-            ->requiresConfirmation()
-            ->schema([
-                TextInput::make('password')
-                    ->label(__('user.buttons.password'))
-                    ->password()
-                    ->revealable()
-                    ->required(),
-            ])
-            ->action(function (array $data): void {
-                /** @var string $password */
-                $password = $data['password'];
-                $user = auth()->user();
-
-                if (! Hash::check($password, $user->password)) {
-                    Notification::make()
-                        ->danger()
-                        ->title(__('user.sessions.incorrect_password'))
-                        ->send();
-
-                    return;
-                }
-
-                Auth::logoutOtherDevices($password);
-
-                request()->session()->put([
-                    'password_hash_'.Auth::getDefaultDriver() => $user->password,
-                ]);
-
-                DB::table('sys_sessions')
-                    ->where('user_id', '=', $user->id)
-                    ->where('id', '!=', request()->session()->getId())
-                    ->delete();
-
-                Notification::make()
-                    ->success()
-                    ->title(__('user.sessions.logout_success'))
-                    ->send();
-
-                $this->mount();
-            });
-    }
-
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                $this->getAvatarUploadComponent(),
+                self::logoField('avatar', 'users/avatars')
+                    ->label(__('user.fields.avatar')),
+
                 $this->getFirstNameFormComponent(),
                 $this->getLastNameFormComponent(),
                 $this->getEmailFormComponent(),
@@ -139,22 +93,21 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
     protected function getFirstNameFormComponent(): Component
     {
         return TextInput::make('first_name')
-            ->label(__('user.columns.first_name'))
+            ->label(__('user.fields.first_name'))
             ->maxLength(255);
     }
 
     protected function getLastNameFormComponent(): Component
     {
         return TextInput::make('last_name')
-            ->label(__('user.columns.last_name'))
+            ->label(__('user.fields.last_name'))
             ->maxLength(255);
     }
 
     protected function getUsernameFormComponent(): Component
     {
         return TextInput::make('username')
-            ->label(__('user.columns.name'))
-            ->validationMessages(['unique' => __('user.columns.name_unique_warning')])
+            ->label(__('user.fields.username'))
             ->required()
             ->maxLength(255)
             ->unique(ignoreRecord: true)
@@ -168,27 +121,57 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             ->validationAttribute(__('filament-panels::auth/pages/edit-profile.form.current_password.validation_attribute'))
             ->belowContent(__('filament-panels::auth/pages/edit-profile.form.current_password.below_content'))
             ->password()
-            ->currentPassword(guard: Filament::getAuthGuard())
-            ->revealable()
-            ->required()
             ->visible(fn (Get $get): bool => filled($get('password'))
                 || ($get('email') !== $this->getUser()->getAttributeValue('email'))
                 || ($get('username') !== $this->getUser()->getAttributeValue('username'))
-            )
-            ->dehydrated(false);
+            );
     }
 
-    private function getAvatarUploadComponent(): FileUpload
+    protected function logoutOtherBrowserSessions(): Action
     {
-        return FileUpload::make('avatar')
-            ->label(__('user.columns.avatar'))
-            ->avatar()
-            ->image()
-            ->imageEditor()
-            ->circleCropper()
-            ->moveFiles()
-            ->directory('logos/avatars')
-            ->maxSize(1024);
+        return Action::make('logoutOtherBrowserSessions')
+            ->icon('tabler-trash')
+            ->size('sm')
+            ->color('danger')
+            ->label(__('user.sessions.delete'))
+            ->modalHeading(__('user.sessions.delete'))
+            ->requiresConfirmation()
+            ->schema([
+                TextInput::make('password')
+                    ->label(__('filament-panels::auth/pages/edit-profile.form.current_password.label'))
+                    ->validationAttribute(__('filament-panels::auth/pages/edit-profile.form.current_password.validation_attribute'))
+                    ->password()
+                    ->currentPassword(guard: Filament::getAuthGuard())
+                    ->revealable()
+                    ->required(),
+            ])
+            ->action(function (array $data): void {
+                /** @var string $password */
+                $password = $data['password'];
+                $user = auth()->user();
+
+                if (! Hash::check($password, $user->password)) {
+                    return;
+                }
+
+                Auth::logoutOtherDevices($password);
+
+                request()->session()->put([
+                    'password_hash_'.Auth::getDefaultDriver() => $user->password,
+                ]);
+
+                DB::table('sys_sessions')
+                    ->where('user_id', '=', $user->id)
+                    ->where('id', '!=', request()->session()->getId())
+                    ->delete();
+
+                Notification::make()
+                    ->success()
+                    ->title(__('user.sessions.logout_success'))
+                    ->send();
+
+                $this->mount();
+            });
     }
 
     /**

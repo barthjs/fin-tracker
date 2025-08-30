@@ -7,15 +7,9 @@ return [
     'form' => [
 
         'current_password' => [
-            'label' => 'Aktuelle Passwort',
-            'below_content' => 'Bestätige bitte dein aktuelles Passwort um fortzufahren.',
-            'validation_attribute' => 'current password',
+            'below_content' => 'Bestätige bitte dein aktuelles Passwort, um fortzufahren.',
         ],
 
-    ],
-
-    'multi_factor_authentication' => [
-        'label' => 'Zwei-Faktor-Authentifizierung (2FA)',
     ],
 
 ];
