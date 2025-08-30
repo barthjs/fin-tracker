@@ -8,6 +8,10 @@ return [
     'plural_label' => 'Portfolios',
     'slug' => 'portfolios',
 
+    'buttons' => [
+        'bulk_edit_portfolio' => 'Edit portfolio',
+    ],
+
     'import' => [
         'modal_heading' => 'Import portfolios',
         'failure_heading' => 'Portfolio import failed',

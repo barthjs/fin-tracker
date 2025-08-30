@@ -8,6 +8,10 @@ return [
     'plural_label' => 'Depots',
     'slug' => 'depots',
 
+    'buttons' => [
+        'bulk_edit_portfolio' => 'Portfolio bearbeiten',
+    ],
+
     'import' => [
         'modal_heading' => 'Depots importieren',
         'failure_heading' => 'Depotimport fehlgeschlagen',

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
+use App\Enums\TradeType;
+use App\Filament\Concerns\HasResourceImportColumns;
 use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
@@ -15,17 +17,16 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Carbon;
 
-class TradeImporter extends Importer
+final class TradeImporter extends Importer
 {
+    use HasResourceImportColumns;
+
     protected static ?string $model = Trade::class;
 
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('date_time')
-                ->label(__('trade.columns.date'))
-                ->requiredMapping()
-                ->rules(['required'])
+            self::dateTimeColumn()
                 ->fillRecordUsing(function (Trade $record, string $state): void {
                     try {
                         $carbon = Carbon::parse($state);
@@ -34,91 +35,87 @@ class TradeImporter extends Importer
                     }
                     $record->date_time = $carbon;
                 }),
-            ImportColumn::make('quantity')
-                ->label(__('trade.columns.quantity'))
-                ->requiredMapping()
-                ->rules(['required'])
-                ->fillRecordUsing(fn (Trade $record, string $state) => $record->quantity = abs(Convertor::formatNumber($state))),
-            ImportColumn::make('price')
-                ->label(__('trade.columns.price'))
-                ->requiredMapping()
-                ->rules(['required'])
-                ->fillRecordUsing(fn (Trade $record, string $state) => $record->price = abs(Convertor::formatNumber($state))),
-            ImportColumn::make('tax')
-                ->label(__('trade.columns.tax'))
-                ->requiredMapping()
-                ->rules(['required'])
-                ->fillRecordUsing(fn (Trade $record, string $state) => $record->tax = abs(Convertor::formatNumber($state))),
-            ImportColumn::make('fee')
-                ->label(__('trade.columns.fee'))
-                ->requiredMapping()
-                ->rules(['required'])
-                ->fillRecordUsing(fn (Trade $record, string $state) => $record->fee = abs(Convertor::formatNumber($state))),
-            ImportColumn::make('type')
-                ->label(__('trade.columns.type'))
-                ->requiredMapping()
-                ->rules(['required'])
+
+            self::typeColumn()
                 ->fillRecordUsing(function (Trade $record, string $state): void {
                     $record->type = match ($state) {
-                        __('trade.types.BUY') => 'BUY',
-                        __('trade.types.SELL') => 'SELL',
-                        default => 'BUY',
+                        TradeType::Buy->getLabel() => TradeType::Buy,
+                        TradeType::Sell->getLabel() => TradeType::Sell,
+                        default => TradeType::Buy,
                     };
                 }),
+
+            self::numericColumn('quantity')
+                ->label(__('trade.fields.quantity'))
+                ->fillRecordUsing(fn (Trade $record, string $state) => $record->quantity = abs(Convertor::formatNumber($state))),
+
+            self::numericColumn('price')
+                ->label(__('fields.price'))
+                ->fillRecordUsing(fn (Trade $record, string $state) => $record->price = abs(Convertor::formatNumber($state))),
+
+            self::numericColumn('tax')
+                ->label(__('trade.fields.tax'))
+                ->fillRecordUsing(fn (Trade $record, string $state) => $record->tax = abs(Convertor::formatNumber($state))),
+
+            self::numericColumn('fee')
+                ->label(__('trade.fields.fee'))
+                ->fillRecordUsing(fn (Trade $record, string $state) => $record->fee = abs(Convertor::formatNumber($state))),
+
             ImportColumn::make('account_id')
                 ->label(__('trade.columns.account'))
                 ->fillRecordUsing(function (Trade $record, string $state): void {
                     $account = Account::whereName($state);
                     if ($account->count() > 1) {
-                        $record->account_id = null;
+                        $record->account_id = Account::getOrCreateDefaultAccount()->id;
                     } else {
-                        $record->account_id = $account->first()->id ?? null;
+                        $record->account_id = $account->first()->id ?? Account::getOrCreateDefaultAccount()->id;
                     }
                 }),
+
             ImportColumn::make('portfolio')
                 ->label(__('trade.columns.portfolio'))
                 ->fillRecordUsing(function (Trade $record, string $state): void {
                     $portfolio = Portfolio::whereName($state);
                     if ($portfolio->count() > 1) {
-                        $record->portfolio_id = null;
+                        $record->portfolio_id = Portfolio::getOrCreateDefaultPortfolio()->id;
                     } else {
-                        $record->portfolio_id = $portfolio->first()->id ?? null;
+                        $record->portfolio_id = $portfolio->first()->id ?? Portfolio::getOrCreateDefaultPortfolio()->id;
                     }
                 }),
+
             ImportColumn::make('isin')
                 ->label(__('security.columns.isin'))
                 ->fillRecordUsing(function (Trade $record, string $state): void {
                     $security = Security::whereIsin($state);
                     if ($security->count() > 1) {
-                        $record->security_id = null;
+                        $record->security_id = Security::getOrCreateDefaultSecurity()->id;
                     } else {
-                        $record->security_id = $security->first()->id ?? null;
+                        $record->security_id = $security->first()->id ?? Security::getOrCreateDefaultSecurity()->id;
                     }
                 }),
-            ImportColumn::make('notes')
-                ->label(__('trade.columns.notes'))
-                ->rules(['max:255']),
-        ];
-    }
 
-    public function resolveRecord(): ?Trade
-    {
-        return new Trade;
+            self::notesColumn(),
+        ];
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = __('trade.notifications.import.body_heading')."\n\r".
-            __('trade.notifications.import.body_success').number_format($import->successful_rows);
+        $body = __('trade.import.body_heading')."\n\r".
+            __('trade.import.body_success').number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= "\n\r".__('trade.notifications.import.body_failure').number_format($failedRowsCount);
+            $body .= "\n\r".__('trade.import.body_failure').number_format($failedRowsCount);
         }
 
         return $body;
     }
 
-    public function getJobBatchName(): ?string
+    public function resolveRecord(): Trade
+    {
+        return new Trade;
+    }
+
+    public function getJobBatchName(): string
     {
         return 'trade-import';
     }

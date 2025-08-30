@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read string $id
- * @property CarbonInterface $trade_date
+ * @property CarbonInterface $date_time
  * @property TradeType $type
  * @property-read float $total_amount
  * @property float $quantity
@@ -58,7 +58,7 @@ final class Trade extends Model
     public function casts(): array
     {
         return [
-            'trade_date' => 'datetime',
+            'date_time' => 'datetime',
             'type' => TradeType::class,
             'total_amount' => 'float',
             'quantity' => 'float',

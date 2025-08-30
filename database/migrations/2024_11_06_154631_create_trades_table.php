@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('trades', function (Blueprint $table) {
             $table->ulid('id')->primary();
 
-            $table->dateTime('trade_date')->index();
+            $table->dateTime('date_time')->index();
             $types = array_column(TradeType::cases(), 'value');
             $table->enum('type', $types)->default(TradeType::Buy)->index();
             $table->decimal('total_amount', 18, 6)
@@ -42,9 +42,9 @@ return new class extends Migration
             $table->index(['portfolio_id', 'type']);
             $table->index(['security_id', 'type']);
 
-            $table->index(['account_id', 'trade_date']);
-            $table->index(['portfolio_id', 'trade_date']);
-            $table->index(['security_id', 'trade_date']);
+            $table->index(['account_id', 'date_time']);
+            $table->index(['portfolio_id', 'date_time']);
+            $table->index(['security_id', 'date_time']);
         });
     }
 };
