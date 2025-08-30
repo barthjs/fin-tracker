@@ -24,6 +24,7 @@ final class TransactionRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return TransactionResource::table($table)
+            ->modelLabel(__('transaction.label'))
             ->heading(__('transaction.plural_label'));
     }
 }

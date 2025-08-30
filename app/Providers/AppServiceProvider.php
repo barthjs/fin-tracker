@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Filament\Concerns\HasResourceActions;
 use Carbon\CarbonImmutable;
-use Filament\Forms\Components\FileUpload;
-use Filament\Infolists\Components\ImageEntry;
+use Filament\Facades\Filament;
 use Filament\Support\View\Components\ModalComponent;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
@@ -19,6 +18,8 @@ use Illuminate\Validation\Rules\Password;
 
 final class AppServiceProvider extends ServiceProvider
 {
+    use HasResourceActions;
+
     /**
      * Register any application services.
      */
@@ -31,19 +32,33 @@ final class AppServiceProvider extends ServiceProvider
     {
         // Laravel
         Date::use(CarbonImmutable::class);
-        Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12)->max(255) : null);
         Model::shouldBeStrict();
         Model::unguard();
         Number::useLocale(app()->getLocale());
         Vite::useAggressivePrefetching();
 
         // Filament
-        FileUpload::configureUsing(fn (FileUpload $fileUpload): FileUpload => $fileUpload->visibility('public'));
-        ImageColumn::configureUsing(fn (ImageColumn $imageColumn): ImageColumn => $imageColumn->visibility('public'));
-        ImageEntry::configureUsing(fn (ImageEntry $imageEntry): ImageEntry => $imageEntry->visibility('public'));
-        ModalComponent::closedByClickingAway(false);
-        Table::configureUsing(fn (Table $table): Table => $table
-            ->deferFilters(false)
-            ->paginationPageOptions([5, 10, 25, 50, 'all']));
+        Filament::serving(function (): void {
+            ModalComponent::closedByClickingAway(false);
+            Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
+            Table::configureUsing(fn (Table $table): Table => $table
+                ->paginationPageOptions([5, 10, 25, 50, 'all'])
+                ->extremePaginationLinks()
+                ->reorderableColumns()
+                ->deferColumnManager(false)
+                ->defaultSort('name')
+                ->persistSortInSession()
+                ->striped()
+                ->persistFiltersInSession()
+                ->recordActions([
+                    self::tableEditAction(),
+                    self::tableDeleteAction(),
+                ])
+                ->emptyStateDescription(null)
+                ->emptyStateActions([
+                    self::createAction(),
+                ])
+            );
+        });
     }
 }

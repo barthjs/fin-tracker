@@ -24,7 +24,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Panel;
 use Filament\Resources\Resource;
@@ -131,11 +130,9 @@ final class TradeResource extends Resource
                         })
                         ->required(),
 
-                    Select::make('type')
-                        ->label(__('fields.type'))
+                    self::typeSelectField()
                         ->options(TradeType::class)
                         ->default(TradeType::Buy)
-                        ->selectablePlaceholder(false)
                         ->live(true)
                         ->afterStateUpdated(function (TradeType $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
@@ -145,8 +142,7 @@ final class TradeResource extends Resource
                                 self::asFloat($get('fee')),
                                 $state,
                             ));
-                        })
-                        ->required(),
+                        }),
 
                     TextInput::make('total_amount')
                         ->label(__('trade.fields.total_amount'))
@@ -255,14 +251,8 @@ final class TradeResource extends Resource
                 self::notesColumn()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->deferLoading()
             ->paginated(fn (): bool => Trade::count() > 20)
-            ->extremePaginationLinks()
-            ->reorderableColumns()
-            ->deferColumnManager(false)
             ->defaultSort('date_time', 'desc')
-            ->persistSortInSession()
-            ->striped()
             ->filters([
                 SelectFilter::make('account_id')
                     ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
@@ -314,14 +304,9 @@ final class TradeResource extends Resource
             ->filtersFormColumns(function (mixed $livewire): int {
                 return $livewire instanceof ListTrades ? 4 : 3;
             })
-            ->persistFiltersInSession()
             ->recordActions(self::getActions())
             ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]))
-            ->emptyStateDescription(null)
-            ->emptyStateActions([
-                self::createAction(),
-            ]);
+            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
     }
 
     /**

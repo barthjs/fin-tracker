@@ -30,6 +30,7 @@ final class TradesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return TradeResource::table($table)
-            ->heading('');
+            ->heading(null)
+            ->modelLabel(__('trade.label'));
     }
 }

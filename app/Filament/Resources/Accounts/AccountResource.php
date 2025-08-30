@@ -107,24 +107,10 @@ final class AccountResource extends Resource
             })
             ->columns(self::getTableColumns())
             ->paginated(fn (): bool => Account::count() > 20)
-            ->reorderableColumns()
-            ->deferColumnManager(false)
-            ->defaultSort('name')
-            ->persistSortInSession()
-            ->striped()
             ->filters([
                 self::inactiveFilter(),
             ])
-            ->persistFiltersInSession()
-            ->recordActions([
-                self::tableEditAction(),
-                self::tableDeleteAction(),
-            ])
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]))
-            ->emptyStateDescription(null)
-            ->emptyStateActions([
-                self::createAction(),
-            ]);
+            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
     }
 
     /**

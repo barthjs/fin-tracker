@@ -116,25 +116,11 @@ final class CategoryResource extends Resource
             })
             ->columns(self::getTableColumns())
             ->paginated(fn (): bool => Category::count() > 20)
-            ->reorderableColumns()
-            ->deferColumnManager(false)
-            ->defaultSort('name')
-            ->persistSortInSession()
-            ->striped()
             ->filters([
                 self::inactiveFilter(),
             ])
-            ->persistFiltersInSession()
-            ->recordActions([
-                self::tableEditAction(),
-                self::tableDeleteAction(),
-            ])
             ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]))
-            ->emptyStateDescription(null)
-            ->emptyStateActions([
-                self::createAction(),
-            ]);
+            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
     }
 
     /**

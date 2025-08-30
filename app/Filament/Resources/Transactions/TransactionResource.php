@@ -175,14 +175,8 @@ final class TransactionResource extends Resource
 
                 self::notesColumn(),
             ])
-            ->deferLoading()
             ->paginated(fn (): bool => Transaction::count() > 20)
-            ->extremePaginationLinks()
-            ->reorderableColumns()
-            ->deferColumnManager(false)
             ->defaultSort('date_time', 'desc')
-            ->persistSortInSession()
-            ->striped()
             ->filters([
                 SelectFilter::make('account_id')
                     ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
@@ -221,7 +215,6 @@ final class TransactionResource extends Resource
             ->filtersFormColumns(function (mixed $livewire = null): int {
                 return $livewire instanceof ListTransactions ? 3 : 2;
             })
-            ->persistFiltersInSession()
             ->headerActions([
                 CreateAction::make('header-create')
                     ->icon('tabler-plus')
@@ -229,11 +222,7 @@ final class TransactionResource extends Resource
             ])
             ->recordActions(self::getActions())
             ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]))
-            ->emptyStateDescription(null)
-            ->emptyStateActions([
-                self::createAction(),
-            ]);
+            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
     }
 
     /**

@@ -145,11 +145,7 @@ final class SecurityResource extends Resource
                 return $query;
             })
             ->columns(self::getTableColumns())
-            ->reorderableColumns()
-            ->deferColumnManager(false)
             ->paginated(fn (): bool => Security::count() > 20)
-            ->defaultSort('name')
-            ->persistSortInSession()
             ->defaultGroup('type')
             ->groupingSettingsHidden()
             ->groups([
@@ -158,11 +154,9 @@ final class SecurityResource extends Resource
                     ->collapsible()
                     ->getTitleFromRecordUsing(fn (Security $record): string => $record->type->getLabel()),
             ])
-            ->striped()
             ->filters([
                 self::inactiveFilter(),
             ])
-            ->persistFiltersInSession()
             ->recordActions([
                 self::tableEditAction()
                     ->using(function (Security $record, array $data): Security {
@@ -189,11 +183,7 @@ final class SecurityResource extends Resource
 
                 self::tableDeleteAction(),
             ])
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]))
-            ->emptyStateDescription(null)
-            ->emptyStateActions([
-                self::createAction(),
-            ]);
+            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
     }
 
     /**

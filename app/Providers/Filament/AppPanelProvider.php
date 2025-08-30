@@ -19,6 +19,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Enums\Platform;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -40,25 +41,29 @@ final class AppPanelProvider extends PanelProvider
             ->id('app')
             ->path('')
             ->spa()
-            ->globalSearch(false)
             ->login(Login::class)
             ->profile(EditProfile::class)
             ->multiFactorAuthentication(
-                AppAuthentication::make()
-                    ->recoverable()
+                AppAuthentication::make()->recoverable()
             )
+            ->defaultThemeMode(ThemeMode::Dark)
+            ->colors(fn (): array => config()->array('colors'))
+            ->font('Poppins', '/fonts/fonts.css', LocalFontProvider::class)
+            ->viteTheme('resources/css/filament/app/theme.css')
+            ->defaultAvatarProvider(LocalAvatarProvider::class)
+            ->breadcrumbs(false)
+            ->maxContentWidth('full')
+            ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
-            ->colors(fn (): array => config()->array('colors'))
-            ->font('Poppins',
-                '/fonts/fonts.css',
-                LocalFontProvider::class
-            )
-            ->defaultAvatarProvider(LocalAvatarProvider::class)
-            ->viteTheme('resources/css/filament/app/theme.css')
-            ->defaultThemeMode(ThemeMode::Dark)
-            ->maxContentWidth('full')
+            ->globalSearch()
+            ->globalSearchKeyBindings(['ctrl+k', 'command+k'])
+            ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
+                Platform::Windows, Platform::Linux => (string) __('CTRL+K'),
+                Platform::Mac => '⌘K',
+                default => null,
+            })
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
