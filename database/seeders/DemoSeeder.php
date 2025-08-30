@@ -29,7 +29,6 @@ final class DemoSeeder extends Seeder
             foreach ($users as $user) {
                 $this->createTransactions($user);
                 $this->createTrades($user);
-                break;
             }
         }
     }

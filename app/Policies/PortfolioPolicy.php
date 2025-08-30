@@ -22,7 +22,7 @@ final class PortfolioPolicy
      */
     public function update(User $user, Portfolio $portfolio): bool
     {
-        return $user->id === $portfolio->user_id;
+        return $user->id === $portfolio->user_id || $user->is_admin;
     }
 
     /**
@@ -32,21 +32,5 @@ final class PortfolioPolicy
     {
         return $user->id === $portfolio->user_id
             && $portfolio->trades()->count() === 0;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Portfolio $portfolio): bool
-    {
-        return $user->id === $portfolio->user_id;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Portfolio $portfolio): bool
-    {
-        return $user->id === $portfolio->user_id;
     }
 }

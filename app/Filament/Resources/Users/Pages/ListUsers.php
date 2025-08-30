@@ -15,29 +15,21 @@ final class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
-    public function getTitle(): string
-    {
-        return __('user.navigation_label');
-    }
-
-    public function getHeading(): string
-    {
-        return __('user.navigation_label');
-    }
-
     public function getTabs(): array
     {
         return [
             'all' => Tab::make()
                 ->label(__('table.filter.all'))
                 ->badge(User::count()),
+
             'inactive' => Tab::make()
-                ->label(__('table.status_inactive'))
-                ->badge(User::whereIsActive(false)->count())
+                ->label(__('fields.status_inactive'))
+                ->badge(User::where('is_active', false)->count())
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('is_active', false)),
+
             'unverified' => Tab::make()
-                ->label(__('user.filter.unverified'))
-                ->badge(User::whereIsVerified(false)->count())
+                ->label(__('table.filter.unverified'))
+                ->badge(User::where('is_verified', false)->count())
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('is_verified', false)),
         ];
     }
@@ -46,8 +38,7 @@ final class ListUsers extends ListRecords
     {
         return [
             CreateAction::make()
-                ->icon('tabler-plus')
-                ->label(__('user.buttons.create_button_label')),
+                ->icon('tabler-plus'),
         ];
     }
 }

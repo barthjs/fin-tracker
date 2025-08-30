@@ -29,11 +29,11 @@ final class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'first_name' => $this->faker->firstName(),
-            'last_name' => $this->faker->lastName(),
-            'username' => $this->faker->unique()->userName,
-            'email' => $this->faker->unique()->safeEmail(),
-            'avatar' => $this->faker->imageUrl(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'username' => fake()->unique()->userName,
+            'email' => fake()->unique()->safeEmail(),
+            'avatar' => fake()->imageUrl(),
             'password' => self::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'is_active' => true,

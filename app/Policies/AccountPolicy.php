@@ -22,7 +22,7 @@ final class AccountPolicy
      */
     public function update(User $user, Account $account): bool
     {
-        return $user->id === $account->user_id;
+        return $user->id === $account->user_id || $user->is_admin;
     }
 
     /**
@@ -33,21 +33,5 @@ final class AccountPolicy
         return $user->id === $account->user_id
             && $account->transactions()->count() === 0
             && $account->trades()->count() === 0;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Account $account): bool
-    {
-        return $user->id === $account->user_id;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Account $account): bool
-    {
-        return $user->id === $account->user_id;
     }
 }

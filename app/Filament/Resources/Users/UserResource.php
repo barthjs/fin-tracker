@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users;
 
+use App\Filament\Concerns\HasResourceActions;
+use App\Filament\Concerns\HasResourceFormFields;
+use App\Filament\Concerns\HasResourceInfolistEntries;
+use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -13,11 +17,8 @@ use App\Filament\Resources\Users\RelationManagers\CategoryRelationManager;
 use App\Filament\Resources\Users\RelationManagers\PortfoliosRelationManager;
 use App\Filament\Resources\Users\RelationManagers\SecuritiesRelationManager;
 use App\Models\User;
-use App\Tables\Columns\LogoColumn;
 use BackedEnum;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
@@ -29,31 +30,33 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 final class UserResource extends Resource
 {
+    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-users';
 
     protected static ?string $recordTitleAttribute = 'full_name';
 
+    public static function getModelLabel(): string
+    {
+        return __('user.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('user.plural_label');
+    }
+
     public static function getSlug(?Panel $panel = null): string
     {
         return __('user.slug');
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('user.navigation_label');
-    }
-
-    public static function getBreadcrumb(): string
-    {
-        return __('user.navigation_label');
     }
 
     public static function form(Schema $schema): Schema
@@ -61,64 +64,72 @@ final class UserResource extends Resource
         return $schema
             ->components([
                 Section::make()
+                    ->columnSpanFull()
+                    ->columns(4)
                     ->schema([
+                        FileUpload::make('avatar')
+                            ->label(__('user.fields.avatar'))
+                            ->columnSpanFull()
+                            ->avatar()
+                            ->image()
+                            ->imageEditor()
+                            ->circleCropper()
+                            ->moveFiles()
+                            ->directory('users/avatars')
+                            ->maxSize(1024),
+
                         TextInput::make('first_name')
-                            ->label(__('user.columns.first_name'))
+                            ->label(__('user.fields.first_name'))
                             ->autofocus()
                             ->maxLength(255),
 
                         TextInput::make('last_name')
-                            ->label(__('user.columns.last_name'))
-                            ->required()
+                            ->label(__('user.fields.last_name'))
                             ->maxLength(255),
 
                         TextInput::make('username')
-                            ->label(__('user.columns.name'))
-                            ->validationMessages(['unique' => __('user.columns.name_unique_warning')])
+                            ->label(__('user.fields.username'))
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
 
                         TextInput::make('email')
-                            ->label(__('user.columns.email'))
-                            ->validationMessages(['unique' => __('user.columns.email_unique_warning')])
+                            ->label(__('filament-panels::auth/pages/edit-profile.form.email.label'))
                             ->required()
                             ->email()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
-                    ])
-                    ->columns(2),
+                    ]),
+
                 Section::make()
+                    ->columnSpanFull()
+                    ->columns(2)
                     ->schema([
                         TextInput::make('password')
-                            ->label(__('user.buttons.password'))
-                            ->validationMessages(['min' => __('user.buttons.password_length_warning')])
+                            ->label(__('filament-panels::auth/pages/edit-profile.form.password.label'))
+                            ->validationAttribute(__('filament-panels::auth/pages/edit-profile.form.password.validation_attribute'))
                             ->password()
                             ->revealable()
+                            ->rule(Password::default())
+                            ->required(fn (string $context): bool => $context === 'create')
+                            ->showAllValidationMessages()
                             ->dehydrated(fn (?string $state): bool => filled($state))
                             ->dehydrateStateUsing(fn (string $state): string => Hash::make($state))
-                            ->required(fn (string $context): bool => $context === 'create')
-                            ->live(debounce: 500),
+                            ->live(debounce: 500)
+                            ->same('passwordConfirmation'),
 
                         TextInput::make('passwordConfirmation')
-                            ->label(__('user.buttons.password_confirmation'))
-                            ->validationMessages(['same' => __('user.buttons.password_confirmation_warning')])
+                            ->label(__('filament-panels::auth/pages/edit-profile.form.password_confirmation.label'))
+                            ->validationAttribute(__('filament-panels::auth/pages/edit-profile.form.password_confirmation.validation_attribute'))
                             ->password()
                             ->revealable()
-                            ->required(function (Get $get) {
-                                if (! $get('password')) {
-                                    return false;
-                                }
-
-                                return true;
-                            })
-                            ->dehydrated(false)
-                            ->same('password'),
+                            ->required(fn (Get $get): bool => filled($get('password')))
+                            ->dehydrated(false),
 
                         Toggle::make('is_admin')
-                            ->label(__('user.columns.is_admin'))
-                            ->disabled(function (?User $record = null) {
-                                // Prevent the current user from removing his admin status
+                            ->label(__('user.fields.is_admin'))
+                            ->hidden(function (?User $record = null): bool {
+                                // Prevent the current user from removing their admin status
                                 if (! $record) {
                                     return false;
                                 }
@@ -128,20 +139,16 @@ final class UserResource extends Resource
                             ->default(false)
                             ->inline(false),
 
-                        Toggle::make('is_active')
-                            ->label(__('table.active'))
-                            ->disabled(function (?User $record = null) {
+                        self::statusToggleField()
+                            ->hidden(function (?User $record = null): bool {
+                                // Prevent the current user from making their account inactive
                                 if (! $record) {
-                                    // Prevent the current user from making his account inactive
                                     return false;
                                 }
 
                                 return $record->id === auth()->user()->id;
-                            })
-                            ->default(true)
-                            ->inline(false),
-                    ])
-                    ->columns(2),
+                            }),
+                    ]),
             ]);
     }
 
@@ -150,36 +157,29 @@ final class UserResource extends Resource
         return $schema
             ->components([
                 Section::make()
+                    ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('full_name')
-                            ->label(__('user.columns.full_name'))
-                            ->state(fn (User $record): string => $record->getFilamentName())
-                            ->tooltip(fn (User $record): string => ! $record->is_active ? __('table.status_inactive') : __('table.status_active'))
-                            ->color(fn (User $record): string => ! $record->is_active ? 'danger' : 'success')
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold),
-
                         TextEntry::make('username')
-                            ->label(__('user.columns.name'))
-                            ->tooltip(fn (User $record): string => ! $record->is_active ? __('table.status_inactive') : __('table.status_active'))
+                            ->label(__('user.fields.username'))
+                            ->tooltip(fn (User $record): string => ! $record->is_active ? (string) __('fields.status_inactive') : (string) __('fields.status_active'))
                             ->color(fn (User $record): string => ! $record->is_active ? 'danger' : 'success')
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
 
                         TextEntry::make('email')
-                            ->label(__('user.columns.email'))
-                            ->tooltip(fn (User $record): string => ! $record->is_active ? __('table.status_inactive') : __('table.status_active'))
+                            ->label(__('filament-panels::auth/pages/edit-profile.form.email.label'))
+                            ->tooltip(fn (User $record): string => ! $record->is_active ? (string) __('fields.status_inactive') : (string) __('fields.status_active'))
                             ->color(fn (User $record): string => ! $record->is_active ? 'danger' : 'success')
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
 
                         IconEntry::make('is_admin')
-                            ->label(__('user.columns.is_admin'))
+                            ->label(__('user.fields.is_admin'))
                             ->boolean(),
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 4,
+                        'md' => 3,
                     ]),
             ]);
     }
@@ -188,62 +188,29 @@ final class UserResource extends Resource
     {
         return $table
             ->columns([
-                LogoColumn::make('username')
-                    ->label(__('user.columns.name'))
+                self::logoAndNameColumn('username')
+                    ->label(__('user.fields.username'))
                     ->state(fn (User $record): array => [
                         'logo' => $record->avatar,
                         'name' => $record->username,
-                    ])
-                    ->searchable()
-                    ->sortable(),
+                    ]),
 
-                TextColumn::make('email')
-                    ->label(__('user.columns.email'))
-                    ->searchable()
-                    ->sortable(),
+                self::nameColumn('first_name')
+                    ->label(__('user.fields.first_name')),
 
-                TextColumn::make('first_name')
-                    ->label(__('user.columns.first_name'))
-                    ->searchable()
-                    ->sortable(),
+                self::nameColumn('last_name')
+                    ->label(__('user.fields.last_name')),
 
-                TextColumn::make('last_name')
-                    ->label(__('user.columns.last_name'))
-                    ->searchable()
-                    ->sortable(),
+                self::nameColumn('email')
+                    ->label(__('filament-panels::auth/pages/edit-profile.form.email.label')),
 
-                TextColumn::make('created_at')
-                    ->label(__('table.created_at'))
-                    ->dateTime('Y-m-d H:i:s')
-                    ->sortable(),
-
-                TextColumn::make('updated_at')
-                    ->label(__('table.updated_at'))
-                    ->dateTime('Y-m-d H:i:s')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::createdAtColumn(),
+                self::updatedAtColumn(),
             ])
+            ->paginated(fn (): bool => User::count() > 20)
             ->defaultSort('username')
-            ->extremePaginationLinks()
-            ->persistSortInSession()
-            ->striped()
-            ->recordActions([
-                EditAction::make()
-                    ->iconButton()
-                    ->icon('tabler-edit'),
-                DeleteAction::make()
-                    ->iconButton()
-                    ->icon('tabler-trash')
-                    ->modalHeading(__('user.buttons.delete_heading')),
-            ])
             ->recordUrl(fn (User $record): string => ViewUser::getUrl(['record' => $record->id]))
-            ->emptyStateHeading(__('user.empty'))
-            ->emptyStateDescription('')
-            ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('user.buttons.create_button_label')),
-            ]);
+            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
     }
 
     public static function getRelations(): array

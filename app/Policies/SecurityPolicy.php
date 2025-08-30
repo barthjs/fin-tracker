@@ -22,7 +22,7 @@ final class SecurityPolicy
      */
     public function update(User $user, Security $security): bool
     {
-        return $user->id === $security->user_id;
+        return $user->id === $security->user_id || $user->is_admin;
     }
 
     /**
@@ -32,21 +32,5 @@ final class SecurityPolicy
     {
         return $user->id === $security->user_id
             && $security->trades()->count() === 0;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Security $security): bool
-    {
-        return $user->id === $security->user_id;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Security $security): bool
-    {
-        return $user->id === $security->user_id;
     }
 }

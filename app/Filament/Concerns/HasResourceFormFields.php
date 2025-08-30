@@ -64,11 +64,11 @@ trait HasResourceFormFields
         return FileUpload::make($name)
             ->label(__('fields.logo'))
             ->avatar()
-            ->image()
             ->imageEditor()
             ->circleCropper()
             ->moveFiles()
             ->directory($directory)
+            ->visibility('public')
             ->maxSize(1024);
     }
 

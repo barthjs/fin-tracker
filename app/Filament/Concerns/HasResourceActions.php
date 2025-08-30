@@ -55,7 +55,7 @@ trait HasResourceActions
     public static function inactiveFilter(): Filter
     {
         return Filter::make('inactive')
-            ->label(__('fields.status'))
+            ->label(__('fields.status_inactive'))
             ->toggle()
             ->query(fn (Builder $query): Builder => $query->where('is_active', false));
     }

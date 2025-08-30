@@ -18,6 +18,13 @@ trait HasResourceTableColumns
             ->sortable();
     }
 
+    public static function nameColumn(string $name): TextColumn
+    {
+        return TextColumn::make($name)
+            ->searchable()
+            ->sortable();
+    }
+
     public static function descriptionColumn(?string $name = 'description'): TextColumn
     {
         return TextColumn::make($name)
@@ -40,6 +47,24 @@ trait HasResourceTableColumns
             ->label(__('fields.status'))
             ->tooltip(fn (bool $state): string => $state ? (string) __('fields.status_active') : (string) __('fields.status_inactive'))
             ->boolean()
+            ->sortable()
+            ->toggleable(isToggledHiddenByDefault: true);
+    }
+
+    public static function createdAtColumn(?string $name = 'created_at'): TextColumn
+    {
+        return TextColumn::make($name)
+            ->label(__('fields.created_at'))
+            ->dateTime('Y-m-d, H:i:s')
+            ->sortable()
+            ->toggleable(isToggledHiddenByDefault: true);
+    }
+
+    public static function updatedAtColumn(?string $name = 'updated_at'): TextColumn
+    {
+        return TextColumn::make($name)
+            ->label(__('fields.updated_at'))
+            ->dateTime('Y-m-d, H:i:s')
             ->sortable()
             ->toggleable(isToggledHiddenByDefault: true);
     }

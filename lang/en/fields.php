@@ -29,4 +29,7 @@ return [
     'date_time' => 'Date',
     'notes' => 'Notes',
 
+    'created_at' => 'Created at',
+    'updated_at' => 'Updated at',
+
 ];

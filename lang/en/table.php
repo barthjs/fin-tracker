@@ -13,6 +13,7 @@ return [
         'sells' => 'Sells',
         'created_from' => 'From',
         'created_until' => 'Until',
+        'unverified' => 'Unverified',
     ],
 
 ];

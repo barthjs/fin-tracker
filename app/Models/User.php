@@ -17,12 +17,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * @property-read string $id
- * @property-read CarbonInterface $created_at
- * @property-read CarbonInterface $updated_at
  * @property string|null $first_name
  * @property string|null $last_name
  * @property-read string|null $full_name
@@ -36,6 +35,12 @@ use Illuminate\Support\Facades\Storage;
  * @property bool $is_active
  * @property bool $is_verified
  * @property bool $is_admin
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
+ * @property-read Collection<int, Account> $accounts
+ * @property-read Collection<int, Category> $categories
+ * @property-read Collection<int, Portfolio> $portfolios
+ * @property-read Collection<int, Security> $securities
  */
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasName
 {
@@ -159,27 +164,19 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
 
     protected static function booted(): void
     {
-        self::created(function (User $user): void {
-            Account::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
-            Category::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
-            Portfolio::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
-            Security::withoutGlobalScopes()->firstOrCreate(['name' => 'Demo', 'user_id' => $user->id]);
-        });
-
         self::updated(function (User $user): void {
-            $avatar = $user->getOriginal('avatar');
+            /** @var string|null $originalAvatar */
+            $originalAvatar = $user->getOriginal('avatar');
 
-            if (
-                is_null($user->avatar)
-                && is_string($avatar)
-                && Storage::disk('public')->exists($avatar)
-            ) {
-                Storage::disk('public')->delete($avatar);
+            if ($originalAvatar !== null && $originalAvatar !== $user->avatar) {
+                if (Storage::disk('public')->exists($originalAvatar)) {
+                    Storage::disk('public')->delete($originalAvatar);
+                }
             }
         });
 
         self::deleted(function (User $user): void {
-            if (! is_null($user->avatar) && Storage::disk('public')->exists($user->avatar)) {
+            if ($user->avatar !== null && Storage::disk('public')->exists($user->avatar)) {
                 Storage::disk('public')->delete($user->avatar);
             }
         });

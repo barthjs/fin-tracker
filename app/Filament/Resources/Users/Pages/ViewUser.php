@@ -12,16 +12,6 @@ final class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
 
-    public function getTitle(): string
-    {
-        return __('user.navigation_label');
-    }
-
-    public function getHeading(): string
-    {
-        return __('user.navigation_label');
-    }
-
     protected function getHeaderActions(): array
     {
         return [
