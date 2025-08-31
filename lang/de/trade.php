@@ -6,7 +6,6 @@ return [
 
     'label' => 'Trade',
     'plural_label' => 'Trades',
-    'slug' => 'trades',
 
     'fields' => [
         'total_amount' => 'Gesamtbetrag',

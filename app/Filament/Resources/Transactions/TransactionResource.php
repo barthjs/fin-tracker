@@ -25,7 +25,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -58,11 +57,6 @@ final class TransactionResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('transaction.plural_label');
-    }
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('transaction.slug');
     }
 
     /**

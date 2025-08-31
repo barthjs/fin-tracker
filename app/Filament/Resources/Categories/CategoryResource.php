@@ -19,7 +19,6 @@ use Carbon\Carbon;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Field;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -51,11 +50,6 @@ final class CategoryResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('category.plural_label');
-    }
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('category.slug');
     }
 
     public static function form(Schema $schema): Schema

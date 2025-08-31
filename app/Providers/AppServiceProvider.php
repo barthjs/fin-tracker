@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Concerns\HasResourceActions;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
 use Filament\Support\View\Components\ModalComponent;
@@ -49,6 +50,7 @@ final class AppServiceProvider extends ServiceProvider
                 ->defaultSort('name')
                 ->persistSortInSession()
                 ->striped()
+                ->deferFilters(false)
                 ->persistFiltersInSession()
                 ->recordActions([
                     self::tableEditAction(),
@@ -59,6 +61,12 @@ final class AppServiceProvider extends ServiceProvider
                     self::createAction(),
                 ])
             );
+        });
+
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            $switch
+                ->visible(outsidePanels: true)
+                ->locales(['de', 'en']);
         });
     }
 }

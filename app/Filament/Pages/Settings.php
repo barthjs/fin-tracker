@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
-use Filament\Panel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -18,11 +17,6 @@ final class Settings extends Page
     public ?string $latestVersionUrl;
 
     protected string $view = 'filament.pages.settings';
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('settings.slug');
-    }
 
     public static function shouldRegisterNavigation(): bool
     {

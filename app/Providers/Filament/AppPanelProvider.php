@@ -57,7 +57,6 @@ final class AppPanelProvider extends PanelProvider
             ->unsavedChangesAlerts()
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
-            ->globalSearch()
             ->globalSearchKeyBindings(['ctrl+k', 'command+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
                 Platform::Windows, Platform::Linux => (string) __('CTRL+K'),

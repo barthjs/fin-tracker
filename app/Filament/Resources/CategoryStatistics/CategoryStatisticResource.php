@@ -11,7 +11,6 @@ use App\Filament\Resources\CategoryStatistics\Pages\ListCategoryStatistics;
 use App\Filament\Resources\CategoryStatistics\Widgets\CategoryStatisticChart;
 use App\Models\CategoryStatistic;
 use BackedEnum;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
@@ -38,11 +37,6 @@ final class CategoryStatisticResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('category_statistic.plural_label');
-    }
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('category_statistic.slug');
     }
 
     public static function getWidgets(): array
@@ -143,12 +137,11 @@ final class CategoryStatisticResource extends Resource
                     ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
                     ->toggleable(),
             ])
+            ->defaultSort('year', 'desc')
             ->deferLoading()
             ->paginated(false)
             ->searchable(false)
             ->persistSortInSession()
-            ->reorderableColumns()
-            ->deferColumnManager(false)
             ->defaultGroup('category.group')
             ->groupingSettingsHidden()
             ->groups([
@@ -157,7 +150,6 @@ final class CategoryStatisticResource extends Resource
                     ->collapsible()
                     ->getTitleFromRecordUsing(fn (CategoryStatistic $record): string => $record->category->group->getLabel()),
             ])
-            ->striped()
             ->filters([
                 SelectFilter::make('year')
                     ->label(__('table.filter.year'))
@@ -178,7 +170,6 @@ final class CategoryStatisticResource extends Resource
                     ->selectablePlaceholder(false),
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(1)
-            ->persistFiltersInSession()
             ->recordUrl(fn (CategoryStatistic $record): string => ViewCategory::getUrl(['record' => $record->category_id]))
             ->emptyStateHeading(null);
     }

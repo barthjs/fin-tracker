@@ -6,7 +6,6 @@ return [
 
     'label' => 'Depot',
     'plural_label' => 'Depots',
-    'slug' => 'depots',
 
     'buttons' => [
         'bulk_edit_portfolio' => 'Portfolio bearbeiten',

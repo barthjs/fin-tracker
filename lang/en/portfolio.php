@@ -6,7 +6,6 @@ return [
 
     'label' => 'Portfolio',
     'plural_label' => 'Portfolios',
-    'slug' => 'portfolios',
 
     'buttons' => [
         'bulk_edit_portfolio' => 'Edit portfolio',

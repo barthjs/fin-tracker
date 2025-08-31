@@ -25,7 +25,6 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -59,11 +58,6 @@ final class TradeResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('trade.plural_label');
-    }
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('trade.slug');
     }
 
     public static function form(Schema $schema, Account|Model|null $account = null, Portfolio|Model|null $portfolio = null, Security|Model|null $security = null): Schema

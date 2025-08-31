@@ -6,7 +6,6 @@ return [
 
     'label' => 'Kategorie',
     'plural_label' => 'Kategorien',
-    'slug' => 'kategorien',
 
     'fields' => [
         'group' => 'Gruppe',

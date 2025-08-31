@@ -10,6 +10,6 @@ return [
 
     'allow_registration' => env('APP_ALLOW_REGISTRATION', false),
 
-    'currency' => env('APP_DEFAULT_CURRENCY', 'USD'),
+    'currency' => env('APP_DEFAULT_CURRENCY', 'EUR'),
 
 ];

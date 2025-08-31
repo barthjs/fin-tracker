@@ -23,7 +23,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -52,11 +51,6 @@ final class UserResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('user.plural_label');
-    }
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('user.slug');
     }
 
     public static function form(Schema $schema): Schema

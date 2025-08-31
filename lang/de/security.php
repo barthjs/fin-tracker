@@ -6,7 +6,6 @@ return [
 
     'label' => 'Wertpapier',
     'plural_label' => 'Wertpapiere',
-    'slug' => 'wertpapiere',
 
     'fields' => [
         'isin' => 'ISIN',

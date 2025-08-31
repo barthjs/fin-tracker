@@ -6,7 +6,6 @@ return [
 
     'label' => 'Umsatz',
     'plural_label' => 'Umsätze',
-    'slug' => 'umsätze',
 
     'fields' => [
         'amount' => 'Betrag',

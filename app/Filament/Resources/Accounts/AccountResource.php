@@ -17,7 +17,6 @@ use App\Filament\Resources\Users\RelationManagers\AccountsRelationManager;
 use App\Models\Account;
 use BackedEnum;
 use Filament\Forms\Components\Field;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -47,11 +46,6 @@ final class AccountResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('account.plural_label');
-    }
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('account.slug');
     }
 
     public static function form(Schema $schema): Schema

@@ -6,7 +6,6 @@ return [
 
     'label' => 'Security',
     'plural_label' => 'Securities',
-    'slug' => 'securities',
 
     'fields' => [
         'isin' => 'ISIN',

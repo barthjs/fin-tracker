@@ -6,7 +6,6 @@ return [
 
     'label' => 'Konto',
     'plural_label' => 'Konten',
-    'slug' => 'konten',
 
     'fields' => [
         'balance' => 'Kontostand',

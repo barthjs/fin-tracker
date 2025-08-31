@@ -21,7 +21,6 @@ use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -55,11 +54,6 @@ final class SecurityResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('security.plural_label');
-    }
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('security.slug');
     }
 
     public static function form(Schema $schema): Schema

@@ -6,7 +6,6 @@ return [
 
     'label' => 'statistik',
     'plural_label' => 'statistik',
-    'slug' => 'statistik',
 
     'columns' => [
         'jan' => 'Januar',

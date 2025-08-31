@@ -6,8 +6,6 @@ return [
 
     'label' => 'User',
     'plural_label' => 'Users',
-    'slug' => 'users',
-    'profile-slug' => 'profile',
 
     'fields' => [
         'first_name' => 'First name',

@@ -6,7 +6,6 @@ return [
 
     'label' => 'Transaction',
     'plural_label' => 'Transactions',
-    'slug' => 'transactions',
 
     'fields' => [
         'amount' => 'Amount',

@@ -10,7 +10,6 @@ use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Panel;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -31,11 +30,6 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
     protected string $view = 'filament.pages.auth.edit-profile';
 
     private bool $wasUnverified = false;
-
-    public static function getSlug(?Panel $panel = null): string
-    {
-        return __('user.profile-slug');
-    }
 
     public static function isSimple(): bool
     {
@@ -121,10 +115,14 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             ->validationAttribute(__('filament-panels::auth/pages/edit-profile.form.current_password.validation_attribute'))
             ->belowContent(__('filament-panels::auth/pages/edit-profile.form.current_password.below_content'))
             ->password()
+            ->currentPassword(guard: Filament::getAuthGuard())
+            ->revealable()
+            ->required()
             ->visible(fn (Get $get): bool => filled($get('password'))
                 || ($get('email') !== $this->getUser()->getAttributeValue('email'))
                 || ($get('username') !== $this->getUser()->getAttributeValue('username'))
-            );
+            )
+            ->dehydrated(false);
     }
 
     protected function logoutOtherBrowserSessions(): Action
