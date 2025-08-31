@@ -29,8 +29,6 @@ final class TransactionRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return TransactionResource::table($table)
-            ->heading(null)
-            ->modelLabel(__('transaction.label'));
+        return TransactionResource::table($table);
     }
 }

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
+use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Resources\Portfolios\PortfolioResource;
 use App\Models\Portfolio;
 use BackedEnum;
 use Exception;
-use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 
 final class PortfoliosRelationManager extends RelationManager
 {
+    use HasResourceActions;
+
     protected static string $relationship = 'portfolios';
 
     protected static string|BackedEnum|null $icon = 'tabler-wallet';
@@ -48,20 +50,8 @@ final class PortfoliosRelationManager extends RelationManager
         return PortfolioResource::table($table)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes())
             ->paginated(fn (): bool => Portfolio::withoutGlobalScopes()->where('user_id', $userId)->count() > 20)
-            ->heading(null)
-            ->modelLabel(__('portfolio.label'))
             ->headerActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->mutateDataUsing(function (array $data) use ($userId): array {
-                        $data['user_id'] = $userId;
-
-                        return $data;
-                    }),
-            ])
-            ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
+                self::createAction()
                     ->mutateDataUsing(function (array $data) use ($userId): array {
                         $data['user_id'] = $userId;
 

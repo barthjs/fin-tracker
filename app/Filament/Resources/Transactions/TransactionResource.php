@@ -20,7 +20,6 @@ use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -132,6 +131,8 @@ final class TransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->heading(null)
+            ->modelLabel(__('transaction.label'))
             ->columns([
                 self::dateTimeColumn('date_time'),
 
@@ -210,9 +211,10 @@ final class TransactionResource extends Resource
                 return $livewire instanceof ListTransactions ? 3 : 2;
             })
             ->headerActions([
-                CreateAction::make('header-create')
-                    ->icon('tabler-plus')
-                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTransactions),
+                self::createAction()
+                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTransactions)
+                    /** @phpstan-ignore-next-line */
+                    ->using(fn (array $data) => Transaction::create($data)),
             ])
             ->recordActions(self::getActions())
             ->toolbarActions(self::getBulkActions())

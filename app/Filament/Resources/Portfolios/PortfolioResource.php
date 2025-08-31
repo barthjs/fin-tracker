@@ -92,6 +92,8 @@ final class PortfolioResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->heading(null)
+            ->modelLabel(__('portfolio.label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('is_active', true);

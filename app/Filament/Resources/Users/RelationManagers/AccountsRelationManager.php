@@ -8,7 +8,6 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Resources\Accounts\AccountResource;
 use App\Models\Account;
 use BackedEnum;
-use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -47,20 +46,8 @@ final class AccountsRelationManager extends RelationManager
         return AccountResource::table($table)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes())
             ->paginated(fn (): bool => Account::withoutGlobalScopes()->where('user_id', $userId)->count() > 20)
-            ->heading(null)
-            ->modelLabel(__('account.label'))
             ->headerActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->mutateDataUsing(function (array $data) use ($userId): array {
-                        $data['user_id'] = $userId;
-
-                        return $data;
-                    }),
-            ])
-            ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
+                self::createAction()
                     ->mutateDataUsing(function (array $data) use ($userId): array {
                         $data['user_id'] = $userId;
 

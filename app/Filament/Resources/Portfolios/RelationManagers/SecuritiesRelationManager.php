@@ -48,8 +48,6 @@ final class SecuritiesRelationManager extends RelationManager
 
                 return Security::whereIn('id', $securityIds);
             })
-            ->heading(null)
-            ->modelLabel(__('security.label'))
             ->columns($columns)
             ->recordUrl(fn (Security $record): string => ViewSecurity::getUrl(['record' => $record->id]));
     }

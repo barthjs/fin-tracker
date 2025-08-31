@@ -21,7 +21,6 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
@@ -74,7 +73,7 @@ final class TradeResource extends Resource
 
                     self::tradeAmountField('quantity')
                         ->label(__('trade.fields.quantity'))
-                        ->afterStateUpdated(function (string|float $state, Get $get, Set $set): void {
+                        ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
                                 self::asFloat($state),
                                 self::asFloat($get('price')),
@@ -87,7 +86,7 @@ final class TradeResource extends Resource
 
                     self::tradeAmountField('price')
                         ->label(__('fields.price'))
-                        ->afterStateUpdated(function (string|float $state, Get $get, Set $set): void {
+                        ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
                                 self::asFloat($get('quantity')),
                                 self::asFloat($state),
@@ -100,7 +99,7 @@ final class TradeResource extends Resource
 
                     self::tradeAmountField('tax')
                         ->label(__('trade.fields.tax'))
-                        ->afterStateUpdated(function (string|float $state, Get $get, Set $set): void {
+                        ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
                                 self::asFloat($get('quantity')),
                                 self::asFloat($get('price')),
@@ -113,7 +112,7 @@ final class TradeResource extends Resource
 
                     self::tradeAmountField('fee')
                         ->label(__('trade.fields.fee'))
-                        ->afterStateUpdated(function (string|float $state, Get $get, Set $set): void {
+                        ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
                                 self::asFloat($get('quantity')),
                                 self::asFloat($get('price')),
@@ -140,6 +139,8 @@ final class TradeResource extends Resource
 
                     TextInput::make('total_amount')
                         ->label(__('trade.fields.total_amount'))
+                        ->numeric()
+                        ->default(0)
                         ->suffix(fn (Get $get): ?string => Account::find($get('account_id'))?->currency?->value)
                         ->dehydrated(false)
                         ->disabled(),
@@ -165,6 +166,8 @@ final class TradeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->heading(null)
+            ->modelLabel(__('trade.label'))
             ->columns([
                 self::dateTimeColumn('date_time'),
 
@@ -290,14 +293,15 @@ final class TradeResource extends Resource
                                 fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
                     }),
             ], FiltersLayout::AboveContentCollapsible)
-            ->headerActions([
-                CreateAction::make('header-create')
-                    ->icon('tabler-plus')
-                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTrades),
-            ])
             ->filtersFormColumns(function (mixed $livewire): int {
                 return $livewire instanceof ListTrades ? 4 : 3;
             })
+            ->headerActions([
+                self::createAction()
+                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTrades)
+                    /** @phpstan-ignore-next-line */
+                    ->using(fn (array $data) => Trade::create($data)),
+            ])
             ->recordActions(self::getActions())
             ->toolbarActions(self::getBulkActions())
             ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
@@ -323,8 +327,8 @@ final class TradeResource extends Resource
                     $oldPortfolioId = $record->getOriginal('portfolio_id');
                     /** @var string $oldSecurityId */
                     $oldSecurityId = $record->getOriginal('security_id');
-                    /** @phpstan-ignore-next-line */
-                    $oldType = TradeType::from($record->getOriginal('type'));
+                    /** @var TradeType $oldType */
+                    $oldType = $record->getOriginal('type');
 
                     DB::transaction(function () use ($record, $data, $oldAmount, $oldQuantity, $oldAccountId, $oldPortfolioId, $oldSecurityId, $oldType): void {
                         $record->update($data);
@@ -343,7 +347,7 @@ final class TradeResource extends Resource
                         if ($oldAccountId !== $accountId) {
                             Account::updateAccountBalance($oldAccountId);
                             Account::updateAccountBalance($accountId);
-                        } elseif ($oldAmount !== $amount) {
+                        } elseif ($oldAmount !== $amount || $oldType !== $type) {
                             Account::updateAccountBalance($accountId);
                         }
 
@@ -469,8 +473,8 @@ final class TradeResource extends Resource
     private static function calculateTotalAmount(float $quantity, float $price, float $tax, float $fee, TradeType $type): float
     {
         return match ($type) {
-            TradeType::Buy => $price * $quantity + $tax + $fee,
-            TradeType::Sell => $price * $quantity - ($tax + $fee),
+            TradeType::Buy => round($price * $quantity + $tax + $fee, 2),
+            TradeType::Sell => round($price * $quantity - ($tax + $fee), 2),
         };
     }
 
