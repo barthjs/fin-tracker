@@ -9,7 +9,6 @@ use App\Filament\Exports\AccountExporter;
 use App\Filament\Imports\AccountImporter;
 use App\Filament\Resources\Accounts\AccountResource;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Builder;
 
 final class ListAccounts extends ListRecords
 {
@@ -32,8 +31,7 @@ final class ListAccounts extends ListRecords
                 ->modalHeading(__('account.export.modal_heading'))
                 ->exporter(AccountExporter::class)
                 ->failureNotificationTitle(__('account.export.failure_heading'))
-                ->successNotificationTitle(__('account.export.success_heading'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
+                ->successNotificationTitle(__('account.export.success_heading')),
         ];
     }
 }

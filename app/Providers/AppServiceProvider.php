@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Concerns\HasResourceActions;
+use App\Jobs\PrepareCsvExport;
+use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Exports\Jobs\PrepareCsvExport as BasePrepareCsvExport;
 use Filament\Facades\Filament;
 use Filament\Support\View\Components\ModalComponent;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
@@ -35,11 +39,16 @@ final class AppServiceProvider extends ServiceProvider
         Date::use(CarbonImmutable::class);
         Model::shouldBeStrict();
         Model::unguard();
-        Number::useLocale(app()->getLocale());
         Vite::useAggressivePrefetching();
 
         // Filament
         Filament::serving(function (): void {
+            Event::listen(function (LocaleChanged $event): void {
+                auth()->user()?->setLocale($event->locale);
+            });
+            $this->app->bind(BasePrepareCsvExport::class, PrepareCsvExport::class);
+            Number::useLocale(app()->getLocale());
+
             ModalComponent::closedByClickingAway(false);
             Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
             Table::configureUsing(fn (Table $table): Table => $table

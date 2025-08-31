@@ -57,10 +57,7 @@ final class ListTrades extends ListRecords
                 ->modalHeading(__('trade.export.modal_heading'))
                 ->exporter(TradeExporter::class)
                 ->failureNotificationTitle(__('trade.export.failure_heading'))
-                ->successNotificationTitle(__('trade.export.success_heading'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()
-                    ->whereHas('account', fn (Builder $query): Builder => $query->where('user_id', auth()->id()))
-                ),
+                ->successNotificationTitle(__('trade.export.success_heading')),
         ];
     }
 }

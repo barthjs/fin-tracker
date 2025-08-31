@@ -56,8 +56,7 @@ final class ListCategories extends ListRecords
                 ->modalHeading(__('category.export.modal_heading'))
                 ->exporter(CategoryExporter::class)
                 ->failureNotificationTitle(__('category.export.failure_heading'))
-                ->successNotificationTitle(__('category.export.success_heading'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
+                ->successNotificationTitle(__('category.export.success_heading')),
         ];
     }
 }

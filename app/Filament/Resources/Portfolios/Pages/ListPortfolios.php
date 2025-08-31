@@ -9,7 +9,6 @@ use App\Filament\Exports\PortfolioExporter;
 use App\Filament\Imports\PortfolioImporter;
 use App\Filament\Resources\Portfolios\PortfolioResource;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\File;
 
 final class ListPortfolios extends ListRecords
@@ -34,8 +33,7 @@ final class ListPortfolios extends ListRecords
                 ->modalHeading(__('portfolio.export.modal_heading'))
                 ->exporter(PortfolioExporter::class)
                 ->failureNotificationTitle(__('portfolio.export.failure_heading'))
-                ->successNotificationTitle(__('portfolio.export.success_heading'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
+                ->successNotificationTitle(__('portfolio.export.success_heading')),
         ];
     }
 }

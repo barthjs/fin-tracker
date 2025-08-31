@@ -34,6 +34,7 @@ final class UserFactory extends Factory
             'username' => fake()->unique()->userName,
             'email' => fake()->unique()->safeEmail(),
             'avatar' => fake()->imageUrl(),
+            'locale' => fake()->randomElement(['en', 'de']),
             'password' => self::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'is_active' => true,

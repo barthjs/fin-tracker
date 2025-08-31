@@ -7,10 +7,8 @@ namespace App\Filament\Exports;
 use App\Filament\Concerns\HasResourceExportColumns;
 use App\Models\Portfolio;
 use Carbon\Carbon;
-use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
-use Illuminate\Support\Number;
 
 final class PortfolioExporter extends Exporter
 {
@@ -23,9 +21,8 @@ final class PortfolioExporter extends Exporter
         return [
             self::nameColumn(),
 
-            ExportColumn::make('market_value')
-                ->label(__('portfolio.fields.market_value'))
-                ->formatStateUsing(fn (float $state): string => Number::format($state, 2)),
+            self::numericColumn('market_value')
+                ->label(__('fields.market_value')),
 
             self::currencyColumn(),
             self::descriptionColumn(),
@@ -51,7 +48,7 @@ final class PortfolioExporter extends Exporter
         return __('portfolio.export.file_name').Carbon::now()->format('Y-m-d-H-i');
     }
 
-    public function getJobBatchName(): ?string
+    public function getJobBatchName(): string
     {
         return 'portfolio-export';
     }

@@ -10,7 +10,6 @@ use App\Filament\Imports\SecurityImporter;
 use App\Filament\Resources\Securities\SecurityResource;
 use App\Filament\Resources\Securities\Widgets\SecurityChart;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\File;
 
 final class ListSecurities extends ListRecords
@@ -42,8 +41,7 @@ final class ListSecurities extends ListRecords
                 ->modalHeading(__('security.export.modal_heading'))
                 ->exporter(SecurityExporter::class)
                 ->failureNotificationTitle(__('security.export.failure_heading'))
-                ->successNotificationTitle(__('security.export.success_heading'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()->where('user_id', auth()->id())),
+                ->successNotificationTitle(__('security.export.success_heading')),
         ];
     }
 }

@@ -17,6 +17,12 @@ trait HasResourceExportColumns
             ->label(__('fields.name'));
     }
 
+    public static function numericColumn(string $name, ?int $places = 2): ExportColumn
+    {
+        return ExportColumn::make($name)
+            ->formatStateUsing(fn (float $state): ?string => Number::format($state, $places) ?: null);
+    }
+
     public static function currencyColumn(?string $name = 'currency'): ExportColumn
     {
         return ExportColumn::make($name)
@@ -54,12 +60,6 @@ trait HasResourceExportColumns
     {
         return ExportColumn::make($name)
             ->label(__('fields.type'));
-    }
-
-    public static function tradeAmountColum(string $name): ExportColumn
-    {
-        return ExportColumn::make($name)
-            ->formatStateUsing(fn (float $state): string|false => Number::format($state, 6));
     }
 
     public static function accountColumn(?string $name = 'account.name'): ExportColumn

@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('email')->nullable()->unique();
             $table->string('avatar')->nullable();
+            $table->string('locale')->default('en');
 
             $table->string('password');
             $table->rememberToken();

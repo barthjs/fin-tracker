@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Storage;
  * @property string $username
  * @property string|null $email
  * @property string|null $avatar
+ * @property string $locale
  * @property string $password
  * @property string|null $remember_token
  * @property string|null $app_authentication_secret
@@ -52,9 +53,10 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     /**
      * The model's default values for attributes.
      *
-     * @var array<string, bool>
+     * @var array<string, string|bool>
      */
     protected $attributes = [
+        'locale' => 'en',
         'is_active' => true,
         'is_verified' => false,
         'is_admin' => false,
@@ -133,6 +135,12 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->avatar ? Storage::url($this->avatar) : null;
+    }
+
+    public function setLocale(string $locale): void
+    {
+        $this->locale = $locale;
+        $this->save();
     }
 
     public function getAppAuthenticationSecret(): ?string

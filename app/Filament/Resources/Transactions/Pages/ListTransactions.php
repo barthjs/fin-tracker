@@ -90,9 +90,7 @@ final class ListTransactions extends ListRecords
                 ->modalHeading(__('transaction.export.modal_heading'))
                 ->exporter(TransactionExporter::class)
                 ->failureNotificationTitle(__('transaction.export.failure_heading'))
-                ->successNotificationTitle(__('transaction.export.success_heading'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes()
-                    ->whereHas('account', fn (Builder $query): Builder => $query->where('user_id', auth()->id()))),
+                ->successNotificationTitle(__('transaction.export.success_heading')),
         ];
     }
 }

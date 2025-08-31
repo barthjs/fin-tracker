@@ -12,7 +12,6 @@ use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
-use Illuminate\Support\Number;
 
 final class TransactionExporter extends Exporter
 {
@@ -28,9 +27,8 @@ final class TransactionExporter extends Exporter
             self::typeColum()
                 ->formatStateUsing(fn (TransactionType $state): string => $state->getLabel()),
 
-            ExportColumn::make('amount')
-                ->label(__('transaction.fields.amount'))
-                ->formatStateUsing(fn (float $state): string|false => Number::format($state, 2)),
+            self::numericColumn('amount')
+                ->label(__('transaction.fields.amount')),
 
             ExportColumn::make('payee')
                 ->label(__('transaction.fields.payee')),

@@ -26,19 +26,19 @@ final class TradeExporter extends Exporter
             self::typeColum()
                 ->formatStateUsing(fn (TradeType $state): string => $state->getLabel()),
 
-            self::tradeAmountColum('total_amount')
+            self::numericColumn('total_amount', 6)
                 ->label(__('trade.fields.total_amount')),
 
-            self::tradeAmountColum('quantity')
+            self::numericColumn('quantity', 6)
                 ->label(__('trade.fields.quantity')),
 
-            self::tradeAmountColum('price')
+            self::numericColumn('price', 6)
                 ->label(__('fields.price')),
 
-            self::tradeAmountColum('tax')
+            self::numericColumn('tax', 6)
                 ->label(__('trade.fields.tax')),
 
-            self::tradeAmountColum('fee')
+            self::numericColumn('fee', 6)
                 ->label(__('trade.fields.fee')),
 
             self::accountColumn(),

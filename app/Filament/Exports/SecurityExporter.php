@@ -11,7 +11,6 @@ use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
-use Illuminate\Support\Number;
 
 final class SecurityExporter extends Exporter
 {
@@ -30,16 +29,14 @@ final class SecurityExporter extends Exporter
             ExportColumn::make('symbol')
                 ->label(__('security.fields.symbol')),
 
-            ExportColumn::make('type')
-                ->label(__('fields.type'))
+            self::typeColum()
                 ->formatStateUsing(fn (SecurityType $state): string => $state->getLabel()),
-            ExportColumn::make('price')
-                ->label(__('fields.price'))
-                ->formatStateUsing(fn (float $state): string => Number::format($state, 6)),
 
-            ExportColumn::make('total_quantity')
-                ->label(__('security.fields.total_quantity'))
-                ->formatStateUsing(fn (float $state): string => Number::format($state, 6)),
+            self::numericColumn('price', 6)
+                ->label(__('fields.price')),
+
+            self::numericColumn('total_quantity', 6)
+                ->label(__('security.fields.total_quantity')),
 
             ExportColumn::make('description')
                 ->label(__('fields.description')),
@@ -66,7 +63,7 @@ final class SecurityExporter extends Exporter
         return __('security.export.file_name').Carbon::now()->format('Y-m-d-H-i');
     }
 
-    public function getJobBatchName(): ?string
+    public function getJobBatchName(): string
     {
         return 'security-export';
     }
