@@ -106,7 +106,6 @@ trait HasResourceFormFields
         return TextInput::make($name)
             ->numeric()
             ->default(0.0)
-            ->step(0.01)
             ->minValue(0.0)
             ->maxValue(1e9)
             ->live(true, 500);

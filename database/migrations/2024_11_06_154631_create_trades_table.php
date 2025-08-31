@@ -20,13 +20,15 @@ return new class extends Migration
             $table->dateTime('date_time')->index();
             $types = array_column(TradeType::cases(), 'value');
             $table->enum('type', $types)->default(TradeType::Buy)->index();
-            $table->decimal('total_amount', 18, 6)
+            $table->decimal('total_amount', 18)
                 ->storedAs("
-                    CASE
-                        WHEN type = 'buy' THEN (price * quantity + tax + fee)
-                        WHEN type = 'sell' THEN (price * quantity - (tax + fee))
-                        ELSE 0
-                    END
+                    ROUND(
+                        CASE
+                            WHEN type = 'buy' THEN (price * quantity + tax + fee)
+                            WHEN type = 'sell' THEN (price * quantity - (tax + fee))
+                            ELSE 0
+                        END
+                    , 2)
                 ");
             $table->decimal('quantity', 18, 6)->default(0);
             $table->decimal('price', 18, 6)->default(0);

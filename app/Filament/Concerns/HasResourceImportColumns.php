@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Concerns;
 
+use App\Enums\Currency;
 use Filament\Actions\Imports\ImportColumn;
 
 trait HasResourceImportColumns
@@ -30,7 +31,10 @@ trait HasResourceImportColumns
         return ImportColumn::make($name)
             ->label(__('fields.currency'))
             ->exampleHeader(__('fields.currency'))
-            ->examples(['EUR', 'USD', 'GBP']);
+            ->examples(__('account.import.examples.currency'))
+            ->requiredMapping()
+            ->rules(['required'])
+            ->castStateUsing(fn (?string $state): Currency => Currency::tryFrom(Currency::getCurrency($state)) ?? Currency::EUR);
     }
 
     public static function colorColumn(?string $name = 'color'): ImportColumn
@@ -55,7 +59,7 @@ trait HasResourceImportColumns
             ->label(__('fields.status'))
             ->exampleHeader(__('fields.status'))
             ->examples([1, 1, 1])
-            ->boolean();
+            ->castStateUsing(fn (?string $state): bool => (bool) $state);
     }
 
     public static function dateTimeColumn(?string $name = 'date_time'): ImportColumn

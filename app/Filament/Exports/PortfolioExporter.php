@@ -21,7 +21,7 @@ final class PortfolioExporter extends Exporter
         return [
             self::nameColumn(),
 
-            self::numericColumn('market_value')
+            self::numericColumn('market_value', 6)
                 ->label(__('fields.market_value')),
 
             self::currencyColumn(),

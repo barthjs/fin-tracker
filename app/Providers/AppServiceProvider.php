@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Concerns\HasResourceActions;
+use App\Jobs\ImportCsvWithLocale;
 use App\Jobs\PrepareCsvExport;
 use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport as BasePrepareCsvExport;
+use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportCsv;
 use Filament\Facades\Filament;
 use Filament\Support\View\Components\ModalComponent;
 use Filament\Tables\Table;
@@ -28,7 +30,11 @@ final class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind(BaseImportCsv::class, ImportCsvWithLocale::class);
+        $this->app->bind(BasePrepareCsvExport::class, PrepareCsvExport::class);
+    }
 
     /**
      * Bootstrap any application services.
@@ -46,7 +52,6 @@ final class AppServiceProvider extends ServiceProvider
             Event::listen(function (LocaleChanged $event): void {
                 auth()->user()?->setLocale($event->locale);
             });
-            $this->app->bind(BasePrepareCsvExport::class, PrepareCsvExport::class);
             Number::useLocale(app()->getLocale());
 
             ModalComponent::closedByClickingAway(false);
@@ -66,9 +71,6 @@ final class AppServiceProvider extends ServiceProvider
                     self::tableDeleteAction(),
                 ])
                 ->emptyStateDescription(null)
-                ->emptyStateActions([
-                    self::createAction(),
-                ])
             );
         });
 

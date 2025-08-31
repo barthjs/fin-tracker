@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
-use App\Enums\Currency;
 use App\Filament\Concerns\HasResourceImportColumns;
 use App\Models\Account;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Builder;
 
 final class AccountImporter extends Importer
 {
@@ -22,11 +22,7 @@ final class AccountImporter extends Importer
             self::nameColumn()
                 ->examples(__('account.import.examples.name')),
 
-            self::currencyColumn()
-                ->examples(__('account.import.examples.currency'))
-                ->fillRecordUsing(function (Account $record, string $state): void {
-                    $record->currency = Currency::getCurrency($state);
-                }),
+            self::currencyColumn(),
 
             self::descriptionColumn()
                 ->examples(__('account.import.examples.description')),
@@ -48,15 +44,24 @@ final class AccountImporter extends Importer
         return $body;
     }
 
-    public function resolveRecord(): ?Account
+    public function resolveRecord(): Account
     {
-        return Account::firstOrNew([
-            'name' => mb_trim($this->data['name']),
-            'user_id' => auth()->user()->id,
-        ]);
+        return Account::query()
+            ->where('user_id', auth()->id())
+            ->where('name', $this->data['name'])
+            ->where('currency', $this->data['currency'])
+            ->when(! empty($this->data['color']), function (Builder $query): void {
+                $query->where('color', $this->data['color']);
+            })
+            ->first() ?? new Account([
+                'name' => $this->data['name'],
+                'currency' => $this->data['currency'],
+                'color' => $this->data['color'] ?? mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
+                'user_id' => auth()->id(),
+            ]);
     }
 
-    public function getJobBatchName(): ?string
+    public function getJobBatchName(): string
     {
         return 'account-import';
     }

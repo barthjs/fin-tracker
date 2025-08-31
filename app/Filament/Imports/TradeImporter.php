@@ -62,7 +62,7 @@ final class TradeImporter extends Importer
                 ->fillRecordUsing(fn (Trade $record, string $state) => $record->fee = abs(Convertor::formatNumber($state))),
 
             ImportColumn::make('account_id')
-                ->label(__('trade.columns.account'))
+                ->label(__('account.label'))
                 ->fillRecordUsing(function (Trade $record, string $state): void {
                     $account = Account::whereName($state);
                     if ($account->count() > 1) {
@@ -73,7 +73,7 @@ final class TradeImporter extends Importer
                 }),
 
             ImportColumn::make('portfolio')
-                ->label(__('trade.columns.portfolio'))
+                ->label(__('portfolio.label'))
                 ->fillRecordUsing(function (Trade $record, string $state): void {
                     $portfolio = Portfolio::whereName($state);
                     if ($portfolio->count() > 1) {
@@ -84,7 +84,7 @@ final class TradeImporter extends Importer
                 }),
 
             ImportColumn::make('isin')
-                ->label(__('security.columns.isin'))
+                ->label(__('security.fields.isin'))
                 ->fillRecordUsing(function (Trade $record, string $state): void {
                     $security = Security::whereIsin($state);
                     if ($security->count() > 1) {

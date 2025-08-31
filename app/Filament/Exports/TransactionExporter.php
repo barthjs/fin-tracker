@@ -35,6 +35,9 @@ final class TransactionExporter extends Exporter
 
             self::accountColumn(),
 
+            ExportColumn::make('transferAccount.name')
+                ->label(__('account.fields.transfer_account_id')),
+
             ExportColumn::make('category.name')
                 ->label(__('category.label')),
 
@@ -43,11 +46,6 @@ final class TransactionExporter extends Exporter
                 ->formatStateUsing(fn (CategoryGroup $state): string => $state->getLabel()),
 
             self::notesColumn(),
-
-            ExportColumn::make('currency')
-                ->label(__('fields.currency'))
-                ->enabledByDefault(false)
-                ->state(fn (Transaction $record): string => $record->account->currency->getLabel()),
         ];
     }
 

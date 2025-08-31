@@ -49,6 +49,8 @@ final class TransactionImporter extends Importer
 
             ImportColumn::make('account_id')
                 ->label(__('account.label'))
+                ->requiredMapping()
+                ->rules(['required'])
                 ->fillRecordUsing(function (Transaction $record, string $state): void {
                     $account = Account::whereName($state);
                     if ($account->count() > 1) {
@@ -58,13 +60,31 @@ final class TransactionImporter extends Importer
                     }
                 }),
 
+            ImportColumn::make('transfer_account_id')
+                ->label(__('account.fields.transfer_account_id'))
+                ->fillRecordUsing(function (Transaction $record, ?string $state): void {
+                    if ($state === null) {
+                        return;
+                    }
+
+                    $account = Account::whereName($state);
+                    if ($account->count() > 1) {
+                        $record->transfer_account_id = Account::getOrCreateDefaultAccount()->id;
+                    } else {
+                        $record->transfer_account_id = $account->first()->id ?? Account::getOrCreateDefaultAccount()->id;
+                    }
+                }),
+
             self::numericColumn('amount')
                 ->label(__('transaction.fields.amount'))
-                ->fillRecordUsing(fn (Transaction $record, string $state) => $record->amount = Convertor::formatNumber($state)),
+                ->requiredMapping()
+                ->rules(['required'])
+                ->castStateUsing(fn (string $state) => Convertor::formatNumber($state)),
 
             ImportColumn::make('payee')
                 ->label(__('transaction.fields.payee'))
-                ->rules(['max:255']),
+                ->requiredMapping()
+                ->rules(['required', 'max:255']),
 
             ImportColumn::make('category_id')
                 ->label(__('category.label'))

@@ -10,6 +10,7 @@ use App\Models\Category;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Builder;
 
 final class CategoryImporter extends Importer
 {
@@ -29,8 +30,8 @@ final class CategoryImporter extends Importer
                 ->examples(__('category.import.examples.group'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(function (Category $record, string $state): void {
-                    $record->group = match ($state) {
+                ->castStateUsing(function (string $state): CategoryGroup {
+                    return match ($state) {
                         CategoryGroup::FixExpenses->getLabel() => CategoryGroup::FixExpenses,
                         CategoryGroup::VarExpenses->getLabel() => CategoryGroup::VarExpenses,
                         CategoryGroup::FixRevenues->getLabel() => CategoryGroup::FixRevenues,
@@ -57,15 +58,23 @@ final class CategoryImporter extends Importer
         return $body;
     }
 
-    public function resolveRecord(): ?Category
+    public function resolveRecord(): Category
     {
-        return Category::firstOrNew([
-            'name' => mb_trim($this->data['name']),
-            'user_id' => auth()->user()->id,
-        ]);
+        return Category::query()
+            ->where('user_id', auth()->user()->id)
+            ->where('name', $this->data['name'])
+            ->where('group', $this->data['group'])
+            ->when(! empty($this->data['color']), function (Builder $query): void {
+                $query->where('color', $this->data['color']);
+            })->first() ?? new Category([
+                'name' => $this->data['name'],
+                'group' => $this->data['group'],
+                'color' => $this->data['color'] ?? mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
+                'user_id' => auth()->user()->id,
+            ]);
     }
 
-    public function getJobBatchName(): ?string
+    public function getJobBatchName(): string
     {
         return 'category-import';
     }

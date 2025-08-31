@@ -11,6 +11,7 @@ use App\Tools\Convertor;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Builder;
 
 final class SecurityImporter extends Importer
 {
@@ -21,11 +22,7 @@ final class SecurityImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('name')
-                ->label(__('fields.name'))
-                ->exampleHeader(__('fields.name'))
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
+            self::nameColumn(),
 
             ImportColumn::make('isin')
                 ->label(__('security.fields.isin'))
@@ -36,9 +33,9 @@ final class SecurityImporter extends Importer
                 ->label(__('fields.type'))
                 ->exampleHeader(__('fields.type'))
                 ->requiredMapping()
-                ->rules(['required', 'max:255'])
-                ->fillRecordUsing(function (Security $record, string $state): void {
-                    $record->type = match ($state) {
+                ->rules(['required'])
+                ->castStateUsing(function (string $state): SecurityType {
+                    return match ($state) {
                         SecurityType::Bond->getLabel() => SecurityType::Bond,
                         SecurityType::Derivative->getLabel() => SecurityType::Derivative,
                         SecurityType::ETF->getLabel() => SecurityType::ETF,
@@ -56,9 +53,7 @@ final class SecurityImporter extends Importer
             ImportColumn::make('price')
                 ->label(__('fields.price'))
                 ->exampleHeader(__('fields.price'))
-                ->requiredMapping()
-                ->rules(['required'])
-                ->fillRecordUsing(fn (Security $record, string $state) => $record->price = Convertor::formatNumber($state)),
+                ->castStateUsing(fn (?string $state) => Convertor::formatNumber($state ?? 0.0)),
 
             self::descriptionColumn(),
             self::colorColumn(),
@@ -80,14 +75,22 @@ final class SecurityImporter extends Importer
 
     public function resolveRecord(): Security
     {
-        return Security::firstOrNew([
-            'name' => mb_trim($this->data['name']),
-            'isin' => mb_trim($this->data['isin']),
-            'user_id' => auth()->user()->id,
-        ]);
+        return Security::query()
+            ->where('user_id', auth()->id())
+            ->where('name', $this->data['name'])
+            ->where('type', $this->data['type'])
+            ->when(! empty($this->data['color']), function (Builder $query): void {
+                $query->where('color', $this->data['color']);
+            })
+            ->first() ?? new Security([
+                'name' => $this->data['name'],
+                'type' => $this->data['type'],
+                'color' => $this->data['color'] ?? mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
+                'user_id' => auth()->id(),
+            ]);
     }
 
-    public function getJobBatchName(): ?string
+    public function getJobBatchName(): string
     {
         return 'security-import';
     }
