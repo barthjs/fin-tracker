@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 return [
 
-    'label' => 'User',
-    'plural_label' => 'Users',
+    'label' => 'user',
+    'plural_label' => 'users',
 
     'fields' => [
         'first_name' => 'First name',

@@ -201,10 +201,8 @@ final class UserResource extends Resource
                 self::createdAtColumn(),
                 self::updatedAtColumn(),
             ])
-            ->paginated(fn (): bool => User::count() > 20)
             ->defaultSort('username')
-            ->recordUrl(fn (User $record): string => ViewUser::getUrl(['record' => $record->id]))
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
+            ->recordUrl(fn (User $record): string => ViewUser::getUrl(['record' => $record->id]));
     }
 
     public static function getRelations(): array
