@@ -171,6 +171,7 @@ final class Portfolio extends Model
         self::creating(function (Portfolio $portfolio): void {
             $portfolio->name = mb_trim($portfolio->name);
 
+            /** @phpstan-ignore-next-line */
             if ($portfolio->user_id === null) {
                 $portfolio->user_id = auth()->user()->id;
             }

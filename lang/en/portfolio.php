@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 return [
 
-    'label' => 'Portfolio',
-    'plural_label' => 'Portfolios',
+    'label' => 'portfolio',
+    'plural_label' => 'portfolios',
 
     'buttons' => [
         'bulk_edit_portfolio' => 'Edit portfolio',
     ],
 
     'import' => [
-        'modal_heading' => 'Import portfolios',
+        'modal_heading' => 'Import Portfolios',
         'failure_heading' => 'Portfolio import failed',
         'success_heading' => 'Portfolio import successful',
         'body_heading' => 'The portfolio import has been completed.',
@@ -21,7 +21,7 @@ return [
     ],
 
     'export' => [
-        'modal_heading' => 'Export portfolios',
+        'modal_heading' => 'Export Portfolios',
         'failure_heading' => 'Portfolio export failed',
         'success_heading' => 'Portfolio export successful',
         'body_heading' => 'The portfolio export has been completed.',

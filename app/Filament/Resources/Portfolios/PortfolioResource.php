@@ -75,13 +75,12 @@ final class PortfolioResource extends Resource
                 Section::make()
                     ->columnSpanFull()
                     ->schema([
-                        self::totalValueEntry('market_value')
+                        self::numericEntry('market_value')
                             ->label(__('fields.market_value'))
                             ->color(fn (Portfolio $record): string => $record->marketValueColor)
-                            ->money(fn (Portfolio $record): string => $record->currency->value),
+                            ->money(fn (Portfolio $record): string => $record->currency->value, decimalPlaces: 6),
 
-                        self::descriptionEntry()
-                            ->hidden(fn (Portfolio $record): bool => $record->description === null),
+                        self::descriptionEntry(),
                     ])
                     ->columns([
                         'default' => 2,
@@ -94,6 +93,7 @@ final class PortfolioResource extends Resource
         return $table
             ->heading(null)
             ->modelLabel(__('portfolio.label'))
+            ->pluralModelLabel(__('portfolio.plural_label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('is_active', true);
@@ -102,11 +102,9 @@ final class PortfolioResource extends Resource
                 return $query;
             })
             ->columns(self::getTableColumns())
-            ->paginated(fn (): bool => Portfolio::count() > 20)
             ->filters([
                 self::inactiveFilter(),
-            ])
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
+            ]);
     }
 
     /**
