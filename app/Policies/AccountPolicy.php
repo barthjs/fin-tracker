@@ -31,7 +31,8 @@ final class AccountPolicy
     public function delete(User $user, Account $account): bool
     {
         return $user->id === $account->user_id
-            && $account->transactions()->count() === 0
-            && $account->trades()->count() === 0;
+            && $account->incomingTransfers()->count() === 0
+            && $account->trades()->count() === 0
+            && $account->transactions()->count() === 0;
     }
 }

@@ -57,7 +57,7 @@ final class AppServiceProvider extends ServiceProvider
             ModalComponent::closedByClickingAway(false);
             Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
             Table::configureUsing(fn (Table $table): Table => $table
-                ->paginationPageOptions([5, 10, 25, 50, 'all'])
+                ->paginationPageOptions([10, 25, 50, 100, 'all'])
                 ->extremePaginationLinks()
                 ->reorderableColumns()
                 ->deferColumnManager(false)
@@ -74,7 +74,7 @@ final class AppServiceProvider extends ServiceProvider
             );
         });
 
-        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch): void {
             $switch
                 ->visible(outsidePanels: true)
                 ->locales(['de', 'en']);

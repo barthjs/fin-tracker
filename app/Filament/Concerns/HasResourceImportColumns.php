@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Concerns;
 
 use App\Enums\Currency;
+use App\Tools\Convertor;
+use Carbon\CarbonImmutable;
+use Exception;
 use Filament\Actions\Imports\ImportColumn;
 
 trait HasResourceImportColumns
@@ -23,6 +26,7 @@ trait HasResourceImportColumns
         return ImportColumn::make($name)
             ->label(__('fields.description'))
             ->exampleHeader(__('fields.description'))
+            ->examples(__('account.import.examples.description'))
             ->rules(['max:1000']);
     }
 
@@ -67,7 +71,16 @@ trait HasResourceImportColumns
         return ImportColumn::make($name)
             ->label(__('fields.date_time'))
             ->requiredMapping()
-            ->rules(['required']);
+            ->rules(['required'])
+            ->castStateUsing(function (string $state): CarbonImmutable {
+                try {
+                    $carbon = CarbonImmutable::parse($state);
+                } catch (Exception) {
+                    $carbon = CarbonImmutable::now();
+                }
+
+                return $carbon;
+            });
     }
 
     public static function typeColumn(?string $name = 'type'): ImportColumn
@@ -82,7 +95,8 @@ trait HasResourceImportColumns
     {
         return ImportColumn::make($name)
             ->requiredMapping()
-            ->rules(['required']);
+            ->rules(['required'])
+            ->castStateUsing(fn (string $state): float => abs(Convertor::formatNumber($state)));
     }
 
     public static function notesColumn(?string $name = 'notes'): ImportColumn

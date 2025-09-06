@@ -75,13 +75,12 @@ final class AccountResource extends Resource
                 Section::make()
                     ->columnSpanFull()
                     ->schema([
-                        self::totalValueEntry('balance')
+                        self::numericEntry('balance')
                             ->label(__('account.fields.balance'))
                             ->color(fn (Account $record): string => $record->balanceColor)
                             ->money(fn (Account $record): string => $record->currency->value),
 
-                        self::descriptionEntry()
-                            ->hidden(fn (Account $record): bool => $record->description === null),
+                        self::descriptionEntry(),
                     ])
                     ->columns([
                         'default' => 2,
@@ -94,6 +93,7 @@ final class AccountResource extends Resource
         return $table
             ->heading(null)
             ->modelLabel(__('account.label'))
+            ->pluralModelLabel(__('account.plural_label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('is_active', true);
@@ -102,11 +102,9 @@ final class AccountResource extends Resource
                 return $query;
             })
             ->columns(self::getTableColumns())
-            ->paginated(fn (): bool => Account::count() > 20)
             ->filters([
                 self::inactiveFilter(),
-            ])
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
+            ]);
     }
 
     /**

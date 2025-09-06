@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 return [
 
-    'label' => 'Account',
-    'plural_label' => 'Accounts',
+    'label' => 'account',
+    'plural_label' => 'accounts',
 
     'fields' => [
         'balance' => 'Balance',
@@ -17,7 +17,7 @@ return [
     ],
 
     'import' => [
-        'modal_heading' => 'Import accounts',
+        'modal_heading' => 'Import Accounts',
         'failure_heading' => 'Account import failed',
         'success_heading' => 'Account import successful',
         'body_heading' => 'The account import has been completed.',
@@ -44,7 +44,7 @@ return [
     ],
 
     'export' => [
-        'modal_heading' => 'Export accounts',
+        'modal_heading' => 'Export Accounts',
         'failure_heading' => 'Account export failed',
         'success_heading' => 'Account export successful',
         'body_heading' => 'The account export has been completed.',

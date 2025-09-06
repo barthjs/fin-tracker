@@ -10,7 +10,7 @@ use Filament\Support\Enums\TextSize;
 
 trait HasResourceInfolistEntries
 {
-    public static function totalValueEntry(string $name): TextEntry
+    public static function numericEntry(string $name): TextEntry
     {
         return TextEntry::make($name)
             ->size(TextSize::Medium)
@@ -21,6 +21,7 @@ trait HasResourceInfolistEntries
     {
         return TextEntry::make($name)
             ->label(__('fields.description'))
-            ->size(TextSize::Small);
+            ->size(TextSize::Small)
+            ->hidden(fn (?string $state): bool => $state === null);
     }
 }

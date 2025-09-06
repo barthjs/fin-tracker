@@ -1,6 +1,5 @@
 {
     "CTRL+K": "CTRL+K",
     "Export": "Export",
-    "Import": "Import",
-    "No :model found": "No :model found"
+    "Import": "Import"
 }

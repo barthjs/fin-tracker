@@ -33,8 +33,8 @@ use Illuminate\Support\Facades\Storage;
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
  * @property-read Collection<int, Transaction> $incomingTransfers
- * @property-read Collection<int, Transaction> $transactions
  * @property-read Collection<int, Trade> $trades
+ * @property-read Collection<int, Transaction> $transactions
  * @property-read string $balanceColor
  */
 final class Account extends Model
@@ -157,16 +157,6 @@ final class Account extends Model
     }
 
     /**
-     * Transactions where this account is the main account.
-     *
-     * @return HasMany<Transaction, $this>
-     */
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class, 'account_id');
-    }
-
-    /**
      * Trades where this account is the main account.
      *
      * @return HasMany<Trade, $this>
@@ -176,6 +166,16 @@ final class Account extends Model
         return $this->hasMany(Trade::class, 'account_id');
     }
 
+    /**
+     * Transactions where this account is the main account.
+     *
+     * @return HasMany<Transaction, $this>
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'account_id');
+    }
+
     protected static function booted(): void
     {
         self::addGlobalScope(new UserScope);
@@ -183,6 +183,7 @@ final class Account extends Model
         self::creating(function (Account $account): void {
             $account->name = mb_trim($account->name);
 
+            /** @phpstan-ignore-next-line */
             if ($account->user_id === null) {
                 $account->user_id = auth()->user()->id;
             }

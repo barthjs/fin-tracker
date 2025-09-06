@@ -8,6 +8,7 @@ use App\Enums\Currency;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Exports\ExportColumn;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 
 trait HasResourceExportColumns
 {
@@ -65,7 +66,7 @@ trait HasResourceExportColumns
     public static function accountColumn(?string $name = 'account.name'): ExportColumn
     {
         return ExportColumn::make($name)
-            ->label(__('account.label'));
+            ->label(Str::ucfirst(__('account.label')));
     }
 
     public static function notesColumn(?string $name = 'notes'): ExportColumn

@@ -38,6 +38,12 @@ trait HasResourceActions
             ->icon('tabler-plus');
     }
 
+    public static function editAction(): CreateAction
+    {
+        return CreateAction::make()
+            ->icon('tabler-edit');
+    }
+
     public static function tableEditAction(): EditAction
     {
         return EditAction::make()

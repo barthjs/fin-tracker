@@ -10,6 +10,8 @@ use App\Filament\Resources\Accounts\AccountResource;
 use App\Filament\Resources\Categories\CategoryResource;
 use App\Filament\Resources\Portfolios\PortfolioResource;
 use App\Filament\Resources\Securities\SecurityResource;
+use App\Models\Category;
+use App\Models\Security;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -18,6 +20,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 trait HasResourceFormFields
 {
@@ -131,7 +134,7 @@ trait HasResourceFormFields
     public static function accountSelectField(string $name = 'account_id'): Select
     {
         return Select::make($name)
-            ->label(__('account.label'))
+            ->label(Str::ucfirst(__('account.label')))
             ->selectablePlaceholder(false)
             ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
             ->preload()
@@ -143,9 +146,10 @@ trait HasResourceFormFields
     public static function categorySelectField(string $column = 'category_id'): Select
     {
         return Select::make($column)
-            ->label(__('category.label'))
+            ->label(Str::ucfirst(__('category.label')))
             ->selectablePlaceholder(false)
             ->relationship('category', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
+            ->getOptionLabelUsing(fn (?string $value): ?string => Category::find($value)?->name)
             ->preload()
             ->searchable()
             ->required()
@@ -155,7 +159,7 @@ trait HasResourceFormFields
     public static function portfolioSelectField(string $column = 'portfolio_id'): Select
     {
         return Select::make($column)
-            ->label(__('portfolio.label'))
+            ->label(Str::ucfirst(__('portfolio.label')))
             ->selectablePlaceholder(false)
             ->relationship('portfolio', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
             ->preload()
@@ -167,9 +171,10 @@ trait HasResourceFormFields
     public static function securitySelectField(string $column = 'security_id'): Select
     {
         return Select::make($column)
-            ->label(__('security.label'))
+            ->label(Str::ucfirst(__('security.label')))
             ->selectablePlaceholder(false)
             ->relationship('security', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
+            ->getOptionLabelUsing(fn (?string $value): ?string => Security::find($value)?->name)
             ->preload()
             ->searchable()
             ->required()
