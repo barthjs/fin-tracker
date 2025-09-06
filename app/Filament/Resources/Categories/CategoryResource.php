@@ -103,6 +103,7 @@ final class CategoryResource extends Resource
         return $table
             ->heading(null)
             ->modelLabel(__('category.label'))
+            ->pluralModelLabel(__('category.plural_label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('is_active', true);
@@ -111,12 +112,10 @@ final class CategoryResource extends Resource
                 return $query;
             })
             ->columns(self::getTableColumns())
-            ->paginated(fn (): bool => Category::count() > 20)
             ->filters([
                 self::inactiveFilter(),
             ])
-            ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
+            ->toolbarActions(self::getBulkActions());
     }
 
     /**

@@ -158,6 +158,7 @@ final class Category extends Model
             /** @phpstan-ignore-next-line */
             $category->type = self::getType($category->group);
 
+            /** @phpstan-ignore-next-line */
             if ($category->user_id === null) {
                 $category->user_id = auth()->user()->id;
             }

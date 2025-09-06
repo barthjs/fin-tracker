@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 return [
 
-    'label' => 'Category',
-    'plural_label' => 'Categories',
+    'label' => 'category',
+    'plural_label' => 'categories',
 
     'fields' => [
         'group' => 'Group',
@@ -24,7 +24,7 @@ return [
     ],
 
     'import' => [
-        'modal_heading' => 'Import categories',
+        'modal_heading' => 'Import Categories',
         'failure_heading' => 'Category import failed',
         'success_heading' => 'Category import successful',
         'body_heading' => 'The category import has been completed.',
@@ -50,7 +50,7 @@ return [
     ],
 
     'export' => [
-        'modal_heading' => 'Export categories',
+        'modal_heading' => 'Export Categories',
         'failure_heading' => 'Category export failed',
         'success_heading' => 'Category export successful',
         'body_heading' => 'The category export has been completed.',
