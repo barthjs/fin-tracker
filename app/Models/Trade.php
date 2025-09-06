@@ -104,16 +104,19 @@ final class Trade extends Model
 
         self::creating(function (Trade $trade): void {
             // Only needed in importer
+            /** @phpstan-ignore-next-line */
             if ($trade->account_id === null) {
                 $trade->account_id = Account::getOrCreateDefaultAccount()->id;
             }
 
             // Only needed in importer
+            /** @phpstan-ignore-next-line */
             if ($trade->portfolio_id === null) {
                 $trade->portfolio_id = Portfolio::getOrCreateDefaultPortfolio()->id;
             }
 
             // Only needed in importer
+            /** @phpstan-ignore-next-line */
             if ($trade->security_id === null) {
                 $trade->security_id = Security::getOrCreateDefaultSecurity()->id;
             }

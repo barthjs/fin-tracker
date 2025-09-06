@@ -8,6 +8,7 @@ use App\Filament\Resources\Trades\TradeResource;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 final class TradesRelationManager extends RelationManager
 {
@@ -21,6 +22,6 @@ final class TradesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return TradeResource::table($table)
-            ->heading(__('trade.plural_label'));
+            ->heading(Str::ucfirst(__('trade.plural_label')));
     }
 }

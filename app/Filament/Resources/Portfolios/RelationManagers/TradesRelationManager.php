@@ -10,6 +10,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 final class TradesRelationManager extends RelationManager
 {
@@ -19,7 +20,7 @@ final class TradesRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('trade.plural_label');
+        return Str::ucfirst(__('trade.plural_label'));
     }
 
     public function form(Schema $schema): Schema

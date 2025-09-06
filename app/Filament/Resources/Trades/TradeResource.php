@@ -38,6 +38,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 final class TradeResource extends Resource
 {
@@ -68,7 +69,6 @@ final class TradeResource extends Resource
                     self::dateTimePickerField(),
 
                     self::securitySelectField()
-                        ->getOptionLabelUsing(fn (?string $value): ?string => Security::find($value)?->name)
                         ->default(fn (): ?string => $security instanceof Security ? $security->id : null),
 
                     self::tradeAmountField('quantity')
@@ -168,6 +168,7 @@ final class TradeResource extends Resource
         return $table
             ->heading(null)
             ->modelLabel(__('trade.label'))
+            ->pluralModelLabel(__('trade.plural_label'))
             ->columns([
                 self::dateTimeColumn('date_time'),
 
@@ -220,7 +221,7 @@ final class TradeResource extends Resource
 
                 self::logoAndNameColumn('account.name')
                     ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
-                    ->label(__('account.label'))
+                    ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
@@ -229,7 +230,7 @@ final class TradeResource extends Resource
 
                 self::logoAndNameColumn('portfolio.name')
                     ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class)
-                    ->label(__('portfolio.label'))
+                    ->label(Str::ucfirst(__('portfolio.label')))
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->portfolio->logo,
                         'name' => $record->portfolio->name,
@@ -238,7 +239,7 @@ final class TradeResource extends Resource
 
                 self::logoAndNameColumn('security.name')
                     ->hiddenOn(Securities\RelationManagers\TradesRelationManager::class)
-                    ->label(__('security.label'))
+                    ->label(Str::ucfirst(__('security.label')))
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->security->logo,
                         'name' => $record->security->name,
@@ -251,9 +252,14 @@ final class TradeResource extends Resource
             ->paginated(fn (): bool => Trade::count() > 20)
             ->defaultSort('date_time', 'desc')
             ->filters([
+                SelectFilter::make('type')
+                    ->hiddenOn(ListTrades::class)
+                    ->label(__('fields.type'))
+                    ->options(TradeType::class),
+
                 SelectFilter::make('account_id')
                     ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
-                    ->label(__('account.label'))
+                    ->label(Str::ucfirst(__('account.label')))
                     ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
@@ -261,7 +267,7 @@ final class TradeResource extends Resource
 
                 SelectFilter::make('portfolio_id')
                     ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class)
-                    ->label(__('portfolio.label'))
+                    ->label(Str::ucfirst(__('portfolio.label')))
                     ->relationship('portfolio', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
@@ -269,7 +275,7 @@ final class TradeResource extends Resource
 
                 SelectFilter::make('security_id')
                     ->hiddenOn(Securities\RelationManagers\TradesRelationManager::class)
-                    ->label(__('security.label'))
+                    ->label(Str::ucfirst(__('security.label')))
                     ->relationship('security', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
@@ -280,6 +286,7 @@ final class TradeResource extends Resource
                         DatePicker::make('from')
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
+
                         DatePicker::make('until')
                             ->label(__('table.filter.created_until')),
                     ])
@@ -293,9 +300,7 @@ final class TradeResource extends Resource
                                 fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
                     }),
             ], FiltersLayout::AboveContentCollapsible)
-            ->filtersFormColumns(function (mixed $livewire): int {
-                return $livewire instanceof ListTrades ? 4 : 3;
-            })
+            ->filtersFormColumns(4)
             ->headerActions([
                 self::createAction()
                     ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTrades)
@@ -303,8 +308,7 @@ final class TradeResource extends Resource
                     ->using(fn (array $data) => Trade::create($data)),
             ])
             ->recordActions(self::getActions())
-            ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
+            ->toolbarActions(self::getBulkActions());
     }
 
     /**

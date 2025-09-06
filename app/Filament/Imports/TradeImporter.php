@@ -10,12 +10,9 @@ use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
-use App\Tools\Convertor;
-use Exception;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Support\Carbon;
 
 final class TradeImporter extends Importer
 {
@@ -26,15 +23,7 @@ final class TradeImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            self::dateTimeColumn()
-                ->fillRecordUsing(function (Trade $record, string $state): void {
-                    try {
-                        $carbon = Carbon::parse($state);
-                    } catch (Exception) {
-                        $carbon = Carbon::now();
-                    }
-                    $record->date_time = $carbon;
-                }),
+            self::dateTimeColumn(),
 
             self::typeColumn()
                 ->fillRecordUsing(function (Trade $record, string $state): void {
@@ -46,24 +35,20 @@ final class TradeImporter extends Importer
                 }),
 
             self::numericColumn('quantity')
-                ->label(__('trade.fields.quantity'))
-                ->fillRecordUsing(fn (Trade $record, string $state) => $record->quantity = abs(Convertor::formatNumber($state))),
+                ->label(__('trade.fields.quantity')),
 
             self::numericColumn('price')
-                ->label(__('fields.price'))
-                ->fillRecordUsing(fn (Trade $record, string $state) => $record->price = abs(Convertor::formatNumber($state))),
+                ->label(__('fields.price')),
 
             self::numericColumn('tax')
-                ->label(__('trade.fields.tax'))
-                ->fillRecordUsing(fn (Trade $record, string $state) => $record->tax = abs(Convertor::formatNumber($state))),
+                ->label(__('trade.fields.tax')),
 
             self::numericColumn('fee')
-                ->label(__('trade.fields.fee'))
-                ->fillRecordUsing(fn (Trade $record, string $state) => $record->fee = abs(Convertor::formatNumber($state))),
+                ->label(__('trade.fields.fee')),
 
             ImportColumn::make('account_id')
                 ->label(__('account.label'))
-                ->fillRecordUsing(function (Trade $record, string $state): void {
+                ->fillRecordUsing(function (Trade $record, ?string $state): void {
                     $account = Account::whereName($state);
                     if ($account->count() > 1) {
                         $record->account_id = Account::getOrCreateDefaultAccount()->id;
@@ -74,7 +59,7 @@ final class TradeImporter extends Importer
 
             ImportColumn::make('portfolio')
                 ->label(__('portfolio.label'))
-                ->fillRecordUsing(function (Trade $record, string $state): void {
+                ->fillRecordUsing(function (Trade $record, ?string $state): void {
                     $portfolio = Portfolio::whereName($state);
                     if ($portfolio->count() > 1) {
                         $record->portfolio_id = Portfolio::getOrCreateDefaultPortfolio()->id;
@@ -85,7 +70,7 @@ final class TradeImporter extends Importer
 
             ImportColumn::make('isin')
                 ->label(__('security.fields.isin'))
-                ->fillRecordUsing(function (Trade $record, string $state): void {
+                ->fillRecordUsing(function (Trade $record, ?string $state): void {
                     $security = Security::whereIsin($state);
                     if ($security->count() > 1) {
                         $record->security_id = Security::getOrCreateDefaultSecurity()->id;

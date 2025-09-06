@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 return [
 
-    'label' => 'Trade',
-    'plural_label' => 'Trades',
+    'label' => 'trade',
+    'plural_label' => 'trades',
 
     'fields' => [
         'total_amount' => 'Total amount',
@@ -20,7 +20,7 @@ return [
     ],
 
     'import' => [
-        'modal_heading' => 'Import trades',
+        'modal_heading' => 'Import Trades',
         'failure_heading' => 'Trade import failed',
         'success_heading' => 'Trade import successful',
         'body_heading' => 'The trade import has been completed.',
@@ -29,7 +29,7 @@ return [
     ],
 
     'export' => [
-        'modal_heading' => 'Export trades',
+        'modal_heading' => 'Export Trades',
         'failure_heading' => 'Trade export failed',
         'success_heading' => 'Trade export successful',
         'body_heading' => 'The trade export has been completed.',

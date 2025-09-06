@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Illuminate\Support\Str;
 
 final class TradeExporter extends Exporter
 {
@@ -44,13 +45,13 @@ final class TradeExporter extends Exporter
             self::accountColumn(),
 
             ExportColumn::make('portfolio.name')
-                ->label(__('portfolio.label')),
+                ->label(Str::ucfirst(__('portfolio.label'))),
 
             ExportColumn::make('security.isin')
                 ->label(__('security.fields.isin')),
 
             ExportColumn::make('security.name')
-                ->label(__('security.label')),
+                ->label(Str::ucfirst(__('security.label'))),
 
             self::notesColumn(),
         ];
