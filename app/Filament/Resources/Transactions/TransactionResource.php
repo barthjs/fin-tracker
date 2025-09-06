@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 final class TransactionResource extends Resource
 {
@@ -120,7 +121,6 @@ final class TransactionResource extends Resource
                         ->maxLength(255),
 
                     self::categorySelectField()
-                        ->getOptionLabelUsing(fn (?string $value): ?string => Category::find($value)?->name)
                         ->default(fn (): ?string => $category instanceof Category ? $category->id : null),
 
                     self::notesField(),
@@ -133,6 +133,7 @@ final class TransactionResource extends Resource
         return $table
             ->heading(null)
             ->modelLabel(__('transaction.label'))
+            ->pluralModelLabel(__('transaction.plural_label'))
             ->columns([
                 self::dateTimeColumn('date_time'),
 
@@ -154,7 +155,7 @@ final class TransactionResource extends Resource
 
                 self::logoAndNameColumn('account.name')
                     ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
-                    ->label(__('account.label'))
+                    ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Transaction $record): array => [
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
@@ -163,19 +164,23 @@ final class TransactionResource extends Resource
 
                 TextColumn::make('category.name')
                     ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
-                    ->label(__('category.label'))
+                    ->label(Str::ucfirst(__('category.label')))
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
 
                 self::notesColumn(),
             ])
-            ->paginated(fn (): bool => Transaction::count() > 20)
             ->defaultSort('date_time', 'desc')
             ->filters([
+                SelectFilter::make('type')
+                    ->hiddenOn(ListTransactions::class)
+                    ->label(__('fields.type'))
+                    ->options(TransactionType::class),
+
                 SelectFilter::make('account_id')
                     ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
-                    ->label(__('account.label'))
+                    ->label(Str::ucfirst(__('account.label')))
                     ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
@@ -183,7 +188,7 @@ final class TransactionResource extends Resource
 
                 SelectFilter::make('category_id')
                     ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
-                    ->label(__('category.label'))
+                    ->label(Str::ucfirst(__('category.label')))
                     ->relationship('category', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
@@ -194,6 +199,7 @@ final class TransactionResource extends Resource
                         DatePicker::make('from')
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
+
                         DatePicker::make('until')
                             ->label(__('table.filter.created_until')),
                     ])
@@ -207,18 +213,15 @@ final class TransactionResource extends Resource
                                 fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
                     }),
             ], FiltersLayout::AboveContentCollapsible)
-            ->filtersFormColumns(function (mixed $livewire = null): int {
-                return $livewire instanceof ListTransactions ? 3 : 2;
-            })
+            ->filtersFormColumns(3)
             ->headerActions([
                 self::createAction()
                     ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTransactions)
                     /** @phpstan-ignore-next-line */
-                    ->using(fn (array $data) => Transaction::create($data)),
+                    ->using(fn (array $data): Transaction => Transaction::create($data)),
             ])
             ->recordActions(self::getActions())
-            ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
+            ->toolbarActions(self::getBulkActions());
     }
 
     /**

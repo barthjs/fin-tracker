@@ -9,6 +9,7 @@ use BackedEnum;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 final class TransactionRelationManager extends RelationManager
 {
@@ -24,6 +25,6 @@ final class TransactionRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return TransactionResource::table($table)
-            ->heading(__('transaction.plural_label'));
+            ->heading(Str::ucfirst(__('transaction.plural_label')));
     }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 return [
 
-    'label' => 'Transaction',
-    'plural_label' => 'Transactions',
+    'label' => 'transaction',
+    'plural_label' => 'transactions',
 
     'fields' => [
         'amount' => 'Amount',
@@ -19,7 +19,7 @@ return [
     ],
 
     'import' => [
-        'modal_heading' => 'Import transactions',
+        'modal_heading' => 'Import Transactions',
         'failure_heading' => 'Transaction import failed',
         'success_heading' => 'Transaction import successful',
         'body_heading' => 'The transaction import has been completed.',
@@ -28,7 +28,7 @@ return [
     ],
 
     'export' => [
-        'modal_heading' => 'Export transactions',
+        'modal_heading' => 'Export Transactions',
         'failure_heading' => 'Transaction export failed',
         'success_heading' => 'Transaction export successful',
         'body_heading' => 'The transaction export has been completed.',

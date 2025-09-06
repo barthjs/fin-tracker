@@ -119,11 +119,13 @@ final class Transaction extends Model
             }
 
             // Only needed in importer
+            /** @phpstan-ignore-next-line */
             if ($transaction->account_id === null) {
                 $transaction->account_id = Account::getOrCreateDefaultAccount()->id;
             }
 
             // Only needed in importer
+            /** @phpstan-ignore-next-line */
             if ($transaction->category_id === null) {
                 $transaction->category_id = Category::getOrCreateDefaultCategory()->id;
             }

@@ -11,11 +11,10 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Tools\Convertor;
-use Exception;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 final class TransactionImporter extends Importer
 {
@@ -26,16 +25,7 @@ final class TransactionImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            self::dateTimeColumn()
-                ->fillRecordUsing(function (Transaction $record, string $state): void {
-                    try {
-                        $carbon = Carbon::parse($state);
-                    } catch (Exception) {
-                        $carbon = Carbon::now();
-                    }
-
-                    $record->date_time = $carbon;
-                }),
+            self::dateTimeColumn(),
 
             self::typeColumn()
                 ->fillRecordUsing(function (Transaction $record, string $state): void {
@@ -87,8 +77,8 @@ final class TransactionImporter extends Importer
                 ->rules(['required', 'max:255']),
 
             ImportColumn::make('category_id')
-                ->label(__('category.label'))
-                ->fillRecordUsing(function (Transaction $record, string $state, array $data): void {
+                ->label(Str::ucfirst(__('category.label')))
+                ->fillRecordUsing(function (Transaction $record, ?string $state, array $data): void {
                     $query = Category::whereName($state);
 
                     // Try to find the category by name and group

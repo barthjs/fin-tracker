@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('notes')->nullable();
 
             $table->foreignUlid('account_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignUlid('transfer_account_id')->nullable()->constrained('accounts')->nullOnDelete();
+            $table->foreignUlid('transfer_account_id')->nullable()->constrained('accounts')->cascadeOnDelete();
             $table->foreignUlid('category_id')->nullable()->constrained()->cascadeOnDelete();
 
             $table->index(['account_id', 'type']);

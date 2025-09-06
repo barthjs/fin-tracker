@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Illuminate\Support\Str;
 
 final class TransactionExporter extends Exporter
 {
@@ -39,7 +40,7 @@ final class TransactionExporter extends Exporter
                 ->label(__('account.fields.transfer_account_id')),
 
             ExportColumn::make('category.name')
-                ->label(__('category.label')),
+                ->label(Str::ucfirst(__('category.label'))),
 
             ExportColumn::make('category.group')
                 ->label(__('category.fields.group'))
