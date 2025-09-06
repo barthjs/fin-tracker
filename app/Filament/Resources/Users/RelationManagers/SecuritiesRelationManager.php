@@ -14,6 +14,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 final class SecuritiesRelationManager extends RelationManager
 {
@@ -25,7 +26,7 @@ final class SecuritiesRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('security.plural_label');
+        return Str::ucfirst(__('security.plural_label'));
     }
 
     public static function getBadge(Model $ownerRecord, string $pageClass): string
@@ -49,7 +50,6 @@ final class SecuritiesRelationManager extends RelationManager
 
         return SecurityResource::table($table)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes())
-            ->paginated(fn (): bool => Security::withoutGlobalScopes()->where('user_id', $userId)->count() > 20)
             ->headerActions([
                 self::createAction()
                     ->mutateDataUsing(function (array $data) use ($userId): array {

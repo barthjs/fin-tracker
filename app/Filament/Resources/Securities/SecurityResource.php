@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Securities;
 
 use App\Enums\SecurityType;
+use App\Enums\TradeType;
 use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Concerns\HasResourceFormFields;
 use App\Filament\Concerns\HasResourceInfolistEntries;
@@ -27,7 +28,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\Column;
-use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
@@ -104,15 +104,15 @@ final class SecurityResource extends Resource
                 Section::make()
                     ->columnSpanFull()
                     ->schema([
-                        self::totalValueEntry('market_value')
+                        self::numericEntry('market_value')
                             ->label(__('fields.market_value'))
                             ->numeric(6),
 
-                        self::totalValueEntry('price')
+                        self::numericEntry('price')
                             ->label(__('fields.price'))
                             ->numeric(6),
 
-                        self::totalValueEntry('total_quantity')
+                        self::numericEntry('total_quantity')
                             ->label(__('security.fields.total_quantity'))
                             ->numeric(6),
 
@@ -133,6 +133,7 @@ final class SecurityResource extends Resource
         return $table
             ->heading(null)
             ->modelLabel(__('security.label'))
+            ->pluralModelLabel(__('security.plural_label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
                     return $query->where('is_active', true);
@@ -141,14 +142,23 @@ final class SecurityResource extends Resource
                 return $query;
             })
             ->columns(self::getTableColumns())
-            ->paginated(fn (): bool => Security::count() > 20)
             ->defaultGroup('type')
             ->groupingSettingsHidden()
             ->groups([
                 Group::make('type')
                     ->label('')
+                    ->getTitleFromRecordUsing(fn (Security $record): string => $record->type->getLabel())
                     ->collapsible()
-                    ->getTitleFromRecordUsing(fn (Security $record): string => $record->type->getLabel()),
+                    ->orderQueryUsing(function (Builder $query, string $direction): Builder {
+                        $cases = [];
+                        foreach (SecurityType::cases() as $case) {
+                            $label = str_replace("'", "''", $case->getLabel());
+                            $cases[] = "WHEN '".$case->value."' THEN '".mb_strtolower($label)."'";
+                        }
+                        $caseSql = 'CASE type '.implode(' ', $cases).' END';
+
+                        return $query->orderByRaw($caseSql.' '.($direction === 'desc' ? 'desc' : 'asc'));
+                    }),
             ])
             ->filters([
                 self::inactiveFilter(),
@@ -178,8 +188,7 @@ final class SecurityResource extends Resource
                     }),
 
                 self::tableDeleteAction(),
-            ])
-            ->emptyStateHeading(__('No :model found', ['model' => self::getPluralModelLabel()]));
+            ]);
     }
 
     /**
@@ -199,16 +208,30 @@ final class SecurityResource extends Resource
             TextColumn::make('market_value')
                 ->label(__('fields.market_value'))
                 ->numeric(2)
-                ->summarize(Sum::make()->label(''))
                 ->sortable(),
 
             TextColumn::make('total_quantity')
                 ->hiddenOn($hidden)
                 ->label(__('security.fields.total_quantity'))
-                ->formatStateUsing(function (Security $record, float $state) use ($portfolio): string|false|null {
+                ->formatStateUsing(function (Security $record, float $state) use ($portfolio): ?string {
                     // Show only the quantity of the current portfolio on the relation manager
-                    // Todo
-                    return $portfolio ? null : Number::format($state, 2);
+                    if ($portfolio) {
+                        $buys = (float) Trade::where('portfolio_id', $portfolio->id)
+                            ->where('security_id', $record->id)
+                            ->where('type', TradeType::Buy)
+                            ->sum('quantity');
+
+                        $sells = (float) Trade::where('portfolio_id', $portfolio->id)
+                            ->where('security_id', $record->id)
+                            ->where('type', TradeType::Sell)
+                            ->sum('quantity');
+
+                        $quantity = $buys - $sells;
+
+                        return Number::format($quantity, 2) ?: null;
+                    }
+
+                    return Number::format($state, 2) ?: null;
                 })
                 ->sortable(),
 

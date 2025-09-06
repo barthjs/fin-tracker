@@ -28,6 +28,34 @@ return [
         'body_heading' => 'Der Wertpapierimport wurde abgeschlossen.',
         'body_failure' => 'Fehlgeschlagene Zeilen: ',
         'body_success' => 'Erfolgreich importierte Zeilen: ',
+
+        'examples' => [
+            'name' => [
+                'Apple',
+                'Microsoft',
+                'SPDR S&P 500 ETF Trust',
+            ],
+            'isin' => [
+                'US0378331005',
+                'US5949181045',
+                'US78462F1030',
+            ],
+            'type' => [
+                'Aktie',
+                'Aktie',
+                'ETF',
+            ],
+            'symbol' => [
+                'AAPL',
+                'MSFT',
+                'SPDR',
+            ],
+            'price' => [
+                '100.00',
+                '200.00',
+                '300.00',
+            ],
+        ],
     ],
 
     'export' => [

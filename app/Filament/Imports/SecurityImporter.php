@@ -22,16 +22,19 @@ final class SecurityImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            self::nameColumn(),
+            self::nameColumn()
+                ->examples(__('security.import.examples.name')),
 
             ImportColumn::make('isin')
                 ->label(__('security.fields.isin'))
                 ->exampleHeader(__('security.fields.isin'))
+                ->examples(__('security.import.examples.isin'))
                 ->rules(['max:255']),
 
             ImportColumn::make('type')
                 ->label(__('fields.type'))
                 ->exampleHeader(__('fields.type'))
+                ->examples(__('security.import.examples.type'))
                 ->requiredMapping()
                 ->rules(['required'])
                 ->castStateUsing(function (string $state): SecurityType {
@@ -48,12 +51,14 @@ final class SecurityImporter extends Importer
             ImportColumn::make('symbol')
                 ->label(__('security.fields.symbol'))
                 ->exampleHeader(__('security.fields.symbol'))
+                ->examples(__('security.import.examples.symbol'))
                 ->rules(['max:255']),
 
             ImportColumn::make('price')
                 ->label(__('fields.price'))
                 ->exampleHeader(__('fields.price'))
-                ->castStateUsing(fn (?string $state) => Convertor::formatNumber($state ?? 0.0)),
+                ->examples(__('security.import.examples.price'))
+                ->castStateUsing(fn (?string $state): float => abs(Convertor::formatNumber($state ?? ''))),
 
             self::descriptionColumn(),
             self::colorColumn(),

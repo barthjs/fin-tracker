@@ -148,6 +148,7 @@ final class Security extends Model
         self::creating(function (Security $security): void {
             self::setCoreFields($security);
 
+            /** @phpstan-ignore-next-line */
             if ($security->user_id === null) {
                 $security->user_id = auth()->user()->id;
             }

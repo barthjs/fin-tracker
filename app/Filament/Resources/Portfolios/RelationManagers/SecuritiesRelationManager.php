@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Portfolios\RelationManagers;
 
+use App\Enums\TradeType;
 use App\Filament\Resources\Securities\Pages\ViewSecurity;
 use App\Filament\Resources\Securities\SecurityResource;
 use App\Models\Portfolio;
@@ -14,6 +15,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 final class SecuritiesRelationManager extends RelationManager
 {
@@ -23,7 +25,7 @@ final class SecuritiesRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('security.plural_label');
+        return Str::ucfirst(__('security.plural_label'));
     }
 
     public function form(Schema $schema): Schema
@@ -42,7 +44,9 @@ final class SecuritiesRelationManager extends RelationManager
             ->query(function () use ($portfolio) {
                 $securityIds = Trade::wherePortfolioId($portfolio->id)
                     ->groupBy(['security_id'])
-                    ->havingRaw('SUM(quantity) > 0')
+                    ->havingRaw('SUM(CASE WHEN type = ? THEN quantity ELSE -quantity END) > 0', [
+                        TradeType::Buy->value,
+                    ])
                     ->pluck('security_id')
                     ->toArray();
 
