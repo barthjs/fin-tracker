@@ -6,6 +6,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Portfolio;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Str;
 
 final class PortfolioChart extends ChartWidget
 {
@@ -31,7 +32,7 @@ final class PortfolioChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('portfolio.plural_label');
+        return Str::ucfirst(__('portfolio.plural_label'));
     }
 
     protected function getData(): array

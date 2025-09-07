@@ -16,10 +16,12 @@ use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
+use Filament\Widgets\TableWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
-final class TotalOverviewTable extends BaseWidget
+final class TotalOverviewTable extends TableWidget
 {
     use HasResourceTableColumns;
 
@@ -41,13 +43,14 @@ final class TotalOverviewTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading('')
-            ->query(function () {
+            ->heading(null)
+            ->deferLoading()
+            ->query(function (): Builder {
                 $unionQuery = DB::table('accounts')
                     ->select([
                         DB::raw("CONCAT('a_', id) AS id"),
                         'name',
-                        DB::raw('(balance / 100) AS market_value'),
+                        DB::raw('balance AS market_value'),
                         'description',
                         'logo',
                         'is_active',
@@ -76,8 +79,8 @@ final class TotalOverviewTable extends BaseWidget
                     ->state(fn (Combined $record): array => [
                         'logo' => $record->logo,
                         'name' => $record->name,
-                    ])
-                    ->sortable(),
+                    ]),
+
                 TextColumn::make('market_value')
                     ->label(__('fields.market_value'))
                     ->badge()
@@ -88,46 +91,34 @@ final class TotalOverviewTable extends BaseWidget
                     })
                     ->money(Currency::getCurrency())
                     ->summarize(Sum::make()->label('')->money(Currency::getCurrency())),
+
                 TextColumn::make('description')
                     ->label(__('fields.description'))
                     ->wrap(),
             ])
             ->paginated(false)
-            ->defaultSort('name')
-            ->persistSortInSession()
             ->defaultGroup('type')
             ->groupingSettingsHidden()
             ->groups([
                 Group::make('type')
                     ->label('')
-                    ->getTitleFromRecordUsing(function (Combined $record): string {
-                        if ($record->type === 'account') {
-                            return __('account.plural_label');
-                        }
-
-                        return __('portfolio.plural_label');
-                    }),
+                    ->getTitleFromRecordUsing(fn (Combined $record): string => Str::ucfirst(__($record->type.'.plural_label'))),
             ])
             ->recordActions([
                 ViewAction::make('view')
                     ->iconButton()
-                    ->url(function (Combined $record): string {
-                        if ($record->type === 'account') {
-                            return ViewAccount::getUrl([mb_substr($record->id, 2)]);
-                        }
-
-                        return ViewPortfolio::getUrl([mb_substr($record->id, 2)]);
-                    }, true),
+                    ->url(fn (Combined $record): string => $this->getRecordUrl($record)),
             ])
-            ->striped()
-            ->recordUrl(function (Combined $record): string {
-                if ($record->type === 'account') {
-                    return ViewAccount::getUrl([mb_substr($record->id, 2)]);
-                }
+            ->recordUrl(fn (Combined $record): string => $this->getRecordUrl($record));
+    }
 
-                return ViewPortfolio::getUrl([mb_substr($record->id, 2)]);
-            }, true)
-            ->emptyStateHeading(null)
-            ->emptyStateDescription(null);
+    private function getRecordUrl(Combined $record): string
+    {
+        $id = mb_substr($record->id, 2);
+        if ($record->type === 'account') {
+            return ViewAccount::getUrl(['record' => $id]);
+        }
+
+        return ViewPortfolio::getUrl(['record' => $id]);
     }
 }

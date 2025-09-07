@@ -71,12 +71,12 @@ final class AppPanelProvider extends PanelProvider
                 'profile' => fn (Action $action): Action => $action->url(fn (): string => EditProfile::getUrl()),
                 Action::make('settings')
                     ->icon('tabler-settings')
-                    ->label(__('settings.navigation_label'))
+                    ->label(fn (): string => __('settings.navigation_label'))
                     ->hidden(fn (): bool => ! auth()->user()->is_admin)
                     ->url(fn (): string => Settings::getUrl()),
                 Action::make('users')
                     ->icon('tabler-users')
-                    ->label(__('user.plural_label'))
+                    ->label(fn (): string => ucfirst(__('user.plural_label')))
                     ->hidden(fn (): bool => ! auth()->user()->is_admin)
                     ->url(fn (): string => UserResource::getUrl()),
             ])

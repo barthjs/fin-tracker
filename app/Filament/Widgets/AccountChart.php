@@ -6,6 +6,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Account;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Str;
 
 final class AccountChart extends ChartWidget
 {
@@ -31,7 +32,7 @@ final class AccountChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('account.plural_label');
+        return Str::ucfirst(__('account.plural_label'));
     }
 
     protected function getData(): array

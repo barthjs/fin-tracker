@@ -1,5 +1,8 @@
 {
     "CTRL+K": "CTRL+K",
+    "Expenses this month": "Expenses this month",
     "Export": "Export",
-    "Import": "Import"
+    "Import": "Import",
+    "Revenues this month": "Revenues this month",
+    "Total Assets": "Total Assets"
 }

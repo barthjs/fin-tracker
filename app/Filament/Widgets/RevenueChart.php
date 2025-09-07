@@ -7,6 +7,7 @@ namespace App\Filament\Widgets;
 use App\Enums\TransactionType;
 use App\Models\Category;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Str;
 
 final class RevenueChart extends ChartWidget
 {
@@ -32,7 +33,7 @@ final class RevenueChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return __('table.filter.revenues');
+        return Str::ucfirst(__('table.filter.revenues'));
     }
 
     protected function getData(): array

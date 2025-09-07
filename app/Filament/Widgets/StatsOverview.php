@@ -38,14 +38,14 @@ final class StatsOverview extends BaseWidget
         $revenueChart = $this->getCategoryChartData(TransactionType::Revenue, $year);
 
         return [
-            Stat::make(__('widget.stats.total_assets'), $totalAssets)
+            Stat::make(__('Total Assets'), $totalAssets)
                 ->color('info'),
 
-            Stat::make(__('widget.stats.expenses_this_month'), $expenseSum)
+            Stat::make(__('Expenses this month'), $expenseSum)
                 ->color('danger')
                 ->chart($expenseChart),
 
-            Stat::make(__('widget.stats.revenues_this_month'), $revenueSum)
+            Stat::make(__('Revenues this month'), $revenueSum)
                 ->color('success')
                 ->chart($revenueChart),
         ];
