@@ -86,8 +86,7 @@ final class TransactionResource extends Resource
 
                     self::typeSelectField()
                         ->options(TransactionType::class)
-                        ->default(TransactionType::Expense)
-                        ->live(true),
+                        ->default(TransactionType::Expense),
 
                     Select::make('transfer_account_id')
                         ->label(__('account.fields.transfer_account_id'))

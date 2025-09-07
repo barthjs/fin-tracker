@@ -12,14 +12,15 @@ use App\Filament\Resources\CategoryStatistics\Widgets\CategoryStatisticChart;
 use App\Models\CategoryStatistic;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 final class CategoryStatisticResource extends Resource
 {
@@ -49,111 +50,29 @@ final class CategoryStatisticResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
+            ->modifyQueryUsing(function (Builder $query): Builder {
                 $query->whereHas('category', function (Builder $query): void {
                     $query->where('type', '!=', TransactionType::Transfer)->where('is_active', true);
                 });
 
-                if (! $table->getActiveFiltersCount()) {
-                    return $query->where('year', Carbon::now()->year);
-                }
-
                 return $query;
             })
-            ->columns([
-                TextColumn::make('category.name')
-                    ->label(__('category.label'))
-                    ->wrap(),
-                TextColumn::make('jan')
-                    ->label(__('category_statistic.columns.jan'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('feb')
-                    ->label(__('category_statistic.columns.feb'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('mar')
-                    ->label(__('category_statistic.columns.mar'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('apr')
-                    ->label(__('category_statistic.columns.apr'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('may')
-                    ->label(__('category_statistic.columns.may'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('jun')
-                    ->label(__('category_statistic.columns.jun'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('jul')
-                    ->label(__('category_statistic.columns.jul'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('aug')
-                    ->label(__('category_statistic.columns.aug'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('sep')
-                    ->label(__('category_statistic.columns.sep'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('oct')
-                    ->label(__('category_statistic.columns.oct'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('nov')
-                    ->label(__('category_statistic.columns.nov'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-                TextColumn::make('dec')
-                    ->label(__('category_statistic.columns.dec'))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->label('')->money(Currency::getCurrency()))
-                    ->toggleable(),
-            ])
-            ->defaultSort('year', 'desc')
             ->deferLoading()
+            ->columns(self::getTableColumns())
             ->paginated(false)
-            ->searchable(false)
-            ->persistSortInSession()
+            ->defaultSort('year', 'desc')
             ->defaultGroup('category.group')
             ->groupingSettingsHidden()
             ->groups([
                 Group::make('category.group')
                     ->label('')
                     ->collapsible()
-                    ->getTitleFromRecordUsing(fn (CategoryStatistic $record): string => $record->category->group->getLabel()),
+                    ->getTitleFromRecordUsing(fn (CategoryStatistic $record): string => $record->category->group->getLabel().' '.$record->year),
             ])
             ->filters([
                 SelectFilter::make('year')
                     ->label(__('table.filter.year'))
-                    ->options(function () {
+                    ->options(function (): array {
                         $years = CategoryStatistic::select('year')
                             ->distinct()
                             ->orderBy('year', 'desc')
@@ -166,12 +85,32 @@ final class CategoryStatisticResource extends Resource
 
                         return $years;
                     })
-                    ->placeholder(__('table.filter.year'))
-                    ->selectablePlaceholder(false),
-            ], FiltersLayout::AboveContentCollapsible)
-            ->filtersFormColumns(1)
-            ->recordUrl(fn (CategoryStatistic $record): string => ViewCategory::getUrl(['record' => $record->category_id]))
-            ->emptyStateHeading(null);
+                    ->default(Carbon::now()->year),
+            ])
+            ->recordActions([])
+            ->recordUrl(fn (CategoryStatistic $record): string => ViewCategory::getUrl(['record' => $record->category_id]));
+    }
+
+    /**
+     * @return array<int, Column>
+     */
+    public static function getTableColumns(): array
+    {
+        return array_merge(
+            [
+                TextColumn::make('category.name')
+                    ->label(Str::ucfirst(__('category.label')))
+                    ->wrap(),
+            ],
+            array_map(function (string $month): TextColumn {
+                return TextColumn::make($month)
+                    ->label(__("category_statistic.fields.$month"))
+                    ->alignEnd()
+                    ->numeric(2)
+                    ->summarize(Sum::make()->money(Currency::getCurrency()))
+                    ->toggleable();
+            }, CategoryStatistic::MONTHS)
+        );
     }
 
     public static function getPages(): array

@@ -21,11 +21,6 @@ final class ListTransactions extends ListRecords
 
     protected static string $resource = TransactionResource::class;
 
-    public function getBreadcrumbs(): array
-    {
-        return [];
-    }
-
     public function getTabs(): array
     {
         return [

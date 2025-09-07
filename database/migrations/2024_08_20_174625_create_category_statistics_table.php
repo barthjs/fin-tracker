@@ -16,22 +16,22 @@ return new class extends Migration
         Schema::create('category_statistics', function (Blueprint $table) {
             $table->ulid('id')->primary();
 
-            $table->foreignUlid('category_id')->constrained('categories')->cascadeOnDelete();
-            $table->unsignedSmallInteger('year');
+            $table->foreignUlid('category_id')->constrained()->cascadeOnDelete();
+            $table->unsignedSmallInteger('year')->index();
             $table->index(['category_id', 'year']);
 
-            $table->decimal('jan', 18)->default(0)->index();
-            $table->decimal('feb', 18)->default(0)->index();
-            $table->decimal('mar', 18)->default(0)->index();
-            $table->decimal('apr', 18)->default(0)->index();
-            $table->decimal('may', 18)->default(0)->index();
-            $table->decimal('jun', 18)->default(0)->index();
-            $table->decimal('jul', 18)->default(0)->index();
-            $table->decimal('aug', 18)->default(0)->index();
-            $table->decimal('sep', 18)->default(0)->index();
-            $table->decimal('oct', 18)->default(0)->index();
-            $table->decimal('nov', 18)->default(0)->index();
-            $table->decimal('dec', 18)->default(0)->index();
+            $table->decimal('jan', 18)->default(0);
+            $table->decimal('feb', 18)->default(0);
+            $table->decimal('mar', 18)->default(0);
+            $table->decimal('apr', 18)->default(0);
+            $table->decimal('may', 18)->default(0);
+            $table->decimal('jun', 18)->default(0);
+            $table->decimal('jul', 18)->default(0);
+            $table->decimal('aug', 18)->default(0);
+            $table->decimal('sep', 18)->default(0);
+            $table->decimal('oct', 18)->default(0);
+            $table->decimal('nov', 18)->default(0);
+            $table->decimal('dec', 18)->default(0);
         });
     }
 };

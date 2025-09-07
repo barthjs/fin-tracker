@@ -20,11 +20,6 @@ final class ListTrades extends ListRecords
 
     protected static string $resource = TradeResource::class;
 
-    public function getBreadcrumbs(): array
-    {
-        return [];
-    }
-
     public function getTabs(): array
     {
         return [
@@ -32,11 +27,11 @@ final class ListTrades extends ListRecords
                 ->label(__('table.filter.all')),
 
             TradeType::Buy->value => Tab::make()
-                ->label(TradeType::Buy->getLabel())
+                ->label(__('table.filter.buys'))
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', TradeType::Buy)),
 
             TradeType::Sell->value => Tab::make()
-                ->label(TradeType::Sell->getLabel())
+                ->label(__('table.filter.sells'))
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('type', TradeType::Sell)),
         ];
     }

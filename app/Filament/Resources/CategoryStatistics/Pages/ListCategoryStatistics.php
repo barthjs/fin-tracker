@@ -21,9 +21,10 @@ final class ListCategoryStatistics extends ListRecords
     public function getTabs(): array
     {
         return [
-            'All' => Tab::make()
+            'all' => Tab::make()
                 ->label(__('table.filter.all')),
-            'Expenses' => Tab::make()
+
+            TransactionType::Expense->value => Tab::make()
                 ->icon('tabler-minus')
                 ->label(__('table.filter.expenses'))
                 ->modifyQueryUsing(function (Builder $query): void {
@@ -31,7 +32,8 @@ final class ListCategoryStatistics extends ListRecords
                         $query->where('type', TransactionType::Expense);
                     });
                 }),
-            'Revenues' => Tab::make()
+
+            TransactionType::Revenue->value => Tab::make()
                 ->icon('tabler-plus')
                 ->iconPosition('after')
                 ->label(__('table.filter.revenues'))

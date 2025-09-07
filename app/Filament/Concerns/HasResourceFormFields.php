@@ -19,6 +19,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
@@ -119,6 +120,7 @@ trait HasResourceFormFields
         return Select::make($name)
             ->label(__('fields.type'))
             ->selectablePlaceholder(false)
+            ->live()
             ->required();
     }
 
@@ -148,7 +150,20 @@ trait HasResourceFormFields
         return Select::make($column)
             ->label(Str::ucfirst(__('category.label')))
             ->selectablePlaceholder(false)
-            ->relationship('category', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
+            ->relationship(
+                'category',
+                'name',
+                function (Builder $query, Get $get): Builder {
+                    $query->where('is_active', true);
+
+                    $type = $get('type');
+                    if ($type !== null) {
+                        $query->where('type', $type);
+                    }
+
+                    return $query;
+                }
+            )
             ->getOptionLabelUsing(fn (?string $value): ?string => Category::find($value)?->name)
             ->preload()
             ->searchable()

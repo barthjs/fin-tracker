@@ -21,6 +21,8 @@ final class CategoryStatisticChart extends ChartWidget
 
     protected ?string $pollingInterval = null;
 
+    protected bool $isCollapsible = true;
+
     protected function getTablePage(): string
     {
         return ListCategoryStatistics::class;
@@ -63,7 +65,7 @@ final class CategoryStatisticChart extends ChartWidget
 
         return [
             'datasets' => $datasets,
-            'labels' => array_values(__('category_statistic.columns')),
+            'labels' => array_values(__('category_statistic.fields')),
         ];
     }
 

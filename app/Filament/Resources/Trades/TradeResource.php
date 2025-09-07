@@ -126,7 +126,6 @@ final class TradeResource extends Resource
                     self::typeSelectField()
                         ->options(TradeType::class)
                         ->default(TradeType::Buy)
-                        ->live(true)
                         ->afterStateUpdated(function (TradeType $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
                                 self::asFloat($get('quantity')),

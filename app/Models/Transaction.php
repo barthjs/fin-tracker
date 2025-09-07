@@ -59,7 +59,11 @@ final class Transaction extends Model
             ->whereMonth('date_time', $month)
             ->sum('amount');
 
-        CategoryStatistic::updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
+        $stat = CategoryStatistic::updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
+
+        if ($stat->yearlySum() === 0.0) {
+            $stat->delete();
+        }
     }
 
     /**

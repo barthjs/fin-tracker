@@ -164,13 +164,6 @@ final class Category extends Model
             }
         });
 
-        // Create an empty entry for the statistic after category creation
-        self::created(function (Category $category): void {
-            if ($category->type !== TransactionType::Transfer) {
-                CategoryStatistic::create(['category_id' => $category->id, 'year' => Carbon::now()->year]);
-            }
-        });
-
         // Listen for the updating event to trim the name and set the type before saving.
         self::updating(function (Category $category): void {
             $category->name = mb_trim($category->name);

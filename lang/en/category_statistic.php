@@ -7,7 +7,7 @@ return [
     'label' => 'statistic',
     'plural_label' => 'statistics',
 
-    'columns' => [
+    'fields' => [
         'jan' => 'January',
         'feb' => 'February',
         'mar' => 'March',
