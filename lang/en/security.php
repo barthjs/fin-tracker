@@ -4,60 +4,68 @@ declare(strict_types=1);
 
 return [
 
-    'slug' => 'securities',
-    'navigation_label' => 'Securities',
+    'label' => 'security',
+    'plural_label' => 'securities',
 
-    'buttons' => [
-        'create_button_label' => 'New security',
-        'create_heading' => 'Create new security',
-        'edit_heading' => 'Edit security',
-        'delete_heading' => 'Delete security',
-        'export_heading' => 'Export Securities',
-        'import_heading' => 'Import Securities',
-    ],
-
-    'columns' => [
-        'logo' => 'Logo',
-        'name' => 'Name',
+    'fields' => [
         'isin' => 'ISIN',
         'symbol' => 'Symbol',
-        'price' => 'Price',
         'total_quantity' => 'Quantity',
-        'market_value' => 'Marketvalue',
-        'description' => 'Description',
-        'type' => 'Type',
     ],
 
-    'form' => [
-        'type_placeholder' => 'Select Type',
+    'type' => [
+        'bond' => 'Bond',
+        'derivative' => 'Derivative',
+        'etf' => 'ETF',
+        'fund' => 'Fund',
+        'stock' => 'Stock',
     ],
 
-    'types' => [
-        'BOND' => 'Bond',
-        'DERIVATIVE' => 'Derivative',
-        'ETF' => 'ETF',
-        'FUND' => 'Fund',
-        'STOCK' => 'Stock',
-    ],
+    'import' => [
+        'modal_heading' => 'Import Securities',
+        'failure_heading' => 'Security import failed',
+        'success_heading' => 'Security import successful',
+        'body_heading' => 'The security import has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully imported rows: ',
 
-    'notifications' => [
-        'import' => [
-            'failure_heading' => 'Security import failed',
-            'success_heading' => 'Security import successful',
-            'body_heading' => 'The security import has been completed.',
-            'body_failure' => 'Failed rows: ',
-            'body_success' => 'Successfully imported rows: ',
+        'examples' => [
+            'name' => [
+                'SPDR S&P 500 ETF Trust',
+                'Apple',
+                'Microsoft',
+            ],
+            'isin' => [
+                'US78462F1030',
+                'US0378331005',
+                'US5949181045',
+            ],
+            'type' => [
+                'ETF',
+                'Stock',
+                'Stock',
+            ],
+            'symbol' => [
+                'SPDR',
+                'AAPL',
+                'MSFT',
+            ],
+            'price' => [
+                '100.00',
+                '200.00',
+                '300.00',
+            ],
         ],
-        'export' => [
-            'failure_heading' => 'Security export failed',
-            'success_heading' => 'Security export successful',
-            'body_heading' => 'The security export has been completed.',
-            'body_failure' => 'Failed rows: ',
-            'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'securities_',
-        ],
     ],
 
-    'empty' => 'No securities found',
+    'export' => [
+        'modal_heading' => 'Export Securities',
+        'failure_heading' => 'Security export failed',
+        'success_heading' => 'Security export successful',
+        'body_heading' => 'The security export has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully exported rows: ',
+        'file_name' => 'Securities_',
+    ],
 
 ];

@@ -4,99 +4,98 @@ declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
+use App\Enums\SecurityType;
+use App\Filament\Concerns\HasResourceImportColumns;
 use App\Models\Security;
 use App\Tools\Convertor;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Builder;
 
-class SecurityImporter extends Importer
+final class SecurityImporter extends Importer
 {
+    use HasResourceImportColumns;
+
     protected static ?string $model = Security::class;
 
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('name')
-                ->label(__('security.columns.name'))
-                ->exampleHeader(__('security.columns.name'))
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
+            self::nameColumn()
+                ->examples(__('security.import.examples.name')),
+
             ImportColumn::make('isin')
-                ->label(__('security.columns.isin'))
-                ->exampleHeader(__('security.columns.isin'))
+                ->label(__('security.fields.isin'))
+                ->exampleHeader(__('security.fields.isin'))
+                ->examples(__('security.import.examples.isin'))
                 ->rules(['max:255']),
-            ImportColumn::make('symbol')
-                ->label(__('security.columns.symbol'))
-                ->exampleHeader(__('security.columns.symbol'))
-                ->rules(['max:255']),
-            ImportColumn::make('price')
-                ->label(__('security.columns.price'))
-                ->exampleHeader(__('security.columns.price'))
+
+            ImportColumn::make('type')
+                ->label(__('fields.type'))
+                ->exampleHeader(__('fields.type'))
+                ->examples(__('security.import.examples.type'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->fillRecordUsing(fn (Security $record, string $state) => $record->price = Convertor::formatNumber($state)),
-            ImportColumn::make('type')
-                ->label(__('security.columns.type'))
-                ->exampleHeader(__('security.columns.type'))
-                ->requiredMapping()
-                ->rules(['required', 'max:255'])
-                ->fillRecordUsing(function (Security $record, string $state): void {
-                    $record->type = match ($state) {
-                        __('security.types.BOND') => 'BOND',
-                        __('security.types.DERIVATIVE') => 'DERIVATIVE',
-                        __('security.types.ETF') => 'ETF',
-                        __('security.types.FUND') => 'FUND',
-                        __('security.types.STOCK') => 'STOCK',
-                        default => ''
+                ->castStateUsing(function (string $state): SecurityType {
+                    return match ($state) {
+                        SecurityType::Bond->getLabel() => SecurityType::Bond,
+                        SecurityType::Derivative->getLabel() => SecurityType::Derivative,
+                        SecurityType::ETF->getLabel() => SecurityType::ETF,
+                        SecurityType::Fund->getLabel() => SecurityType::Fund,
+                        SecurityType::Stock->getLabel() => SecurityType::Stock,
+                        default => SecurityType::Stock,
                     };
                 }),
-            ImportColumn::make('description')
-                ->label(__('security.columns.description'))
-                ->exampleHeader(__('security.columns.description'))
-                ->rules(['max:1000']),
-            ImportColumn::make('color')
-                ->label(__('widget.color'))
-                ->exampleHeader(__('widget.color'))
-                ->examples(function (): array {
-                    $colors = [];
-                    for ($i = 1; $i <= 3; $i++) {
-                        $colors[] = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
-                    }
 
-                    return $colors;
-                })
-                ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
-            ImportColumn::make('active')
-                ->label(__('table.active'))
-                ->exampleHeader(__('table.active'))
-                ->examples([1, 1, 1])
-                ->boolean(),
+            ImportColumn::make('symbol')
+                ->label(__('security.fields.symbol'))
+                ->exampleHeader(__('security.fields.symbol'))
+                ->examples(__('security.import.examples.symbol'))
+                ->rules(['max:255']),
+
+            ImportColumn::make('price')
+                ->label(__('fields.price'))
+                ->exampleHeader(__('fields.price'))
+                ->examples(__('security.import.examples.price'))
+                ->castStateUsing(fn (?string $state): float => abs(Convertor::formatNumber($state ?? ''))),
+
+            self::descriptionColumn(),
+            self::colorColumn(),
+            self::statusColumn(),
         ];
-    }
-
-    public function resolveRecord(): Security
-    {
-        return Security::firstOrNew([
-            'name' => mb_trim($this->data['name']),
-            'isin' => mb_trim($this->data['isin']),
-            'user_id' => auth()->user()->id,
-        ]);
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = __('security.notifications.import.body_heading')."\n\r".
-            __('security.notifications.import.body_success').number_format($import->successful_rows);
+        $body = __('security.import.body_heading')."\n\r".
+            __('security.import.body_success').number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= "\n\r".__('security.notifications.import.body_failure').number_format($failedRowsCount);
+            $body .= "\n\r".__('security.import.body_failure').number_format($failedRowsCount);
         }
 
         return $body;
     }
 
-    public function getJobBatchName(): ?string
+    public function resolveRecord(): Security
+    {
+        return Security::query()
+            ->where('user_id', auth()->id())
+            ->where('name', $this->data['name'])
+            ->where('type', $this->data['type'])
+            ->when(! empty($this->data['color']), function (Builder $query): void {
+                $query->where('color', $this->data['color']);
+            })
+            ->first() ?? new Security([
+                'name' => $this->data['name'],
+                'type' => $this->data['type'],
+                'color' => $this->data['color'] ?? mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
+                'user_id' => auth()->id(),
+            ]);
+    }
+
+    public function getJobBatchName(): string
     {
         return 'security-import';
     }

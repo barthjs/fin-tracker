@@ -30,4 +30,10 @@ return [
 
     ],
 
+    'messages' => [
+
+        'failed' => 'Anmeldedaten sind ungültig.',
+
+    ],
+
 ];

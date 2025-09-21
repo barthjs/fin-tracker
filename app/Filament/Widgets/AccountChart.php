@@ -6,9 +6,9 @@ namespace App\Filament\Widgets;
 
 use App\Models\Account;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Str;
 
-class AccountChart extends ChartWidget
+final class AccountChart extends ChartWidget
 {
     protected static ?int $sort = 2;
 
@@ -30,14 +30,14 @@ class AccountChart extends ChartWidget
         ],
     ];
 
-    public function getHeading(): Htmlable|string|null
+    public function getHeading(): string
     {
-        return __('account.navigation_label');
+        return Str::ucfirst(__('account.plural_label'));
     }
 
     protected function getData(): array
     {
-        $accounts = Account::whereActive(true)
+        $accounts = Account::where('is_active', true)
             ->orderBy('balance', 'desc')
             ->get();
 

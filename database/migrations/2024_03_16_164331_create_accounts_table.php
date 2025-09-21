@@ -15,29 +15,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('accounts', function (Blueprint $table) {
-            $table->unsignedSmallInteger('id')->autoIncrement();
-            $table->timestamps();
+            $table->ulid('id')->primary();
 
             $table->string('name')->index();
-            $table->bigInteger('balance')->default(0)->index();
-            $currencies = array_column(Currency::cases(), 'value');
-            $table->enum('currency', $currencies)->default(Currency::USD->name)->index();
+            $table->decimal('balance', 18)->default(0);
+            $table->char('currency', 3)->default(Currency::EUR->value)->index();
             $table->text('description')->nullable();
 
             $table->string('logo')->nullable();
             $table->string('color');
-            $table->boolean('active')->default(true)->index();
+            $table->boolean('is_active')->default(true)->index();
 
-            $table->unsignedTinyInteger('user_id')->index();
-            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
+
+            $table->timestamps();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('accounts');
     }
 };

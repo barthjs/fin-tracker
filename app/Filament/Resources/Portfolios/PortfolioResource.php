@@ -4,104 +4,67 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Portfolios;
 
+use App\Enums\Currency;
+use App\Filament\Concerns\HasResourceActions;
+use App\Filament\Concerns\HasResourceFormFields;
+use App\Filament\Concerns\HasResourceInfolistEntries;
+use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Portfolios\Pages\ListPortfolios;
 use App\Filament\Resources\Portfolios\Pages\ViewPortfolio;
 use App\Filament\Resources\Portfolios\RelationManagers\SecuritiesRelationManager;
 use App\Filament\Resources\Portfolios\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\Users\RelationManagers\PortfoliosRelationManager;
-use App\Models\Account;
 use App\Models\Portfolio;
-use App\Tables\Columns\LogoColumn;
 use BackedEnum;
-use Exception;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Panel;
+use Filament\Forms\Components\Field;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\TextSize;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class PortfolioResource extends Resource
+final class PortfolioResource extends Resource
 {
+    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+
     protected static ?string $model = Portfolio::class;
 
     protected static ?int $navigationSort = 4;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-wallet';
 
-    public static function getSlug(?Panel $panel = null): string
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getModelLabel(): string
     {
-        return __('portfolio.slug');
+        return __('portfolio.label');
     }
 
-    public static function getNavigationLabel(): string
+    public static function getPluralModelLabel(): string
     {
-        return __('portfolio.navigation_label');
-    }
-
-    public static function getBreadcrumb(): string
-    {
-        return __('portfolio.navigation_label');
+        return __('portfolio.plural_label');
     }
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->components(self::formParts());
+        return $schema->components(self::getFormFields());
     }
 
-    public static function formParts(): array
+    /**
+     * @return array<int, Field>
+     */
+    public static function getFormFields(): array
     {
         return [
-            Section::make()
-                ->schema([
-                    TextInput::make('name')
-                        ->label(__('portfolio.columns.name'))
-                        ->autofocus()
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                    ColorPicker::make('color')
-                        ->label(__('widget.color'))
-                        ->validationMessages(['regex' => __('widget.color_validation_message')])
-                        ->required()
-                        ->default(mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
-                        ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
-                    Textarea::make('description')
-                        ->label(__('portfolio.columns.description'))
-                        ->autosize()
-                        ->rows(1)
-                        ->columnSpanFull()
-                        ->maxLength(1000)
-                        ->string(),
-                    FileUpload::make('logo')
-                        ->label(__('portfolio.columns.logo'))
-                        ->avatar()
-                        ->image()
-                        ->imageEditor()
-                        ->circleCropper()
-                        ->moveFiles()
-                        ->directory('logos')
-                        ->maxSize(1024),
-                    Toggle::make('active')
-                        ->label(__('table.active'))
-                        ->default(true)
-                        ->inline(false),
-                ])->columns(2),
+            self::nameField(),
+            self::currencyField(),
+            self::colorField(),
+            self::statusToggleField(),
+            self::logoField(directory: 'portfolios'),
+            self::descriptionField(),
         ];
     }
 
@@ -110,118 +73,67 @@ class PortfolioResource extends Resource
         return $schema
             ->components([
                 Section::make()
+                    ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('name')
-                            ->label(__('portfolio.columns.name'))
-                            ->tooltip(fn (Portfolio $record) => ! $record->active ? __('table.status_inactive') : '')
-                            ->color(fn (Portfolio $record) => ! $record->active ? 'danger' : 'success')
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                        TextEntry::make('market_value')
-                            ->label(__('portfolio.columns.market_value'))
-                            ->color(fn (float $state): string => match (true) {
-                                $state === 0.0 => 'gray',
-                                $state < 0 => 'danger',
-                                default => 'success'
-                            })
-                            ->money(fn (Portfolio $record) => Account::getCurrency())
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                        TextEntry::make('description')
-                            ->label(__('portfolio.columns.description'))
-                            ->size(TextSize::Small)
-                            ->hidden(fn (Portfolio $record) => ! $record->description),
+                        self::numericEntry('market_value')
+                            ->label(__('fields.market_value'))
+                            ->color(fn (Portfolio $record): string => $record->marketValueColor)
+                            ->money(fn (Portfolio $record): string => $record->currency->value, decimalPlaces: 6),
+
+                        self::descriptionEntry(),
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 3,
                     ]),
             ]);
     }
 
-    /**
-     * @throws Exception
-     */
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query, Table $table) {
+            ->heading(null)
+            ->modelLabel(__('portfolio.label'))
+            ->pluralModelLabel(__('portfolio.plural_label'))
+            ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
-                    return $query->where('active', true);
+                    return $query->where('is_active', true);
                 }
 
                 return $query;
             })
             ->columns(self::getTableColumns())
-            ->paginated(fn (): bool => Portfolio::count() > 20)
-            ->defaultSort('name')
-            ->persistSortInSession()
-            ->striped()
             ->filters([
-                Filter::make('inactive')
-                    ->label(__('table.status_inactive'))
-                    ->toggle()
-                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
-            ])
-            ->persistFiltersInSession()
-            ->recordActions([
-                EditAction::make()
-                    ->iconButton()
-                    ->icon('tabler-edit')
-                    ->modalHeading(__('portfolio.buttons.edit_heading')),
-                DeleteAction::make()
-                    ->iconButton()
-                    ->icon('tabler-trash')
-                    ->modalHeading(__('portfolio.buttons.delete_heading'))
-                    ->visible(fn (Portfolio $record): bool => ! $record->trades()->exists()),
-            ])
-            ->emptyStateHeading(__('portfolio.empty'))
-            ->emptyStateDescription('')
-            ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('portfolio.buttons.create_button_label'))
-                    ->modalHeading(__('portfolio.buttons.create_heading')),
+                self::inactiveFilter(),
             ]);
     }
 
+    /**
+     * @return array<int, Column>
+     */
     public static function getTableColumns(): array
     {
         $hidden = PortfoliosRelationManager::class;
 
         return [
-            LogoColumn::make('name')
-                ->label(__('portfolio.columns.name'))
+            self::logoAndNameColumn()
                 ->state(fn (Portfolio $record): array => [
                     'logo' => $record->logo,
                     'name' => $record->name,
-                ])
-                ->searchable()
-                ->sortable(),
+                ]),
+
             TextColumn::make('market_value')
-                ->label(__('portfolio.columns.market_value'))
                 ->hiddenOn($hidden)
+                ->label(__('fields.market_value'))
                 ->badge()
-                ->color(fn (float $state): string => match (true) {
-                    $state === 0.0 => 'gray',
-                    $state < 0 => 'danger',
-                    default => 'success'
-                })
-                ->money(Account::getCurrency())
-                ->summarize(Sum::make()->money(config('app.currency')))
-                ->toggleable(),
-            TextColumn::make('description')
-                ->label(__('portfolio.columns.description'))
-                ->hiddenOn($hidden)
-                ->wrap()
-                ->searchable()
-                ->toggleable(),
-            IconColumn::make('active')
-                ->label(__('table.active'))
-                ->tooltip(fn (bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
-                ->boolean()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+                ->color(fn (Portfolio $record): string => $record->marketValueColor)
+                ->money(fn (Portfolio $record): string => $record->currency->value)
+                ->summarize(Sum::make()->money(Currency::getCurrency())),
+
+            self::descriptionColumn()
+                ->hiddenOn($hidden),
+
+            self::currencyColumn(),
+            self::statusColumn(),
         ];
     }
 

@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Portfolios\RelationManagers;
 
+use App\Enums\TradeType;
 use App\Filament\Resources\Securities\Pages\ViewSecurity;
 use App\Filament\Resources\Securities\SecurityResource;
+use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
 use BackedEnum;
-use Exception;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
-class SecuritiesRelationManager extends RelationManager
+final class SecuritiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'securities';
 
@@ -23,7 +25,7 @@ class SecuritiesRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('security.navigation_label');
+        return Str::ucfirst(__('security.plural_label'));
     }
 
     public function form(Schema $schema): Schema
@@ -31,26 +33,26 @@ class SecuritiesRelationManager extends RelationManager
         return SecurityResource::form($schema);
     }
 
-    /**
-     * @throws Exception
-     */
     public function table(Table $table): Table
     {
-        $columns = SecurityResource::getTableColumns($this->ownerRecord->id);
+        /** @var Portfolio $portfolio */
+        $portfolio = $this->ownerRecord;
+
+        $columns = SecurityResource::getTableColumns($portfolio);
 
         return SecurityResource::table($table)
-            ->query(function () {
-                $securityIds = Trade::wherePortfolioId($this->ownerRecord->id)
+            ->query(function () use ($portfolio) {
+                $securityIds = Trade::wherePortfolioId($portfolio->id)
                     ->groupBy(['security_id'])
-                    ->havingRaw('SUM(quantity) > 0')
+                    ->havingRaw('SUM(CASE WHEN type = ? THEN quantity ELSE -quantity END) > 0', [
+                        TradeType::Buy->value,
+                    ])
                     ->pluck('security_id')
                     ->toArray();
 
                 return Security::whereIn('id', $securityIds);
             })
-            ->heading('')
             ->columns($columns)
-            ->recordUrl(fn (Security $record): string => ViewSecurity::getUrl([$record->id]))
-            ->emptyStateActions([]);
+            ->recordUrl(fn (Security $record): string => ViewSecurity::getUrl(['record' => $record->id]));
     }
 }

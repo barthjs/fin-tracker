@@ -4,181 +4,128 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Casts\MoneyCast;
 use App\Enums\TradeType;
-use App\Models\Scopes\UserScope;
+use App\Models\Scopes\UserRelationScope;
+use Carbon\CarbonInterface;
+use Database\Factories\TradeFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Trade extends Model
+/**
+ * @property-read string $id
+ * @property CarbonInterface $date_time
+ * @property TradeType $type
+ * @property-read float $total_amount
+ * @property float $quantity
+ * @property float $price
+ * @property float $fee
+ * @property float $tax
+ * @property string|null $notes
+ * @property string $account_id
+ * @property string $portfolio_id
+ * @property string $security_id
+ * @property-read Account $account
+ * @property-read Portfolio $portfolio
+ * @property-read Security $security
+ */
+final class Trade extends Model
 {
-    use HasFactory;
-
-    public $table = 'trades';
+    /** @use HasFactory<TradeFactory> */
+    use HasFactory, HasUlids;
 
     public $timestamps = false;
 
-    protected $fillable = [
-        'date_time',
-        'total_amount',
-        'quantity',
-        'price',
-        'tax',
-        'fee',
-        'notes',
-        'type',
-        'account_id',
-        'portfolio_id',
-        'security_id',
-        'user_id',
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'type' => TradeType::Buy->value,
+        'quantity' => 0.0,
+        'price' => 0.0,
+        'fee' => 0.0,
+        'tax' => 0.0,
     ];
 
-    protected $casts = [
-        'date_time' => 'datetime',  // Carbon object
-        'total_amount' => MoneyCast::class,
-        'quantity' => 'decimal:6',
-        'price' => 'decimal:6',
-        'tax' => 'decimal:2',
-        'fee' => 'decimal:2',
-        'type' => TradeType::class,
-        'account_id' => 'integer',
-        'portfolio_id' => 'integer',
-        'category_id' => 'integer',
-        'security_id' => 'integer',
-        'user_id' => 'integer',
-    ];
-
-    protected static function booted(): void
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    public function casts(): array
     {
-        static::addGlobalScope(new UserScope);
-
-        static::creating(function (Trade $trade) {
-            // Only needed in importer
-            if (is_null($trade->account_id)) {
-                $trade->account_id = Account::getDefaultAccountId();
-            }
-
-            // Only needed in importer
-            if (is_null($trade->portfolio_id)) {
-                $trade->portfolio_id = self::getDefaultPortfolioId();
-            }
-
-            // Only needed in importer
-            if (is_null($trade->security_id)) {
-                $trade->security_id = self::getDefaultSecurityId();
-            }
-
-            // Only needed in importer and web
-            if (is_null($trade->user_id)) {
-                $trade->user_id = auth()->user()->id;
-            }
-
-            $trade->notes = mb_trim($trade->notes ?? '');
-
-            // Set the type factor based on trade type
-            $amountSign = 1;
-            $quantitySign = 1;
-            $feeSign = 1;
-
-            if ($trade->type === TradeType::BUY) {
-                $amountSign = -1;
-            } else {
-                $quantitySign = -1;
-                $feeSign = -1;
-            }
-
-            $trade->total_amount = round(
-                ($trade->price * $trade->quantity + ($trade->tax + $trade->fee) * $feeSign) * $amountSign,
-                2
-            );
-
-            $trade->quantity *= $quantitySign;
-        });
-
-        static::created(function (Trade $trade) {
-            Account::updateAccountBalance($trade->account_id);
-            Portfolio::updatePortfolioMarketValue($trade->portfolio_id);
-            Security::updateSecurityQuantity($trade->security_id);
-        });
-
-        static::updating(function (Trade $trade) {
-            $trade->notes = mb_trim($trade->notes ?? '');
-
-            // Set the type factor based on trade type
-            $amountSign = 1;
-            $quantitySign = 1;
-            $feeSign = 1;
-
-            if ($trade->type === TradeType::BUY) {
-                $amountSign = -1;
-            } else {
-                $quantitySign = -1;
-                $feeSign = -1;
-            }
-
-            $trade->total_amount = round(
-                ($trade->price * $trade->quantity + ($trade->tax + $trade->fee) * $feeSign) * $amountSign,
-                2
-            );
-
-            $trade->quantity *= $quantitySign;
-        });
+        return [
+            'date_time' => 'datetime',
+            'type' => TradeType::class,
+            'total_amount' => 'float',
+            'quantity' => 'float',
+            'price' => 'float',
+            'fee' => 'float',
+            'tax' => 'float',
+        ];
     }
 
     /**
-     * Get the default portfolio ID for the current user.
+     * Account this trade belongs to.
      *
-     * Retrieves the first portfolio with the name 'Demo' for the currently
-     * authenticated user. If it does not exist, it creates one with that name.
-     *
-     * @return int The ID of the default portfolio.
+     * @return BelongsTo<Account, $this>
      */
-    private static function getDefaultPortfolioId(): int
-    {
-        $portfolio = Portfolio::whereName('Demo')->first();
-        if (! $portfolio) {
-            $portfolio = Portfolio::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
-        }
-
-        return $portfolio->id;
-    }
-
-    /**
-     * Get the default security ID for the current user.
-     *
-     * Retrieves the first security with the name 'Demo' for the currently
-     * authenticated user. If it does not exist, it creates one with that name.
-     *
-     * @return int The ID of the default security.
-     */
-    private static function getDefaultSecurityId(): int
-    {
-        $portfolio = Security::whereName('Demo')->first();
-        if (! $portfolio) {
-            $portfolio = Security::firstOrCreate(['name' => 'Demo', 'user_id' => auth()->id()]);
-        }
-
-        return $portfolio->id;
-    }
-
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'account_id');
     }
 
+    /**
+     * Portfolio this trade belongs to.
+     *
+     * @return BelongsTo<Portfolio, $this>
+     */
     public function portfolio(): BelongsTo
     {
         return $this->belongsTo(Portfolio::class, 'portfolio_id');
     }
 
+    /**
+     * Security this trade belongs to.
+     *
+     * @return BelongsTo<Security, $this>
+     */
     public function security(): BelongsTo
     {
         return $this->belongsTo(Security::class, 'security_id');
     }
 
-    public function user(): BelongsTo
+    protected static function booted(): void
     {
-        return $this->belongsTo(User::class, 'user_id');
+        self::addGlobalScope(new UserRelationScope());
+
+        self::creating(function (Trade $trade): void {
+            // Only needed in importer
+            /** @phpstan-ignore-next-line */
+            if ($trade->account_id === null) {
+                $trade->account_id = Account::getOrCreateDefaultAccount()->id;
+            }
+
+            // Only needed in importer
+            /** @phpstan-ignore-next-line */
+            if ($trade->portfolio_id === null) {
+                $trade->portfolio_id = Portfolio::getOrCreateDefaultPortfolio()->id;
+            }
+
+            // Only needed in importer
+            /** @phpstan-ignore-next-line */
+            if ($trade->security_id === null) {
+                $trade->security_id = Security::getOrCreateDefaultSecurity()->id;
+            }
+        });
+
+        self::created(function (Trade $trade): void {
+            Account::updateAccountBalance($trade->account_id);
+            Portfolio::updatePortfolioMarketValue($trade->portfolio_id);
+            Security::updateSecurityQuantity($trade->security_id);
+        });
     }
 }

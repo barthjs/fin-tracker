@@ -28,12 +28,14 @@ RUN install-php-extensions \
         intl \
         opcache \
         pdo_mysql \
+        pdo_pgsql \
         zip && \
         rm -f /usr/local/bin/install-php-extensions
 
 # Copy php configuration files
 RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/php.ini
+COPY docker/php/php-prod.ini /usr/local/etc/php/conf.d/php-prod.ini
 COPY docker/php/application.conf /usr/local/etc/php-fpm.d/application.conf
 
 # Copy nginx configuration files

@@ -8,11 +8,6 @@ use Filament\Support\Contracts\HasLabel;
 
 enum Currency: string implements HasLabel
 {
-    public function getLabel(): ?string
-    {
-        return $this->name;
-    }
-
     case AED = 'AED'; // United Arab Emirates Dirham
     case AFN = 'AFN'; // Afghan Afghani
     case ALL = 'ALL'; // Albanian Lek
@@ -173,4 +168,37 @@ enum Currency: string implements HasLabel
     case ZAR = 'ZAR'; // South African Rand
     case ZMW = 'ZMW'; // Zambian Kwacha
     case ZWL = 'ZWL'; // Zimbabwean Dollar
+
+    /**
+     * Returns a valid ISO4217 currency code.
+     *
+     * Order of precedence:
+     *   1. Provided code, if valid
+     *   2. Default from config (app.currency), if valid
+     *   3. Fallback EUR
+     */
+    public static function getCurrency(?string $currencyCode = null): string
+    {
+        if ($currencyCode !== null) {
+            $currency = self::tryFrom($currencyCode);
+            if ($currency instanceof self) {
+                return $currency->value;
+            }
+        }
+
+        $configCurrency = config('app.currency');
+        if (is_string($configCurrency)) {
+            $currency = self::tryFrom($configCurrency);
+            if ($currency instanceof self) {
+                return $currency->value;
+            }
+        }
+
+        return self::EUR->value;
+    }
+
+    public function getLabel(): string
+    {
+        return $this->name;
+    }
 }

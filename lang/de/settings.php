@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 return [
 
-    'slug' => 'einstellungen',
     'navigation_label' => 'Einstellungen',
 
     'about' => 'Über',

@@ -5,113 +5,66 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Accounts;
 
 use App\Enums\Currency;
+use App\Filament\Concerns\HasResourceActions;
+use App\Filament\Concerns\HasResourceFormFields;
+use App\Filament\Concerns\HasResourceInfolistEntries;
+use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts\Pages\ListAccounts;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Accounts\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\Accounts\RelationManagers\TransactionRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AccountsRelationManager;
 use App\Models\Account;
-use App\Tables\Columns\LogoColumn;
 use BackedEnum;
-use Exception;
-use Filament\Actions\BulkAction;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Panel;
+use Filament\Forms\Components\Field;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\TextSize;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 
-class AccountResource extends Resource
+final class AccountResource extends Resource
 {
+    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+
     protected static ?string $model = Account::class;
 
     protected static ?int $navigationSort = 3;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-bank-building';
 
-    public static function getSlug(?Panel $panel = null): string
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getModelLabel(): string
     {
-        return __('account.slug');
+        return __('account.label');
     }
 
-    public static function getNavigationLabel(): string
+    public static function getPluralModelLabel(): string
     {
-        return __('account.navigation_label');
-    }
-
-    public static function getBreadcrumb(): string
-    {
-        return __('account.navigation_label');
+        return __('account.plural_label');
     }
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->components(self::formParts());
+        return $schema->components(self::getFormFields());
     }
 
-    public static function formParts(): array
+    /**
+     * @return array<int, Field>
+     */
+    public static function getFormFields(): array
     {
         return [
-            Section::make()
-                ->schema([
-                    TextInput::make('name')
-                        ->label(__('account.columns.name'))
-                        ->autofocus()
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                    Select::make('currency')
-                        ->label(__('account.columns.currency'))
-                        ->placeholder(__('account.form.currency_placeholder'))
-                        ->validationMessages(['required' => __('account.form.currency_validation_message')])
-                        ->options(Currency::class)
-                        ->default(Account::getCurrency())
-                        ->required()
-                        ->searchable(),
-                    Textarea::make('description')
-                        ->label(__('account.columns.description'))
-                        ->autosize()
-                        ->rows(1)
-                        ->maxLength(1000)
-                        ->string(),
-                    FileUpload::make('logo')
-                        ->label(__('account.columns.logo'))
-                        ->avatar()
-                        ->image()
-                        ->imageEditor()
-                        ->circleCropper()
-                        ->moveFiles()
-                        ->directory('logos')
-                        ->maxSize(1024),
-                    ColorPicker::make('color')
-                        ->label(__('widget.color'))
-                        ->validationMessages(['regex' => __('widget.color_validation_message')])
-                        ->required()
-                        ->default(mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF))))
-                        ->regex('/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'),
-                    Toggle::make('active')
-                        ->label(__('table.active'))
-                        ->default(true)
-                        ->inline(false),
-                ])->columns(3),
+            self::nameField(),
+            self::currencyField(),
+            self::colorField(),
+            self::statusToggleField(),
+            self::logoField(directory: 'accounts'),
+            self::descriptionField(),
         ];
     }
 
@@ -120,146 +73,67 @@ class AccountResource extends Resource
         return $schema
             ->components([
                 Section::make()
+                    ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('name')
-                            ->label(__('account.columns.name'))
-                            ->tooltip(fn (Account $record) => ! $record->active ? __('table.status_inactive') : '')
-                            ->color(fn (Account $record) => ! $record->active ? 'danger' : 'success')
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                        TextEntry::make('balance')
-                            ->label(__('account.columns.balance'))
-                            ->color(fn (float $state): string => match (true) {
-                                $state === 0.0 => 'gray',
-                                $state < 0 => 'danger',
-                                default => 'success'
-                            })
-                            ->money(fn (Account $record): string => $record->currency->name)
-                            ->size(TextSize::Medium)
-                            ->weight(FontWeight::SemiBold),
-                        TextEntry::make('description')
-                            ->label(__('account.columns.description'))
-                            ->size(TextSize::Small)
-                            ->hidden(fn (Account $record) => ! $record->description),
+                        self::numericEntry('balance')
+                            ->label(__('account.fields.balance'))
+                            ->color(fn (Account $record): string => $record->balanceColor)
+                            ->money(fn (Account $record): string => $record->currency->value),
+
+                        self::descriptionEntry(),
                     ])
                     ->columns([
                         'default' => 2,
-                        'md' => 3,
                     ]),
             ]);
     }
 
-    /**
-     * @throws Exception
-     */
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query, Table $table) {
+            ->heading(null)
+            ->modelLabel(__('account.label'))
+            ->pluralModelLabel(__('account.plural_label'))
+            ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
                 if (! $table->getActiveFiltersCount()) {
-                    return $query->where('active', true);
+                    return $query->where('is_active', true);
                 }
 
                 return $query;
             })
-            ->columns(self::tableColumns())
-            ->paginated(fn (): bool => Account::count() > 20)
-            ->defaultSort('name')
-            ->persistSortInSession()
-            ->striped()
+            ->columns(self::getTableColumns())
             ->filters([
-                Filter::make('inactive')
-                    ->label(__('table.status_inactive'))
-                    ->toggle()
-                    ->query(fn (Builder $query): Builder => $query->where('active', false)),
-            ])
-            ->persistFiltersInSession()
-            ->recordActions([
-                EditAction::make()
-                    ->iconButton()
-                    ->icon('tabler-edit')
-                    ->modalHeading(__('account.buttons.edit_heading')),
-                DeleteAction::make()
-                    ->iconButton()
-                    ->icon('tabler-trash')
-                    ->modalHeading(__('account.buttons.delete_heading'))
-                    ->visible(fn (Account $record): bool => ! $record->transactions()->exists() && ! $record->trades()->exists()),
-            ])
-            ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('account.empty'))
-            ->emptyStateDescription('')
-            ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('account.buttons.create_button_label'))
-                    ->modalHeading(__('account.buttons.create_heading')),
+                self::inactiveFilter(),
             ]);
     }
 
-    public static function tableColumns(): array
+    /**
+     * @return array<int, Column>
+     */
+    public static function getTableColumns(): array
     {
         $hidden = AccountsRelationManager::class;
 
         return [
-            LogoColumn::make('name')
-                ->label(__('account.columns.name'))
+            self::logoAndNameColumn()
                 ->state(fn (Account $record): array => [
                     'logo' => $record->logo,
                     'name' => $record->name,
-                ])
-                ->searchable()
-                ->sortable(),
-            TextColumn::make('balance')
-                ->label(__('account.columns.balance'))
-                ->hiddenOn($hidden)
-                ->badge()
-                ->color(fn (float $state): string => match (true) {
-                    $state === .0 => 'gray',
-                    $state < 0 => 'danger',
-                    default => 'success'
-                })
-                ->money(currency: fn (Account $record): string => $record->currency->name)
-                ->summarize(Sum::make()->money(Account::getCurrency(), 100))
-                ->toggleable(),
-            TextColumn::make('description')
-                ->label(__('account.columns.description'))
-                ->hiddenOn($hidden)
-                ->wrap()
-                ->searchable()
-                ->toggleable(),
-            TextColumn::make('currency')
-                ->label(__('account.columns.currency'))
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            IconColumn::make('active')
-                ->label(__('table.active'))
-                ->tooltip(fn (bool $state): string => $state ? __('table.status_active') : __('table.status_inactive'))
-                ->boolean()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-        ];
-    }
+                ]),
 
-    public static function getBulkActions(): array
-    {
-        return [
-            BulkAction::make('currency')
-                ->icon('tabler-edit')
-                ->label(__('account.buttons.bulk_currency'))
-                ->schema([
-                    Select::make('currency')
-                        ->label(__('account.columns.currency'))
-                        ->placeholder(__('account.form.currency_placeholder'))
-                        ->validationMessages(['required' => __('account.form.currency_validation_message')])
-                        ->options(Currency::class)
-                        ->default(Account::getCurrency())
-                        ->required()
-                        ->searchable(),
-                ])
-                ->action(function (Collection $records, array $data): void {
-                    $records->each->update(['currency' => $data['currency']]);
-                })
-                ->deselectRecordsAfterCompletion(),
+            TextColumn::make('balance')
+                ->hiddenOn($hidden)
+                ->label(__('account.fields.balance'))
+                ->badge()
+                ->color(fn (Account $record): string => $record->balanceColor)
+                ->money(fn (Account $record): string => $record->currency->value)
+                ->summarize(Sum::make()->money(Currency::getCurrency())),
+
+            self::descriptionColumn()
+                ->hiddenOn($hidden),
+
+            self::currencyColumn(),
+            self::statusColumn(),
         ];
     }
 

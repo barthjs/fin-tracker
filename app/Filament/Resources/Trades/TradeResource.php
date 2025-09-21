@@ -4,36 +4,30 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Trades;
 
+use App\Enums\TradeType;
+use App\Filament\Concerns\HasResourceActions;
+use App\Filament\Concerns\HasResourceFormFields;
+use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts;
-use App\Filament\Resources\Accounts\AccountResource;
 use App\Filament\Resources\Portfolios;
-use App\Filament\Resources\Portfolios\PortfolioResource;
 use App\Filament\Resources\Securities;
-use App\Filament\Resources\Securities\SecurityResource;
 use App\Filament\Resources\Trades\Pages\ListTrades;
 use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
-use App\Tables\Columns\LogoColumn;
 use BackedEnum;
 use Carbon\Carbon;
-use Exception;
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -41,369 +35,314 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Number;
+use Illuminate\Support\Str;
 
-class TradeResource extends Resource
+final class TradeResource extends Resource
 {
+    use HasResourceActions, HasResourceFormFields, HasResourceTableColumns;
+
     protected static ?string $model = Trade::class;
 
     protected static ?int $navigationSort = 6;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-exchange';
 
-    public static function getSlug(?Panel $panel = null): string
+    public static function getModelLabel(): string
     {
-        return __('trade.slug');
+        return __('trade.label');
     }
 
-    public static function getNavigationLabel(): string
+    public static function getPluralModelLabel(): string
     {
-        return __('trade.navigation_label');
+        return __('trade.plural_label');
     }
 
-    public static function form(Schema $schema): Schema
+    public static function form(Schema $schema, Account|Model|null $account = null, Portfolio|Model|null $portfolio = null, Security|Model|null $security = null): Schema
     {
-        return $schema->components(self::formParts());
-    }
-
-    public static function formParts(?Account $account = null, ?Portfolio $portfolio = null, ?Security $security = null): array
-    {
-        // account, portfolio and security for default values in relation manager
-        return [
+        return $schema->components([
             Section::make()
+                ->columns(2)
                 ->schema([
-                    DateTimePicker::make('date_time')
-                        ->label(__('transaction.columns.date'))
-                        ->autofocus()
-                        ->native(false)
-                        ->displayFormat('d.m.Y, H:i')
-                        ->seconds(false)
-                        ->default(today())
-                        ->required(),
-                    Select::make('security_id')
-                        ->label(__('trade.columns.security'))
-                        ->relationship('security', 'name')
-                        ->options(fn (): array => Security::query()
-                            ->orderBy('name')
-                            ->where('active', true)
-                            ->pluck('name', 'id')
-                            ->toArray()
-                        )
-                        ->placeholder(__('trade.form.security_placeholder'))
-                        ->validationMessages(['required' => __('trade.form.security_validation_message')])
-                        ->preload()
-                        ->default(fn (): int|string => $security->id ?? '')
-                        ->required()
-                        ->searchable()
-                        ->createOptionForm(SecurityResource::formParts())
-                        ->createOptionModalHeading(__('security.buttons.create_heading')),
-                    TextInput::make('quantity')
-                        ->label(__('trade.columns.quantity'))
-                        ->required()
-                        ->numeric()
-                        ->default(0)
-                        ->minValue(0)
-                        ->live(true, 500)
-                        ->formatStateUsing(function (string|int $state) {
-                            if ($state < 0) {
-                                return $state * -1;
-                            }
+                    self::dateTimePickerField(),
 
-                            return $state;
+                    self::securitySelectField()
+                        ->default(fn (): ?string => $security instanceof Security ? $security->id : null),
+
+                    self::tradeAmountField('quantity')
+                        ->label(__('trade.fields.quantity'))
+                        ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
+                            $set('total_amount', self::calculateTotalAmount(
+                                self::asFloat($state),
+                                self::asFloat($get('price')),
+                                self::asFloat($get('tax')),
+                                self::asFloat($get('fee')),
+                                self::asTradeType($get('type')),
+                            ));
                         })
-                        ->afterStateUpdated(function (string|int $state, callable $get, callable $set) {
-                            $set('total_amount', $get('price') * $state + $get('tax') + $get('fee'));
-                        }),
-                    TextInput::make('price')
-                        ->label(__('trade.columns.price'))
-                        ->required()
-                        ->numeric()
-                        ->default(0)
-                        ->minValue(0)
-                        ->live(true, 500)
-                        ->afterStateUpdated(function (string|int $state, callable $get, callable $set) {
-                            $set('total_amount', round($state * $get('quantity') + $get('tax') + $get('fee'), 2));
-                        }),
-                    TextInput::make('tax')
-                        ->label(__('trade.columns.tax'))
-                        ->required()
-                        ->numeric()
-                        ->default(0)
-                        ->minValue(0)
-                        ->live(true, 500)
-                        ->afterStateUpdated(function (string|int $state, callable $get, callable $set) {
-                            $set('total_amount', $get('price') * $get('quantity') + $state + $get('fee'));
-                        }),
-                    TextInput::make('fee')
-                        ->label(__('trade.columns.fee'))
-                        ->required()
-                        ->numeric()
-                        ->default(0)
-                        ->minValue(0)
-                        ->live(true, 500)
-                        ->afterStateUpdated(function (string|int $state, callable $get, callable $set) {
-                            $set('total_amount', $get('price') * $get('quantity') + $get('tax') + $state);
-                        }),
-                    TextInput::make('total_amount')
-                        ->label(__('trade.columns.total_amount'))
-                        ->suffix(fn (Get $get): string => Account::whereId($get('account_id'))->first()->currency->name ?? '')
-                        ->disabled(),
-                    Select::make('type')
-                        ->label(__('trade.columns.type'))
-                        ->placeholder(__('trade.form.type_placeholder'))
-                        ->options(__('trade.types'))
                         ->required(),
-                    Section::make()
-                        ->schema([
-                            Select::make('account_id')
-                                ->label(__('trade.columns.account'))
-                                ->relationship('account', 'name')
-                                ->options(fn (): array => Account::query()
-                                    ->orderBy('name')
-                                    ->where('active', true)
-                                    ->pluck('name', 'id')
-                                    ->toArray()
-                                )
-                                ->placeholder(__('trade.form.account_placeholder'))
-                                ->validationMessages(['required' => __('trade.form.account_validation_message')])
-                                ->preload()
-                                ->default(fn (): int|string => $account->id ?? '')
-                                ->live(true)
-                                ->required()
-                                ->searchable()
-                                ->createOptionForm(AccountResource::formParts())
-                                ->createOptionModalHeading(__('account.buttons.create_heading')),
-                            Select::make('portfolio_id')
-                                ->label(__('trade.columns.portfolio'))
-                                ->relationship('portfolio', 'name')
-                                ->options(fn (): array => Portfolio::query()
-                                    ->orderBy('name')
-                                    ->where('active', true)
-                                    ->pluck('name', 'id')
-                                    ->toArray()
-                                )
-                                ->placeholder(__('trade.form.portfolio_placeholder'))
-                                ->validationMessages(['required' => __('trade.form.portfolio_validation_message')])
-                                ->preload()
-                                ->default(fn (): int|string => $portfolio->id ?? '')
-                                ->required()
-                                ->searchable()
-                                ->createOptionForm(PortfolioResource::formParts())
-                                ->createOptionModalHeading(__('portfolio.buttons.create_heading')),
-                            Textarea::make('notes')
-                                ->label(__('trade.columns.notes'))
-                                ->autosize()
-                                ->columnSpanFull()
-                                ->maxLength(255)
-                                ->rows(1)
-                                ->string(),
-                        ])
-                        ->columns(2),
 
-                ])
-                ->columns(2),
-        ];
+                    self::tradeAmountField('price')
+                        ->label(__('fields.price'))
+                        ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
+                            $set('total_amount', self::calculateTotalAmount(
+                                self::asFloat($get('quantity')),
+                                self::asFloat($state),
+                                self::asFloat($get('tax')),
+                                self::asFloat($get('fee')),
+                                self::asTradeType($get('type')),
+                            ));
+                        })
+                        ->required(),
+
+                    self::tradeAmountField('tax')
+                        ->label(__('trade.fields.tax'))
+                        ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
+                            $set('total_amount', self::calculateTotalAmount(
+                                self::asFloat($get('quantity')),
+                                self::asFloat($get('price')),
+                                self::asFloat($state),
+                                self::asFloat($get('fee')),
+                                self::asTradeType($get('type')),
+                            ));
+                        })
+                        ->required(),
+
+                    self::tradeAmountField('fee')
+                        ->label(__('trade.fields.fee'))
+                        ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
+                            $set('total_amount', self::calculateTotalAmount(
+                                self::asFloat($get('quantity')),
+                                self::asFloat($get('price')),
+                                self::asFloat($get('tax')),
+                                self::asFloat($state),
+                                self::asTradeType($get('type')),
+                            ));
+                        })
+                        ->required(),
+
+                    self::typeSelectField()
+                        ->options(TradeType::class)
+                        ->default(TradeType::Buy)
+                        ->afterStateUpdated(function (TradeType $state, Get $get, Set $set): void {
+                            $set('total_amount', self::calculateTotalAmount(
+                                self::asFloat($get('quantity')),
+                                self::asFloat($get('price')),
+                                self::asFloat($get('tax')),
+                                self::asFloat($get('fee')),
+                                $state,
+                            ));
+                        }),
+
+                    TextInput::make('total_amount')
+                        ->label(__('trade.fields.total_amount'))
+                        ->numeric()
+                        ->default(0)
+                        ->suffix(fn (Get $get): ?string => Account::find($get('account_id'))?->currency?->value)
+                        ->dehydrated(false)
+                        ->disabled(),
+                ]),
+
+            Section::make()
+                ->columns(2)
+                ->schema([
+                    self::accountSelectField()
+                        ->getOptionLabelUsing(fn (?string $value): ?string => Account::find($value)?->name)
+                        ->default(fn (): ?string => $account instanceof Account ? $account->id : null)
+                        ->live(true),
+
+                    self::portfolioSelectField()
+                        ->getOptionLabelUsing(fn (?string $value): ?string => Portfolio::find($value)?->name)
+                        ->default(fn (): ?string => $portfolio instanceof Portfolio ? $portfolio->id : null),
+
+                    self::notesField(),
+                ]),
+        ])->columns(1);
     }
 
-    /**
-     * @throws Exception
-     */
     public static function table(Table $table): Table
     {
         return $table
+            ->heading(null)
+            ->modelLabel(__('trade.label'))
+            ->pluralModelLabel(__('trade.plural_label'))
             ->columns([
-                TextColumn::make('date_time')
-                    ->label(__('trade.columns.date'))
-                    ->dateTime('Y-m-d, H:i')
+                self::dateTimeColumn('date_time'),
+
+                TextColumn::make('total_amount')
+                    ->label(__('trade.fields.total_amount'))
+                    ->alignEnd()
                     ->fontFamily('mono')
+                    ->copyable()
+                    ->badge()
+                    ->color(fn (Trade $record): string => $record->type->getColor())
+                    ->numeric(2)
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('total_amount')
-                    ->label(__('trade.columns.total_amount'))
-                    ->fontFamily('mono')
-                    ->copyable()
-                    ->copyableState(fn (float $state) => Number::format($state, 2))
-                    ->numeric(2)
-                    ->badge()
-                    ->color(fn (Trade $record): string => $record->type->name === 'BUY' ? 'danger' : 'success')
-                    ->sortable()
-                    ->toggleable()
-                    ->alignEnd(),
+
                 TextColumn::make('quantity')
-                    ->label(__('trade.columns.quantity'))
+                    ->label(__('trade.fields.quantity'))
+                    ->alignEnd()
                     ->fontFamily('mono')
                     ->copyable()
                     ->numeric(2)
                     ->sortable()
-                    ->toggleable()
-                    ->alignEnd(),
+                    ->toggleable(),
+
                 TextColumn::make('price')
-                    ->label(__('trade.columns.price'))
+                    ->label(__('fields.price'))
+                    ->alignEnd()
                     ->fontFamily('mono')
                     ->copyable()
                     ->numeric(2)
                     ->sortable()
-                    ->toggleable()
-                    ->alignEnd(),
+                    ->toggleable(),
+
                 TextColumn::make('tax')
-                    ->label(__('trade.columns.tax'))
+                    ->label(__('trade.fields.tax'))
+                    ->alignEnd()
                     ->fontFamily('mono')
                     ->copyable()
                     ->numeric(2)
                     ->sortable()
-                    ->toggleable()
-                    ->alignEnd(),
+                    ->toggleable(),
+
                 TextColumn::make('fee')
-                    ->label(__('trade.columns.fee'))
+                    ->label(__('trade.fields.fee'))
+                    ->alignEnd()
                     ->fontFamily('mono')
                     ->copyable()
                     ->numeric(2)
                     ->sortable()
-                    ->wrap()
-                    ->toggleable()
-                    ->alignEnd(),
-                LogoColumn::make('account.name')
-                    ->label(__('trade.columns.account'))
+                    ->toggleable(),
+
+                self::logoAndNameColumn('account.name')
+                    ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
+                    ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
                     ])
-                    ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
-                    ->searchable()
-                    ->sortable()
                     ->toggleable(),
-                LogoColumn::make('portfolio.name')
-                    ->label(__('trade.columns.portfolio'))
+
+                self::logoAndNameColumn('portfolio.name')
+                    ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class)
+                    ->label(Str::ucfirst(__('portfolio.label')))
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->portfolio->logo,
                         'name' => $record->portfolio->name,
                     ])
-                    ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class)
-                    ->searchable()
-                    ->sortable()
                     ->toggleable(),
-                LogoColumn::make('security.name')
-                    ->label(__('trade.columns.security'))
+
+                self::logoAndNameColumn('security.name')
+                    ->hiddenOn(Securities\RelationManagers\TradesRelationManager::class)
+                    ->label(Str::ucfirst(__('security.label')))
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->security->logo,
                         'name' => $record->security->name,
                     ])
-                    ->hiddenOn(Securities\RelationManagers\TradesRelationManager::class)
-                    ->searchable()
-                    ->sortable()
                     ->toggleable(),
-                TextColumn::make('notes')
-                    ->label(__('trade.columns.notes'))
-                    ->wrap()
-                    ->searchable()
+
+                self::notesColumn()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->paginated(fn (): bool => Trade::count() > 20)
-            ->deferLoading()
-            ->extremePaginationLinks()
             ->defaultSort('date_time', 'desc')
-            ->persistSortInSession()
-            ->striped()
             ->filters([
+                SelectFilter::make('type')
+                    ->hiddenOn(ListTrades::class)
+                    ->label(__('fields.type'))
+                    ->options(TradeType::class),
+
                 SelectFilter::make('account_id')
-                    ->label(__('trade.columns.account'))
                     ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
-                    ->options(fn (): array => Account::query()
-                        ->orderBy('name')
-                        ->where('active', true)
-                        ->pluck('name', 'id')
-                        ->toArray()
-                    )
+                    ->label(Str::ucfirst(__('account.label')))
+                    ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
                     ->searchable(),
+
                 SelectFilter::make('portfolio_id')
-                    ->label(__('trade.columns.portfolio'))
                     ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class)
-                    ->options(fn (): array => Portfolio::query()
-                        ->orderBy('name')
-                        ->where('active', true)
-                        ->pluck('name', 'id')
-                        ->toArray()
-                    )
+                    ->label(Str::ucfirst(__('portfolio.label')))
+                    ->relationship('portfolio', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
                     ->searchable(),
+
                 SelectFilter::make('security_id')
-                    ->label(__('trade.columns.security'))
                     ->hiddenOn(Securities\RelationManagers\TradesRelationManager::class)
-                    ->options(fn (): array => Security::query()
-                        ->orderBy('name')
-                        ->where('active', true)
-                        ->pluck('name', 'id')
-                        ->toArray()
-                    )
+                    ->label(Str::ucfirst(__('security.label')))
+                    ->relationship('security', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
                     ->searchable(),
+
                 Filter::make('date')
                     ->schema([
-                        DatePicker::make('created_from')
+                        DatePicker::make('from')
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
-                        DatePicker::make('created_until')
+
+                        DatePicker::make('until')
                             ->label(__('table.filter.created_until')),
                     ])
                     ->columns(2)
                     ->query(function (Builder $query, array $data): Builder {
+                        /** @var array{from: string, until: string} $data */
                         return $query
-                            ->when($data['created_from'],
+                            ->when($data['from'],
                                 fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '>=', $date))
-                            ->when($data['created_until'],
+                            ->when($data['until'],
                                 fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
                     }),
             ], FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(4)
             ->headerActions([
-                CreateAction::make('header-create')
-                    ->icon('tabler-plus')
-                    ->label(__('trade.buttons.create_button_label'))
-                    ->hidden(function (mixed $livewire): bool {
-                        return $livewire instanceof ListTrades;
-                    })
-                    ->modalHeading(__('trade.buttons.create_heading')),
+                self::createAction()
+                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTrades)
+                    /** @phpstan-ignore-next-line */
+                    ->using(fn (array $data) => Trade::create($data)),
             ])
-            ->persistFiltersInSession()
-            ->filtersFormColumns(function (mixed $livewire) {
-                return $livewire instanceof ListTrades ? 4 : 3;
-            })
             ->recordActions(self::getActions())
-            ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('trade.empty'))
-            ->emptyStateDescription('')
-            ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('trade.buttons.create_button_label'))
-                    ->modalHeading(__('trade.buttons.create_heading')),
-            ]);
+            ->toolbarActions(self::getBulkActions());
     }
 
+    /**
+     * @return array<int, Action>
+     */
     public static function getActions(): array
     {
         return [
-            EditAction::make()
-                ->iconButton()
-                ->icon('tabler-edit')
-                ->modalHeading(__('trade.buttons.edit_heading'))
+            self::tableEditAction()
                 ->using(function (Trade $record, array $data): Trade {
-                    $oldAmount = $record->getOriginal('total_amount');
-                    $oldQuantity = $record->getOriginal('quantity');
-                    $oldAccountId = $record->getOriginal('account_id');
-                    $oldPortfolioId = $record->getOriginal('portfolio_id');
-                    $oldSecurityId = $record->getOriginal('security_id');
+                    /** @var array<string, mixed> $data */
 
-                    DB::transaction(function () use ($record, $data, $oldAmount, $oldQuantity, $oldAccountId, $oldPortfolioId, $oldSecurityId): void {
+                    /** @var float $oldAmount */
+                    $oldAmount = $record->getOriginal('total_amount');
+                    /** @var float $oldQuantity */
+                    $oldQuantity = $record->getOriginal('quantity');
+                    /** @var string $oldAccountId */
+                    $oldAccountId = $record->getOriginal('account_id');
+                    /** @var string $oldPortfolioId */
+                    $oldPortfolioId = $record->getOriginal('portfolio_id');
+                    /** @var string $oldSecurityId */
+                    $oldSecurityId = $record->getOriginal('security_id');
+                    /** @var TradeType $oldType */
+                    $oldType = $record->getOriginal('type');
+
+                    DB::transaction(function () use ($record, $data, $oldAmount, $oldQuantity, $oldAccountId, $oldPortfolioId, $oldSecurityId, $oldType): void {
                         $record->update($data);
 
-                        $amount = $record->total_amount;
                         $quantity = $record->quantity;
+                        $price = $record->price;
+                        $tax = $record->tax;
+                        $fee = $record->fee;
+                        $type = $record->type;
+                        $amount = self::calculateTotalAmount($quantity, $price, $tax, $fee, $type);
+
                         $accountId = $record->account_id;
                         $portfolioId = $record->portfolio_id;
                         $securityId = $record->security_id;
@@ -411,31 +350,29 @@ class TradeResource extends Resource
                         if ($oldAccountId !== $accountId) {
                             Account::updateAccountBalance($oldAccountId);
                             Account::updateAccountBalance($accountId);
-                        } elseif ($oldAmount !== $amount) {
+                        } elseif ($oldAmount !== $amount || $oldType !== $type) {
                             Account::updateAccountBalance($accountId);
                         }
 
                         if ($oldPortfolioId !== $portfolioId) {
                             Portfolio::updatePortfolioMarketValue($oldPortfolioId);
                             Portfolio::updatePortfolioMarketValue($portfolioId);
-                        } elseif ($oldQuantity !== $quantity) {
+                        } elseif ($oldQuantity !== $quantity || $oldType !== $type) {
                             Portfolio::updatePortfolioMarketValue($portfolioId);
                         }
 
                         if ($oldSecurityId !== $securityId) {
                             Security::updateSecurityQuantity($oldSecurityId);
                             Security::updateSecurityQuantity($securityId);
-                        } elseif ($oldQuantity !== $quantity) {
+                        } elseif ($oldQuantity !== $quantity || $oldType !== $type) {
                             Security::updateSecurityQuantity($securityId);
                         }
                     });
 
                     return $record;
                 }),
-            DeleteAction::make()
-                ->iconButton()
-                ->icon('tabler-trash')
-                ->modalHeading(__('trade.buttons.delete_heading'))
+
+            self::tableDeleteAction()
                 ->after(function (Trade $record): Trade {
                     Account::updateAccountBalance($record->account_id);
                     Portfolio::updatePortfolioMarketValue($record->portfolio_id);
@@ -450,58 +387,48 @@ class TradeResource extends Resource
     {
         return BulkActionGroup::make([
             DeleteBulkAction::make()
-                ->modalHeading(__('trade.buttons.bulk_delete_heading'))
-                ->after(function (Collection $records) {
-                    $deletedAccountIds = [];
-                    $deletedPortfolioIds = [];
-                    $deletedSecurityIds = [];
+                ->icon('tabler-trash')
+                ->after(function (Collection $records): void {
+                    /** @var Collection<int, Trade> $records */
+                    /** @var array<string> $accountIds */
+                    $accountIds = $records->pluck('account_id')->unique()->all();
+                    /** @var array<string> $portfolioIds */
+                    $portfolioIds = $records->pluck('portfolio_id')->unique()->all();
+                    /** @var array<string> $securityIds */
+                    $securityIds = $records->pluck('security_id')->unique()->all();
 
-                    foreach ($records as $record) {
-                        if (! in_array($record->account_id, $deletedAccountIds)) {
-                            $deletedAccountIds[] = $record->account_id;
-                        }
-
-                        if (! in_array($record->portfolio_id, $deletedPortfolioIds)) {
-                            $deletedPortfolioIds[] = $record->portfolio_id;
-                        }
-
-                        if (! in_array($record->security_id, $deletedSecurityIds)) {
-                            $deletedSecurityIds[] = $record->security_id;
-                        }
-                    }
-
-                    foreach ($deletedAccountIds as $accountId) {
+                    foreach ($accountIds as $accountId) {
                         Account::updateAccountBalance($accountId);
                     }
 
-                    foreach ($deletedPortfolioIds as $portfolioId) {
+                    foreach ($portfolioIds as $portfolioId) {
                         Portfolio::updatePortfolioMarketValue($portfolioId);
                     }
 
-                    foreach ($deletedSecurityIds as $securityId) {
+                    foreach ($securityIds as $securityId) {
                         Security::updateSecurityQuantity($securityId);
                     }
                 }),
-            BulkAction::make('account')
+
+            BulkAction::make('account_id')
                 ->icon('tabler-edit')
-                ->label(__('trade.buttons.bulk_account'))
+                ->label(__('account.buttons.bulk_edit_account'))
                 ->schema([
-                    Select::make('account_id')
-                        ->label(__('trade.columns.account'))
-                        ->relationship('account', 'name')
-                        ->placeholder(__('trade.form.account_placeholder'))
-                        ->validationMessages(['required' => __('trade.form.account_validation_message')])
-                        ->preload()
-                        ->required()
-                        ->searchable(),
+                    self::accountSelectField(),
                 ])
                 ->action(function (Collection $records, array $data): void {
-                    // save old values before updating
+                    /**
+                     * Save old values before updating
+                     *
+                     * @var Collection<int, Trade> $records
+                     * @var array<string> $data
+                     * @var array<string> $oldAccountIds
+                     */
                     $oldAccountIds = $records->pluck('account_id')->unique();
                     $records->each->update(['account_id' => $data['account_id']]);
 
-                    // update balance for new account
-                    Account::updateAccountBalance((int) ($data['account_id']));
+                    // update balance for the new account
+                    Account::updateAccountBalance(($data['account_id']));
 
                     // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {
@@ -509,26 +436,26 @@ class TradeResource extends Resource
                     }
                 })
                 ->deselectRecordsAfterCompletion(),
-            BulkAction::make('portfolio')
+
+            BulkAction::make('portfolio_id')
                 ->icon('tabler-edit')
-                ->label(__('trade.buttons.bulk_portfolio'))
+                ->label(__('portfolio.buttons.bulk_edit_portfolio'))
                 ->schema([
-                    Select::make('portfolio_id')
-                        ->label(__('trade.columns.portfolio'))
-                        ->relationship('portfolio', 'name')
-                        ->placeholder(__('trade.form.portfolio_placeholder'))
-                        ->validationMessages(['required' => __('trade.form.portfolio_validation_message')])
-                        ->preload()
-                        ->required()
-                        ->searchable(),
+                    self::portfolioSelectField(),
                 ])
                 ->action(function (Collection $records, array $data): void {
-                    // save old values before updating
+                    /**
+                     * Save old values before updating
+                     *
+                     * @var Collection<int, Trade> $records
+                     * @var array<string> $data
+                     * @var array<string> $oldPortfolioIds
+                     */
                     $oldPortfolioIds = $records->pluck('portfolio_id')->unique();
                     $records->each->update(['portfolio_id' => $data['portfolio_id']]);
 
-                    // update market value for new portfolio
-                    Portfolio::updatePortfolioMarketValue((int) ($data['portfolio_id']));
+                    // update market value for the new portfolio
+                    Portfolio::updatePortfolioMarketValue($data['portfolio_id']);
 
                     // update market value for old portfolios
                     foreach ($oldPortfolioIds as $oldPortfolioId) {
@@ -544,5 +471,49 @@ class TradeResource extends Resource
         return [
             'index' => ListTrades::route('/'),
         ];
+    }
+
+    private static function calculateTotalAmount(float $quantity, float $price, float $tax, float $fee, TradeType $type): float
+    {
+        return match ($type) {
+            TradeType::Buy => round($price * $quantity + $tax + $fee, 2),
+            TradeType::Sell => round($price * $quantity - ($tax + $fee), 2),
+        };
+    }
+
+    private static function asFloat(mixed $value): float
+    {
+        if (is_null($value)) {
+            return 0.0;
+        }
+
+        if (is_string($value)) {
+            $normalized = str_replace([',', ' '], ['', ''], $value);
+            if (is_numeric($normalized)) {
+                return (float) $normalized;
+            }
+
+            return 0.0;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (float) $value;
+        }
+
+        // Unsupported types (arrays, objects, bool): treat as 0 for safety
+        return 0.0;
+    }
+
+    private static function asTradeType(mixed $value): TradeType
+    {
+        if ($value instanceof TradeType) {
+            return $value;
+        }
+
+        if (is_string($value) || is_int($value)) {
+            return TradeType::from($value);
+        }
+
+        return TradeType::Buy;
     }
 }

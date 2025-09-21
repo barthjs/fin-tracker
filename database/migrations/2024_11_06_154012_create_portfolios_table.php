@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Currency;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,27 +15,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('portfolios', function (Blueprint $table) {
-            $table->unsignedSmallInteger('id')->autoIncrement();
-            $table->timestamps();
+            $table->ulid('id')->primary();
 
             $table->string('name')->index();
-            $table->decimal('market_value', 18, 6)->default(0)->index();
+            $table->decimal('market_value', 18, 6)->default(0);
+            $table->char('currency', 3)->default(Currency::EUR->value)->index();
             $table->text('description')->nullable();
 
             $table->string('logo')->nullable();
             $table->string('color');
-            $table->boolean('active')->default(true)->index();
+            $table->boolean('is_active')->default(true)->index();
 
-            $table->unsignedTinyInteger('user_id')->index();
-            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
+
+            $table->timestamps();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('portfolios');
     }
 };

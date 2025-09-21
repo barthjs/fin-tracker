@@ -6,13 +6,13 @@ namespace App\Filament\Resources\Portfolios\RelationManagers;
 
 use App\Filament\Resources\Trades\TradeResource;
 use BackedEnum;
-use Exception;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
-class TradesRelationManager extends RelationManager
+final class TradesRelationManager extends RelationManager
 {
     protected static string $relationship = 'trades';
 
@@ -20,20 +20,16 @@ class TradesRelationManager extends RelationManager
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return __('trade.navigation_label');
+        return Str::ucfirst(__('trade.plural_label'));
     }
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components(TradeResource::formParts(portfolio: $this->ownerRecord));
+        return TradeResource::form($schema, portfolio: $this->ownerRecord);
     }
 
-    /**
-     * @throws Exception
-     */
     public function table(Table $table): Table
     {
-        return TradeResource::table($table)
-            ->heading('');
+        return TradeResource::table($table);
     }
 }

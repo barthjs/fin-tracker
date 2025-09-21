@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Models\User;
 use Filament\AvatarProviders\Contracts\AvatarProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ final class LocalAvatarProvider implements AvatarProvider
      */
     public function get(Model|Authenticatable $record): string
     {
+        /** @var User $record */
         $initials = $this->extractInitials($record);
 
         $html = $this->render($initials);
@@ -23,12 +25,12 @@ final class LocalAvatarProvider implements AvatarProvider
         return 'data:image/svg+xml;base64,'.base64_encode($html);
     }
 
-    private function extractInitials(Model|Authenticatable $record): string
+    private function extractInitials(User $record): string
     {
         $initials = '';
 
-        $first = mb_trim((string) ($record->first_name ?? ''));
-        $last = mb_trim((string) ($record->last_name ?? ''));
+        $first = mb_trim($record->first_name ?? '');
+        $last = mb_trim($record->last_name ?? '');
 
         if ($first !== '') {
             $initials .= Str::upper(Str::substr($first, 0, 1));
@@ -39,7 +41,7 @@ final class LocalAvatarProvider implements AvatarProvider
         }
 
         if ($initials === '') {
-            $name = mb_trim((string) $record->name);
+            $name = mb_trim((string) $record->username);
             $initials = Str::upper(Str::substr($name, 0, 1));
         }
 

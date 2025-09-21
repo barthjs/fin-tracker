@@ -6,8 +6,9 @@ namespace App\Filament\Resources\Securities\Widgets;
 
 use App\Models\Security;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Collection;
 
-class SecurityChart extends ChartWidget
+final class SecurityChart extends ChartWidget
 {
     protected int|string|array $columnSpan = 'full';
 
@@ -31,7 +32,7 @@ class SecurityChart extends ChartWidget
 
     protected function getData(): array
     {
-        $securities = Security::whereActive(true)
+        $securities = Security::where('is_active', true)
             ->orderBy('market_value', 'desc')
             ->get();
 
@@ -39,9 +40,10 @@ class SecurityChart extends ChartWidget
         $series = [];
         $colors = [];
 
+        /** @var Collection<int, Security> $securities */
         foreach ($securities as $security) {
             $labels[] = $security->name;
-            $series[] = (float) $security->market_value;
+            $series[] = $security->market_value;
             $colors[] = $security->color;
         }
 

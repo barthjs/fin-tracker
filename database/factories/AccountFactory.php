@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\Currency;
 use App\Models\Account;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AccountFactory extends Factory
+/**
+ * @extends Factory<Account>
+ */
+final class AccountFactory extends Factory
 {
     protected $model = Account::class;
 
@@ -19,9 +23,11 @@ class AccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->word(),
-            'currency' => Account::getCurrency(),
+            'name' => fake()->word(),
+            'currency' => Currency::getCurrency(),
             'description' => fake()->sentence(),
+            'color' => fake()->hexColor(),
+            'is_active' => fake()->boolean(),
         ];
     }
 }

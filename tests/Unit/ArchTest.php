@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 arch()->preset()->php();
 arch()->preset()->laravel()->ignoring('App\Providers\Filament');
-arch()->preset()->security()->ignoring(['md5', 'mt_rand', 'sha1']);
+arch()->preset()->security();
 
 arch('controllers')
     ->expect('App\Http\Controllers')
@@ -13,4 +13,5 @@ arch('controllers')
 arch('strict mode')
     ->expect('App')
     ->toUseStrictEquality()
-    ->toUseStrictTypes();
+    ->toUseStrictTypes()
+    ->classes()->toBeFinal();

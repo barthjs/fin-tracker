@@ -15,37 +15,38 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('trades', function (Blueprint $table) {
-            $table->unsignedInteger('id')->autoIncrement();
-            $table->dateTime('date_time')->index();
+            $table->ulid('id')->primary();
 
-            $table->bigInteger('total_amount')->default(0);
+            $table->dateTime('date_time')->index();
+            $types = array_column(TradeType::cases(), 'value');
+            $table->enum('type', $types)->default(TradeType::Buy)->index();
+            $table->decimal('total_amount', 18)
+                ->storedAs("
+                    ROUND(
+                        CASE
+                            WHEN type = 'buy' THEN (price * quantity + tax + fee)
+                            WHEN type = 'sell' THEN (price * quantity - (tax + fee))
+                            ELSE 0
+                        END
+                    , 2)
+                ");
             $table->decimal('quantity', 18, 6)->default(0);
             $table->decimal('price', 18, 6)->default(0);
-            $table->decimal('tax', 13)->default(0);
-            $table->decimal('fee', 13)->default(0);
-            $types = array_column(TradeType::cases(), 'name');
-            $table->enum('type', $types)->index();
+            $table->decimal('tax', 18, 6)->default(0);
+            $table->decimal('fee', 18, 6)->default(0);
             $table->string('notes')->nullable();
 
-            $table->unsignedSmallInteger('account_id')->index();
-            $table->foreign('account_id')->references('id')->on('accounts')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('account_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('portfolio_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('security_id')->constrained()->cascadeOnDelete();
 
-            $table->unsignedSmallInteger('portfolio_id')->index();
-            $table->foreign('portfolio_id')->references('id')->on('portfolios')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->index(['account_id', 'type']);
+            $table->index(['portfolio_id', 'type']);
+            $table->index(['security_id', 'type']);
 
-            $table->unsignedInteger('security_id')->index();
-            $table->foreign('security_id')->references('id')->on('securities')->cascadeOnDelete()->cascadeOnUpdate();
-
-            $table->unsignedTinyInteger('user_id')->index();
-            $table->foreign('user_id')->references('id')->on('sys_users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->index(['account_id', 'date_time']);
+            $table->index(['portfolio_id', 'date_time']);
+            $table->index(['security_id', 'date_time']);
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('trades');
     }
 };

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\TransactionType;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class TransactionFactory extends Factory
+/**
+ * @extends Factory<Transaction>
+ */
+final class TransactionFactory extends Factory
 {
     protected $model = Transaction::class;
 
@@ -19,9 +23,10 @@ class TransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'date_time' => fake()->dateTime(),
-            'amount' => fake()->numberBetween(-10000, 10000),
-            'destination' => fake()->company(),
+            'date_time' => fake()->dateTimeBetween('-1 year', 'now'),
+            'type' => fake()->randomElement([TransactionType::Expense, TransactionType::Revenue]),
+            'amount' => fake()->randomFloat(2, 10, 10000),
+            'payee' => fake()->company(),
             'notes' => fake()->sentence(),
         ];
     }

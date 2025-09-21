@@ -12,56 +12,43 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
-class ListCategoryStatistics extends ListRecords
+final class ListCategoryStatistics extends ListRecords
 {
     use ExposesTableToWidgets;
 
     protected static string $resource = CategoryStatisticResource::class;
 
-    public function getTitle(): string
+    public function getTabs(): array
     {
-        return __('category_statistic.navigation_label');
-    }
+        return [
+            'all' => Tab::make()
+                ->label(__('table.filter.all')),
 
-    public function getHeading(): string
-    {
-        return __('category_statistic.navigation_label');
-    }
+            TransactionType::Expense->value => Tab::make()
+                ->icon('tabler-minus')
+                ->label(__('table.filter.expenses'))
+                ->modifyQueryUsing(function (Builder $query): void {
+                    $query->whereHas('category', function (Builder $query): void {
+                        $query->where('type', TransactionType::Expense);
+                    });
+                }),
 
-    public function getBreadcrumbs(): array
-    {
-        return [];
+            TransactionType::Revenue->value => Tab::make()
+                ->icon('tabler-plus')
+                ->iconPosition('after')
+                ->label(__('table.filter.revenues'))
+                ->modifyQueryUsing(function (Builder $query): void {
+                    $query->whereHas('category', function (Builder $query): void {
+                        $query->where('type', TransactionType::Revenue);
+                    });
+                }),
+        ];
     }
 
     protected function getHeaderWidgets(): array
     {
         return [
             CategoryStatisticChart::class,
-        ];
-    }
-
-    public function getTabs(): array
-    {
-        return [
-            'All' => Tab::make()
-                ->label(__('table.filter.all')),
-            'Expenses' => Tab::make()
-                ->icon('tabler-minus')
-                ->label(__('table.filter.expenses'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('type', '=', TransactionType::expense);
-                    });
-                }),
-            'Revenues' => Tab::make()
-                ->icon('tabler-plus')
-                ->iconPosition('after')
-                ->label(__('table.filter.revenues'))
-                ->modifyQueryUsing(function (Builder $query) {
-                    $query->whereHas('category', function (Builder $query) {
-                        $query->where('type', '=', TransactionType::revenue);
-                    });
-                }),
         ];
     }
 }

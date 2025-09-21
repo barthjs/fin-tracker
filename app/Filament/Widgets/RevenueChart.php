@@ -7,9 +7,9 @@ namespace App\Filament\Widgets;
 use App\Enums\TransactionType;
 use App\Models\Category;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Str;
 
-class RevenueChart extends ChartWidget
+final class RevenueChart extends ChartWidget
 {
     protected static ?int $sort = 5;
 
@@ -31,14 +31,14 @@ class RevenueChart extends ChartWidget
         ],
     ];
 
-    public function getHeading(): Htmlable|string|null
+    public function getHeading(): string
     {
-        return __('table.filter.revenues');
+        return Str::ucfirst(__('table.filter.revenues'));
     }
 
     protected function getData(): array
     {
-        $data = Category::getChartData(TransactionType::revenue);
+        $data = Category::getChartData(TransactionType::Revenue);
 
         return [
             'datasets' => [

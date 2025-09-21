@@ -6,7 +6,7 @@ namespace App\Policies;
 
 use App\Models\User;
 
-class UserPolicy
+final class UserPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -45,22 +45,6 @@ class UserPolicy
      */
     public function delete(User $user): bool
     {
-        return $user->is_admin;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user): bool
-    {
-        return $user->is_admin;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user): bool
-    {
-        return $user->is_admin;
+        return $user->is_admin && $user->id !== auth()->id();
     }
 }

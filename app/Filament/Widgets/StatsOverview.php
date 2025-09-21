@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Enums\Currency;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\CategoryStatistic;
@@ -14,7 +15,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
 use Number;
 
-class StatsOverview extends BaseWidget
+final class StatsOverview extends BaseWidget
 {
     protected static ?int $sort = 1;
 
@@ -22,31 +23,29 @@ class StatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $currency = Account::getCurrency();
         $year = Carbon::now()->year;
         $monthColumn = mb_strtolower(Carbon::now()->format('M'));
-        $months = array_keys(__('category_statistic.columns'));
 
         $totalAssets = Number::currency(
-            Account::getActiveSum() + Portfolio::getActiveSum(),
-            $currency
+            Account::getActiveBalanceSum() + Portfolio::getActiveMarketValueSum(),
+            Currency::getCurrency()
         );
 
-        $expenseSum = $this->getCategorySumByMonth(TransactionType::expense, $year, $monthColumn);
-        $revenueSum = $this->getCategorySumByMonth(TransactionType::revenue, $year, $monthColumn);
+        $expenseSum = $this->getCategorySumByMonth(TransactionType::Expense, $year, $monthColumn);
+        $revenueSum = $this->getCategorySumByMonth(TransactionType::Revenue, $year, $monthColumn);
 
-        $expenseChart = $this->getCategoryChartData(TransactionType::expense, $year, $months);
-        $revenueChart = $this->getCategoryChartData(TransactionType::revenue, $year, $months);
+        $expenseChart = $this->getCategoryChartData(TransactionType::Expense, $year);
+        $revenueChart = $this->getCategoryChartData(TransactionType::Revenue, $year);
 
         return [
-            Stat::make(__('widget.stats.total_assets'), $totalAssets)
+            Stat::make(__('Total Assets'), $totalAssets)
                 ->color('info'),
 
-            Stat::make(__('widget.stats.expenses_this_month'), $expenseSum)
+            Stat::make(__('Expenses this month'), $expenseSum)
                 ->color('danger')
                 ->chart($expenseChart),
 
-            Stat::make(__('widget.stats.revenues_this_month'), $revenueSum)
+            Stat::make(__('Revenues this month'), $revenueSum)
                 ->color('success')
                 ->chart($revenueChart),
         ];
@@ -54,19 +53,36 @@ class StatsOverview extends BaseWidget
 
     private function getCategorySumByMonth(TransactionType $type, int $year, string $month): string
     {
-        $sum = CategoryStatistic::where('year', $year)
-            ->whereHas('category', fn (Builder $query) => $query->where('type', $type))
-            ->sum($month) / 100;
+        $sum = (float) CategoryStatistic::where('year', $year)
+            ->whereHas('category', fn (Builder $query): Builder => $query->where('type', $type))
+            ->sum($month);
 
-        return Number::currency($sum, Account::getCurrency());
+        return (string) Number::currency($sum, Currency::getCurrency());
     }
 
-    private function getCategoryChartData(TransactionType $type, int $year, array $months): array
+    /**
+     * @return array<int, float>
+     */
+    private function getCategoryChartData(TransactionType $type, int $year): array
     {
-        return array_map(fn (string $month) => CategoryStatistic::where('year', $year)
-            ->whereHas('category', fn (Builder $query) => $query->where('type', $type))
-            ->sum($month) / 100,
-            $months
+        $row = CategoryStatistic::query()
+            ->selectRaw(collect(CategoryStatistic::MONTHS)
+                ->map(fn (string $m) => "SUM($m) as $m")
+                ->implode(', '))
+            ->where('year', $year)
+            ->whereHas('category', fn (Builder $query): Builder => $query->where('type', $type))
+            ->first();
+
+        if ($row === null) {
+            return array_fill(0, count(CategoryStatistic::MONTHS), 0.0);
+        }
+
+        /** @var array<string, float|int|null> $values */
+        $values = $row->toArray();
+
+        return array_map(
+            fn (string $m): float => (float) ($values[$m] ?? 0),
+            CategoryStatistic::MONTHS
         );
     }
 }

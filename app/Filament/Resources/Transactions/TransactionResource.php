@@ -4,31 +4,26 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Transactions;
 
-use App\Enums\TransactionGroup;
+use App\Enums\TransactionType;
+use App\Filament\Concerns\HasResourceActions;
+use App\Filament\Concerns\HasResourceFormFields;
+use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts;
-use App\Filament\Resources\Accounts\AccountResource;
 use App\Filament\Resources\Categories;
-use App\Filament\Resources\Categories\CategoryResource;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
-use App\Tables\Columns\LogoColumn;
 use BackedEnum;
 use Carbon\Carbon;
-use Exception;
+use Carbon\CarbonInterface;
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -42,296 +37,250 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Number;
+use Illuminate\Support\Str;
 
-class TransactionResource extends Resource
+final class TransactionResource extends Resource
 {
+    use HasResourceActions, HasResourceFormFields, HasResourceTableColumns;
+
     protected static ?string $model = Transaction::class;
 
     protected static ?int $navigationSort = 5;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-credit-card';
 
-    public static function getSlug(?Panel $panel = null): string
+    public static function getModelLabel(): string
     {
-        return __('transaction.slug');
+        return __('transaction.label');
     }
 
-    public static function getNavigationLabel(): string
+    public static function getPluralModelLabel(): string
     {
-        return __('transaction.navigation_label');
-    }
-
-    public static function form(Schema $schema): Schema
-    {
-        return $schema->components(self::formParts());
-    }
-
-    public static function formParts(?Model $account = null, ?Model $category = null): array
-    {
-        // account and category for default values in relation manager
-        return [
-            Section::make()
-                ->schema([
-                    DateTimePicker::make('date_time')
-                        ->label(__('transaction.columns.date'))
-                        ->autofocus()
-                        ->native(false)
-                        ->displayFormat('d.m.Y, H:i')
-                        ->seconds(false)
-                        ->default(today())
-                        ->required(),
-                    Select::make('account_id')
-                        ->label(__('transaction.columns.account'))
-                        ->relationship('account', 'name')
-                        ->options(fn (): array => Account::query()
-                            ->orderBy('name')
-                            ->where('active', true)
-                            ->pluck('name', 'id')
-                            ->toArray()
-                        )
-                        ->placeholder(__('transaction.form.account_placeholder'))
-                        ->validationMessages(['required' => __('transaction.form.account_validation_message')])
-                        ->preload()
-                        ->live(true)
-                        ->default(fn (): int|string => $account->id ?? '')
-                        ->required()
-                        ->searchable()
-                        ->createOptionForm(AccountResource::formParts())
-                        ->createOptionModalHeading(__('account.buttons.create_heading')),
-                    TextInput::make('amount')
-                        ->label(__('transaction.columns.amount'))
-                        ->suffix(fn (Get $get) => Account::whereId($get('account_id'))->first()->currency->name ?? '')
-                        ->numeric()
-                        ->minValue(-922337203685477580)
-                        ->maxValue(9223372036854775807)
-                        ->required(),
-                ])
-                ->columns(3),
-            Section::make()
-                ->schema([
-                    TextInput::make('destination')
-                        ->label(__('transaction.columns.destination'))
-                        ->datalist(Transaction::query()
-                            ->whereBetween('date_time', [today()->subYear()->toDateString(), today()->toDateString()])
-                            ->select('destination')
-                            ->distinct()
-                            ->orderBy('destination')
-                            ->pluck('destination')
-                            ->toArray())
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                    Select::make('category_id')
-                        ->label(__('transaction.columns.category'))
-                        ->relationship('category', 'name')
-                        ->options(fn (): array => Category::query()
-                            ->orderBy('name')
-                            ->where('active', true)
-                            ->pluck('name', 'id')
-                            ->toArray()
-                        )
-                        ->placeholder(__('transaction.form.category_placeholder'))
-                        ->validationMessages(['required' => __('transaction.form.category_validation_message')])
-                        ->preload()
-                        ->live(true)
-                        ->default(fn (): int|string => $category->id ?? '')
-                        ->hint(fn (Get $get): string => __('category.types')[Category::whereId($get('category_id'))->first()->type->name ?? ''] ?? '')
-                        ->required()
-                        ->searchable()
-                        ->createOptionForm(CategoryResource::formParts())
-                        ->createOptionModalHeading(__('category.buttons.create_heading')),
-                    Textarea::make('notes')
-                        ->label(__('transaction.columns.notes'))
-                        ->autosize()
-                        ->columnSpanFull()
-                        ->maxLength(255)
-                        ->rows(1)
-                        ->string(),
-                ])
-                ->columns(2),
-        ];
+        return __('transaction.plural_label');
     }
 
     /**
-     * @throws Exception
+     * Account and category for default values in relation manager.
      */
+    public static function form(Schema $schema, Account|Model|null $account = null, Category|Model|null $category = null): Schema
+    {
+        return $schema->components([
+            Section::make()
+                ->columns(2)
+                ->schema([
+                    self::dateTimePickerField(),
+
+                    self::accountSelectField()
+                        ->getOptionLabelUsing(fn (?string $value): ?string => Account::find($value)?->name)
+                        ->default(fn (): ?string => $account instanceof Account ? $account->id : null)
+                        ->live(true),
+
+                    TextInput::make('amount')
+                        ->label(__('transaction.fields.amount'))
+                        ->suffix(fn (Get $get): ?string => Account::find($get('account_id'))?->currency?->value)
+                        ->numeric()
+                        ->step(0.01)
+                        ->minValue(0.0)
+                        ->maxValue(1e9)
+                        ->required(),
+
+                    self::typeSelectField()
+                        ->options(TransactionType::class)
+                        ->default(TransactionType::Expense),
+
+                    Select::make('transfer_account_id')
+                        ->label(__('account.fields.transfer_account_id'))
+                        ->columnSpanFull()
+                        ->visible(fn (Get $get): bool => $get('type') === TransactionType::Transfer)
+                        ->required(fn (Get $get): bool => $get('type') === TransactionType::Transfer)
+                        ->selectablePlaceholder(false)
+                        ->options(fn (Get $get): array => Account::query()
+                            ->where('is_active', true)
+                            ->when($get('account_id'), fn (Builder $query, mixed $id): Builder => $query->whereKeyNot($id))
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all()
+                        )
+                        ->searchable()
+                        ->preload(),
+                ]),
+
+            Section::make()
+                ->schema([
+                    TextInput::make('payee')
+                        ->label(__('transaction.fields.payee'))
+                        ->datalist(fn (): array => Transaction::query()
+                            ->whereBetween('date_time', [today()->subYear(), today()])
+                            ->distinct()
+                            ->orderBy('payee')
+                            ->pluck('payee')
+                            ->toArray()
+                        )
+                        ->required()
+                        ->maxLength(255),
+
+                    self::categorySelectField()
+                        ->default(fn (): ?string => $category instanceof Category ? $category->id : null),
+
+                    self::notesField(),
+                ]),
+        ])->columns(1);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
+            ->heading(null)
+            ->modelLabel(__('transaction.label'))
+            ->pluralModelLabel(__('transaction.plural_label'))
             ->columns([
-                TextColumn::make('date_time')
-                    ->label(__('transaction.columns.date'))
-                    ->dateTime('Y-m-d, H:i')
-                    ->fontFamily('mono')
-                    ->sortable()
-                    ->toggleable(),
+                self::dateTimeColumn('date_time'),
+
                 TextColumn::make('amount')
-                    ->label(__('transaction.columns.amount'))
+                    ->label(__('transaction.fields.amount'))
                     ->fontFamily('mono')
                     ->copyable()
-                    ->copyableState(fn (float $state) => Number::format($state, 2))
-                    ->numeric(2)
                     ->badge()
-                    ->color(fn (Transaction $record): string => match ($record->category->type->name) {
-                        'expense' => 'danger',
-                        'revenue' => 'success',
-                        default => 'warning',
-                    })
+                    ->color(fn (Transaction $record): string => $record->type->getColor())
+                    ->numeric(2)
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('destination')
-                    ->label(__('transaction.columns.destination'))
+
+                TextColumn::make('payee')
+                    ->label(__('transaction.fields.payee'))
                     ->wrap()
                     ->searchable()
                     ->toggleable(),
-                LogoColumn::make('account.name')
-                    ->label(__('transaction.columns.account'))
+
+                self::logoAndNameColumn('account.name')
+                    ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
+                    ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Transaction $record): array => [
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
                     ])
-                    ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
-                    ->searchable()
-                    ->sortable()
                     ->toggleable(),
-                TextColumn::make('category.name')
-                    ->label(__('transaction.columns.category'))
-                    ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
-                    ->badge()
-                    ->color(fn (Transaction $record): string => match ($record->category->type->name) {
-                        'expense' => 'danger',
-                        'revenue' => 'success',
-                        default => 'warning',
-                    })
-                    ->wrap()
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('category.group')
-                    ->label(__('transaction.columns.group'))
-                    ->hiddenOn([Categories\RelationManagers\TransactionRelationManager::class, ListTransactions::class])
-                    ->formatStateUsing(fn (TransactionGroup $state): string => __('category.groups')[$state->name])
-                    ->wrap()
-                    ->searchable(true, function (Builder $query, string $search): Builder {
-                        $groups = [];
-                        foreach (__('category.groups') as $group => $value) {
-                            if (mb_stripos($value, $search) !== false) {
-                                $groups[] = $group;
-                            }
-                        }
 
-                        return $query->whereHas('category', fn (Builder $query) => $query->whereIn('group', $groups));
-                    })
+                TextColumn::make('category.name')
+                    ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
+                    ->label(Str::ucfirst(__('category.label')))
+                    ->searchable()
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('notes')
-                    ->label(__('transaction.columns.notes'))
-                    ->wrap()
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+
+                self::notesColumn(),
             ])
-            ->paginated(fn (): bool => Transaction::count() > 20)
-            ->deferLoading()
-            ->extremePaginationLinks()
             ->defaultSort('date_time', 'desc')
-            ->persistSortInSession()
-            ->striped()
             ->filters([
+                SelectFilter::make('type')
+                    ->hiddenOn(ListTransactions::class)
+                    ->label(__('fields.type'))
+                    ->options(TransactionType::class),
+
                 SelectFilter::make('account_id')
-                    ->label(__('transaction.columns.account'))
                     ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
-                    ->options(fn (): array => Account::query()
-                        ->orderBy('name')
-                        ->where('active', true)
-                        ->pluck('name', 'id')
-                        ->toArray()
-                    )
+                    ->label(Str::ucfirst(__('account.label')))
+                    ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
                     ->searchable(),
+
                 SelectFilter::make('category_id')
-                    ->label(__('transaction.columns.category'))
                     ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
-                    ->options(fn (): array => Category::query()
-                        ->orderBy('name')
-                        ->where('active', true)
-                        ->pluck('name', 'id')
-                        ->toArray()
-                    )
+                    ->label(Str::ucfirst(__('category.label')))
+                    ->relationship('category', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
                     ->preload()
                     ->searchable(),
+
                 Filter::make('date')
                     ->schema([
-                        DatePicker::make('created_from')
+                        DatePicker::make('from')
                             ->label(__('table.filter.created_from'))
                             ->default(Carbon::today()->startOfYear()),
-                        DatePicker::make('created_until')
+
+                        DatePicker::make('until')
                             ->label(__('table.filter.created_until')),
                     ])
                     ->columns(2)
                     ->query(function (Builder $query, array $data): Builder {
+                        /** @var array{from: string, until: string} $data */
                         return $query
-                            ->when($data['created_from'],
+                            ->when($data['from'],
                                 fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '>=', $date))
-                            ->when($data['created_until'],
+                            ->when($data['until'],
                                 fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
                     }),
             ], FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(3)
             ->headerActions([
-                CreateAction::make('header-create')
-                    ->icon('tabler-plus')
-                    ->label(__('transaction.buttons.create_button_label'))
-                    ->hidden(function (mixed $livewire = null) {
-                        return $livewire instanceof ListTransactions;
-                    })
-                    ->modalHeading(__('transaction.buttons.create_heading')),
+                self::createAction()
+                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTransactions)
+                    /** @phpstan-ignore-next-line */
+                    ->using(fn (array $data): Transaction => Transaction::create($data)),
             ])
-            ->persistFiltersInSession()
-            ->filtersFormColumns(function (mixed $livewire = null) {
-                return $livewire instanceof ListTransactions ? 3 : 2;
-            })
             ->recordActions(self::getActions())
-            ->toolbarActions(self::getBulkActions())
-            ->emptyStateHeading(__('transaction.empty'))
-            ->emptyStateDescription('')
-            ->emptyStateActions([
-                CreateAction::make()
-                    ->icon('tabler-plus')
-                    ->label(__('transaction.buttons.create_button_label'))
-                    ->modalHeading(__('transaction.buttons.create_heading')),
-            ]);
+            ->toolbarActions(self::getBulkActions());
     }
 
+    /**
+     * @return array<int, Action>
+     */
     public static function getActions(): array
     {
         return [
-            EditAction::make()
-                ->iconButton()
-                ->icon('tabler-edit')
-                ->modalHeading(__('transaction.buttons.edit_heading'))
-                ->using(function (Transaction $record, array $data): Model {
-                    $oldDate = $record->getOriginal('date_time');
-                    $oldAmount = $record->getOriginal('amount');
-                    $oldAccountId = $record->getOriginal('account_id');
-                    $oldCategoryId = $record->getOriginal('category_id');
+            self::tableEditAction()
+                ->using(function (Transaction $record, array $data): Transaction {
+                    /** @var array<string, mixed> $data */
 
-                    DB::transaction(function () use ($record, $data, $oldDate, $oldAmount, $oldAccountId, $oldCategoryId) {
+                    /** @var CarbonInterface $oldDate */
+                    $oldDate = $record->getOriginal('date_time');
+                    /** @var float $oldAmount */
+                    $oldAmount = $record->getOriginal('amount');
+                    /** @var string $oldAccountId */
+                    $oldAccountId = $record->getOriginal('account_id');
+                    /** @var string $oldCategoryId */
+                    $oldCategoryId = $record->getOriginal('category_id');
+                    /** @var string|null $oldTransferAccountId */
+                    $oldTransferAccountId = $record->getOriginal('transfer_account_id');
+                    /** @var TransactionType $oldType */
+                    $oldType = $record->getOriginal('type');
+
+                    DB::transaction(function () use ($record, $data, $oldDate, $oldAmount, $oldAccountId, $oldCategoryId, $oldTransferAccountId, $oldType) {
                         $record->update($data);
 
                         $amount = $record->amount;
                         $date = $record->date_time;
                         $accountId = $record->account_id;
                         $categoryId = $record->category_id;
+                        $type = $record->type;
+                        $transferAccountId = $record->transfer_account_id;
+
+                        $accountsToUpdate = [];
 
                         if ($oldAccountId !== $accountId) {
-                            Account::updateAccountBalance($oldAccountId);
-                            Account::updateAccountBalance($accountId);
-                        } elseif ($oldAmount !== $amount) {
-                            Account::updateAccountBalance($accountId);
+                            $accountsToUpdate[] = $oldAccountId;
+                            $accountsToUpdate[] = $accountId;
+                        } elseif ($oldAmount !== $amount || $oldType !== $type) {
+                            $accountsToUpdate[] = $accountId;
                         }
 
-                        if ($oldCategoryId !== $categoryId || $date->notEqualTo($oldDate) || $oldAmount !== $amount) {
+                        // Handle transfer target accounts
+                        $wasTransfer = $oldType === TransactionType::Transfer;
+                        $isTransfer = $type === TransactionType::Transfer;
+
+                        if ($wasTransfer && $oldTransferAccountId) {
+                            $accountsToUpdate[] = $oldTransferAccountId;
+                        }
+                        if ($isTransfer && $transferAccountId) {
+                            $accountsToUpdate[] = $transferAccountId;
+                        }
+
+                        foreach (array_unique(array_filter($accountsToUpdate)) as $id) {
+                            Account::updateAccountBalance($id);
+                        }
+
+                        if ($oldCategoryId !== $categoryId || $date->notEqualTo($oldDate) || $oldAmount !== $amount || $oldType !== $type) {
                             Transaction::updateCategoryStatistics($oldCategoryId, $oldDate);
                             Transaction::updateCategoryStatistics($categoryId, $date);
                         }
@@ -339,12 +288,13 @@ class TransactionResource extends Resource
 
                     return $record;
                 }),
-            DeleteAction::make()
-                ->iconButton()
-                ->icon('tabler-trash')
-                ->modalHeading(__('transaction.buttons.delete_heading'))
+
+            self::tableDeleteAction()
                 ->after(function (Transaction $record): Transaction {
                     Account::updateAccountBalance($record->account_id);
+                    if ($record->type === TransactionType::Transfer && $record->transfer_account_id !== null) {
+                        Account::updateAccountBalance($record->transfer_account_id);
+                    }
                     Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
 
                     return $record;
@@ -356,43 +306,53 @@ class TransactionResource extends Resource
     {
         return BulkActionGroup::make([
             DeleteBulkAction::make()
-                ->modalHeading(__('transaction.buttons.bulk_delete_heading'))
-                ->after(function (Collection $records) {
-                    $deletedAccountIds = [];
+                ->icon('tabler-trash')
+                ->after(function (Collection $records): void {
+                    /** @var Collection<int, Transaction> $records */
+                    $accountIds = [];
+                    $transferAccountIds = [];
+                    $categories = [];
 
                     foreach ($records as $record) {
-                        if (! in_array($record->account_id, $deletedAccountIds)) {
-                            $deletedAccountIds[] = $record->account_id;
+                        $accountIds[] = $record->account_id;
+                        if ($record->type === TransactionType::Transfer && $record->transfer_account_id !== null) {
+                            $transferAccountIds[] = $record->transfer_account_id;
                         }
+                        $categories[] = [$record->category_id, $record->date_time];
                     }
-                    foreach ($deletedAccountIds as $accountId) {
+
+                    foreach (array_unique($accountIds) as $accountId) {
                         Account::updateAccountBalance($accountId);
                     }
 
-                    foreach ($records as $record) {
-                        Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
+                    foreach (array_unique($transferAccountIds) as $accountId) {
+                        Account::updateAccountBalance($accountId);
+                    }
+
+                    foreach ($categories as [$categoryId, $date]) {
+                        Transaction::updateCategoryStatistics($categoryId, $date);
                     }
                 }),
-            BulkAction::make('account')
+
+            BulkAction::make('account_id')
                 ->icon('tabler-edit')
-                ->label(__('transaction.buttons.bulk_account'))
+                ->label(__('account.buttons.bulk_edit_account'))
                 ->schema([
-                    Select::make('account_id')
-                        ->label(__('transaction.columns.account'))
-                        ->relationship('account', 'name')
-                        ->placeholder(__('transaction.form.account_placeholder'))
-                        ->validationMessages(['required' => __('transaction.form.account_validation_message')])
-                        ->preload()
-                        ->required()
-                        ->searchable(),
+                    self::accountSelectField(),
                 ])
                 ->action(function (Collection $records, array $data): void {
-                    // save old values before updating
+                    /**
+                     * Save old values before updating
+                     *
+                     * @var Collection<int, Transaction> $records
+                     * @var array<string> $data
+                     * @var array<string> $oldAccountIds
+                     */
                     $oldAccountIds = $records->pluck('account_id')->unique();
                     $records->each->update(['account_id' => $data['account_id']]);
 
-                    // update balance for new account
-                    Account::updateAccountBalance((int) ($data['account_id']));
+                    // update balance for the new account
+                    Account::updateAccountBalance($data['account_id']);
 
                     // update balance for old accounts
                     foreach ($oldAccountIds as $oldAccountId) {
@@ -400,50 +360,6 @@ class TransactionResource extends Resource
                     }
                 })
                 ->deselectRecordsAfterCompletion(),
-            /*
-            BulkAction::make('category')
-                ->icon('tabler-edit')
-                ->label(__('transaction.buttons.bulk_category'))
-                ->form([
-                    Select::make('category_id')
-                        ->label(__('transaction.columns.category'))
-                        ->relationship('category', 'name')
-                        ->placeholder(__('transaction.form.category_placeholder'))
-                        ->preload()
-                        ->required()
-                        ->searchable()
-                ])
-                // Todo this doesnt work all the time, some values don't get updated, disabled until fixed
-                ->action(function (Collection $records, array $data): void {
-                    // save old values before updating
-                    $oldCategories = $records->pluck('category_id', 'date_time');
-                    $records->each->update(['category_id' => $data['category_id']]);
-
-                    // update new values
-                    $dates = Transaction::whereCategoryId($data['category_id'])
-                        ->pluck('date_time')
-                        ->map(fn($date) => Carbon::parse($date)->format('Y-m'))
-                        ->unique();
-                    foreach ($dates as $date) {
-                        Transaction::updateCategoryStatistics($data['category_id'], $date);
-                    }
-
-                    // update old values
-                    $groupedData = [];
-                    foreach ($oldCategories as $datetime => $categoryId) {
-                        $monthKey = Carbon::parse($datetime)->format('Y-m');
-
-                        $groupedData[$monthKey][] = $categoryId;
-                    }
-
-                    foreach ($groupedData as $month => $categories) {
-                        foreach (array_unique($categories) as $categoryId) {
-                            Transaction::updateCategoryStatistics($categoryId, $month);
-                        }
-                    }
-                })
-                ->deselectRecordsAfterCompletion(),
-            */
         ]);
     }
 

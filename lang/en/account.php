@@ -4,65 +4,53 @@ declare(strict_types=1);
 
 return [
 
-    'slug' => 'accounts',
-    'navigation_label' => 'Accounts',
+    'label' => 'account',
+    'plural_label' => 'accounts',
+
+    'fields' => [
+        'balance' => 'Balance',
+        'transfer_account_id' => 'Target account',
+    ],
 
     'buttons' => [
-        'create_button_label' => 'New account',
-        'create_heading' => 'Create new account',
-        'edit_heading' => 'Edit account',
-        'delete_heading' => 'Delete account',
-        'bulk_currency' => 'Edit currency',
-        'export_heading' => 'Export accounts',
-        'import_heading' => 'Import accounts',
+        'bulk_edit_account' => 'Edit account',
     ],
 
-    'columns' => [
-        'logo' => 'Logo',
-        'name' => 'Name',
-        'name_examples' => [
-            'Bank of America',
-            'ING',
-            'HSBC',
-        ],
-        'balance' => 'Balance',
-        'currency' => 'Currency',
-        'currency_examples' => [
-            'EUR',
-            'GBP',
-            'USD',
-        ],
-        'description' => 'Description',
-        'description_examples' => [
-            'Lorem ipsum dolor sit amet',
-            'Lorem ipsum dolor sit amet',
-            'Lorem ipsum dolor sit amet',
-        ],
-    ],
+    'import' => [
+        'modal_heading' => 'Import Accounts',
+        'failure_heading' => 'Account import failed',
+        'success_heading' => 'Account import successful',
+        'body_heading' => 'The account import has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully imported rows: ',
 
-    'form' => [
-        'currency_placeholder' => 'Choose currency',
-        'currency_validation_message' => 'Please specify a currency',
-    ],
-
-    'notifications' => [
-        'import' => [
-            'failure_heading' => 'Account import failed',
-            'success_heading' => 'Account import successful',
-            'body_heading' => 'The account import has been completed.',
-            'body_failure' => 'Failed rows: ',
-            'body_success' => 'Successfully imported rows: ',
-        ],
-        'export' => [
-            'failure_heading' => 'Account export failed',
-            'success_heading' => 'Account export successful',
-            'body_heading' => 'The account export has been completed.',
-            'body_failure' => 'Failed rows: ',
-            'body_success' => 'Successfully exported rows: ',
-            'file_name' => 'accounts_',
+        'examples' => [
+            'name' => [
+                'Bank of America',
+                'HSBC',
+                'ING',
+            ],
+            'currency' => [
+                'USD',
+                'GBP',
+                'EUR',
+            ],
+            'description' => [
+                'Lorem ipsum dolor sit amet',
+                'Lorem ipsum dolor sit amet',
+                'Lorem ipsum dolor sit amet',
+            ],
         ],
     ],
 
-    'empty' => 'No accounts found',
+    'export' => [
+        'modal_heading' => 'Export Accounts',
+        'failure_heading' => 'Account export failed',
+        'success_heading' => 'Account export successful',
+        'body_heading' => 'The account export has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully exported rows: ',
+        'file_name' => 'Accounts_',
+    ],
 
 ];

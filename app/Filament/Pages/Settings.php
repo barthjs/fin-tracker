@@ -5,23 +5,22 @@ declare(strict_types=1);
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
-use Filament\Panel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class Settings extends Page
+final class Settings extends Page
 {
-    protected string $view = 'filament.pages.settings';
-
     public ?string $latestVersion;
 
     public ?string $latestVersionUrl;
 
-    public static function getSlug(?Panel $panel = null): string
+    protected string $view = 'filament.pages.settings';
+
+    public static function shouldRegisterNavigation(): bool
     {
-        return __('settings.slug');
+        return false;
     }
 
     public function getTitle(): string
@@ -34,14 +33,9 @@ class Settings extends Page
         return __('settings.navigation_label');
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
-    }
-
     public function mount(): void
     {
-        $this->latestVersion = self::getLatestVersion();
+        $this->latestVersion = $this->getLatestVersion();
     }
 
     /**
@@ -49,8 +43,9 @@ class Settings extends Page
      *
      * @return string|null Returns the version tag (e.g., "v1.2.3") or null on failure
      */
-    public static function getLatestVersion(): ?string
+    private function getLatestVersion(): ?string
     {
+        /** @var string|null */
         return Cache::remember('github.latest_version', now()->addHour(), function () {
             try {
                 $response = Http::retry(3, 100)
@@ -71,14 +66,14 @@ class Settings extends Page
                 }
 
                 $data = $response->json();
-
-                if (! isset($data['tag_name'])) {
-                    Log::warning('GitHub API response missing tag_name field', ['response' => $data]);
-
-                    return null;
+                if (is_array($data) && array_key_exists('tag_name', $data) && is_string($data['tag_name'])) {
+                    return mb_ltrim($data['tag_name'], 'v');
                 }
 
-                return mb_ltrim($data['tag_name'], 'v');
+                Log::warning('GitHub API response missing or invalid tag_name field', ['response' => $data]);
+
+                return null;
+
             } catch (Throwable $e) {
                 Log::error('Exception occurred while fetching latest version from GitHub', [
                     'message' => $e->getMessage(),

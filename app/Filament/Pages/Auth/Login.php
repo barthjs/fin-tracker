@@ -8,7 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Illuminate\Validation\ValidationException;
 
-class Login extends \Filament\Auth\Pages\Login
+final class Login extends \Filament\Auth\Pages\Login
 {
     protected function throwFailureValidationException(): never
     {
@@ -17,10 +17,14 @@ class Login extends \Filament\Auth\Pages\Login
         ]);
     }
 
+    /**
+     * Overriding the default login form to allow users
+     * to log in with either their username or email.
+     */
     protected function getEmailFormComponent(): Component
     {
         return TextInput::make('login')
-            ->label(__('user.login.user_or_email'))
+            ->label(__('user.fields.username_or_email'))
             ->required()
             ->autocomplete()
             ->autofocus()
@@ -29,7 +33,7 @@ class Login extends \Filament\Auth\Pages\Login
 
     protected function getCredentialsFromFormData(array $data): array
     {
-        $loginType = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        $loginType = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
         return [
             $loginType => $data['login'],

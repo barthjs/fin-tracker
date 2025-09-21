@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
-class ResetPasswordCommand extends Command
+final class ResetPasswordCommand extends Command
 {
     protected $signature = 'app:reset-password {emailOrUsername?}';
 
@@ -29,48 +29,55 @@ class ResetPasswordCommand extends Command
         }
 
         if (filter_var($emailOrUsername, FILTER_VALIDATE_EMAIL)) {
-            $user = User::where('email', $emailOrUsername)->first();
+            $user = User::where('email', '=', $emailOrUsername)->first();
         } else {
-            $user = User::where('name', $emailOrUsername)->first();
+            $user = User::where('username', '=', $emailOrUsername)->first();
         }
 
-        if (empty($user)) {
+        if ($user === null) {
             $this->error('User not found');
 
             return 1;
         }
 
-        if (! $this->confirm('Resetting password for user '.$user->name, true)) {
+        if (! $this->confirm('Resetting password for user '.$user->username, true)) {
             return 1;
         }
 
         $password = '';
         while (empty($password)) {
-            $password = $this->secret('Enter new password for user: '.$user->name);
-            if (empty($password)) {
+            /** @var string|null $inputPassword */
+            $inputPassword = $this->secret('Enter new password for user: '.$user->username);
+            if ($inputPassword === null || $inputPassword === '') {
                 $this->error('Password cannot be empty');
 
                 continue;
             }
 
+            /** @var string|null $confirmPassword */
             $confirmPassword = $this->secret('Confirm password');
-            if ($password !== $confirmPassword) {
+            if ($confirmPassword === null || $inputPassword !== $confirmPassword) {
                 $this->error('Passwords do not match');
-                $password = '';
+
+                continue;
             }
+
+            $password = $inputPassword;
         }
 
         try {
             $user->password = Hash::make($password);
             $user->remember_token = null;
 
-            DB::table(config('session.table'))->where('user_id', $user->id)->delete();
+            DB::table(config()->string('session.table'))
+                ->where('user_id', '=', $user->id)
+                ->delete();
 
             $user->save();
 
             $this->info('Password reset successfully');
         } catch (Exception $e) {
-            Log::error('Password reset failed for user: '.$user->name, ['exception' => $e]);
+            Log::error('Password reset failed for user: '.$user->username, ['exception' => $e]);
             $this->error('An error occurred while resetting the password.');
 
             return 1;

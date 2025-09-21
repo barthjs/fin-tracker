@@ -4,70 +4,64 @@ declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
+use App\Filament\Concerns\HasResourceImportColumns;
 use App\Models\Portfolio;
-use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Builder;
 
-class PortfolioImporter extends Importer
+final class PortfolioImporter extends Importer
 {
+    use HasResourceImportColumns;
+
     protected static ?string $model = Portfolio::class;
 
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('name')
-                ->label(__('portfolio.columns.name'))
-                ->exampleHeader(__('portfolio.columns.name'))
-                ->examples(__('portfolio.columns.name_examples'))
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
-            ImportColumn::make('description')
-                ->label(__('portfolio.columns.description'))
-                ->exampleHeader(__('portfolio.columns.description'))
-                ->examples(__('portfolio.columns.description_examples'))
-                ->rules(['max:1000']),
-            ImportColumn::make('color')
-                ->label(__('widget.color'))
-                ->exampleHeader(__('widget.color'))
-                ->examples(function (): array {
-                    $colors = [];
-                    for ($i = 1; $i <= 3; $i++) {
-                        $colors[] = mb_strtolower(sprintf('#%06X', mt_rand(0, 0xFFFFFF)));
-                    }
+            self::nameColumn()
+                ->examples(__('account.import.examples.name')),
 
-                    return $colors;
-                })
-                ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']),
-            ImportColumn::make('active')
-                ->label(__('table.active'))
-                ->exampleHeader(__('table.active'))
-                ->examples([1, 1, 1])
-                ->boolean(),
+            self::currencyColumn(),
+
+            self::descriptionColumn()
+                ->examples(__('account.import.examples.description')),
+
+            self::colorColumn(),
+            self::statusColumn(),
         ];
-    }
-
-    public function resolveRecord(): ?Portfolio
-    {
-        return Portfolio::firstOrNew([
-            'name' => mb_trim($this->data['name']),
-            'user_id' => auth()->user()->id,
-        ]);
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = __('portfolio.notifications.import.body_heading')."\n\r".
-            __('portfolio.notifications.import.body_success').number_format($import->successful_rows);
+        $body = __('portfolio.import.body_heading')."\n\r".
+            __('portfolio.import.body_success').number_format($import->successful_rows);
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= "\n\r".__('portfolio.notifications.import.body_failure').number_format($failedRowsCount);
+            $body .= "\n\r".__('portfolio.import.body_failure').number_format($failedRowsCount);
         }
 
         return $body;
     }
 
-    public function getJobBatchName(): ?string
+    public function resolveRecord(): Portfolio
+    {
+        return Portfolio::query()
+            ->where('user_id', auth()->id())
+            ->where('name', $this->data['name'])
+            ->where('currency', $this->data['currency'])
+            ->when(! empty($this->data['color']), function (Builder $query): void {
+                $query->where('color', $this->data['color']);
+            })
+            ->first() ?? new Portfolio([
+                'name' => $this->data['name'],
+                'currency' => $this->data['currency'],
+                'color' => $this->data['color'] ?? mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
+                'user_id' => auth()->id(),
+            ]);
+    }
+
+    public function getJobBatchName(): string
     {
         return 'portfolio-import';
     }

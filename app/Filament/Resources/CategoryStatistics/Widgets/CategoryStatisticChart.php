@@ -6,10 +6,12 @@ namespace App\Filament\Resources\CategoryStatistics\Widgets;
 
 use App\Enums\TransactionType;
 use App\Filament\Resources\CategoryStatistics\Pages\ListCategoryStatistics;
+use App\Models\CategoryStatistic;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
+use Illuminate\Database\Eloquent\Collection;
 
-class CategoryStatisticChart extends ChartWidget
+final class CategoryStatisticChart extends ChartWidget
 {
     use InteractsWithPageTable;
 
@@ -19,6 +21,8 @@ class CategoryStatisticChart extends ChartWidget
 
     protected ?string $pollingInterval = null;
 
+    protected bool $isCollapsible = true;
+
     protected function getTablePage(): string
     {
         return ListCategoryStatistics::class;
@@ -26,61 +30,42 @@ class CategoryStatisticChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = $this->getPageTableRecords();
-        $query = $this->getPageTableQuery();
-        $type = $query->getQuery()->bindings['where'][0] ?? null;
+        /** @var Collection<int, CategoryStatistic> $records */
+        $records = $this->getPageTableRecords();
 
-        $months = array_keys(__('category_statistic.columns'));
+        $sums = [
+            TransactionType::Expense->value => array_fill_keys(CategoryStatistic::MONTHS, 0.0),
+            TransactionType::Revenue->value => array_fill_keys(CategoryStatistic::MONTHS, 0.0),
+        ];
 
-        $expensesSum = array_fill_keys($months, 0);
-        $revenuesSum = array_fill_keys($months, 0);
+        foreach ($records as $record) {
+            $type = $record->category->type->value;
 
-        foreach ($data as $record) {
-            $categoryType = $record->category->type;
+            foreach (CategoryStatistic::MONTHS as $month) {
+                $value = (float) $record->$month;
 
-            foreach ($months as $month) {
-                if ($categoryType === TransactionType::expense) {
-                    $expensesSum[$month] += $record->$month ?? 0;
-                } elseif ($categoryType === TransactionType::revenue) {
-                    $revenuesSum[$month] += $record->$month ?? 0;
+                if ($type === TransactionType::Expense->value) {
+                    $sums[TransactionType::Expense->value][$month] -= $value;
+                } elseif ($type === TransactionType::Revenue->value) {
+                    $sums[TransactionType::Revenue->value][$month] += $value;
                 }
             }
         }
 
         $datasets = [];
 
-        if ($type === 'expense') {
+        foreach ($sums as $type => $values) {
             $datasets[] = [
-                'label' => __('table.filter.expenses'),
-                'data' => array_values($expensesSum),
-                'backgroundColor' => '#f87171',
-                'borderColor' => '#f87171',
-            ];
-        } elseif ($type === 'revenue') {
-            $datasets[] = [
-                'label' => __('table.filter.revenues'),
-                'data' => array_values($revenuesSum),
-                'backgroundColor' => '#44c975',
-                'borderColor' => '#44c975',
-            ];
-        } else {
-            $datasets[] = [
-                'label' => __('table.filter.expenses'),
-                'data' => array_values($expensesSum),
-                'backgroundColor' => '#f87171',
-                'borderColor' => '#f87171',
-            ];
-            $datasets[] = [
-                'label' => __('table.filter.revenues'),
-                'data' => array_values($revenuesSum),
-                'backgroundColor' => '#44c975',
-                'borderColor' => '#44c975',
+                'label' => __('table.filter.'.($type === TransactionType::Expense->value ? 'expenses' : 'revenues')),
+                'data' => array_values($values),
+                'backgroundColor' => $type === TransactionType::Expense->value ? '#f87171' : '#44c975',
+                'borderColor' => $type === TransactionType::Expense->value ? '#f87171' : '#44c975',
             ];
         }
 
         return [
             'datasets' => $datasets,
-            'labels' => array_map('ucfirst', array_values(__('category_statistic.columns'))),
+            'labels' => array_values(__('category_statistic.fields')),
         ];
     }
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 return [
 
-    'slug' => 'statistic',
-    'navigation_label' => 'Statistic',
+    'label' => 'statistic',
+    'plural_label' => 'statistics',
 
-    'columns' => [
+    'fields' => [
         'jan' => 'January',
         'feb' => 'February',
         'mar' => 'March',

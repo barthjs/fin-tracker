@@ -4,23 +4,36 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use Filament\Forms\Components\FileUpload;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Schemas\Components\Section;
+use App\Filament\Concerns\HasResourceActions;
+use App\Jobs\ImportCsvWithLocale;
+use App\Jobs\PrepareCsvExport;
+use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Carbon\CarbonImmutable;
+use Filament\Actions\Exports\Jobs\PrepareCsvExport as BasePrepareCsvExport;
+use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportCsv;
+use Filament\Facades\Filament;
 use Filament\Support\View\Components\ModalComponent;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
+    use HasResourceActions;
+
     /**
      * Register any application services.
      */
     public function register(): void
     {
-        ModalComponent::closedByClickingAway(false);
+        $this->app->bind(BaseImportCsv::class, ImportCsvWithLocale::class);
+        $this->app->bind(BasePrepareCsvExport::class, PrepareCsvExport::class);
     }
 
     /**
@@ -28,22 +41,43 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        FileUpload::configureUsing(fn (FileUpload $fileUpload): FileUpload => $fileUpload
-            ->visibility('public'));
+        // Laravel
+        Date::use(CarbonImmutable::class);
+        Model::shouldBeStrict();
+        Model::unguard();
+        Vite::useAggressivePrefetching();
 
-        ImageColumn::configureUsing(fn (ImageColumn $imageColumn): ImageColumn => $imageColumn
-            ->visibility('public'));
+        // Filament
+        Filament::serving(function (): void {
+            Event::listen(function (LocaleChanged $event): void {
+                auth()->user()?->setLocale($event->locale);
+            });
+            Number::useLocale(app()->getLocale());
 
-        ImageEntry::configureUsing(fn (ImageEntry $imageEntry): ImageEntry => $imageEntry
-            ->visibility('public'));
+            ModalComponent::closedByClickingAway(false);
+            Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
+            Table::configureUsing(fn (Table $table): Table => $table
+                ->paginationPageOptions([10, 25, 50, 100, 'all'])
+                ->extremePaginationLinks()
+                ->reorderableColumns()
+                ->deferColumnManager(false)
+                ->defaultSort('name')
+                ->persistSortInSession()
+                ->striped()
+                ->deferFilters(false)
+                ->persistFiltersInSession()
+                ->recordActions([
+                    self::tableEditAction(),
+                    self::tableDeleteAction(),
+                ])
+                ->emptyStateDescription(null)
+            );
+        });
 
-        Number::useLocale(app()->getLocale());
-
-        Section::configureUsing(fn (Section $section): Section => $section
-            ->columnSpanFull());
-
-        Table::configureUsing(fn (Table $table): Table => $table
-            ->deferFilters(false)
-            ->paginationPageOptions([5, 10, 25, 50, 'all']));
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch): void {
+            $switch
+                ->visible(outsidePanels: true)
+                ->locales(['de', 'en']);
+        });
     }
 }

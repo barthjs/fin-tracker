@@ -14,32 +14,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('category_statistics', function (Blueprint $table) {
-            $table->id();
-            $table->smallInteger('year')->nullable()->index();
+            $table->ulid('id')->primary();
 
-            $table->bigInteger('jan')->default(0)->index();
-            $table->bigInteger('feb')->default(0)->index();
-            $table->bigInteger('mar')->default(0)->index();
-            $table->bigInteger('apr')->default(0)->index();
-            $table->bigInteger('may')->default(0)->index();
-            $table->bigInteger('jun')->default(0)->index();
-            $table->bigInteger('jul')->default(0)->index();
-            $table->bigInteger('aug')->default(0)->index();
-            $table->bigInteger('sep')->default(0)->index();
-            $table->bigInteger('oct')->default(0)->index();
-            $table->bigInteger('nov')->default(0)->index();
-            $table->bigInteger('dec')->default(0)->index();
+            $table->foreignUlid('category_id')->constrained()->cascadeOnDelete();
+            $table->unsignedSmallInteger('year')->index();
+            $table->index(['category_id', 'year']);
 
-            $table->unsignedInteger('category_id')->index();
-            $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->decimal('jan', 18)->default(0);
+            $table->decimal('feb', 18)->default(0);
+            $table->decimal('mar', 18)->default(0);
+            $table->decimal('apr', 18)->default(0);
+            $table->decimal('may', 18)->default(0);
+            $table->decimal('jun', 18)->default(0);
+            $table->decimal('jul', 18)->default(0);
+            $table->decimal('aug', 18)->default(0);
+            $table->decimal('sep', 18)->default(0);
+            $table->decimal('oct', 18)->default(0);
+            $table->decimal('nov', 18)->default(0);
+            $table->decimal('dec', 18)->default(0);
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('category_statistics');
     }
 };

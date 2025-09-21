@@ -5,26 +5,23 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Securities\RelationManagers;
 
 use App\Filament\Resources\Trades\TradeResource;
-use Exception;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
-class TradesRelationManager extends RelationManager
+final class TradesRelationManager extends RelationManager
 {
     protected static string $relationship = 'trades';
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components(TradeResource::formParts(security: $this->ownerRecord));
+        return TradeResource::form($schema, security: $this->ownerRecord);
     }
 
-    /**
-     * @throws Exception
-     */
     public function table(Table $table): Table
     {
         return TradeResource::table($table)
-            ->heading(__('trade.navigation_label'));
+            ->heading(Str::ucfirst(__('trade.plural_label')));
     }
 }

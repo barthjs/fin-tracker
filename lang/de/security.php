@@ -4,60 +4,68 @@ declare(strict_types=1);
 
 return [
 
-    'slug' => 'wertpapiere',
-    'navigation_label' => 'Wertpapiere',
+    'label' => 'Wertpapier',
+    'plural_label' => 'Wertpapiere',
 
-    'buttons' => [
-        'create_button_label' => 'Neues Wertpapier',
-        'create_heading' => 'Neues Wertpapier hinzufügen',
-        'edit_heading' => 'Wertpapier bearbeiten',
-        'delete_heading' => 'Wertpapier löschen',
-        'export_heading' => 'Wertpapier exportieren',
-        'import_heading' => 'Wertpapier importieren',
-    ],
-
-    'columns' => [
-        'logo' => 'Logo',
-        'name' => 'Name',
+    'fields' => [
         'isin' => 'ISIN',
         'symbol' => 'Symbol',
-        'price' => 'Kurs',
         'total_quantity' => 'Anzahl',
-        'market_value' => 'Marktwert',
-        'description' => 'Beschreibung',
-        'type' => 'Typ',
     ],
 
-    'form' => [
-        'type_placeholder' => 'Typ wählen',
+    'type' => [
+        'bond' => 'Anleihe',
+        'derivative' => 'Derivat',
+        'etf' => 'ETF',
+        'fund' => 'Fond',
+        'stock' => 'Aktie',
     ],
 
-    'types' => [
-        'BOND' => 'Anleihe',
-        'DERIVATIVE' => 'Derivat',
-        'ETF' => 'ETF',
-        'FUND' => 'Fond',
-        'STOCK' => 'Aktie',
-    ],
+    'import' => [
+        'modal_heading' => 'Wertpapiere importieren',
+        'failure_heading' => 'Wertpapierimport fehlgeschlagen',
+        'success_heading' => 'Wertpapierimport erfolgreich',
+        'body_heading' => 'Der Wertpapierimport wurde abgeschlossen.',
+        'body_failure' => 'Fehlgeschlagene Zeilen: ',
+        'body_success' => 'Erfolgreich importierte Zeilen: ',
 
-    'notifications' => [
-        'import' => [
-            'failure_heading' => 'Wertpapierimport fehlgeschlagen',
-            'success_heading' => 'Wertpapierimport erfolgreich',
-            'body_heading' => 'Der Wertpapierimport wurde abgeschlossen.',
-            'body_failure' => 'Fehlgeschlagene Zeilen: ',
-            'body_success' => 'Erfolgreich importierte Zeilen: ',
+        'examples' => [
+            'name' => [
+                'Apple',
+                'Microsoft',
+                'SPDR S&P 500 ETF Trust',
+            ],
+            'isin' => [
+                'US0378331005',
+                'US5949181045',
+                'US78462F1030',
+            ],
+            'type' => [
+                'Aktie',
+                'Aktie',
+                'ETF',
+            ],
+            'symbol' => [
+                'AAPL',
+                'MSFT',
+                'SPDR',
+            ],
+            'price' => [
+                '100.00',
+                '200.00',
+                '300.00',
+            ],
         ],
-        'export' => [
-            'failure_heading' => 'Wertpapierexport fehlgeschlagen',
-            'success_heading' => 'Wertpapierexport erfolgreich',
-            'body_heading' => 'Der Wertpapierexport wurde abgeschlossen.',
-            'body_failure' => 'Fehlgeschlagene Zeilen: ',
-            'body_success' => 'Erfolgreiche exportierte Zeilen: ',
-            'file_name' => 'Wertpapiere_',
-        ],
     ],
 
-    'empty' => 'Keine Wertpapiere gefunden',
+    'export' => [
+        'modal_heading' => 'Wertpapier exportieren',
+        'failure_heading' => 'Wertpapierexport fehlgeschlagen',
+        'success_heading' => 'Wertpapierexport erfolgreich',
+        'body_heading' => 'Der Wertpapierexport wurde abgeschlossen.',
+        'body_failure' => 'Fehlgeschlagene Zeilen: ',
+        'body_success' => 'Erfolgreiche exportierte Zeilen: ',
+        'file_name' => 'Wertpapiere_',
+    ],
 
 ];

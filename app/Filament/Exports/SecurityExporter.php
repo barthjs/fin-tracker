@@ -5,64 +5,66 @@ declare(strict_types=1);
 namespace App\Filament\Exports;
 
 use App\Enums\SecurityType;
+use App\Filament\Concerns\HasResourceExportColumns;
 use App\Models\Security;
 use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
-use Illuminate\Support\Number;
 
-class SecurityExporter extends Exporter
+final class SecurityExporter extends Exporter
 {
+    use HasResourceExportColumns;
+
     protected static ?string $model = Security::class;
 
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('name')
-                ->label(__('security.columns.name')),
+            self::nameColumn(),
+
             ExportColumn::make('isin')
-                ->label(__('security.columns.isin')),
+                ->label(__('security.fields.isin')),
+
             ExportColumn::make('symbol')
-                ->label(__('security.columns.symbol')),
-            ExportColumn::make('price')
-                ->label(__('security.columns.price'))
-                ->formatStateUsing(fn (float $state): string => Number::format($state, 6)),
-            ExportColumn::make('total_quantity')
-                ->label(__('security.columns.total_quantity'))
-                ->formatStateUsing(fn (float $state): string => Number::format($state, 6)),
+                ->label(__('security.fields.symbol')),
+
+            self::typeColum()
+                ->formatStateUsing(fn (SecurityType $state): string => $state->getLabel()),
+
+            self::numericColumn('price', 6)
+                ->label(__('fields.price')),
+
+            self::numericColumn('total_quantity', 6)
+                ->label(__('security.fields.total_quantity')),
+
             ExportColumn::make('description')
-                ->label(__('security.columns.description')),
-            ExportColumn::make('type')
-                ->label(__('security.columns.type'))
-                ->formatStateUsing(fn (SecurityType $state): string => __('security.types')[$state->name]),
-            ExportColumn::make('color')
-                ->label(__('widget.color')),
-            ExportColumn::make('active')
-                ->label(__('table.active'))
-                ->enabledByDefault(false),
+                ->label(__('fields.description')),
+
+            self::colorColumn(),
+            self::statusColumn(),
         ];
     }
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = __('security.notifications.export.body_heading')."\n\r".
-            __('security.notifications.export.body_success').number_format($export->successful_rows);
+        $body = __('security.export.body_heading')."\n\r".
+            __('security.export.body_success').number_format($export->successful_rows);
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= "\n\r".__('security.notifications.export.body_failure').number_format($failedRowsCount);
+            $body .= "\n\r".__('security.export.body_failure').number_format($failedRowsCount);
         }
 
         return $body;
     }
 
-    public function getJobBatchName(): ?string
-    {
-        return 'security-export';
-    }
-
     public function getFileName(Export $export): string
     {
-        return __('security.notifications.export.file_name').Carbon::now()->format('Y-m-d-H-i');
+        return __('security.export.file_name').Carbon::now()->format('Y-m-d-H-i');
+    }
+
+    public function getJobBatchName(): string
+    {
+        return 'security-export';
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tools;
 
-class Convertor
+final class Convertor
 {
     public static function formatNumber(string $number): float
     {
