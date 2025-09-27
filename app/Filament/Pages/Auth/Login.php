@@ -7,6 +7,7 @@ namespace App\Filament\Pages\Auth;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Illuminate\Validation\ValidationException;
+use SensitiveParameter;
 
 final class Login extends \Filament\Auth\Pages\Login
 {
@@ -31,7 +32,7 @@ final class Login extends \Filament\Auth\Pages\Login
             ->extraInputAttributes(['tabindex' => 1]);
     }
 
-    protected function getCredentialsFromFormData(array $data): array
+    protected function getCredentialsFromFormData(#[SensitiveParameter] array $data): array
     {
         $loginType = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
