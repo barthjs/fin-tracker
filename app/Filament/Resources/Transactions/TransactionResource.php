@@ -27,6 +27,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -86,7 +87,8 @@ final class TransactionResource extends Resource
 
                     self::typeSelectField()
                         ->options(TransactionType::class)
-                        ->default(TransactionType::Expense),
+                        ->default(TransactionType::Expense)
+                        ->afterStateUpdated(fn (Set $set) => $set('category_id', null)),
 
                     Select::make('transfer_account_id')
                         ->label(__('account.fields.transfer_account_id'))
