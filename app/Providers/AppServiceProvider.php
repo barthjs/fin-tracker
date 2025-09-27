@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Filament\Concerns\HasResourceActions;
+use App\Jobs\ExportCompletionWithLocale;
+use App\Jobs\ExportCsvWithLocale;
 use App\Jobs\ImportCsvWithLocale;
-use App\Jobs\PrepareCsvExport;
 use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonImmutable;
-use Filament\Actions\Exports\Jobs\PrepareCsvExport as BasePrepareCsvExport;
+use Filament\Actions\Exports\Jobs\ExportCompletion;
+use Filament\Actions\Exports\Jobs\ExportCsv as BaseExportCsv;
 use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportCsv;
 use Filament\Facades\Filament;
 use Filament\Support\View\Components\ModalComponent;
@@ -33,7 +35,8 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(BaseImportCsv::class, ImportCsvWithLocale::class);
-        $this->app->bind(BasePrepareCsvExport::class, PrepareCsvExport::class);
+        $this->app->bind(BaseExportCsv::class, ExportCsvWithLocale::class);
+        $this->app->bind(ExportCompletion::class, ExportCompletionWithLocale::class);
     }
 
     /**
