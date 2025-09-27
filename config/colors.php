@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 return [
 
-    // https://uicolors.app/create
-    // #6db964
+    // https://uicolors.app/generate/6db964
     'primary' => [
         '50' => '#f4faf3',
         '100' => '#e5f5e3',
