@@ -72,7 +72,6 @@ final class AppPanelProvider extends PanelProvider
                 Action::make('settings')
                     ->icon('tabler-settings')
                     ->label(fn (): string => __('settings.navigation_label'))
-                    ->hidden(fn (): bool => ! auth()->user()->is_admin)
                     ->url(fn (): string => Settings::getUrl()),
                 Action::make('users')
                     ->icon('tabler-users')
