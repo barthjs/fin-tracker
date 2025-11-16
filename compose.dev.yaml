@@ -15,7 +15,7 @@ services:
       - host.docker.internal:host-gateway
 
   database:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     container_name: fin-tracker-db
     working_dir: /pgsqldump
     ports:
