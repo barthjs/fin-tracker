@@ -42,4 +42,19 @@ final class UserFactory extends Factory
             'is_admin' => false,
         ];
     }
+
+    public function inactive(): self
+    {
+        return $this->state(['is_active' => false]);
+    }
+
+    public function verified(): self
+    {
+        return $this->state(['is_verified' => true]);
+    }
+
+    public function admin(): self
+    {
+        return $this->state(['is_admin' => true]);
+    }
 }

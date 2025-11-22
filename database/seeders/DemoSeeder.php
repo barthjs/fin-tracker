@@ -38,8 +38,8 @@ final class DemoSeeder extends Seeder
      */
     private function createTransactions(User $user): void
     {
-        $accounts = Account::factory(3)->create(['is_active' => true, 'user_id' => $user->id]);
-        $categories = Category::factory(10)->create(['is_active' => true, 'user_id' => $user->id]);
+        $accounts = Account::factory(3)->create(['user_id' => $user->id]);
+        $categories = Category::factory(10)->create(['user_id' => $user->id]);
 
         for ($m = 11; $m >= 0; $m--) {
             foreach ($accounts as $account) {
@@ -75,8 +75,8 @@ final class DemoSeeder extends Seeder
      */
     private function createTrades(User $user): void
     {
-        $portfolios = Portfolio::factory(3)->create(['is_active' => true, 'user_id' => $user->id]);
-        Security::factory(10)->create(['is_active' => true, 'user_id' => $user->id]);
+        $portfolios = Portfolio::factory(3)->create(['user_id' => $user->id]);
+        Security::factory(10)->create(['user_id' => $user->id]);
 
         for ($m = 11; $m >= 0; $m--) {
             foreach ($portfolios as $portfolio) {
