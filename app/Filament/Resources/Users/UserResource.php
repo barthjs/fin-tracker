@@ -13,7 +13,7 @@ use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\AccountsRelationManager;
-use App\Filament\Resources\Users\RelationManagers\CategoryRelationManager;
+use App\Filament\Resources\Users\RelationManagers\CategoriesRelationManager;
 use App\Filament\Resources\Users\RelationManagers\PortfoliosRelationManager;
 use App\Filament\Resources\Users\RelationManagers\SecuritiesRelationManager;
 use App\Models\User;
@@ -209,7 +209,7 @@ final class UserResource extends Resource
     {
         return [
             AccountsRelationManager::class,
-            CategoryRelationManager::class,
+            CategoriesRelationManager::class,
             PortfoliosRelationManager::class,
             SecuritiesRelationManager::class,
         ];

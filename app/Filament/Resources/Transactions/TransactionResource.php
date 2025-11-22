@@ -155,7 +155,7 @@ final class TransactionResource extends Resource
                     ->toggleable(),
 
                 self::logoAndNameColumn('account.name')
-                    ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(Accounts\RelationManagers\TransactionsRelationManager::class)
                     ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Transaction $record): array => [
                         'logo' => $record->account->logo,
@@ -164,7 +164,7 @@ final class TransactionResource extends Resource
                     ->toggleable(),
 
                 TextColumn::make('category.name')
-                    ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(Categories\RelationManagers\TransactionsRelationManager::class)
                     ->label(Str::ucfirst(__('category.label')))
                     ->searchable()
                     ->sortable()
@@ -180,7 +180,7 @@ final class TransactionResource extends Resource
                     ->options(TransactionType::class),
 
                 SelectFilter::make('account_id')
-                    ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(Accounts\RelationManagers\TransactionsRelationManager::class)
                     ->label(Str::ucfirst(__('account.label')))
                     ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
@@ -188,7 +188,7 @@ final class TransactionResource extends Resource
                     ->searchable(),
 
                 SelectFilter::make('category_id')
-                    ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(Categories\RelationManagers\TransactionsRelationManager::class)
                     ->label(Str::ucfirst(__('category.label')))
                     ->relationship('category', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()

@@ -12,7 +12,7 @@ use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts\Pages\ListAccounts;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Accounts\RelationManagers\TradesRelationManager;
-use App\Filament\Resources\Accounts\RelationManagers\TransactionRelationManager;
+use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AccountsRelationManager;
 use App\Models\Account;
 use BackedEnum;
@@ -140,7 +140,7 @@ final class AccountResource extends Resource
     public static function getRelations(): array
     {
         return [
-            TransactionRelationManager::class,
+            TransactionsRelationManager::class,
             TradesRelationManager::class,
         ];
     }
