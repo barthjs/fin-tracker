@@ -24,6 +24,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -59,11 +60,11 @@ final class UserResource extends Resource
             ->components([
                 Section::make()
                     ->columnSpanFull()
-                    ->columns(4)
+                    ->columns(3)
                     ->schema([
                         FileUpload::make('avatar')
                             ->label(__('user.fields.avatar'))
-                            ->columnSpanFull()
+                            ->columnSpan(1)
                             ->avatar()
                             ->image()
                             ->imageEditor()
@@ -72,27 +73,30 @@ final class UserResource extends Resource
                             ->directory('users/avatars')
                             ->maxSize(1024),
 
-                        TextInput::make('first_name')
-                            ->label(__('user.fields.first_name'))
-                            ->autofocus()
-                            ->maxLength(255),
+                        Group::make([
+                            TextInput::make('first_name')
+                                ->label(__('user.fields.first_name'))
+                                ->maxLength(255),
 
-                        TextInput::make('last_name')
-                            ->label(__('user.fields.last_name'))
-                            ->maxLength(255),
+                            TextInput::make('last_name')
+                                ->label(__('user.fields.last_name'))
+                                ->maxLength(255),
+                        ])->columnSpan(1),
 
-                        TextInput::make('username')
-                            ->label(__('user.fields.username'))
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
+                        Group::make([
+                            TextInput::make('username')
+                                ->label(__('user.fields.username'))
+                                ->required()
+                                ->unique(ignoreRecord: true)
+                                ->maxLength(255),
 
-                        TextInput::make('email')
-                            ->label(__('filament-panels::auth/pages/edit-profile.form.email.label'))
-                            ->required()
-                            ->email()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
+                            TextInput::make('email')
+                                ->label(__('filament-panels::auth/pages/edit-profile.form.email.label'))
+                                ->required()
+                                ->email()
+                                ->unique(ignoreRecord: true)
+                                ->maxLength(255),
+                        ])->columnSpan(1),
                     ]),
 
                 Section::make()
