@@ -57,7 +57,7 @@ final class AppServiceProvider extends ServiceProvider
             });
             Number::useLocale(app()->getLocale());
 
-            ModalComponent::closedByClickingAway(false);
+            ModalComponent::closedByClickingAway(! app()->isProduction());
             Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
             Table::configureUsing(fn (Table $table): Table => $table
                 ->paginationPageOptions([10, 25, 50, 100, 'all'])

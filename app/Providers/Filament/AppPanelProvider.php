@@ -54,7 +54,7 @@ final class AppPanelProvider extends PanelProvider
             ->breadcrumbs(false)
             ->maxContentWidth('full')
             ->sidebarCollapsibleOnDesktop()
-            ->unsavedChangesAlerts()
+            ->unsavedChangesAlerts(app()->isProduction())
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             ->globalSearchKeyBindings(['ctrl+k', 'command+k'])
