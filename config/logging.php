@@ -12,6 +12,13 @@ return [
 
     'channels' => [
 
+        'file' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'warning'),
+            'replace_placeholders' => true,
+        ],
+
         'stdout' => [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'warning'),
