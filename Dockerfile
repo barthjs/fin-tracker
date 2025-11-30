@@ -2,13 +2,15 @@ FROM php:8.4-cli-alpine AS composer-builder
 WORKDIR /app
 
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
-RUN apk add --no-cache curl git && \
-    install-php-extensions \
+RUN install-php-extensions \
         intl \
         zip
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-COPY composer.json composer.lock /app/
+COPY bootstrap ./bootstrap
+COPY storage ./storage
+COPY routes ./routes
+COPY artisan composer* ./
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 FROM node:24-alpine AS node-builder
@@ -17,9 +19,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-COPY --from=composer-builder /app/vendor /app/vendor
-COPY public public
-COPY resources resources
+COPY --from=composer-builder /app/vendor ./vendor
+COPY public ./public
+COPY resources ./resources
 COPY vite.config.js ./
 RUN npm run build
 
@@ -67,9 +69,9 @@ COPY docker/supervisor.d /etc/supervisor.d
 
 COPY docker/start.sh /start.sh
 
-COPY --chown=application:application . /app
-COPY --chown=application:application --from=composer-builder /app/vendor /app/vendor
-COPY --chown=application:application --from=node-builder /app/public /app/public
+COPY --chown=application:application . .
+COPY --chown=application:application --from=composer-builder /app/vendor ./vendor
+COPY --chown=application:application --from=node-builder /app/public ./public
 
 RUN php artisan storage:link
 
