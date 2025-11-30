@@ -22,16 +22,21 @@ return new class extends Migration
             $table->string('symbol')->nullable()->index();
             $types = array_column(SecurityType::cases(), 'value');
             $table->enum('type', $types)->default(SecurityType::Stock->value)->index();
-            $table->decimal('price', 18, 6)->default(0);
-            $table->decimal('total_quantity', 18, 6)->default(0);
-            $table->decimal('market_value', 18, 6)->storedAs('price * total_quantity');
+            $table->decimal('price', 18, 6)->default(0)->index();
+            $table->decimal('total_quantity', 18, 6)->default(0)->index();
+            $table->decimal('market_value', 18, 6)->storedAs('price * total_quantity')->index();
             $table->text('description')->nullable();
 
             $table->string('logo')->nullable();
             $table->string('color');
             $table->boolean('is_active')->default(true)->index();
 
-            $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
+            $table->foreignUlid('user_id')
+                ->index()
+                ->constrained('sys_users')
+                ->cascadeOnDelete();
+
+            $table->index(['user_id', 'is_active']);
 
             $table->timestamps();
         });

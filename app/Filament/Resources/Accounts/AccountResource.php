@@ -127,7 +127,8 @@ final class AccountResource extends Resource
                 ->badge()
                 ->color(fn (Account $record): string => $record->balanceColor)
                 ->money(fn (Account $record): string => $record->currency->value)
-                ->summarize(Sum::make()->money(Currency::getCurrency())),
+                ->summarize(Sum::make()->money(Currency::getCurrency()))
+                ->sortable(),
 
             self::descriptionColumn()
                 ->hiddenOn($hidden),

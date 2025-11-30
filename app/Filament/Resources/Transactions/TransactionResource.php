@@ -152,6 +152,7 @@ final class TransactionResource extends Resource
                     ->label(__('transaction.fields.payee'))
                     ->wrap()
                     ->searchable()
+                    ->sortable()
                     ->toggleable(),
 
                 self::logoAndNameColumn('account.name')

@@ -27,7 +27,12 @@ return new class extends Migration
             $table->string('color');
             $table->boolean('is_active')->default(true)->index();
 
-            $table->foreignUlid('user_id')->constrained('sys_users')->cascadeOnDelete();
+            $table->foreignUlid('user_id')
+                ->index()
+                ->constrained('sys_users')
+                ->cascadeOnDelete();
+
+            $table->index(['user_id', 'is_active']);
 
             $table->timestamps();
         });

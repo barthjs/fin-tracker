@@ -29,16 +29,26 @@ return new class extends Migration
                             ELSE 0
                         END
                     , 2)
-                ");
-            $table->decimal('quantity', 18, 6)->default(0);
-            $table->decimal('price', 18, 6)->default(0);
-            $table->decimal('tax', 18, 6)->default(0);
-            $table->decimal('fee', 18, 6)->default(0);
+                ")
+                ->index();
+            $table->decimal('quantity', 18, 6)->default(0)->index();
+            $table->decimal('price', 18, 6)->default(0)->index();
+            $table->decimal('tax', 18, 6)->default(0)->index();
+            $table->decimal('fee', 18, 6)->default(0)->index();
             $table->string('notes')->nullable();
 
-            $table->foreignUlid('account_id')->constrained()->cascadeOnDelete();
-            $table->foreignUlid('portfolio_id')->constrained()->cascadeOnDelete();
-            $table->foreignUlid('security_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('account_id')
+                ->index()
+                ->constrained()
+                ->cascadeOnDelete();
+            $table->foreignUlid('portfolio_id')
+                ->index()
+                ->constrained()
+                ->cascadeOnDelete();
+            $table->foreignUlid('security_id')
+                ->index()
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->index(['account_id', 'type']);
             $table->index(['portfolio_id', 'type']);
