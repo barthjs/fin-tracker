@@ -69,7 +69,7 @@ COPY docker/supervisor.d /etc/supervisor.d
 
 COPY docker/start.sh /start.sh
 
-COPY --chown=application:application . .
+COPY --chown=application:application --exclude=package*.json --exclude=vite.config.js . .
 COPY --chown=application:application --from=composer-builder /app/vendor ./vendor
 COPY --chown=application:application --from=node-builder /app/public ./public
 

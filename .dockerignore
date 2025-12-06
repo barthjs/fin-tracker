@@ -12,10 +12,8 @@ tests/
 
 *.yaml
 Dockerfile
-package*.json
 phpstan.neon
 phpunit.xml
 pint.json
 SECURITY.md
 setup-dev.sh
-vite.config.js
