@@ -51,7 +51,7 @@ final class AppPanelProvider extends PanelProvider
             )
             ->defaultThemeMode(ThemeMode::Dark)
             ->colors(fn (): array => config()->array('colors'))
-            ->font('Poppins', '/fonts/fonts.css', LocalFontProvider::class)
+            ->font('Poppins', provider: LocalFontProvider::class)
             ->viteTheme('resources/css/filament/app/theme.css')
             ->defaultAvatarProvider(LocalAvatarProvider::class)
             ->breadcrumbs(false)
