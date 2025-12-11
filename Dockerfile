@@ -7,10 +7,13 @@ RUN install-php-extensions \
         zip
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-COPY bootstrap ./bootstrap
-COPY storage ./storage
-COPY routes ./routes
-COPY artisan composer* ./
+COPY --parents \
+    bootstrap \
+    storage \
+    routes \
+    artisan \
+    composer.* \
+    ./
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 FROM node:24-alpine AS node-builder
@@ -20,9 +23,11 @@ COPY package*.json ./
 RUN npm ci
 
 COPY --from=composer-builder /app/vendor ./vendor
-COPY public ./public
-COPY resources ./resources
-COPY vite.config.js ./
+COPY --parents \
+    public \
+    resources \
+    vite.config.js \
+    ./
 RUN npm run build
 
 FROM php:8.4-fpm-alpine
@@ -57,8 +62,7 @@ RUN install-php-extensions \
     rm -rf /usr/local/etc/php-fpm.d/*.conf
 
 RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/php.ini
-COPY docker/php/php-prod.ini /usr/local/etc/php/conf.d/php-prod.ini
+COPY docker/php/php.ini docker/php/php-prod.ini /usr/local/etc/php/conf.d/
 COPY docker/php/application.conf /usr/local/etc/php-fpm.d/application.conf
 
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
@@ -69,7 +73,19 @@ COPY docker/supervisor.d /etc/supervisor.d
 
 COPY docker/start.sh /start.sh
 
-COPY --chown=application:application --exclude=package*.json --exclude=vite.config.js . .
+COPY --chown=application:application --parents \
+    app \
+    bootstrap \
+    config \
+    database \
+    lang \
+    resources/icons \
+    resources/views \
+    routes \
+    storage \
+    artisan \
+    composer.json \
+    ./
 COPY --chown=application:application --from=composer-builder /app/vendor ./vendor
 COPY --chown=application:application --from=node-builder /app/public ./public
 

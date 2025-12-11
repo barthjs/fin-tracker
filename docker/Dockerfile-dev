@@ -35,8 +35,7 @@ RUN install-php-extensions \
     rm -rf /usr/local/etc/php-fpm.d/*.conf
 
 RUN mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
-COPY php/php.ini /usr/local/etc/php/conf.d/php.ini
-COPY php/php-dev.ini /usr/local/etc/php/conf.d/php-dev.ini
+COPY docker/php/php.ini docker/php/php-dev.ini /usr/local/etc/php/conf.d/
 COPY php/application.conf /usr/local/etc/php-fpm.d/application.conf
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf

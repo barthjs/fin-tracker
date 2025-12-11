@@ -34,5 +34,4 @@ echo "#############################"
 echo "Setup completed successfully."
 echo "#############################"
 
-
 supervisord -c /etc/supervisord.conf
