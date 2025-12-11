@@ -20,12 +20,15 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Platform;
+use Filament\Support\Enums\Width;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\View;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 final class AppPanelProvider extends PanelProvider
@@ -52,7 +55,7 @@ final class AppPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/app/theme.css')
             ->defaultAvatarProvider(LocalAvatarProvider::class)
             ->breadcrumbs(false)
-            ->maxContentWidth('full')
+            ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts(app()->isProduction())
             ->databaseNotifications()
@@ -67,6 +70,10 @@ final class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => View::make('components.favicons')->render()
+            )
             ->userMenuItems([
                 'profile' => fn (Action $action): Action => $action->url(fn (): string => EditProfile::getUrl()),
                 Action::make('settings')
