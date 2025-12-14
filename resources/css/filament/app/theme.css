@@ -5,3 +5,7 @@
 
 @source '../../../../app/Filament';
 @source '../../../../resources/views';
+
+.fi-sidebar-header {
+    margin-top: 1rem;
+}

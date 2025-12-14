@@ -29,6 +29,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 final class AppPanelProvider extends PanelProvider
@@ -53,6 +54,9 @@ final class AppPanelProvider extends PanelProvider
             ->colors(fn (): array => config()->array('colors'))
             ->font('Poppins', provider: LocalFontProvider::class)
             ->viteTheme('resources/css/filament/app/theme.css')
+            ->brandLogo(fn (): string => Vite::asset('resources/images/logo/logo-light.svg'))
+            ->darkModeBrandLogo(fn (): string => Vite::asset('resources/images/logo/logo-dark.svg'))
+            ->brandLogoHeight('3.5rem')
             ->defaultAvatarProvider(LocalAvatarProvider::class)
             ->breadcrumbs(false)
             ->maxContentWidth(Width::Full)
