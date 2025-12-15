@@ -37,13 +37,7 @@
     <li><a href="#updating">Updating</a></li>
     <li><a href="#backup">Backup</a></li>
     <li><a href="#contributing">Contributing</a></li>
-    <li>
-      <a href="#development">Development</a>
-      <ul>
-        <li><a href="#requirements">Requirements</a></li>
-        <li><a href="#building">Building</a></li>
-      </ul>
-    </li>
+    <li><a href="#development">Development</a></li>
     <li><a href="#built-with">Built With</a></li>
     <li><a href="#license">License</a></li>
   </ol>
@@ -160,33 +154,7 @@ Please read the [contributing guidelines](CONTRIBUTING.md) for more details.
 
 ## Development
 
-### Requirements
-
-- [Docker](https://docs.docker.com/engine/install/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-
-The repository includes a Docker image with all dependencies pre-installed:
-
-- [Dockerfile-dev](docker/Dockerfile-dev)
-- [compose.dev.yaml](compose.dev.yaml)
-
-### Building
-
-Clone the repo and prepare the development environment:
-
-```shell
-git clone https://github.com/barthjs/fin-tracker
-cd fin-tracker
-./setup-dev.sh
-```
-
-This script sets up a development container and initializes the database with demo data. You can customize the
-environment via [.env.development](.env.development).
-
-Default login at [http://localhost](http://localhost)
-
-- **Username**: `admin`
-- **Password**: `admin`
+See the [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to setup a development environment.
 
 ## Built With
 
