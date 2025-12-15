@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🤝 Contributing Guide
+    url: https://github.com/barthjs/fin-tracker/blob/main/CONTRIBUTING.md
+    about: How to set up development, run checks and submit changes
+  - name: 🔐 Security Policy
+    url: https://github.com/barthjs/fin-tracker/blob/main/SECURITY.md
+    about: Please report vulnerabilities privately per our security policy
