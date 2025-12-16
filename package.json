@@ -6,10 +6,10 @@
         "dev": "vite --host"
     },
     "devDependencies": {
-        "@tailwindcss/vite": "^4.1.17",
+        "@tailwindcss/vite": "^4.1.18",
         "laravel-vite-plugin": "^2.0.1",
         "npm-check-updates": "^19.2.0",
-        "tailwindcss": "^4.1.17",
-        "vite": "^7.2.7"
+        "tailwindcss": "^4.1.18",
+        "vite": "^7.3.0"
     }
 }

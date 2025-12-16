@@ -159,7 +159,7 @@ See the [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to setup a develop
 ## Built With
 
 - <a href="https://php.net" target="_blank">
-    <img src="https://img.shields.io/badge/PHP-8.4-777BB4?style=flat-square&logo=php" alt="PHP 8.4">
+    <img src="https://img.shields.io/badge/PHP-8.5-777BB4?style=flat-square&logo=php" alt="PHP 8.5">
   </a>
 - <a href="https://laravel.com" target="_blank">
     <img src="https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel" alt="Laravel 12">

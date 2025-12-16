@@ -1,4 +1,4 @@
-FROM php:8.4-cli-alpine AS composer-builder
+FROM php:8.5-cli-alpine AS composer-builder
 WORKDIR /app
 
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
@@ -30,7 +30,7 @@ COPY --parents \
     ./
 RUN npm run build
 
-FROM php:8.4-fpm-alpine
+FROM php:8.5-fpm-alpine
 WORKDIR /app
 
 ARG VERSION=latest

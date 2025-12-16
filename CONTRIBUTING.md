@@ -10,7 +10,7 @@ and system dependencies.
 
 Tech stack:
 
-- [PHP 8.4](https://php.net/)
+- [PHP 8.5](https://php.net/)
 - [Laravel 12](https://laravel.com/)
 - [Filament 4](https://filamentphp.com/)
 - [PostgreSQL](https://www.postgresql.org/)
