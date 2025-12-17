@@ -1,0 +1,43 @@
+name: "✨ Feature request"
+description: Suggest an idea to improve Fin‑Tracker
+title: "[Feature] "
+labels: [ enhancement ]
+assignees: [ ]
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched existing issues and didn’t find a similar request
+          required: true
+        - label: This aligns with the project scope
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What problem does this feature solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other solutions did you consider?
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Links, screenshots, or references

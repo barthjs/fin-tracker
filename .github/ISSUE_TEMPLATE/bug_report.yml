@@ -1,0 +1,98 @@
+name: 🐞 Bug report
+description: File a bug report.
+title: "[Bug] "
+labels: [ bug ]
+assignees: [ ]
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Before you submit
+      description: Please confirm the following
+      options:
+        - label: I searched existing issues and discussions and didn’t find a match
+          required: true
+        - label: I read CONTRIBUTING.md and can reproduce this with a clean setup
+          required: true
+        - label: I agree to have read this project [Security Policy](https://github.com/barthjs/fin-tracker/security/policy)
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear and concise description of the bug
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide exact steps to reproduce from a fresh environment
+      placeholder: |
+        1. Fresh install using compose.yaml
+        2. Log in as admin
+        3. Go to …
+        4. Click …
+        5. See error …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: What actually happened? Include any error messages.
+    validations:
+      required: true
+
+  - type: input
+    id: app_version
+    attributes:
+      label: Fin‑Tracker version or commit
+      placeholder: e.g., v1.2.3
+    validations:
+      required: true
+
+  - type: input
+    id: database_version
+    attributes:
+      label: Database
+      placeholder: e.g., PostgreSQL 18, MariaDB 11
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: What browsers are you seeing the problem on?
+      multiple: true
+      options:
+        - Brave
+        - Chrome
+        - Firefox
+        - Microsoft Edge
+        - Safari
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem

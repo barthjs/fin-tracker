@@ -1,4 +1,37 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.5-cli-alpine AS composer-builder
+WORKDIR /app
+
+COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions \
+        intl \
+        zip
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --parents \
+    bootstrap \
+    storage \
+    routes \
+    artisan \
+    composer.* \
+    ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+FROM node:24-alpine AS node-builder
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY --from=composer-builder /app/vendor ./vendor
+COPY --parents \
+    public \
+    resources \
+    vite.config.js \
+    ./
+RUN npm run build
+
+FROM php:8.5-fpm-alpine
+WORKDIR /app
 
 ARG VERSION=latest
 ENV APP_VERSION=${VERSION}
@@ -10,19 +43,14 @@ LABEL org.opencontainers.image.title="Fin-Tracker" \
     org.opencontainers.image.version=${VERSION} \
     org.opencontainers.image.licenses="MIT"
 
-# Create application user
 RUN addgroup -g 1000 application && \
-    adduser -D -u 1000 -G application -h /home/application -s /bin/sh application
+    adduser -D -u 1000 -G application application
 
-# Install base packages
 RUN apk add --no-cache \
         curl \
         nginx \
-        supervisor && \
-    # Clear all php-fpm default configurations \
-    rm -rf /usr/local/etc/php-fpm.d/*.conf
+        supervisor
 
-# Install php extensions
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
         intl \
@@ -30,40 +58,38 @@ RUN install-php-extensions \
         pdo_mysql \
         pdo_pgsql \
         zip && \
-        rm -f /usr/local/bin/install-php-extensions
+    rm -f /usr/local/bin/install-php-extensions && \
+    rm -rf /usr/local/etc/php-fpm.d/*.conf
 
-# Copy php configuration files
 RUN mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/php.ini
-COPY docker/php/php-prod.ini /usr/local/etc/php/conf.d/php-prod.ini
+COPY docker/php/php.ini docker/php/php-prod.ini /usr/local/etc/php/conf.d/
 COPY docker/php/application.conf /usr/local/etc/php-fpm.d/application.conf
 
-# Copy nginx configuration files
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/prod.conf /etc/nginx/conf.d/prod.conf
 
-# Copy Supervisor configuration files
 COPY docker/supervisord.conf /etc/supervisord.conf
 COPY docker/supervisor.d /etc/supervisor.d
 
-# App setup
-WORKDIR /app
-COPY --chown=application:application . /app
-
-# Install app dependencies and build frontend
-RUN apk add --no-cache --virtual .build-deps nodejs npm && \
-    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
-    composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader && \
-    npm install &&  \
-    npm run build && \
-    php artisan storage:link && \
-    # Remove build dependencies \
-    apk del .build-deps &&  \
-    rm -rf /usr/local/bin/composer \
-    docker node_modules resources/css composer.lock package*.json *.js
-
-# Entrypoint
 COPY docker/start.sh /start.sh
+
+COPY --chown=application:application --parents \
+    app \
+    bootstrap \
+    config \
+    database \
+    lang \
+    resources/icons \
+    resources/views \
+    routes \
+    storage \
+    artisan \
+    composer.json \
+    ./
+COPY --chown=application:application --from=composer-builder /app/vendor ./vendor
+COPY --chown=application:application --from=node-builder /app/public ./public
+
+RUN php artisan storage:link
 
 EXPOSE 80
 ENTRYPOINT ["/start.sh"]

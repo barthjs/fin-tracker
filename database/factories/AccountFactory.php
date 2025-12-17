@@ -27,7 +27,12 @@ final class AccountFactory extends Factory
             'currency' => Currency::getCurrency(),
             'description' => fake()->sentence(),
             'color' => fake()->hexColor(),
-            'is_active' => fake()->boolean(),
+            'is_active' => true,
         ];
+    }
+
+    public function inActive(): self
+    {
+        return $this->state(['is_active' => true]);
     }
 }

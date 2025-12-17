@@ -1,5 +1,7 @@
 @php
-    $pageComponent = static::isSimple() ? 'filament-panels::page.simple' : 'filament-panels::page';
+    use App\Filament\Pages\Auth\EditProfile;
+    use Carbon\Carbon;
+    $pageComponent = EditProfile::isSimple() ? 'filament-panels::page.simple' : 'filament-panels::page';
 @endphp
 
 <x-dynamic-component :component="$pageComponent">
@@ -44,7 +46,7 @@
                                         {{ __('user.sessions.this_device') }}
                                     </span>
                                 @else
-                                    {{ __('user.sessions.last_active') }} {{ $session['last_active'] }}
+                                    {{ __('user.sessions.last_active') }} {{ Carbon::createFromTimestamp($session['last_active'])->diffForHumans() }}
                                 @endif
                             </div>
                         </div>

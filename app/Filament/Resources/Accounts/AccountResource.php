@@ -12,7 +12,7 @@ use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts\Pages\ListAccounts;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Accounts\RelationManagers\TradesRelationManager;
-use App\Filament\Resources\Accounts\RelationManagers\TransactionRelationManager;
+use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AccountsRelationManager;
 use App\Models\Account;
 use BackedEnum;
@@ -127,7 +127,8 @@ final class AccountResource extends Resource
                 ->badge()
                 ->color(fn (Account $record): string => $record->balanceColor)
                 ->money(fn (Account $record): string => $record->currency->value)
-                ->summarize(Sum::make()->money(Currency::getCurrency())),
+                ->summarize(Sum::make()->money(Currency::getCurrency()))
+                ->sortable(),
 
             self::descriptionColumn()
                 ->hiddenOn($hidden),
@@ -140,7 +141,7 @@ final class AccountResource extends Resource
     public static function getRelations(): array
     {
         return [
-            TransactionRelationManager::class,
+            TransactionsRelationManager::class,
             TradesRelationManager::class,
         ];
     }

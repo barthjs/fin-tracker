@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -48,6 +49,7 @@ final class Settings extends Page
         /** @var string|null */
         return Cache::remember('github.latest_version', now()->addHour(), function () {
             try {
+                /** @var Response $response */
                 $response = Http::retry(3, 100)
                     ->timeout(10)
                     ->withHeaders([

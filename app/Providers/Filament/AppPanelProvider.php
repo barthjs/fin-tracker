@@ -20,12 +20,16 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Platform;
+use Filament\Support\Enums\Width;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 final class AppPanelProvider extends PanelProvider
@@ -48,13 +52,16 @@ final class AppPanelProvider extends PanelProvider
             )
             ->defaultThemeMode(ThemeMode::Dark)
             ->colors(fn (): array => config()->array('colors'))
-            ->font('Poppins', '/fonts/fonts.css', LocalFontProvider::class)
+            ->font('Poppins', provider: LocalFontProvider::class)
             ->viteTheme('resources/css/filament/app/theme.css')
+            ->brandLogo(fn (): string => Vite::asset('resources/images/logo/logo-light.svg'))
+            ->darkModeBrandLogo(fn (): string => Vite::asset('resources/images/logo/logo-dark.svg'))
+            ->brandLogoHeight('3.5rem')
             ->defaultAvatarProvider(LocalAvatarProvider::class)
             ->breadcrumbs(false)
-            ->maxContentWidth('full')
+            ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
-            ->unsavedChangesAlerts()
+            ->unsavedChangesAlerts(app()->isProduction())
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             ->globalSearchKeyBindings(['ctrl+k', 'command+k'])
@@ -67,12 +74,15 @@ final class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => View::make('components.favicons')->render()
+            )
             ->userMenuItems([
                 'profile' => fn (Action $action): Action => $action->url(fn (): string => EditProfile::getUrl()),
                 Action::make('settings')
                     ->icon('tabler-settings')
                     ->label(fn (): string => __('settings.navigation_label'))
-                    ->hidden(fn (): bool => ! auth()->user()->is_admin)
                     ->url(fn (): string => Settings::getUrl()),
                 Action::make('users')
                     ->icon('tabler-users')

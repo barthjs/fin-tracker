@@ -12,7 +12,7 @@ use App\Filament\Concerns\HasResourceInfolistEntries;
 use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Categories\Pages\ListCategories;
 use App\Filament\Resources\Categories\Pages\ViewCategory;
-use App\Filament\Resources\Categories\RelationManagers\TransactionRelationManager;
+use App\Filament\Resources\Categories\RelationManagers\TransactionsRelationManager;
 use App\Models\Category;
 use BackedEnum;
 use Carbon\Carbon;
@@ -174,7 +174,7 @@ final class CategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            TransactionRelationManager::class,
+            TransactionsRelationManager::class,
         ];
     }
 

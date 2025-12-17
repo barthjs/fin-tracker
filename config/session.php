@@ -6,11 +6,11 @@ return [
 
     'driver' => 'database',
 
+    // one month
+    'lifetime' => 43800,
+
     'table' => 'sys_sessions',
 
     'cookie' => 'fin-tracker_session',
-
-    // one month
-    'lifetime' => 43800,
 
 ];

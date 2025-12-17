@@ -27,6 +27,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -86,7 +87,8 @@ final class TransactionResource extends Resource
 
                     self::typeSelectField()
                         ->options(TransactionType::class)
-                        ->default(TransactionType::Expense),
+                        ->default(TransactionType::Expense)
+                        ->afterStateUpdated(fn (Set $set) => $set('category_id', null)),
 
                     Select::make('transfer_account_id')
                         ->label(__('account.fields.transfer_account_id'))
@@ -150,10 +152,11 @@ final class TransactionResource extends Resource
                     ->label(__('transaction.fields.payee'))
                     ->wrap()
                     ->searchable()
+                    ->sortable()
                     ->toggleable(),
 
                 self::logoAndNameColumn('account.name')
-                    ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(Accounts\RelationManagers\TransactionsRelationManager::class)
                     ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Transaction $record): array => [
                         'logo' => $record->account->logo,
@@ -162,7 +165,7 @@ final class TransactionResource extends Resource
                     ->toggleable(),
 
                 TextColumn::make('category.name')
-                    ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(Categories\RelationManagers\TransactionsRelationManager::class)
                     ->label(Str::ucfirst(__('category.label')))
                     ->searchable()
                     ->sortable()
@@ -178,7 +181,7 @@ final class TransactionResource extends Resource
                     ->options(TransactionType::class),
 
                 SelectFilter::make('account_id')
-                    ->hiddenOn(Accounts\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(Accounts\RelationManagers\TransactionsRelationManager::class)
                     ->label(Str::ucfirst(__('account.label')))
                     ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()
@@ -186,7 +189,7 @@ final class TransactionResource extends Resource
                     ->searchable(),
 
                 SelectFilter::make('category_id')
-                    ->hiddenOn(Categories\RelationManagers\TransactionRelationManager::class)
+                    ->hiddenOn(Categories\RelationManagers\TransactionsRelationManager::class)
                     ->label(Str::ucfirst(__('category.label')))
                     ->relationship('category', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
                     ->multiple()

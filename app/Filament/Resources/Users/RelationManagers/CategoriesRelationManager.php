@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-final class CategoryRelationManager extends RelationManager
+final class CategoriesRelationManager extends RelationManager
 {
     use HasResourceActions;
 

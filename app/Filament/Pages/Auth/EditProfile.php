@@ -115,6 +115,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             ->validationAttribute(__('filament-panels::auth/pages/edit-profile.form.current_password.validation_attribute'))
             ->belowContent(__('filament-panels::auth/pages/edit-profile.form.current_password.below_content'))
             ->password()
+            ->autocomplete('current-password')
             ->currentPassword(guard: Filament::getAuthGuard())
             ->revealable()
             ->required()

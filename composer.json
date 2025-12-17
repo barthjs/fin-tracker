@@ -6,23 +6,23 @@
     "homepage": "https://github.com/barthjs/fin-tracker",
     "license": "MIT",
     "require": {
-        "php": "^8.4",
+        "php": "^8.5",
         "bezhansalleh/filament-language-switch": "^4.0.0",
-        "filament/filament": "^4.0.18",
+        "filament/filament": "^4.3.1",
         "jenssegers/agent": "^2.6.4",
-        "laravel/framework": "^12.30.1"
+        "laravel/framework": "^12.43.1"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.16.0",
+        "barryvdh/laravel-debugbar": "^3.16.2",
         "fakerphp/faker": "^1.24.1",
-        "larastan/larastan": "^3.7.2",
-        "laravel/pint": "^1.25.1",
+        "larastan/larastan": "^3.8.1",
+        "laravel/pint": "^1.26.0",
         "mockery/mockery": "^1.6.12",
-        "nunomaduro/collision": "^8.8.2",
-        "pestphp/pest": "^4.1.0",
+        "nunomaduro/collision": "^8.8.3",
+        "pestphp/pest": "^4.2.0",
         "pestphp/pest-plugin-laravel": "^4.0.0",
         "pestphp/pest-plugin-livewire": "^4.0.1",
-        "pestphp/pest-plugin-type-coverage": "^4.0.2"
+        "pestphp/pest-plugin-type-coverage": "^4.0.3"
     },
     "autoload": {
         "psr-4": {
@@ -43,12 +43,18 @@
         ],
         "post-update-cmd": [
             "@php artisan livewire:publish --assets",
-            "@php artisan filament:upgrade"
+            "@php artisan filament:upgrade",
+            "@php artisan clear",
+            "@update:requirements"
         ],
-        "lint": "pint",
+        "update:requirements": [
+            "composer bump",
+            "npx npm-check-updates -u"
+        ],
+        "lint": "pint --parallel",
         "test:type-coverage": "pest --type-coverage --compact --min=100",
         "test:unit": "pest --parallel",
-        "test:lint": "pint --test",
+        "test:lint": "pint --parallel --test",
         "test:types": "phpstan",
         "test": [
             "@test:type-coverage",
@@ -63,7 +69,6 @@
         }
     },
     "config": {
-        "bump-after-update": true,
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,

@@ -30,7 +30,12 @@ final class SecurityFactory extends Factory
             'price' => fake()->randomFloat(6, 1, 100),
             'description' => fake()->text(20),
             'color' => fake()->hexColor(),
-            'is_active' => fake()->boolean(),
+            'is_active' => true,
         ];
+    }
+
+    public function inActive(): self
+    {
+        return $this->state(['is_active' => true]);
     }
 }

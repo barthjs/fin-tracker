@@ -1,26 +1,26 @@
-<a id="readme-top"></a>
-
 <div align="center">
 
-<h1>Fin-Tracker</h1>
-<h3>Household Finance Manager</h3>
+<img src="https://raw.githubusercontent.com/barthjs/fin-tracker/refs/heads/main/resources/images/logo/logo.svg" height="200px" alt="Fin-Tracker logo">
 
-<!-- Badges -->
+<h1>Household Finance Manager</h1>
+
 <p>
-  <a href="https://hub.docker.com/r/barthjs/fin-tracker/tags">
-    <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker" alt="Docker image">
+  <a href="https://github.com/barthjs/fin-tracker/releases">
+    <img src="https://img.shields.io/github/v/release/barthjs/fin-tracker?sort=semver&label=version" alt="GitHub Release">
   </a>
   <a href="https://github.com/barthjs/fin-tracker/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/barthjs/fin-tracker" alt="License"/>
-  </a>
-  <a href="https://github.com/barthjs/fin-tracker/issues/">
-    <img src="https://img.shields.io/github/issues/barthjs/fin-tracker" alt="open issues"/>
+    <img src="https://img.shields.io/github/license/barthjs/fin-tracker" alt="License">
   </a>
 </p>
 
+<img src="resources/screenshots/dashboard.png" alt="Fin-Tracker Dashboard">
+
 </div>
 
-<!-- Table of Contents -->
+<hr>
+
+<a id="readme-top"></a>
+
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -30,20 +30,15 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
-        <li><a href="#configuration">Configuration</a></li>
-        <li><a href="#updating">Updating</a></li>
-        <li><a href="#backup">Backup</a></li>
       </ul>
     </li>
+    <li><a href="#configuration">Configuration</a></li>
     <li><a href="#screenshots">Screenshots</a></li>
-    <li>
-      <a href="#contributing">Contributing</a>
-      <ul>
-        <li><a href="#requirements">Requirements</a></li>
-        <li><a href="#building">Building</a></li>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
+    <li><a href="#updating">Updating</a></li>
+    <li><a href="#backup">Backup</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#development">Development</a></li>
+    <li><a href="#built-with">Built With</a></li>
     <li><a href="#license">License</a></li>
   </ol>
 </details>
@@ -51,15 +46,15 @@
 ## About
 
 **Fin-Tracker** is a self-hostable, web-based household finance manager designed to help you monitor and organize your
-financial activity across multiple bank accounts and investment portfolios.
+finances across multiple bank accounts and investment portfolios.
 
 ### Features
 
-- Track and categorize expenses and income from multiple bank accounts
+- Track and visualize expenses and revenues from multiple bank accounts
 - Record and manage trades across multiple investment portfolios
-- Import and export data via CSV and Excel files
-- Multi-user support with two-factor authentication (2FA)
-- Fully self-hostable using Docker
+- Import and export data via CSV and Excel
+- Multi-user support
+- Fully containerized and ready for self-hosting with Docker
 
 ## Getting Started
 
@@ -70,128 +65,110 @@ financial activity across multiple bank accounts and investment portfolios.
 
 ### Installation
 
-Create an app directory:
+1. Create an app directory:
 
-```shell
-mkdir fin-tracker && cd ./fin-tracker
-```
+    ```shell
+    mkdir -p /opt/fin-tracker
+    cd /opt/fin-tracker
+    ```
 
-Create a `.env` file using the values from the [.env.example](.env.example) and adjust it as needed. If
-you plan to use a different database, ensure you set the correct `DB_CONNECTION` in the `.env` file.
-The only supported databases are MariaDB and MySQL.
+2. Create a `.env` file using the values from the [.env.example](.env.example) and adjust it as needed. If
+   you plan to use a different database, ensure you set the correct `DB_CONNECTION` in the `.env` file.
 
-```shell
-curl https://raw.githubusercontent.com/barthjs/fin-tracker/main/.env.example -o .env
-```
+    ```shell
+    curl https://raw.githubusercontent.com/barthjs/fin-tracker/main/.env.example -o .env
+    ```
 
-Download the [compose.yaml](compose.yaml) file.
+3. Download the [compose.yaml](compose.yaml) file.
 
-```shell
-curl https://raw.githubusercontent.com/barthjs/fin-tracker/main/compose.yaml -o compose.yaml
-```
+    ```shell
+    curl https://raw.githubusercontent.com/barthjs/fin-tracker/main/compose.yaml -o compose.yaml
+    ```
 
-Start the application:
+4. Start the application:
 
-```shell
-docker compose up -d
-```
+    ```shell
+    docker compose up -d
+    ```
 
-Access the app at [http://localhost](http://localhost) using the default credentials:
+5. Log in at  [http://localhost](http://localhost) using the default credentials:
 
-- **Username**: `admin`
-- **Password**: `admin`
+    - **Username**: `admin`
+    - **Password**: `admin`
 
 Upon the first login, you will be redirected to the profile page to change the default password.
 
-### Configuration
+## Configuration
 
 Use the `.env` file to adjust configuration settings:
 
-| Environment variable     | Default          | Description                                                                                         |
-|--------------------------|------------------|-----------------------------------------------------------------------------------------------------|
-| `APP_KEY`                | (required)       | The key the system uses for encryption. Generate with: `echo -n 'base64:'; openssl rand -base64 32` |
-| `APP_LOCALE`             | `en`             | Supported languages: `en`, `de`                                                                     |
-| `APP_ALLOW_REGISTRATION` | `false`          | Enable/disable user self-registration                                                               |
-| `DB_CONNECTION`          | `mariadb`        | `mariadb` or `mysql`                                                                                |
-| `DB_HOST`                | `fin-tracker-db` | Database host                                                                                       |
-| `DB_PORT`                | `3306`           | Database port                                                                                       |
-| `DB_DATABASE`            | `fin-tracker`    | Database name                                                                                       |
-| `DB_PASSWORD`            | (required)       | Database password                                                                                   |
-
-### Updating
-
-Before updating, export your data using the CSV export feature. Check the changelog for any breaking changes or new
-configuration options.
-
-```shell
-cd fin-tracker
-docker compose pull && docker compose up -d
-```
-
-### Backup
-
-Back up all Docker volumes used in the [compose.yaml](compose.yaml) as well as the `.env`.
+| Environment variable     | Default          | Description                                                                                       |
+|--------------------------|------------------|---------------------------------------------------------------------------------------------------|
+| `APP_KEY`                | (required)       | Key used to encrypt and decrypt data. Generate with: `echo -n 'base64:'; openssl rand -base64 32` |
+| `APP_ALLOW_REGISTRATION` | `false`          | Enable/disable user self-registration                                                             |
+| `APP_DEFAULT_CURRENCY`   | `EUR`            | Currency to use when creating new users (ISO 4217).                                               |
+| `LOG_CHANNEL`            | `stdout`         | `stdout` logs to Docker, whereas `file` writes to `/app/storage/fin-tracker.log`                  |
+| `LOG_LEVEL`              | `warning`        | Log level: `debug`, `info`, `warning`, `error`                                                    |
+| `DB_CONNECTION`          | `pgsql`          | Database driver: `pgsql` or `mariadb`                                                             |
+| `DB_HOST`                | `fin-tracker-db` | Database host name (service or container name in Docker Compose).                                 |
+| `DB_PORT`                | `5432`           | Database port (`5432` for pgsql, `3306` for mariadb).                                             |
+| `DB_DATABASE`            | `fin-tracker`    | Database name                                                                                     |
+| `DB_USERNAME`            | `fin-tracker`    | Database username                                                                                 |
+| `DB_PASSWORD`            | (required)       | Database password                                                                                 |
 
 ## Screenshots
 
+![](resources/screenshots/transactions.png)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>  
+
+![](resources/screenshots/statistics.png)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>  
+
+![](resources/screenshots/accounts.png)
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Updating
+
+Before updating to a new major version, it is recommended to export your data using the CSV export feature.
+
+Always check the changelog for any breaking changes or new configuration options.
+
+```shell
+cd /opt/fin-tracker
+docker compose pull && docker compose up -d
+```
+
+## Backup
+
+Back up all Docker volumes used in the [compose.yaml](compose.yaml) as well as the `.env`.
 
 ## Contributing
 
 Contributions are welcome. If you encounter a bug, have a feature request, or need support, feel free
 to [open an issue](https://github.com/barthjs/fin-tracker/issues/).
 
-### Requirements
+Please read the [contributing guidelines](CONTRIBUTING.md) for more details.
 
-- [Docker](https://docs.docker.com/engine/install/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+## Development
 
-A Linux environment is recommended for development. Development setup includes:
+See the [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to setup a development environment.
 
-- [Dockerfile-dev](docker/Dockerfile-dev)
-- [compose.dev.yaml](compose.dev.yaml)
+## Built With
 
-For the best experience use [PHP Storm](https://www.jetbrains.com/phpstorm/). Configure the IDE debugger:
-
-- **Name**: `survey`
-- **host:port**: `localhost:80`
-- **Debugger**: `Xdebug`
-- **Absolute path on the server**: `/app`
-
-### Building
-
-Clone the repo and prepare the development environment:
-
-```shell
-git clone https://github.com/barthjs/fin-tracker
-cd fin-tracker
-./setup-dev.sh
-```
-
-This script sets up a development container and initializes the database with demo data. Customize
-via [.env.development](.env.development).
-
-Default login at [http://localhost](http://localhost)
-
-- Username: `admin`
-- Password: `admin`
-
-### Built With
-
-- <a href="https://php.net">
-    <img alt="PHP 8.4" src="https://img.shields.io/badge/PHP-8.4-777BB4?style=flat-square&logo=php">
+- <a href="https://php.net" target="_blank">
+    <img src="https://img.shields.io/badge/PHP-8.5-777BB4?style=flat-square&logo=php" alt="PHP 8.5">
   </a>
-- <a href="https://laravel.com">
-    <img alt="Laravel v12.x" src="https://img.shields.io/badge/Laravel-v12.x-FF2D20?style=flat-square&logo=laravel">
+- <a href="https://laravel.com" target="_blank">
+    <img src="https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel" alt="Laravel 12">
   </a>
-- <a href="https://filamentphp.com/">
-    <img alt="Filament v4.x" src="https://img.shields.io/badge/Filament-v4.x-e9b228?style=flat-square">
+- <a href="https://filamentphp.com/" target="_blank">
+    <img src="https://img.shields.io/badge/Filament-4-E9B228?style=flat-square" alt="Filament 4">
   </a>
-- <a href="https://tabler.io/icons">
-    <img alt="Tabler Icons" src="https://img.shields.io/badge/Tabler_Icons-grey?style=flat-square">
-  </a>
-- <a href="https://hub.docker.com/r/barthjs/fin-tracker/tags">
-    <img src="https://img.shields.io/docker/v/barthjs/fin-tracker?label=Docker&logo=docker&style=flat-square" alt="Docker image">
+- <a href="https://tabler.io/icons" target="_blank">
+    <img src="https://img.shields.io/badge/Tabler_Icons-grey?style=flat-square" alt="Tabler Icons">
   </a>
 
 ## License

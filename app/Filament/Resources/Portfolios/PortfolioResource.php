@@ -127,7 +127,8 @@ final class PortfolioResource extends Resource
                 ->badge()
                 ->color(fn (Portfolio $record): string => $record->marketValueColor)
                 ->money(fn (Portfolio $record): string => $record->currency->value)
-                ->summarize(Sum::make()->money(Currency::getCurrency())),
+                ->summarize(Sum::make()->money(Currency::getCurrency()))
+                ->sortable(),
 
             self::descriptionColumn()
                 ->hiddenOn($hidden),

@@ -34,7 +34,12 @@ final class CategoryFactory extends Factory
             'name' => fake()->word(),
             'group' => $group,
             'color' => fake()->hexColor(),
-            'is_active' => fake()->boolean(),
+            'is_active' => true,
         ];
+    }
+
+    public function inActive(): self
+    {
+        return $this->state(['is_active' => true]);
     }
 }

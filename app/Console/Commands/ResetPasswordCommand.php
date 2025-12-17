@@ -68,12 +68,11 @@ final class ResetPasswordCommand extends Command
         try {
             $user->password = Hash::make($password);
             $user->remember_token = null;
+            $user->save();
 
             DB::table(config()->string('session.table'))
                 ->where('user_id', '=', $user->id)
                 ->delete();
-
-            $user->save();
 
             $this->info('Password reset successfully');
         } catch (Exception $e) {

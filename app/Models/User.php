@@ -172,6 +172,10 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
 
     protected static function booted(): void
     {
+        self::creating(function (User $user): void {
+            $user->locale = app()->getLocale();
+        });
+
         self::updated(function (User $user): void {
             /** @var string|null $originalAvatar */
             $originalAvatar = $user->getOriginal('avatar');

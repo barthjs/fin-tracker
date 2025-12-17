@@ -5,9 +5,18 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/filament/app/theme.css'],
+            input: [
+                'resources/css/filament/app/theme.css',
+                'resources/css/fonts.css',
+                'resources/js/main.js'
+            ],
             refresh: true,
         }),
         tailwindcss(),
     ],
+    server: {
+        watch: {
+            ignored: ['**/storage/framework/views/**'],
+        },
+    },
 });
