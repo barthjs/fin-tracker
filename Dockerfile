@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7-labs
 FROM php:8.5-cli-alpine AS composer-builder
 WORKDIR /app
 
