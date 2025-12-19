@@ -13,11 +13,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Cleanup old Filament import/export data and notifications.
+ * Clean up old Filament import/export data and notifications.
  *
  * - Notifications: Delete notifications older than 7 days.
  * - Imports:
- *     - Delete uploaded import file immediately after "completed_at" is set.
+ *     - Delete the uploaded file immediately after "completed_at" is set.
  *     - Delete import record:
  *         - immediately if there are no failed rows,
  *         - otherwise only if "completed_at" is older than 7 days.
@@ -27,21 +27,21 @@ use Illuminate\Support\Facades\Storage;
  *     - Delete the export record afterward.
  * - Livewire temporary files: Delete all files older than 24 hours.
  */
-final class CleanupFilamentDataCommand extends Command
+final class CleanupDataCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'app:cleanup-filament';
+    protected $signature = 'app:cleanup-data';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Cleanup old Filament import/export records, notifications and related files.';
+    protected $description = 'Cleanup old data.';
 
     private CarbonInterface $cutoff;
 
@@ -52,12 +52,24 @@ final class CleanupFilamentDataCommand extends Command
     {
         $this->cutoff = Carbon::now()->subDays(7);
 
+        $this->cleanupCache();
         $this->cleanupNotifications();
         $this->cleanupImports();
         $this->cleanupExports();
         $this->cleanupLivewireTmp();
 
         return self::SUCCESS;
+    }
+
+    public function cleanupCache(): void
+    {
+        DB::table(config()->string('cache.stores.database.table'))
+            ->where('expiration', '<=', time())
+            ->delete();
+
+        DB::table(config()->string('cache.stores.database.lock_table'))
+            ->where('expiration', '<=', time())
+            ->delete();
     }
 
     private function cleanupNotifications(): void
@@ -117,14 +129,14 @@ final class CleanupFilamentDataCommand extends Command
     {
         $storage = Storage::disk('local');
 
-        /** @var string $filePathname */
-        foreach ($storage->files('livewire-tmp') as $filePathname) {
-            if (! $storage->exists($filePathname)) {
+        /** @var string $path */
+        foreach ($storage->files('livewire-tmp') as $path) {
+            if (! $storage->exists($path)) {
                 continue;
             }
 
-            if (now()->subHours(24)->timestamp > $storage->lastModified($filePathname)) {
-                $storage->delete($filePathname);
+            if (now()->subHours(24)->timestamp > $storage->lastModified($path)) {
+                $storage->delete($path);
             }
         }
     }
