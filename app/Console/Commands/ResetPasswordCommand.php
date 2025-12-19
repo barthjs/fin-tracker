@@ -23,7 +23,6 @@ final class ResetPasswordCommand extends Command
     public function handle(): int
     {
         $emailOrUsername = $this->argument('emailOrUsername');
-
         if (empty($emailOrUsername)) {
             $emailOrUsername = $this->ask('Enter email or username to reset password');
         }

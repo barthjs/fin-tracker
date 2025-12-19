@@ -24,26 +24,26 @@ final class DatabaseSeeder extends Seeder
             return;
         }
 
-        if (User::where('is_admin', '=', true)->first() === null) {
-            $user = User::firstOrCreate(['username' => 'admin', 'email' => 'admin@example.com'],
+        if (User::where('is_admin', '=', true)->count() === 0) {
+            User::create(
                 [
                     'first_name' => 'Admin',
                     'last_name' => 'Admin',
+                    'username' => 'admin',
+                    'email' => 'admin@example.com',
                     'password' => Hash::make('admin'),
                     'is_active' => true,
                     'is_verified' => ! App::isProduction(),
                     'is_admin' => true,
                 ]
-            );
-
-            $this->generateDefaults($user);
+            ) |> $this->generateDefaults(...);
         }
 
         if (! App::isLocal()) {
             return;
         }
 
-        $user = User::firstOrCreate(['username' => 'user', 'email' => 'user@example.com'],
+        User::firstOrCreate(['username' => 'user', 'email' => 'user@example.com'],
             [
                 'first_name' => 'User',
                 'last_name' => 'User',
@@ -51,9 +51,7 @@ final class DatabaseSeeder extends Seeder
                 'is_active' => true,
                 'is_verified' => true,
                 'is_admin' => false,
-            ]);
-
-        $this->generateDefaults($user);
+            ]) |> $this->generateDefaults(...);
 
         $this->call([
             DemoSeeder::class,
