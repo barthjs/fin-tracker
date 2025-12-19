@@ -16,6 +16,6 @@ return [
 
     ],
 
-    'prefix' => env('fin-tracker_cache_'),
+    'prefix' => 'fin-tracker_cache_',
 
 ];

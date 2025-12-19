@@ -14,7 +14,7 @@ return [
 
         'file' => [
             'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/fin-tracker.log'),
             'level' => env('LOG_LEVEL', 'warning'),
             'replace_placeholders' => true,
         ],

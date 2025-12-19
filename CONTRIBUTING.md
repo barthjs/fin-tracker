@@ -1,10 +1,10 @@
 # Contributing
 
-This guide shows how to develop Fin‑Tracker and the checks you must pass before opening a PR.
+This guide shows how to develop Fin-Tracker and the checks you must pass before opening a PR.
 
 ## Project overview
 
-Fin‑Tracker is a Laravel application powered by Filament. The project is fully containerized for a consistent developer
+Fin-Tracker is a Laravel application powered by Filament. The project is fully containerized for a consistent developer
 experience. Development and deployment are expected to happen inside the provided Docker images, which bundle PHP, Node
 and system dependencies.
 
@@ -138,14 +138,13 @@ docker exec -u application -it fin-tracker bash -c "npm run dev"
 
 - The main language is English.
 - Supported locales today: `en`, `de` (see the [lang](lang) directory).
-- All UI text must use a translation key via Laravel’s translation system. Don’t hard‑code strings in views, Livewire
-  components or Filament resources.
+- All UI text must use a translation key via Laravel’s translation system. Don’t hard-code strings.
 - New features must include translations for all supported locales in the same PR. If you add a new translation key,
-  create it in `lang/en/…` and `lang/de/…` with appropriate values before submitting the PR.
+  create it in `lang/en/...` and `lang/de/...` with appropriate values before submitting the PR.
 
 ## IDE tips
 
-If you use PhpStorm, the repository includes ready‑to‑use run configurations in the [.run](.run) directory. Open the
+If you use PhpStorm, the repository includes ready-to-use run configurations in the [.run](.run) directory. Open the
 project in PhpStorm and the configurations will be detected automatically, so you can open a shell with a single click.
 
 ## Security
