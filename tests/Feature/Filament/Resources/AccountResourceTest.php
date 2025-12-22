@@ -20,6 +20,28 @@ it('renders the list page', function () {
         ->assertCanSeeTableRecords($accounts);
 });
 
+it('can filter accounts by inactivity', function () {
+    $activeAccount = Account::factory()->create(['is_active' => true]);
+    $inactiveAccount = Account::factory()->create(['is_active' => false]);
+
+    livewire(ListAccounts::class)
+        ->assertCanSeeTableRecords([$activeAccount])
+        ->assertCanNotSeeTableRecords([$inactiveAccount])
+        ->filterTable('inactive', true)
+        ->assertCanSeeTableRecords([$inactiveAccount])
+        ->assertCanNotSeeTableRecords([$activeAccount]);
+});
+
+it('can create an account', function () {
+    $data = Account::factory()->make()->toArray();
+
+    livewire(ListAccounts::class)
+        ->callAction('create', $data)
+        ->assertHasNoActionErrors();
+
+    $this->assertDatabaseHas('accounts', $data);
+});
+
 it('renders the view page', function () {
     $account = Account::factory()->create();
 
@@ -31,6 +53,17 @@ it('renders the view page', function () {
             'balance' => $account->balance,
             'description' => $account->description,
         ], 'infolist');
+});
+
+it('can edit an account', function () {
+    $account = Account::factory()->create();
+    $data = Account::factory()->make()->toArray();
+
+    livewire(ViewAccount::class, ['record' => $account->id])
+        ->callAction('edit', $data)
+        ->assertHasNoActionErrors();
+
+    $this->assertDatabaseHas('accounts', array_merge(['id' => $account->id], $data));
 });
 
 it('can load the transactions relation manager', function () {

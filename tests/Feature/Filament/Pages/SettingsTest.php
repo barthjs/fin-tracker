@@ -19,5 +19,6 @@ it('renders the settings page', function () {
     ]);
 
     livewire(Settings::class)
-        ->assertOk();
+        ->assertOk()
+        ->assertSee('1.2.3');
 });
