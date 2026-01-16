@@ -11,7 +11,11 @@
         "filament/filament": "^4.5.3",
         "jenssegers/agent": "^2.6.4",
         "laravel/framework": "^12.47.0",
-        "laravel/socialite": "^5.24.2"
+        "laravel/socialite": "^5.24.2",
+        "socialiteproviders/authelia": "^4.0",
+        "socialiteproviders/authentik": "^5.2",
+        "socialiteproviders/gitea": "^4.1",
+        "socialiteproviders/keycloak": "^5.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16.3",
