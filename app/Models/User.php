@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $email
  * @property string|null $avatar
  * @property string $locale
- * @property string $password
+ * @property string|null $password
  * @property string|null $remember_token
  * @property string|null $app_authentication_secret
  * @property array<string>|null $app_authentication_recovery_codes
@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read Collection<int, Category> $categories
  * @property-read Collection<int, Portfolio> $portfolios
  * @property-read Collection<int, Security> $securities
+ * @property-read Collection<int, UserProvider> $providers
  */
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasName
 {
@@ -122,6 +123,14 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
         return $this->hasMany(Security::class, 'user_id');
     }
 
+    /**
+     * @return HasMany<UserProvider, $this>
+     */
+    public function providers(): HasMany
+    {
+        return $this->hasMany(UserProvider::class, 'user_id');
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->is_active;
@@ -162,6 +171,11 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     public function getAppAuthenticationRecoveryCodes(): ?array
     {
         return $this->app_authentication_recovery_codes;
+    }
+
+    public function isOidcUser(): bool
+    {
+        return $this->providers()->exists();
     }
 
     public function saveAppAuthenticationRecoveryCodes(?array $codes): void
