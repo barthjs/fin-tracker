@@ -8,6 +8,8 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Jobs\ExportCompletionWithLocale;
 use App\Jobs\ExportCsvWithLocale;
 use App\Jobs\ImportCsvWithLocale;
+use App\Services\Oidc\OidcProvider;
+use App\Services\Oidc\OidcService;
 use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonImmutable;
@@ -24,6 +26,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -49,6 +52,24 @@ final class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict();
         Model::unguard();
         Vite::useAggressivePrefetching();
+
+        Event::listen(function (SocialiteWasCalled $event): void {
+            $oidcService = $this->app->make(OidcService::class);
+
+            foreach (array_keys($oidcService->getEnabledProviders()) as $provider) {
+                $class = 'SocialiteProviders\\'.str($provider)->studly().'\\Provider';
+
+                if (class_exists($class)) {
+                    $event->extendSocialite($provider, $class);
+
+                    continue;
+                }
+
+                if (config()->boolean('services.oidc.oidc_enabled')) {
+                    $event->extendSocialite($provider, OidcProvider::class);
+                }
+            }
+        });
 
         // Filament
         Filament::serving(function (): void {
