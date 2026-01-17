@@ -30,7 +30,9 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -92,7 +94,6 @@ final class UserResource extends Resource
 
                             TextInput::make('email')
                                 ->label(__('filament-panels::auth/pages/edit-profile.form.email.label'))
-                                ->required()
                                 ->email()
                                 ->unique(ignoreRecord: true)
                                 ->maxLength(255),
@@ -102,6 +103,7 @@ final class UserResource extends Resource
                 Section::make()
                     ->columnSpanFull()
                     ->columns(2)
+                    ->hidden(fn (?User $record): bool => $record?->id === auth()->user()->id)
                     ->schema([
                         TextInput::make('password')
                             ->label(__('filament-panels::auth/pages/edit-profile.form.password.label'))
@@ -123,29 +125,19 @@ final class UserResource extends Resource
                             ->revealable()
                             ->required(fn (Get $get): bool => filled($get('password')))
                             ->dehydrated(false),
+                    ]),
 
+                Section::make()
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->hidden(fn (?User $record): bool => $record?->id === auth()->user()->id)
+                    ->schema([
                         Toggle::make('is_admin')
                             ->label(__('user.fields.is_admin'))
-                            ->hidden(function (?User $record = null): bool {
-                                // Prevent the current user from removing their admin status
-                                if (! $record) {
-                                    return false;
-                                }
-
-                                return $record->id === auth()->user()->id;
-                            })
                             ->default(false)
                             ->inline(false),
 
-                        self::statusToggleField()
-                            ->hidden(function (?User $record = null): bool {
-                                // Prevent the current user from making their account inactive
-                                if (! $record) {
-                                    return false;
-                                }
-
-                                return $record->id === auth()->user()->id;
-                            }),
+                        self::statusToggleField(),
                     ]),
             ]);
     }
@@ -156,6 +148,10 @@ final class UserResource extends Resource
             ->components([
                 Section::make()
                     ->columnSpanFull()
+                    ->columns([
+                        'default' => 2,
+                        'md' => 3,
+                    ])
                     ->schema([
                         TextEntry::make('username')
                             ->label(__('user.fields.username'))
@@ -174,10 +170,26 @@ final class UserResource extends Resource
                         IconEntry::make('is_admin')
                             ->label(__('user.fields.is_admin'))
                             ->boolean(),
-                    ])
-                    ->columns([
-                        'default' => 2,
-                        'md' => 3,
+                    ]),
+
+                Section::make()
+                    ->columnSpanFull()
+                    ->columns(2)
+                    ->schema([
+                        IconEntry::make('password')
+                            ->label(__('user.fields.status_local_password'))
+                            ->state(fn (User $record): bool => $record->password !== null)
+                            ->boolean()
+                            ->trueIcon('tabler-lock-check')
+                            ->falseIcon('tabler-lock-off')
+                            ->trueColor('success')
+                            ->falseColor('warning'),
+
+                        TextEntry::make('providers.provider_name')
+                            ->label(__('profile.oidc.heading'))
+                            ->badge()
+                            ->color('gray')
+                            ->placeholder(__('profile.oidc.no_providers_connected')),
                     ]),
             ]);
     }
@@ -202,11 +214,26 @@ final class UserResource extends Resource
                 self::nameColumn('email')
                     ->label(__('filament-panels::auth/pages/edit-profile.form.email.label')),
 
+                ImageColumn::make('providers.provider_name')
+                    ->view('filament.tables.columns.users.auth-methods')
+                    ->label(__('user.fields.auth_methods')),
+
                 self::createdAtColumn(),
                 self::updatedAtColumn(),
             ])
             ->defaultSort('username')
             ->recordUrl(fn (User $record): string => ViewUser::getUrl(['record' => $record->id]));
+    }
+
+    /**
+     * @return Builder<User>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var Builder<User> $query */
+        $query = parent::getEloquentQuery();
+
+        return $query->with(['providers']);
     }
 
     public static function getRelations(): array
