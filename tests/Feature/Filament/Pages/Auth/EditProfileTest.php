@@ -6,6 +6,7 @@ use App\Filament\Pages\Auth\EditProfile;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Hash;
 
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
@@ -76,7 +77,7 @@ it('can remove a linked OIDC provider', function () {
         ->callAction('removeProvider', arguments: ['id' => $provider->id])
         ->assertHasNoErrors();
 
-    $this->assertDatabaseMissing('sys_user_providers', ['id' => $provider->id]);
+    assertDatabaseMissing('sys_user_providers', ['id' => $provider->id]);
 });
 
 it('disables provider removal if it is the only login method', function () {
@@ -94,15 +95,15 @@ it('displays the active user sessions on the profile page', function () {
         'id' => 'dummy_session_id',
         'user_id' => $this->user->id,
         'ip_address' => '1.2.3.4',
-        'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'payload' => base64_encode('dummy-data'),
+        'user_agent' => 'Firefox',
+        'payload' => base64_encode('data'),
         'last_activity' => time(),
     ]);
 
     livewire(EditProfile::class)
         ->assertOk()
         ->assertSee('1.2.3.4')
-        ->assertSee('Chrome');
+        ->assertSee('Firefox');
 });
 
 it('deletes the user account after password confirmation', function () {
@@ -112,5 +113,5 @@ it('deletes the user account after password confirmation', function () {
         ])
         ->assertRedirect(Filament::getLoginUrl());
 
-    $this->assertDatabaseMissing('sys_users', ['id' => $this->user->id]);
+    assertDatabaseMissing('sys_users', ['id' => $this->user->id]);
 });
