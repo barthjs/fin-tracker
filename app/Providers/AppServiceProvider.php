@@ -17,9 +17,12 @@ use Filament\Actions\Exports\Jobs\ExportCompletion;
 use Filament\Actions\Exports\Jobs\ExportCsv as BaseExportCsv;
 use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportCsv;
 use Filament\Facades\Filament;
+use Filament\Support\Facades\FilamentView;
 use Filament\Support\View\Components\ModalComponent;
 use Filament\Tables\Table;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Vite;
@@ -77,6 +80,16 @@ final class AppServiceProvider extends ServiceProvider
                 auth()->user()?->setLocale($event->locale);
             });
             Number::useLocale(app()->getLocale());
+
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn (): string => Blade::render('<x-auth.oidc mode="login" />'),
+            );
+
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::AUTH_REGISTER_FORM_AFTER,
+                fn (): string => Blade::render('<x-auth.oidc mode="register" />'),
+            );
 
             ModalComponent::closedByClickingAway(! app()->isProduction());
             Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
