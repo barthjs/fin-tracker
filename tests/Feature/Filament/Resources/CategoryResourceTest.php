@@ -42,7 +42,7 @@ it('can create a category', function () {
 
     livewire(ListCategories::class)
         ->callAction('create', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('categories', $data);
 });
@@ -71,7 +71,7 @@ it('can edit a category', function () {
 
     livewire(ViewCategory::class, ['record' => $category->id])
         ->callAction('edit', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('categories', array_merge(['id' => $category->id], $data));
 });

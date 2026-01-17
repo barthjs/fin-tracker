@@ -36,7 +36,7 @@ it('can create a security', function () {
 
     livewire(ListSecurities::class)
         ->callAction('create', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('securities', $data);
 });
@@ -65,7 +65,7 @@ it('can edit a security', function () {
         'record' => $security->id,
     ])
         ->callAction('edit', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('securities', array_merge(['id' => $security->id], $data));
 });

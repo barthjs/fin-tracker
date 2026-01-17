@@ -21,6 +21,7 @@ it('renders the list page', function () {
         ->create([
             'account_id' => $account->id,
             'category_id' => $category->id,
+            'date_time' => now(),
         ]);
 
     livewire(ListTransactions::class)
@@ -40,7 +41,7 @@ it('can create a transaction', function () {
 
     livewire(ListTransactions::class)
         ->callAction('create', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('transactions', $data);
 });
@@ -61,7 +62,7 @@ it('can edit a transaction', function () {
             TestAction::make('edit')->table($transaction),
             $data
         )
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('transactions', array_merge(['id' => $transaction->id], $data));
 });

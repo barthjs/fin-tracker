@@ -37,7 +37,7 @@ it('can create an account', function () {
 
     livewire(ListAccounts::class)
         ->callAction('create', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('accounts', $data);
 });
@@ -61,7 +61,7 @@ it('can edit an account', function () {
 
     livewire(ViewAccount::class, ['record' => $account->id])
         ->callAction('edit', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('accounts', array_merge(['id' => $account->id], $data));
 });

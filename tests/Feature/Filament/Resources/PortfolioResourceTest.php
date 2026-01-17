@@ -37,7 +37,7 @@ it('can create a portfolio', function () {
 
     livewire(ListPortfolios::class)
         ->callAction('create', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('portfolios', $data);
 });
@@ -61,7 +61,7 @@ it('can edit a portfolio', function () {
 
     livewire(ViewPortfolio::class, ['record' => $portfolio->id])
         ->callAction('edit', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('portfolios', array_merge(['id' => $portfolio->id], $data));
 });
