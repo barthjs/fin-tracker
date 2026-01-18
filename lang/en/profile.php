@@ -17,7 +17,7 @@ return [
         'remove' => 'Disconnect account',
         'removed' => 'The provider has been successfully disconnected.',
         'cannot_remove_last_method' => 'You cannot remove your last remaining login method.',
-        'auth_failed_title' => 'Authentication via :provider is currently not available.',
+        'auth_failed_title' => 'Authentication via :provider failed.',
     ],
 
     'sessions' => [

@@ -11,7 +11,7 @@ use Auth;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
+use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -31,8 +31,20 @@ final readonly class OidcController
         return $driver->redirectUrl($redirectUrl)->redirect();
     }
 
-    public function callback(string $provider, OidcService $oidcService): RedirectResponse|Redirector
+    public function callback(Request $request, string $provider, OidcService $oidcService): RedirectResponse
     {
+        if ($request->has('error')) {
+            $this->setNotificationLocale($request);
+
+            Notification::make()
+                ->warning()
+                ->title(__('profile.oidc.auth_failed_title', ['provider' => ucfirst($provider)]))
+                ->body($request->query('error_description', ''))
+                ->send();
+
+            return redirect()->intended(Filament::getLoginUrl());
+        }
+
         abort_unless($oidcService->isEnabled($provider), 404);
 
         $redirectUrl = route('auth.oidc.callback', ['provider' => $provider]);
@@ -56,14 +68,28 @@ final readonly class OidcController
 
             return redirect()->intended(Filament::getUrl());
         } catch (Throwable $e) {
+            $this->setNotificationLocale($request);
+
             Notification::make()
                 ->warning()
                 ->title(__('profile.oidc.auth_failed_title', ['provider' => ucfirst($provider)]))
                 ->send();
 
-            Log::error("OIDC Login failed for provider {$provider}: ".$e->getMessage());
+            Log::error("OIDC Login failed for provider $provider: ".$e->getMessage());
 
-            return redirect(Filament::getLoginUrl());
+            return redirect()->intended(Filament::getLoginUrl());
         }
+    }
+
+    private function setNotificationLocale(Request $request): void
+    {
+        $user = auth()->user();
+
+        /** @var string $locale */
+        $locale = $user->locale
+            ?? $request->getPreferredLanguage(['de', 'en'])
+            ?? config('app.locale');
+
+        app()->setLocale($locale);
     }
 }

@@ -17,7 +17,7 @@ return [
         'remove' => 'Konto trennen',
         'removed' => 'Der Provider wurde erfolgreich getrennt.',
         'cannot_remove_last_method' => 'Du kannst deine letzte verbleibende Anmeldemethode nicht entfernen.',
-        'auth_failed_title' => 'Anmeldung via :provider aktuell nicht möglich.',
+        'auth_failed_title' => 'Anmeldung via :provider fehlgeschlagen.',
     ],
 
     'sessions' => [
