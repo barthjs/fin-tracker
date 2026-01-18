@@ -22,6 +22,8 @@ final readonly class OidcController
 {
     public function redirect(string $provider, OidcService $oidcService): RedirectResponse
     {
+        $provider = mb_strtolower($provider);
+
         abort_unless($oidcService->isEnabled($provider), 404);
 
         $redirectUrl = route('auth.oidc.callback', ['provider' => $provider]);
@@ -33,6 +35,8 @@ final readonly class OidcController
 
     public function callback(Request $request, string $provider, OidcService $oidcService): RedirectResponse
     {
+        $provider = mb_strtolower($provider);
+
         if ($request->has('error')) {
             $this->setNotificationLocale($request);
 
