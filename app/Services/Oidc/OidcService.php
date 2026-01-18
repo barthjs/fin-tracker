@@ -54,6 +54,10 @@ final readonly class OidcService
             return $userProvider->user;
         }
 
+        if (! config()->boolean('app.allow_registration')) {
+            throw new RuntimeException('Registration is disabled');
+        }
+
         if (User::where('email', $socialiteUser->getEmail())->exists()) {
             throw new RuntimeException('Email collision');
         }
