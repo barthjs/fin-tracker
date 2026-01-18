@@ -8,7 +8,7 @@ return [
 
     'version' => env('APP_VERSION', 'dev'),
 
-    'allow_registration' => env('APP_ALLOW_REGISTRATION', false),
+    'allow_registration' => (bool) env('APP_ALLOW_REGISTRATION', false),
 
     'currency' => env('APP_DEFAULT_CURRENCY', 'EUR'),
 

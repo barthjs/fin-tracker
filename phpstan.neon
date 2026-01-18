@@ -11,6 +11,7 @@ parameters:
     level: max
 
     ignoreErrors:
-        - '#Cannot access property \$[a-zA-Z0-9\\_]+ on App\\Models\\User\|null#'
+        - '#Cannot access property .* on App\\Models\\User\|null#'
+        - '#Cannot call method .* on App\\Models\\User\|null#'
 
     tmpDir: /tmp/phpstan

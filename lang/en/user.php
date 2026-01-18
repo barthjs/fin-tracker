@@ -13,21 +13,12 @@ return [
         'full_name' => 'Name',
         'username' => 'Username',
         'username_or_email' => 'Username or email',
+        'password' => 'Password',
+        'status_local_password' => 'Local Password',
+        'auth_methods' => 'Authentication methods',
         'avatar' => 'Avatar',
         'is_verified' => 'Verified',
         'is_admin' => 'Administrator',
-    ],
-
-    'change_password_message' => 'Please change your password to continue.',
-
-    'sessions' => [
-        'heading' => 'Devices & Sessions',
-        'delete' => 'Log Out Other Browser Sessions',
-        'unknown_platform' => 'Unknown platform',
-        'unknown_browser' => 'Unknown browser',
-        'this_device' => 'This device',
-        'last_active' => 'Last active',
-        'logout_success' => 'All other browser sessions have been logged out successfully.',
     ],
 
 ];

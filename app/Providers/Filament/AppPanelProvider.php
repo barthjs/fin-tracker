@@ -10,6 +10,7 @@ use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\Users\UserResource;
 use App\Http\Middleware\CheckVerified;
+use Awcodes\LightSwitch\LightSwitchPlugin;
 use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Enums\ThemeMode;
@@ -89,6 +90,9 @@ final class AppPanelProvider extends PanelProvider
                     ->label(fn (): string => ucfirst(__('user.plural_label')))
                     ->hidden(fn (): bool => ! auth()->user()->is_admin)
                     ->url(fn (): string => UserResource::getUrl()),
+            ])
+            ->plugins([
+                LightSwitchPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,

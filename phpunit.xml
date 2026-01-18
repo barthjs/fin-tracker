@@ -25,5 +25,9 @@
         <env name="DB_DATABASE" value=":memory:"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="OIDC_ENABLED" value="true"/>
+        <env name="OIDC_BASE_URL" value="https://auth.example.com"/>
+        <env name="OIDC_CLIENT_ID" value="test-id"/>
+        <env name="OIDC_CLIENT_SECRET" value="test-secret"/>
     </php>
 </phpunit>

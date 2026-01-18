@@ -8,6 +8,8 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Jobs\ExportCompletionWithLocale;
 use App\Jobs\ExportCsvWithLocale;
 use App\Jobs\ImportCsvWithLocale;
+use App\Services\Oidc\OidcProvider;
+use App\Services\Oidc\OidcService;
 use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonImmutable;
@@ -15,15 +17,19 @@ use Filament\Actions\Exports\Jobs\ExportCompletion;
 use Filament\Actions\Exports\Jobs\ExportCsv as BaseExportCsv;
 use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportCsv;
 use Filament\Facades\Filament;
+use Filament\Support\Facades\FilamentView;
 use Filament\Support\View\Components\ModalComponent;
 use Filament\Tables\Table;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -50,12 +56,40 @@ final class AppServiceProvider extends ServiceProvider
         Model::unguard();
         Vite::useAggressivePrefetching();
 
+        Event::listen(function (SocialiteWasCalled $event): void {
+            $oidcService = $this->app->make(OidcService::class);
+
+            foreach (array_keys($oidcService->getEnabledProviders()) as $provider) {
+                $class = 'SocialiteProviders\\'.str($provider)->studly().'\\Provider';
+
+                if (class_exists($class)) {
+                    $event->extendSocialite($provider, $class);
+
+                    continue;
+                }
+
+                if (config()->boolean('services.oidc.oidc_enabled')) {
+                    $event->extendSocialite($provider, OidcProvider::class);
+                }
+            }
+        });
+
         // Filament
         Filament::serving(function (): void {
             Event::listen(function (LocaleChanged $event): void {
                 auth()->user()?->setLocale($event->locale);
             });
             Number::useLocale(app()->getLocale());
+
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn (): string => Blade::render('<x-auth.oidc mode="login" />'),
+            );
+
+            FilamentView::registerRenderHook(
+                PanelsRenderHook::AUTH_REGISTER_FORM_AFTER,
+                fn (): string => Blade::render('<x-auth.oidc mode="register" />'),
+            );
 
             ModalComponent::closedByClickingAway(! app()->isProduction());
             Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);

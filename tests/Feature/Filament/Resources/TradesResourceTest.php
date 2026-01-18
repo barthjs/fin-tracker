@@ -43,7 +43,7 @@ it('can create a trade', function () {
 
     livewire(ListTrades::class)
         ->callAction('create', $data)
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('trades', $data);
 });
@@ -63,7 +63,7 @@ it('can edit a trade', function () {
             TestAction::make('edit')->table($trade),
             $data
         )
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('trades', array_merge(['id' => $trade->id], $data));
 });

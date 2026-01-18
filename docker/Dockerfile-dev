@@ -5,16 +5,24 @@ ARG VERSION=dev
 ENV APP_VERSION=${VERSION} \
     PHP_IDE_CONFIG="serverName=fin-tracker"
 
-RUN addgroup -g 1000 application && \
-    adduser -D -u 1000 -G application application
-
 RUN apk add --no-cache \
         bash \
         curl \
+        git \
         nginx \
         nodejs \
         npm \
-        supervisor
+        supervisor \
+        zsh \
+        zsh-vcs && \
+  addgroup -g 1000 application && \
+  adduser -D -u 1000 -G application application -s /bin/zsh application
+
+USER application
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" \
+    --unattended
+COPY .zshrc /home/application/.zshrc
+USER root
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
@@ -25,9 +33,9 @@ RUN install-php-extensions \
         xdebug \
         zip && \
     rm -f /usr/local/bin/install-php-extensions && \
-    rm -rf /usr/local/etc/php-fpm.d/*.conf
+    rm -rf /usr/local/etc/php-fpm.d/*.conf && \
+    mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 
-RUN mv /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 COPY php/php.ini php/php-dev.ini /usr/local/etc/php/conf.d/
 COPY php/application.conf /usr/local/etc/php-fpm.d/application.conf
 

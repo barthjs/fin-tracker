@@ -33,6 +33,7 @@
       </ul>
     </li>
     <li><a href="#configuration">Configuration</a></li>
+    <li><a href="#openid-connect-sso">OpenID Connect (SSO)</a></li>
     <li><a href="#account-management">Account Management</a></li>
     <li><a href="#screenshots">Screenshots</a></li>
     <li><a href="#updating">Updating</a></li>
@@ -55,6 +56,7 @@ finances across multiple bank accounts and investment portfolios.
 - Record and manage trades across multiple investment portfolios
 - Import and export data via CSV and Excel
 - Multi-user support
+- Single Sign-On via OpenID Connect
 - Fully containerized and ready for self-hosting with Docker
 
 ## Getting Started
@@ -92,7 +94,7 @@ finances across multiple bank accounts and investment portfolios.
     docker compose up -d
     ```
 
-5. Log in at  [http://localhost](http://localhost) using the default credentials:
+5. Log in at [http://localhost](http://localhost) using the default credentials:
 
     - **Username**: `admin`
     - **Password**: `admin`
@@ -116,6 +118,47 @@ Use the `.env` file to adjust configuration settings:
 | `DB_DATABASE`            | `fin-tracker`    | Database name                                                                                     |
 | `DB_USERNAME`            | `fin-tracker`    | Database username                                                                                 |
 | `DB_PASSWORD`            | (required)       | Database password                                                                                 |
+
+## OpenID Connect (SSO)
+
+Fin-Tracker supports authentication via OpenID Connect. You can configure a generic provider or use pre-configured
+integrations for common identity providers.
+
+### Generic Provider
+
+To use a generic OIDC provider, set the following variables in your `.env`:
+
+```dotenv
+OIDC_ENABLED=true
+OIDC_BASE_URL=
+OIDC_CLIENT_ID=
+OIDC_CLIENT_SECRET=your-client-secret
+```
+
+### Specialized Providers
+
+Fin-Tracker comes with pre-configured integrations for the following identity providers. Most follow a standard pattern
+for environment variables: `[PREFIX]_OIDC_ENABLED`, `_URL`, `_CLIENT_ID`, and `_CLIENT_SECRET`.
+
+- [Authelia](https://www.authelia.com/configuration/identity-providers/openid-connect/clients/): Use prefix `AUTHELIA`
+- [Authentik](https://docs.goauthentik.io/add-secure-apps/providers/oauth2/): Use prefix `AUTHENTIK`
+- [Gitea](https://docs.gitea.com/development/oauth2-provider): Use prefix `GITEA`
+- [Keycloak](https://www.keycloak.org/documentation): `KEYCLOAK`
+
+Keycloak: Keycloak requires a `REALM` and uses a `BASE_URL` instead of a discovery URL:
+
+```dotenv
+KEYCLOAK_OIDC_BASE_URL=https://auth.example.com
+KEYCLOAK_OIDC_REALM=master
+```
+
+### Redirect URI
+
+When configuring your Identity Provider (IdP), you must use the following callback URL:
+
+`https://your-domain.com/auth/oidc/[provider]/callback`
+
+Replace `[provider]` with the name of your provider (`authelia`, `authentik`, `gitea`, `keycloak`, `oidc`).
 
 ## Account Management
 
