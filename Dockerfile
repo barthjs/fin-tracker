@@ -83,4 +83,4 @@ EXPOSE 80
 ENTRYPOINT ["/start.sh"]
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -fsS http://127.0.0.1:80/up || exit 1
+    CMD curl -fsS http://127.0.0.1:80/api/up || exit 1

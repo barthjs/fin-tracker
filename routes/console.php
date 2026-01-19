@@ -2,8 +2,16 @@
 
 declare(strict_types=1);
 
-Schedule::command('app:cleanup-data')->everyThreeHours()->withoutOverlapping();
+use App\Console\Commands\CleanupDataCommand;
+use Illuminate\Queue\Console\FlushFailedCommand;
+use Illuminate\Queue\Console\PruneBatchesCommand;
+use Illuminate\Queue\Console\PruneFailedJobsCommand;
+use Laravel\Sanctum\Console\Commands\PruneExpired;
 
-Schedule::command('queue:prune-batches')->everySixHours()->withoutOverlapping();
-Schedule::command('queue:prune-failed')->everySixHours()->withoutOverlapping();
-Schedule::command('queue:flush')->everySixHours()->withoutOverlapping();
+Schedule::command(CleanupDataCommand::class)->everyThreeHours()->withoutOverlapping();
+
+Schedule::command(PruneBatchesCommand::class)->everySixHours()->withoutOverlapping();
+Schedule::command(PruneFailedJobsCommand::class)->everySixHours()->withoutOverlapping();
+Schedule::command(FlushFailedCommand::class)->everySixHours()->withoutOverlapping();
+
+Schedule::command(PruneExpired::class, ['--hours' => 24])->everySixHours()->withoutOverlapping();

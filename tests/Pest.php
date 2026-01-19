@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithCachedConfig;
@@ -23,9 +24,26 @@ pest()->extend(TestCase::class)
         Str::createUlidsNormally();
         Str::createUuidsNormally();
 
+        /** @phpstan-ignore-next-line */
         $this->freezeTime();
     })
     ->in('Feature', 'Unit');
+
+/**
+ * @param  array<int, string>  $abilities
+ */
+function actingAsWithAbilities(User $user, array $abilities = []): void
+{
+    $token = new PersonalAccessToken([
+        'name' => 'Token',
+        'token' => hash('sha256', 'token'),
+        'abilities' => $abilities,
+    ]);
+
+    $user->withAccessToken($token);
+
+    actingAs($user, 'sanctum');
+}
 
 function asUser(): void
 {
