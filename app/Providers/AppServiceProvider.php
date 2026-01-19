@@ -8,6 +8,7 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Jobs\ExportCompletionWithLocale;
 use App\Jobs\ExportCsvWithLocale;
 use App\Jobs\ImportCsvWithLocale;
+use App\Models\PersonalAccessToken;
 use App\Services\Oidc\OidcProvider;
 use App\Services\Oidc\OidcService;
 use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Sanctum\Sanctum;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
 final class AppServiceProvider extends ServiceProvider
@@ -55,6 +57,8 @@ final class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict();
         Model::unguard();
         Vite::useAggressivePrefetching();
+
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
         Event::listen(function (SocialiteWasCalled $event): void {
             $oidcService = $this->app->make(OidcService::class);
