@@ -9,7 +9,7 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\Users\UserResource;
-use App\Http\Middleware\CheckVerified;
+use App\Http\Middleware\EnsureUserIsVerified;
 use Awcodes\LightSwitch\LightSwitchPlugin;
 use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -104,7 +104,7 @@ final class AppPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                CheckVerified::class,
+                EnsureUserIsVerified::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
