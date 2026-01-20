@@ -51,7 +51,7 @@ final class SecuritiesRelationManager extends RelationManager
         return SecurityResource::table($table)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->withoutGlobalScopes())
             ->headerActions([
-                self::createAction()
+                self::tableCreateAction()
                     ->mutateDataUsing(function (array $data) use ($userId): array {
                         $data['user_id'] = $userId;
 

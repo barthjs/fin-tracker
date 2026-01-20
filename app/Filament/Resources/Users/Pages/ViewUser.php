@@ -18,6 +18,7 @@ final class ViewUser extends ViewRecord
     {
         return [
             self::editAction(),
+            self::deleteAction(),
         ];
     }
 }

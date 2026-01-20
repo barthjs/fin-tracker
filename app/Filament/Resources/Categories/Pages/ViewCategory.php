@@ -18,6 +18,7 @@ final class ViewCategory extends ViewRecord
     {
         return [
             self::editAction(),
+            self::deleteAction(),
         ];
     }
 }
