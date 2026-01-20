@@ -20,8 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read float $total_amount
  * @property float $quantity
  * @property float $price
- * @property float $fee
  * @property float $tax
+ * @property float $fee
  * @property string|null $notes
  * @property string $account_id
  * @property string $portfolio_id
@@ -63,8 +63,8 @@ final class Trade extends Model
             'total_amount' => 'float',
             'quantity' => 'float',
             'price' => 'float',
-            'fee' => 'float',
             'tax' => 'float',
+            'fee' => 'float',
         ];
     }
 
@@ -120,12 +120,6 @@ final class Trade extends Model
             if ($trade->security_id === null) {
                 $trade->security_id = Security::getOrCreateDefaultSecurity()->id;
             }
-        });
-
-        self::created(function (Trade $trade): void {
-            Account::updateAccountBalance($trade->account_id);
-            Portfolio::updatePortfolioMarketValue($trade->portfolio_id);
-            Security::updateSecurityQuantity($trade->security_id);
         });
     }
 }
