@@ -20,6 +20,26 @@ return [
         'auth_failed_title' => 'Anmeldung via :provider fehlgeschlagen.',
     ],
 
+    'api_tokens' => [
+        'heading' => 'API-Token',
+        'delete' => 'Löschen',
+        'deleted' => 'Token wurde widerrufen',
+        'empty' => 'Du hast noch keine API-Tokens erstellt.',
+        'expired' => 'Abgelaufen',
+        'create' => 'API-Token erstellen',
+        'select_all' => 'Alle auswählen',
+        'deselect_all' => 'Alle abwählen',
+        'name' => 'Name des Tokens',
+        'abilities' => 'Berechtigungen',
+        'read' => 'Lesen',
+        'write' => 'Lesen & Schreiben',
+        'expires_at' => 'Ablaufdatum',
+        'min_abilities' => 'Bitte wähle mindestens eine Berechtigung aus.',
+        'token_value' => 'Dein API-Token',
+        'token_warning' => 'Kopiere diesen Token jetzt. Er wird danach nie wieder angezeigt.',
+        'close' => 'Schließen',
+    ],
+
     'sessions' => [
         'heading' => 'Geräte & Sitzungen',
         'delete' => 'Andere Browser-Sitzungen abmelden',

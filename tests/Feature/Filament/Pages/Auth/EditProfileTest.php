@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ApiAbility;
 use App\Filament\Pages\Auth\EditProfile;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Hash;
@@ -86,6 +87,50 @@ it('disables provider removal if it is the only login method', function () {
 
     livewire(EditProfile::class)
         ->assertActionDisabled('removeProvider');
+});
+
+it('can create an api token with specific abilities', function () {
+    $ability = ApiAbility::ACCOUNT;
+
+    livewire(EditProfile::class)
+        ->callAction('createApiToken', [
+            'name' => 'Test Token',
+            'abilities' => [
+                $ability->read() => true,
+            ],
+        ])
+        ->assertHasNoFormErrors();
+
+    $user = auth()->user();
+
+    expect($user->tokens)->toHaveCount(1)
+        ->and($user->tokens->first()->name)->toBe('Test Token')
+        ->and($user->tokens->first()->abilities)->toContain($ability->read());
+});
+
+it('automatically selects read ability when write is selected', function () {
+    $ability = ApiAbility::PORTFOLIO;
+
+    livewire(EditProfile::class)
+        ->mountAction('createApiToken')
+        ->fillForm([
+            "abilities.{$ability->write()}" => true,
+        ])
+        ->assertFormComponentActionDataSet([
+            "abilities.{$ability->read()}" => true,
+        ]);
+});
+
+it('can delete an api token', function () {
+    $user = auth()->user();
+    $user->createToken('Delete Me', [ApiAbility::TRANSACTION->read()]);
+    $token = $user->tokens->first();
+
+    livewire(EditProfile::class)
+        ->callAction('deleteApiToken', arguments: ['token' => $token->id])
+        ->assertHasNoErrors();
+
+    assertDatabaseMissing('sys_personal_access_tokens', ['id' => $token->id]);
 });
 
 it('displays the active user sessions on the profile page', function () {
