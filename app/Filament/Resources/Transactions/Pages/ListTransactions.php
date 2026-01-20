@@ -10,10 +10,11 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\TransactionExporter;
 use App\Filament\Imports\TransactionImporter;
 use App\Filament\Resources\Transactions\TransactionResource;
+use App\Models\Transaction;
+use App\Services\TransactionService;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\Rules\File;
 
 final class ListTransactions extends ListRecords
 {
@@ -72,14 +73,15 @@ final class ListTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            self::createAction(),
+            self::createAction()
+                /** @phpstan-ignore-next-line */
+                ->action(fn (TransactionService $service, array $data): Transaction => $service->create($data)),
 
             self::importAction()
                 ->modalHeading(__('transaction.import.modal_heading'))
                 ->importer(TransactionImporter::class)
                 ->failureNotificationTitle(__('transaction.import.failure_heading'))
-                ->successNotificationTitle(__('transaction.import.success_heading'))
-                ->fileRules([File::types(['csv'])->max(1024)]),
+                ->successNotificationTitle(__('transaction.import.success_heading')),
 
             self::exportAction()
                 ->modalHeading(__('transaction.export.modal_heading'))

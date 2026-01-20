@@ -117,7 +117,6 @@ final class Transaction extends Model
         self::creating(function (Transaction $transaction): void {
             $transaction->payee = $transaction->payee === null ? null : mb_trim($transaction->payee);
 
-            // Normalize transfer target for non-transfer types
             if ($transaction->type !== TransactionType::Transfer) {
                 $transaction->transfer_account_id = null;
             }
@@ -135,20 +134,9 @@ final class Transaction extends Model
             }
         });
 
-        self::created(function (Transaction $transaction): void {
-            Account::updateAccountBalance($transaction->account_id);
-
-            if ($transaction->type === TransactionType::Transfer && $transaction->transfer_account_id !== null) {
-                Account::updateAccountBalance($transaction->transfer_account_id);
-            }
-
-            self::updateCategoryStatistics($transaction->category_id, $transaction->date_time);
-        });
-
         self::updating(function (Transaction $transaction): void {
             $transaction->payee = $transaction->payee === null ? null : mb_trim($transaction->payee);
 
-            // Normalize transfer target for non-transfer types
             if ($transaction->type !== TransactionType::Transfer) {
                 $transaction->transfer_account_id = null;
             }
