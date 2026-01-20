@@ -17,7 +17,9 @@ use App\Filament\Resources\Users\RelationManagers\CategoriesRelationManager;
 use App\Filament\Resources\Users\RelationManagers\PortfoliosRelationManager;
 use App\Filament\Resources\Users\RelationManagers\SecuritiesRelationManager;
 use App\Models\User;
+use App\Services\UserService;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -222,7 +224,8 @@ final class UserResource extends Resource
                 self::updatedAtColumn(),
             ])
             ->defaultSort('username')
-            ->recordUrl(fn (User $record): string => ViewUser::getUrl(['record' => $record->id]));
+            ->recordUrl(fn (User $record): string => ViewUser::getUrl(['record' => $record->id]))
+            ->recordActions(self::getActions());
     }
 
     /**
@@ -234,6 +237,19 @@ final class UserResource extends Resource
         $query = parent::getEloquentQuery();
 
         return $query->with(['providers']);
+    }
+
+    /**
+     * @return array<int, Action>
+     */
+    public static function getActions(): array
+    {
+        return [
+            self::tableEditAction(),
+
+            self::tableDeleteAction()
+                ->using(fn (User $record) => app(UserService::class)->delete($record)),
+        ];
     }
 
     public static function getRelations(): array
