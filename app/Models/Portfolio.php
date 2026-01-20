@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\HasDeletableFiles;
 use App\Enums\Currency;
 use App\Enums\TradeType;
 use App\Models\Scopes\UserScope;
+use App\Observers\FileCleanupObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\PortfolioFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -17,7 +19,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property-read string $id
@@ -35,7 +36,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read Collection<int, Trade> $trades
  * @property-read string $marketValueColor
  */
-final class Portfolio extends Model
+final class Portfolio extends Model implements HasDeletableFiles
 {
     /** @use HasFactory<PortfolioFactory> */
     use HasFactory, HasUlids;
@@ -164,6 +165,19 @@ final class Portfolio extends Model
         return $this->hasMany(Trade::class, 'portfolio_id');
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function getFileFields(): array
+    {
+        return ['logo'];
+    }
+
+    public function getFileDisk(): string
+    {
+        return 'public';
+    }
+
     protected static function booted(): void
     {
         self::addGlobalScope(new UserScope);
@@ -181,22 +195,7 @@ final class Portfolio extends Model
             $portfolio->name = mb_trim($portfolio->name);
         });
 
-        self::updated(function (Portfolio $portfolio): void {
-            /** @var string|null $originalLogo */
-            $originalLogo = $portfolio->getOriginal('logo');
-
-            if ($originalLogo !== null && $originalLogo !== $portfolio->logo) {
-                if (Storage::disk('public')->exists($originalLogo)) {
-                    Storage::disk('public')->delete($originalLogo);
-                }
-            }
-        });
-
-        self::deleted(function (Portfolio $portfolio): void {
-            if ($portfolio->logo !== null && Storage::disk('public')->exists($portfolio->logo)) {
-                Storage::disk('public')->delete($portfolio->logo);
-            }
-        });
+        self::observe(FileCleanupObserver::class);
     }
 
     /**

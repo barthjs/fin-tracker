@@ -164,7 +164,6 @@ final class Category extends Model
             }
         });
 
-        // Listen for the updating event to trim the name and set the type before saving.
         self::updating(function (Category $category): void {
             $category->name = mb_trim($category->name);
             /** @phpstan-ignore-next-line */

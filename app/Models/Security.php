@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\HasDeletableFiles;
 use App\Enums\SecurityType;
 use App\Enums\TradeType;
 use App\Models\Scopes\UserScope;
+use App\Observers\FileCleanupObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\SecurityFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,7 +18,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property-read string $id
@@ -37,7 +38,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read User $user
  * @property-read Collection<int, Trade> $trades
  */
-final class Security extends Model
+final class Security extends Model implements HasDeletableFiles
 {
     /** @use HasFactory<SecurityFactory> */
     use HasFactory, HasUlids;
@@ -141,12 +142,25 @@ final class Security extends Model
         return $this->hasMany(Trade::class, 'security_id');
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function getFileFields(): array
+    {
+        return ['logo'];
+    }
+
+    public function getFileDisk(): string
+    {
+        return 'public';
+    }
+
     protected static function booted(): void
     {
         self::addGlobalScope(new UserScope);
 
         self::creating(function (Security $security): void {
-            self::setCoreFields($security);
+            self::trimFields($security);
 
             /** @phpstan-ignore-next-line */
             if ($security->user_id === null) {
@@ -155,28 +169,13 @@ final class Security extends Model
         });
 
         self::updating(function (Security $security): void {
-            self::setCoreFields($security);
+            self::trimFields($security);
         });
 
-        self::updated(function (Security $security): void {
-            /** @var string|null $originalLogo */
-            $originalLogo = $security->getOriginal('logo');
-
-            if ($originalLogo !== null && $originalLogo !== $security->logo) {
-                if (Storage::disk('public')->exists($originalLogo)) {
-                    Storage::disk('public')->delete($originalLogo);
-                }
-            }
-        });
-
-        self::deleted(function (Security $security): void {
-            if ($security->logo !== null && Storage::disk('public')->exists($security->logo)) {
-                Storage::disk('public')->delete($security->logo);
-            }
-        });
+        self::observe(FileCleanupObserver::class);
     }
 
-    private static function setCoreFields(self $security): void
+    private static function trimFields(self $security): void
     {
         $security->name = mb_trim($security->name);
         $security->isin = $security->isin === null ? null : mb_trim($security->isin);
