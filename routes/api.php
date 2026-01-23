@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\ApiAbility;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\PortfolioController;
 use App\Http\Controllers\Api\SystemController;
 use App\Http\Middleware\CheckAbilities;
 use App\Http\Middleware\EnsureUserIsActive;
@@ -21,4 +22,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->name('api.')->gr
 
     Route::apiResource('categories', CategoryController::class)
         ->middleware(CheckAbilities::class.':'.ApiAbility::CATEGORY->value);
+
+    Route::apiResource('portfolios', PortfolioController::class)
+        ->middleware(CheckAbilities::class.':'.ApiAbility::PORTFOLIO->value);
 });
