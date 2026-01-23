@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PortfolioController;
 use App\Http\Controllers\Api\SecurityController;
 use App\Http\Controllers\Api\SystemController;
+use App\Http\Controllers\Api\TradeController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Middleware\CheckAbilities;
 use App\Http\Middleware\EnsureUserIsActive;
@@ -30,6 +31,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->name('api.')->gr
 
     Route::apiResource('securities', SecurityController::class)
         ->middleware(CheckAbilities::class.':'.ApiAbility::SECURITY->value);
+
+    Route::apiResource('trades', TradeController::class)
+        ->middleware(CheckAbilities::class.':'.ApiAbility::TRADE->value);
 
     Route::apiResource('transactions', TransactionController::class)
         ->middleware(CheckAbilities::class.':'.ApiAbility::TRANSACTION->value);
