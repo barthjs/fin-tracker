@@ -33,7 +33,7 @@ return [
     'keycloak' => [
         'label' => 'Keycloak',
         'oidc_enabled' => (bool) env('KEYCLOAK_OIDC_ENABLED', false),
-        'base_url' => env('KEYCLOAK_OIDC_BASE_URL'),
+        'base_url' => env('KEYCLOAK_OIDC_URL'),
         'realms' => env('KEYCLOAK_OIDC_REALM', 'master'),
         'client_id' => env('KEYCLOAK_OIDC_CLIENT_ID'),
         'client_secret' => env('KEYCLOAK_OIDC_CLIENT_SECRET'),
