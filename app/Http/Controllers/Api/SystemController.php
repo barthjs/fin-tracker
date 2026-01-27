@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 final class SystemController
 {
     /**
-     * Minimal status route for guest users.
+     * Check system availability
      */
     public function up(): JsonResponse
     {
@@ -19,7 +19,7 @@ final class SystemController
     }
 
     /**
-     * Detailed health route for auth users.
+     * Get system health status
      */
     public function health(): JsonResponse
     {
@@ -30,7 +30,7 @@ final class SystemController
     }
 
     /**
-     * Get the current app version.
+     * Get the application version
      */
     public function version(): JsonResponse
     {

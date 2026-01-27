@@ -21,7 +21,7 @@ final class AccountController
     use ApiResponse;
 
     /**
-     * Display a listing of the resource.
+     * List accounts
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -48,7 +48,7 @@ final class AccountController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a new account
      */
     public function store(StoreAccountRequest $request): AccountResource
     {
@@ -58,7 +58,7 @@ final class AccountController
     }
 
     /**
-     * Display the specified resource.
+     * Get account details
      */
     public function show(Account $account): AccountResource
     {
@@ -66,7 +66,7 @@ final class AccountController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update an account
      */
     public function update(StoreAccountRequest $request, Account $account): AccountResource
     {
@@ -76,7 +76,7 @@ final class AccountController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete an account
      */
     public function destroy(Request $request, Account $account): JsonResponse|Response
     {

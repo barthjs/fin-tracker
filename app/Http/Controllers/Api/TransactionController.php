@@ -21,7 +21,7 @@ final class TransactionController
     use ApiResponse;
 
     /**
-     * Display a listing of the resource.
+     * List transactions
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -59,7 +59,7 @@ final class TransactionController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a new transaction
      */
     public function store(StoreTransactionRequest $request, TransactionService $service): TransactionResource
     {
@@ -69,7 +69,7 @@ final class TransactionController
     }
 
     /**
-     * Display the specified resource.
+     * Get transaction details
      */
     public function show(Transaction $transaction): TransactionResource
     {
@@ -77,7 +77,7 @@ final class TransactionController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a transaction
      */
     public function update(StoreTransactionRequest $request, Transaction $transaction, TransactionService $service): TransactionResource
     {
@@ -87,7 +87,7 @@ final class TransactionController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a transaction
      */
     public function destroy(Transaction $transaction, TransactionService $service): Response
     {

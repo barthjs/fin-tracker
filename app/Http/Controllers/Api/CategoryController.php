@@ -21,7 +21,7 @@ final class CategoryController
     use ApiResponse;
 
     /**
-     * Display a listing of the resource.
+     * List categories
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -47,7 +47,7 @@ final class CategoryController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a new category
      */
     public function store(StoreCategoryRequest $request): CategoryResource
     {
@@ -57,7 +57,7 @@ final class CategoryController
     }
 
     /**
-     * Display the specified resource.
+     * Get category details
      */
     public function show(Category $category): CategoryResource
     {
@@ -65,7 +65,7 @@ final class CategoryController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a category
      */
     public function update(StoreCategoryRequest $request, Category $category): CategoryResource
     {
@@ -75,7 +75,7 @@ final class CategoryController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a category
      */
     public function destroy(Request $request, Category $category): JsonResponse|Response
     {

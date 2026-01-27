@@ -21,7 +21,7 @@ final class PortfolioController
     use ApiResponse;
 
     /**
-     * Display a listing of the resource.
+     * List portfolios
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -48,7 +48,7 @@ final class PortfolioController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a new portfolio
      */
     public function store(StorePortfolioRequest $request): PortfolioResource
     {
@@ -58,7 +58,7 @@ final class PortfolioController
     }
 
     /**
-     * Display the specified resource.
+     * Get portfolio details
      */
     public function show(Portfolio $portfolio): PortfolioResource
     {
@@ -66,7 +66,7 @@ final class PortfolioController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a portfolio
      */
     public function update(StorePortfolioRequest $request, Portfolio $portfolio): PortfolioResource
     {
@@ -76,7 +76,7 @@ final class PortfolioController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a portfolio
      */
     public function destroy(Request $request, Portfolio $portfolio): Response|JsonResponse
     {

@@ -22,7 +22,7 @@ final class SecurityController
     use ApiResponse;
 
     /**
-     * Display a listing of the resource.
+     * List securities
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -55,7 +55,7 @@ final class SecurityController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a new security
      */
     public function store(StoreSecurityRequest $request): SecurityResource
     {
@@ -65,7 +65,7 @@ final class SecurityController
     }
 
     /**
-     * Display the specified resource.
+     * Get security details
      */
     public function show(Security $security): SecurityResource
     {
@@ -73,7 +73,7 @@ final class SecurityController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a security
      */
     public function update(StoreSecurityRequest $request, SecurityService $service, Security $security): SecurityResource
     {
@@ -83,7 +83,7 @@ final class SecurityController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a security
      */
     public function destroy(Request $request, Security $security): Response|JsonResponse
     {

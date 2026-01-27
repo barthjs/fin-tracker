@@ -20,7 +20,7 @@ final class TradeController
     use ApiResponse;
 
     /**
-     * Display a listing of the resource.
+     * List trades
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -57,7 +57,7 @@ final class TradeController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create a new trade
      */
     public function store(StoreTradeRequest $request, TradeService $service): TradeResource
     {
@@ -67,7 +67,7 @@ final class TradeController
     }
 
     /**
-     * Display the specified resource.
+     * Get trade details
      */
     public function show(Trade $trade): TradeResource
     {
@@ -75,7 +75,7 @@ final class TradeController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a trade
      */
     public function update(StoreTradeRequest $request, Trade $trade, TradeService $service): TradeResource
     {
@@ -85,7 +85,7 @@ final class TradeController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a trade
      */
     public function destroy(Trade $trade, TradeService $service): Response
     {

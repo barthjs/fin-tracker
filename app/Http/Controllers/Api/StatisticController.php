@@ -17,7 +17,7 @@ final class StatisticController
     use ApiResponse;
 
     /**
-     * Display a listing of the resource.
+     * List category statistics
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -54,7 +54,7 @@ final class StatisticController
     }
 
     /**
-     * Display the specified resource.
+     * Get category statistic details
      */
     public function show(CategoryStatistic $statistic): StatisticResource
     {
