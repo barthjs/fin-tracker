@@ -14,6 +14,9 @@ use App\Services\Oidc\OidcService;
 use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonImmutable;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Filament\Actions\Exports\Jobs\ExportCompletion;
 use Filament\Actions\Exports\Jobs\ExportCsv as BaseExportCsv;
 use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportCsv;
@@ -120,5 +123,13 @@ final class AppServiceProvider extends ServiceProvider
                 ->visible(outsidePanels: true)
                 ->locales(['de', 'en']);
         });
+
+        Scramble::configure()
+            ->preferPatchMethod()
+            ->withDocumentTransformers(function (OpenApi $openApi): void {
+                $openApi->secure(
+                    SecurityScheme::http('bearer')
+                );
+            });
     }
 }

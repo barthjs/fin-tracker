@@ -40,6 +40,7 @@
     <li><a href="#backup">Backup</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#development">Development</a></li>
+    <li><a href="#api-reference">API Reference</a></li>
     <li><a href="#built-with">Built With</a></li>
     <li><a href="#license">License</a></li>
   </ol>
@@ -218,7 +219,15 @@ Please read the [contributing guidelines](CONTRIBUTING.md) for more details.
 
 ## Development
 
-See the [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to setup a development environment.
+See the [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to set up a development environment.
+
+## API Reference
+
+Fin-Tracker includes a RESTful API. The API is documented using the OpenAPI standard and is accessible directly within
+your installation:
+
+- **Interactive Documentation**: `https://your-domain.com/docs/api`
+- **OpenAPI Specification**: `https://your-domain.com/docs/api.json`
 
 ## Built With
 
