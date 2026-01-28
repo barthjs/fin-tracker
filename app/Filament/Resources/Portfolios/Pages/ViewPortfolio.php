@@ -18,6 +18,7 @@ final class ViewPortfolio extends ViewRecord
     {
         return [
             self::editAction(),
+            self::deleteAction(),
         ];
     }
 }

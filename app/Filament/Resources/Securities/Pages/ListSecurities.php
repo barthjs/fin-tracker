@@ -10,7 +10,6 @@ use App\Filament\Imports\SecurityImporter;
 use App\Filament\Resources\Securities\SecurityResource;
 use App\Filament\Resources\Securities\Widgets\SecurityChart;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Validation\Rules\File;
 
 final class ListSecurities extends ListRecords
 {
@@ -34,8 +33,7 @@ final class ListSecurities extends ListRecords
                 ->modalHeading(__('security.import.modal_heading'))
                 ->importer(SecurityImporter::class)
                 ->failureNotificationTitle(__('security.import.failure_heading'))
-                ->successNotificationTitle(__('security.import.success_heading'))
-                ->fileRules([File::types(['csv'])->max(1024)]),
+                ->successNotificationTitle(__('security.import.success_heading')),
 
             self::exportAction()
                 ->modalHeading(__('security.export.modal_heading'))

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\HasDeletableFiles;
+use App\Observers\FileCleanupObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
@@ -19,6 +21,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property-read string $id
@@ -43,11 +46,12 @@ use Illuminate\Support\Facades\Storage;
  * @property-read Collection<int, Portfolio> $portfolios
  * @property-read Collection<int, Security> $securities
  * @property-read Collection<int, UserProvider> $providers
+ * @property-read Collection<int, PersonalAccessToken> $tokens
  */
-final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasName
+final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasDeletableFiles, HasName
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasUlids, Notifiable;
+    use HasApiTokens, HasFactory, HasUlids, Notifiable;
 
     protected $table = 'sys_users';
 
@@ -173,15 +177,23 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
         return $this->app_authentication_recovery_codes;
     }
 
-    public function isOidcUser(): bool
-    {
-        return $this->providers()->exists();
-    }
-
     public function saveAppAuthenticationRecoveryCodes(?array $codes): void
     {
         $this->app_authentication_recovery_codes = $codes;
         $this->save();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getFileFields(): array
+    {
+        return ['avatar'];
+    }
+
+    public function getFileDisk(): string
+    {
+        return 'public';
     }
 
     protected static function booted(): void
@@ -190,21 +202,6 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
             $user->locale = app()->getLocale();
         });
 
-        self::updated(function (User $user): void {
-            /** @var string|null $originalAvatar */
-            $originalAvatar = $user->getOriginal('avatar');
-
-            if ($originalAvatar !== null && $originalAvatar !== $user->avatar) {
-                if (Storage::disk('public')->exists($originalAvatar)) {
-                    Storage::disk('public')->delete($originalAvatar);
-                }
-            }
-        });
-
-        self::deleted(function (User $user): void {
-            if ($user->avatar !== null && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-        });
+        self::observe(FileCleanupObserver::class);
     }
 }

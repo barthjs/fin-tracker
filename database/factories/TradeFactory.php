@@ -26,8 +26,8 @@ final class TradeFactory extends Factory
             'date_time' => now(),
             'type' => fake()->randomElement(TradeType::cases()),
             'price' => fake()->randomFloat(2, 1, 100),
-            'fee' => fake()->randomFloat(2, 0, 10),
             'tax' => fake()->randomFloat(2, 0, 10),
+            'fee' => fake()->randomFloat(2, 0, 10),
             'notes' => fake()->sentence(),
         ];
     }

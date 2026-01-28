@@ -4,15 +4,26 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Auth;
 
+use App\Enums\ApiAbility;
 use App\Filament\Concerns\HasResourceFormFields;
 use App\Models\User;
 use App\Services\Oidc\OidcService;
+use App\Services\UserService;
+use Carbon\CarbonImmutable;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +32,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
+use Laravel\Sanctum\PersonalAccessToken;
 
 final class EditProfile extends \Filament\Auth\Pages\EditProfile
 {
@@ -29,6 +42,11 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
 
     /** @var array<array{label: string, is_connected: bool, id?: int|string|null}> */
     public array $oidcProviders = [];
+
+    /** @var \Illuminate\Database\Eloquent\Collection<int, PersonalAccessToken> */
+    public Collection $apiTokens;
+
+    public ?string $newApiToken = null;
 
     /**
      * @var array<int, array{
@@ -59,6 +77,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
 
         $this->loadOidcProviders();
         $this->loadSessions();
+        $this->loadApiTokens();
 
         if (auth()->user()->password === null) {
             Filament::getCurrentOrDefaultPanel()?->multiFactorAuthentication([]);
@@ -181,6 +200,136 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             });
     }
 
+    protected function createApiTokenAction(): Action
+    {
+        return Action::make('createApiToken')
+            ->icon('tabler-plus')
+            ->color('primary')
+            ->size('sm')
+            ->label(__('profile.api_tokens.create'))
+            ->mountUsing(fn () => $this->newApiToken = null)
+            ->schema([
+                TextInput::make('plain_token')
+                    ->label(__('profile.api_tokens.token_value'))
+                    ->helperText(__('profile.api_tokens.token_warning'))
+                    ->visible(fn (): bool => filled($this->newApiToken))
+                    ->readonly()
+                    ->copyable(),
+
+                TextInput::make('name')
+                    ->label(__('profile.api_tokens.name'))
+                    ->required()
+                    ->maxLength(255)
+                    ->autofocus()
+                    ->hidden(fn (): bool => filled($this->newApiToken))
+                    ->rules([
+                        fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                            /** @var array<string, bool> $abilities */
+                            $abilities = $get('abilities') ?? [];
+
+                            if (! in_array(true, $abilities, true)) {
+                                $fail(__('profile.api_tokens.min_abilities'));
+                            }
+                        },
+                    ]),
+
+                Section::make(__('profile.api_tokens.abilities'))
+                    ->hidden(fn (): bool => filled($this->newApiToken))
+                    ->schema([
+                        Actions::make([
+                            Action::make('selectAll')
+                                ->icon('tabler-checks')
+                                ->size('sm')
+                                ->label(__('profile.api_tokens.select_all'))
+                                ->action(function (Set $set): void {
+                                    foreach (ApiAbility::cases() as $ability) {
+                                        $set("abilities.{$ability->read()}", true);
+                                        $set("abilities.{$ability->write()}", true);
+                                    }
+                                }),
+
+                            Action::make('deselectAll')
+                                ->icon('tabler-x')
+                                ->color('gray')
+                                ->size('sm')
+                                ->label(__('profile.api_tokens.deselect_all'))
+                                ->action(fn (Set $set) => $set('abilities', [])),
+                        ])->columnSpanFull(),
+                        ...collect(ApiAbility::cases())->map(function (ApiAbility $ability): Component {
+                            $readKey = $ability->read();
+                            $writeKey = $ability->write();
+
+                            return Grid::make()
+                                ->columns(3)
+                                ->schema([
+                                    TextEntry::make("label_$ability->value}")
+                                        ->hiddenLabel()
+                                        ->state(Str::ucfirst(__("$ability->value.plural_label"))),
+
+                                    Checkbox::make("abilities.$readKey")
+                                        ->label(__('profile.api_tokens.read'))
+                                        ->live(),
+
+                                    Checkbox::make("abilities.$writeKey")
+                                        ->label(__('profile.api_tokens.write'))
+                                        ->live()
+                                        ->afterStateUpdated(function (mixed $state, Set $set) use ($readKey): void {
+                                            if ($state) {
+                                                $set("abilities.$readKey", true);
+                                            }
+                                        }),
+                                ]);
+                        })->all(),
+                    ]),
+
+                DatePicker::make('expires_at')
+                    ->label(__('profile.api_tokens.expires_at'))
+                    ->hidden(fn (): bool => filled($this->newApiToken)),
+            ])
+            ->modalSubmitAction(fn (Action $action): false|Action => filled($this->newApiToken) ? false : $action)
+            ->modalCancelActionLabel(fn (): ?string => filled($this->newApiToken) ? (string) __('profile.api_tokens.close') : null)
+            ->action(function (array $data, Action $action, Schema $form): void {
+                /** @var array{name: string, abilities: array<string, bool>, expires_at: string|null} $data */
+                $selectedAbilities = array_keys(array_filter(
+                    $data['abilities'],
+                    fn (bool $value): bool => $value === true
+                ));
+
+                $expiresAt = is_string($data['expires_at'])
+                    ? CarbonImmutable::parse($data['expires_at'])
+                    : null;
+
+                $token = auth()->user()->createToken($data['name'], $selectedAbilities, $expiresAt);
+
+                $this->newApiToken = $token->plainTextToken;
+                $form->fill([
+                    'plain_token' => $this->newApiToken,
+                ]);
+
+                $this->loadApiTokens();
+                $action->halt();
+            });
+    }
+
+    protected function deleteApiTokenAction(): Action
+    {
+        return Action::make('deleteApiToken')
+            ->icon('tabler-trash')
+            ->color('danger')
+            ->size('sm')
+            ->label(__('profile.api_tokens.delete'))
+            ->requiresConfirmation()
+            ->action(function (array $arguments): void {
+                auth()->user()->tokens()->where('id', $arguments['token'])->delete();
+                $this->loadApiTokens();
+
+                Notification::make()
+                    ->success()
+                    ->title(__('profile.api_tokens.deleted'))
+                    ->send();
+            });
+    }
+
     protected function logoutOtherBrowserSessionsAction(): Action
     {
         $form = auth()->user()->password !== null ? [
@@ -245,8 +394,11 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             ->modalWidth(Width::Large)
             ->requiresConfirmation()
             ->schema($form)
-            ->action(function (): void {
-                Auth::user()->delete();
+            ->action(function (UserService $service): void {
+                /** @var User $user */
+                $user = auth()->user();
+
+                $service->delete($user);
 
                 Session::invalidate();
                 Session::regenerateToken();
@@ -273,9 +425,15 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
         }
     }
 
+    private function loadApiTokens(): void
+    {
+        $this->apiTokens = auth()->user()->tokens()
+            ->latest()
+            ->get();
+    }
+
     private function loadSessions(): void
     {
-
         /** @var Collection<int, object{ id: string, user_agent: string|null, ip_address: string|null, last_activity: int }> $sessions */
         $sessions = DB::table('sys_sessions')
             ->where('user_id', '=', \auth()->user()->id)

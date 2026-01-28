@@ -16,12 +16,11 @@ use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
+use App\Services\TradeService;
 use BackedEnum;
 use Carbon\Carbon;
 use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -37,7 +36,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 final class TradeResource extends Resource
@@ -248,7 +246,6 @@ final class TradeResource extends Resource
                 self::notesColumn()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->paginated(fn (): bool => Trade::count() > 20)
             ->defaultSort('date_time', 'desc')
             ->filters([
                 SelectFilter::make('type')
@@ -301,10 +298,10 @@ final class TradeResource extends Resource
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(4)
             ->headerActions([
-                self::createAction()
+                self::tableCreateAction()
                     ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTrades)
                     /** @phpstan-ignore-next-line */
-                    ->using(fn (array $data) => Trade::create($data)),
+                    ->action(fn (TradeService $service, array $data): Trade => $service->create($data)),
             ])
             ->recordActions(self::getActions())
             ->toolbarActions(self::getBulkActions());
@@ -317,151 +314,36 @@ final class TradeResource extends Resource
     {
         return [
             self::tableEditAction()
-                ->using(function (Trade $record, array $data): Trade {
-                    /** @var array<string, mixed> $data */
-
-                    /** @var float $oldAmount */
-                    $oldAmount = $record->getOriginal('total_amount');
-                    /** @var float $oldQuantity */
-                    $oldQuantity = $record->getOriginal('quantity');
-                    /** @var string $oldAccountId */
-                    $oldAccountId = $record->getOriginal('account_id');
-                    /** @var string $oldPortfolioId */
-                    $oldPortfolioId = $record->getOriginal('portfolio_id');
-                    /** @var string $oldSecurityId */
-                    $oldSecurityId = $record->getOriginal('security_id');
-                    /** @var TradeType $oldType */
-                    $oldType = $record->getOriginal('type');
-
-                    DB::transaction(function () use ($record, $data, $oldAmount, $oldQuantity, $oldAccountId, $oldPortfolioId, $oldSecurityId, $oldType): void {
-                        $record->update($data);
-
-                        $quantity = $record->quantity;
-                        $price = $record->price;
-                        $tax = $record->tax;
-                        $fee = $record->fee;
-                        $type = $record->type;
-                        $amount = self::calculateTotalAmount($quantity, $price, $tax, $fee, $type);
-
-                        $accountId = $record->account_id;
-                        $portfolioId = $record->portfolio_id;
-                        $securityId = $record->security_id;
-
-                        if ($oldAccountId !== $accountId) {
-                            Account::updateAccountBalance($oldAccountId);
-                            Account::updateAccountBalance($accountId);
-                        } elseif ($oldAmount !== $amount || $oldType !== $type) {
-                            Account::updateAccountBalance($accountId);
-                        }
-
-                        if ($oldPortfolioId !== $portfolioId) {
-                            Portfolio::updatePortfolioMarketValue($oldPortfolioId);
-                            Portfolio::updatePortfolioMarketValue($portfolioId);
-                        } elseif ($oldQuantity !== $quantity || $oldType !== $type) {
-                            Portfolio::updatePortfolioMarketValue($portfolioId);
-                        }
-
-                        if ($oldSecurityId !== $securityId) {
-                            Security::updateSecurityQuantity($oldSecurityId);
-                            Security::updateSecurityQuantity($securityId);
-                        } elseif ($oldQuantity !== $quantity || $oldType !== $type) {
-                            Security::updateSecurityQuantity($securityId);
-                        }
-                    });
-
-                    return $record;
-                }),
+                /** @phpstan-ignore-next-line */
+                ->action(fn (TradeService $service, Trade $record, array $data): Trade => $service->update($record, $data)),
 
             self::tableDeleteAction()
-                ->after(function (Trade $record): Trade {
-                    Account::updateAccountBalance($record->account_id);
-                    Portfolio::updatePortfolioMarketValue($record->portfolio_id);
-                    Security::updateSecurityQuantity($record->security_id);
-
-                    return $record;
-                }),
+                ->action(fn (TradeService $service, Trade $record) => $service->delete($record)),
         ];
     }
 
     public static function getBulkActions(): BulkActionGroup
     {
         return BulkActionGroup::make([
-            DeleteBulkAction::make()
-                ->icon('tabler-trash')
-                ->after(function (Collection $records): void {
-                    /** @var Collection<int, Trade> $records */
-                    /** @var array<string> $accountIds */
-                    $accountIds = $records->pluck('account_id')->unique()->all();
-                    /** @var array<string> $portfolioIds */
-                    $portfolioIds = $records->pluck('portfolio_id')->unique()->all();
-                    /** @var array<string> $securityIds */
-                    $securityIds = $records->pluck('security_id')->unique()->all();
+            self::tableBulkDeleteAction()
+                ->action(fn (TradeService $service, Collection $records) => $service->bulkDelete($records)),
 
-                    foreach ($accountIds as $accountId) {
-                        Account::updateAccountBalance($accountId);
-                    }
-
-                    foreach ($portfolioIds as $portfolioId) {
-                        Portfolio::updatePortfolioMarketValue($portfolioId);
-                    }
-
-                    foreach ($securityIds as $securityId) {
-                        Security::updateSecurityQuantity($securityId);
-                    }
-                }),
-
-            BulkAction::make('account_id')
-                ->icon('tabler-edit')
+            self::tableBulkEditAction('account_id')
                 ->label(__('account.buttons.bulk_edit_account'))
                 ->schema([
                     self::accountSelectField(),
                 ])
-                ->action(function (Collection $records, array $data): void {
-                    /**
-                     * Save old values before updating
-                     *
-                     * @var Collection<int, Trade> $records
-                     * @var array<string> $data
-                     * @var array<string> $oldAccountIds
-                     */
-                    $oldAccountIds = $records->pluck('account_id')->unique();
-                    $records->each->update(['account_id' => $data['account_id']]);
-
-                    // update balance for the new account
-                    Account::updateAccountBalance(($data['account_id']));
-
-                    // update balance for old accounts
-                    foreach ($oldAccountIds as $oldAccountId) {
-                        Account::updateAccountBalance($oldAccountId);
-                    }
-                })
+                /** @phpstan-ignore-next-line */
+                ->action(fn (TradeService $service, Collection $records, array $data) => $service->bulkUpdate($records, $data))
                 ->deselectRecordsAfterCompletion(),
 
-            BulkAction::make('portfolio_id')
-                ->icon('tabler-edit')
+            self::tableBulkEditAction('portfolio_id')
                 ->label(__('portfolio.buttons.bulk_edit_portfolio'))
                 ->schema([
                     self::portfolioSelectField(),
                 ])
-                ->action(function (Collection $records, array $data): void {
-                    /**
-                     * Save old values before updating
-                     *
-                     * @var Collection<int, Trade> $records
-                     * @var array<string> $data
-                     * @var array<string> $oldPortfolioIds
-                     */
-                    $oldPortfolioIds = $records->pluck('portfolio_id')->unique();
-                    $records->each->update(['portfolio_id' => $data['portfolio_id']]);
-
-                    // update market value for the new portfolio
-                    Portfolio::updatePortfolioMarketValue($data['portfolio_id']);
-
-                    // update market value for old portfolios
-                    foreach ($oldPortfolioIds as $oldPortfolioId) {
-                        Portfolio::updatePortfolioMarketValue($oldPortfolioId);
-                    }
-                })
+                /** @phpstan-ignore-next-line */
+                ->action(fn (TradeService $service, Collection $records, array $data) => $service->bulkUpdate($records, $data))
                 ->deselectRecordsAfterCompletion(),
         ]);
     }

@@ -18,6 +18,7 @@ final class ViewSecurity extends ViewRecord
     {
         return [
             self::editAction(),
+            self::deleteAction(),
         ];
     }
 }

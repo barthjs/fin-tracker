@@ -14,13 +14,11 @@ use App\Filament\Resources\Transactions\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Services\TransactionService;
 use BackedEnum;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
 use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -37,7 +35,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 final class TransactionResource extends Resource
@@ -118,7 +115,6 @@ final class TransactionResource extends Resource
                             ->pluck('payee')
                             ->toArray()
                         )
-                        ->required()
                         ->maxLength(255),
 
                     self::categorySelectField()
@@ -217,10 +213,10 @@ final class TransactionResource extends Resource
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(3)
             ->headerActions([
-                self::createAction()
+                self::tableCreateAction()
                     ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTransactions)
                     /** @phpstan-ignore-next-line */
-                    ->using(fn (array $data): Transaction => Transaction::create($data)),
+                    ->action(fn (TransactionService $service, array $data): Transaction => $service->create($data)),
             ])
             ->recordActions(self::getActions())
             ->toolbarActions(self::getBulkActions());
@@ -233,135 +229,27 @@ final class TransactionResource extends Resource
     {
         return [
             self::tableEditAction()
-                ->using(function (Transaction $record, array $data): Transaction {
-                    /** @var array<string, mixed> $data */
-
-                    /** @var CarbonInterface $oldDate */
-                    $oldDate = $record->getOriginal('date_time');
-                    /** @var float $oldAmount */
-                    $oldAmount = $record->getOriginal('amount');
-                    /** @var string $oldAccountId */
-                    $oldAccountId = $record->getOriginal('account_id');
-                    /** @var string $oldCategoryId */
-                    $oldCategoryId = $record->getOriginal('category_id');
-                    /** @var string|null $oldTransferAccountId */
-                    $oldTransferAccountId = $record->getOriginal('transfer_account_id');
-                    /** @var TransactionType $oldType */
-                    $oldType = $record->getOriginal('type');
-
-                    DB::transaction(function () use ($record, $data, $oldDate, $oldAmount, $oldAccountId, $oldCategoryId, $oldTransferAccountId, $oldType) {
-                        $record->update($data);
-
-                        $amount = $record->amount;
-                        $date = $record->date_time;
-                        $accountId = $record->account_id;
-                        $categoryId = $record->category_id;
-                        $type = $record->type;
-                        $transferAccountId = $record->transfer_account_id;
-
-                        $accountsToUpdate = [];
-
-                        if ($oldAccountId !== $accountId) {
-                            $accountsToUpdate[] = $oldAccountId;
-                            $accountsToUpdate[] = $accountId;
-                        } elseif ($oldAmount !== $amount || $oldType !== $type) {
-                            $accountsToUpdate[] = $accountId;
-                        }
-
-                        // Handle transfer target accounts
-                        $wasTransfer = $oldType === TransactionType::Transfer;
-                        $isTransfer = $type === TransactionType::Transfer;
-
-                        if ($wasTransfer && $oldTransferAccountId) {
-                            $accountsToUpdate[] = $oldTransferAccountId;
-                        }
-                        if ($isTransfer && $transferAccountId) {
-                            $accountsToUpdate[] = $transferAccountId;
-                        }
-
-                        foreach (array_unique(array_filter($accountsToUpdate)) as $id) {
-                            Account::updateAccountBalance($id);
-                        }
-
-                        if ($oldCategoryId !== $categoryId || $date->notEqualTo($oldDate) || $oldAmount !== $amount || $oldType !== $type) {
-                            Transaction::updateCategoryStatistics($oldCategoryId, $oldDate);
-                            Transaction::updateCategoryStatistics($categoryId, $date);
-                        }
-                    });
-
-                    return $record;
-                }),
+                /** @phpstan-ignore-next-line */
+                ->action(fn (TransactionService $service, Transaction $record, array $data): Transaction => $service->update($record, $data)),
 
             self::tableDeleteAction()
-                ->after(function (Transaction $record): Transaction {
-                    Account::updateAccountBalance($record->account_id);
-                    if ($record->type === TransactionType::Transfer && $record->transfer_account_id !== null) {
-                        Account::updateAccountBalance($record->transfer_account_id);
-                    }
-                    Transaction::updateCategoryStatistics($record->category_id, $record->date_time);
-
-                    return $record;
-                }),
+                ->action(fn (TransactionService $service, Transaction $record) => $service->delete($record)),
         ];
     }
 
     public static function getBulkActions(): BulkActionGroup
     {
         return BulkActionGroup::make([
-            DeleteBulkAction::make()
-                ->icon('tabler-trash')
-                ->after(function (Collection $records): void {
-                    /** @var Collection<int, Transaction> $records */
-                    $accountIds = [];
-                    $transferAccountIds = [];
-                    $categories = [];
+            self::tableBulkDeleteAction()
+                ->action(fn (TransactionService $service, Collection $records) => $service->bulkDelete($records)),
 
-                    foreach ($records as $record) {
-                        $accountIds[] = $record->account_id;
-                        if ($record->type === TransactionType::Transfer && $record->transfer_account_id !== null) {
-                            $transferAccountIds[] = $record->transfer_account_id;
-                        }
-                        $categories[] = [$record->category_id, $record->date_time];
-                    }
-
-                    foreach (array_unique($accountIds) as $accountId) {
-                        Account::updateAccountBalance($accountId);
-                    }
-
-                    foreach (array_unique($transferAccountIds) as $accountId) {
-                        Account::updateAccountBalance($accountId);
-                    }
-
-                    foreach ($categories as [$categoryId, $date]) {
-                        Transaction::updateCategoryStatistics($categoryId, $date);
-                    }
-                }),
-
-            BulkAction::make('account_id')
-                ->icon('tabler-edit')
+            self::tableBulkEditAction('account_id')
                 ->label(__('account.buttons.bulk_edit_account'))
                 ->schema([
                     self::accountSelectField(),
                 ])
-                ->action(function (Collection $records, array $data): void {
-                    /**
-                     * Save old values before updating
-                     *
-                     * @var Collection<int, Transaction> $records
-                     * @var array<string> $data
-                     * @var array<string> $oldAccountIds
-                     */
-                    $oldAccountIds = $records->pluck('account_id')->unique();
-                    $records->each->update(['account_id' => $data['account_id']]);
-
-                    // update balance for the new account
-                    Account::updateAccountBalance($data['account_id']);
-
-                    // update balance for old accounts
-                    foreach ($oldAccountIds as $oldAccountId) {
-                        Account::updateAccountBalance($oldAccountId);
-                    }
-                })
+                /** @phpstan-ignore-next-line */
+                ->action(fn (TransactionService $service, Collection $records, array $data) => $service->bulkEditAccount($records, $data))
                 ->deselectRecordsAfterCompletion(),
         ]);
     }

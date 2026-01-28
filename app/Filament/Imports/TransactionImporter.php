@@ -10,6 +10,7 @@ use App\Filament\Concerns\HasResourceImportColumns;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Services\TransactionService;
 use App\Tools\Convertor;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -127,6 +128,13 @@ final class TransactionImporter extends Importer
     public function resolveRecord(): Transaction
     {
         return new Transaction;
+    }
+
+    public function saveRecord(): void
+    {
+        $service = app(TransactionService::class);
+        /** @phpstan-ignore-next-line  */
+        $this->record = $service->create($this->record->toArray());
     }
 
     public function getJobBatchName(): string

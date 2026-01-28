@@ -20,6 +20,26 @@ return [
         'auth_failed_title' => 'Authentication via :provider failed.',
     ],
 
+    'api_tokens' => [
+        'heading' => 'API Tokens',
+        'delete' => 'Delete',
+        'deleted' => 'Token revoked',
+        'empty' => 'You haven\'t created any API tokens yet.',
+        'expired' => 'Expired',
+        'create' => 'Create API Token',
+        'select_all' => 'Select all',
+        'deselect_all' => 'Deselect all',
+        'name' => 'Token name',
+        'abilities' => 'Abilities',
+        'read' => 'Read',
+        'write' => 'Read & Write',
+        'expires_at' => 'Expiration date',
+        'min_abilities' => 'Please select at least one ability.',
+        'token_value' => 'Your API Token',
+        'token_warning' => 'Copy this token now. It will never be shown again.',
+        'close' => 'Close',
+    ],
+
     'sessions' => [
         'heading' => 'Devices & Sessions',
         'delete' => 'Log Out Other Browser Sessions',

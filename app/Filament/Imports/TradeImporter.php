@@ -10,6 +10,7 @@ use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
+use App\Services\TradeService;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -98,6 +99,13 @@ final class TradeImporter extends Importer
     public function resolveRecord(): Trade
     {
         return new Trade;
+    }
+
+    public function saveRecord(): void
+    {
+        $service = app(TradeService::class);
+        /** @phpstan-ignore-next-line  */
+        $this->record = $service->create($this->record->toArray());
     }
 
     public function getJobBatchName(): string

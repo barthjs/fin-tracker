@@ -40,6 +40,7 @@
     <li><a href="#backup">Backup</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#development">Development</a></li>
+    <li><a href="#api-reference">API Reference</a></li>
     <li><a href="#built-with">Built With</a></li>
     <li><a href="#license">License</a></li>
   </ol>
@@ -121,35 +122,48 @@ Use the `.env` file to adjust configuration settings:
 
 ## OpenID Connect (SSO)
 
-Fin-Tracker supports authentication via OpenID Connect. You can configure a generic provider or use pre-configured
-integrations for common identity providers.
+Fin-Tracker supports authentication via OpenID Connect (OIDC). You can configure a generic provider or use
+pre-configured integrations for common identity providers.
 
 ### Generic Provider
 
-To use a generic OIDC provider, set the following variables in your `.env`:
+To use a generic OIDC provider, set the following variables in your `.env`. The provider must support OIDC Discovery via
+the provided base URL.
 
 ```dotenv
 OIDC_ENABLED=true
-OIDC_BASE_URL=
-OIDC_CLIENT_ID=
+OIDC_URL=https://auth.example.com
+OIDC_CLIENT_ID=your-client-id
 OIDC_CLIENT_SECRET=your-client-secret
 ```
 
 ### Specialized Providers
 
-Fin-Tracker comes with pre-configured integrations for the following identity providers. Most follow a standard pattern
-for environment variables: `[PREFIX]_OIDC_ENABLED`, `_URL`, `_CLIENT_ID`, and `_CLIENT_SECRET`.
+Fin-Tracker includes built-in support for the following identity providers. These follow a consistent environment
+variable pattern:
+
+```dotenv
+PREFIX_OIDC_ENABLED=true
+PREFIX_OIDC_URL=https://auth.example.com
+PREFIX_OIDC_CLIENT_ID=your-client-id
+PREFIX_OIDC_CLIENT_SECRET=your-client-secret
+```
 
 - [Authelia](https://www.authelia.com/configuration/identity-providers/openid-connect/clients/): Use prefix `AUTHELIA`
 - [Authentik](https://docs.goauthentik.io/add-secure-apps/providers/oauth2/): Use prefix `AUTHENTIK`
 - [Gitea](https://docs.gitea.com/development/oauth2-provider): Use prefix `GITEA`
-- [Keycloak](https://www.keycloak.org/documentation): `KEYCLOAK`
+- [Keycloak](https://www.keycloak.org/documentation): Use prefix `KEYCLOAK` (see specific configuration below)
 
-Keycloak: Keycloak requires a `REALM` and uses a `BASE_URL` instead of a discovery URL:
+#### Keycloak Configuration
+
+Keycloak requires a realm name in addition to the base URL:
 
 ```dotenv
-KEYCLOAK_OIDC_BASE_URL=https://auth.example.com
+KEYCLOAK_OIDC_ENABLED=true
+KEYCLOAK_OIDC_URL=https://auth.example.com
 KEYCLOAK_OIDC_REALM=master
+KEYCLOAK_OIDC_CLIENT_ID=your-client-id
+KEYCLOAK_OIDC_CLIENT_SECRET=your-client-secret
 ```
 
 ### Redirect URI
@@ -158,7 +172,8 @@ When configuring your Identity Provider (IdP), you must use the following callba
 
 `https://your-domain.com/auth/oidc/[provider]/callback`
 
-Replace `[provider]` with the name of your provider (`authelia`, `authentik`, `gitea`, `keycloak`, `oidc`).
+Replace `[provider]` with the identifier of your provider (`authelia`, `authentik`, `gitea`, `keycloak`, or `oidc` for
+the generic provider).
 
 ## Account Management
 
@@ -218,7 +233,15 @@ Please read the [contributing guidelines](CONTRIBUTING.md) for more details.
 
 ## Development
 
-See the [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to setup a development environment.
+See the [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to set up a development environment.
+
+## API Reference
+
+Fin-Tracker includes a RESTful API. The API is documented using the OpenAPI standard and is accessible directly within
+your installation:
+
+- **Interactive Documentation**: `https://your-domain.com/docs/api`
+- **OpenAPI Specification**: `https://your-domain.com/docs/api.json`
 
 ## Built With
 

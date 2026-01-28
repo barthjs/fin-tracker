@@ -8,11 +8,15 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Jobs\ExportCompletionWithLocale;
 use App\Jobs\ExportCsvWithLocale;
 use App\Jobs\ImportCsvWithLocale;
+use App\Models\PersonalAccessToken;
 use App\Services\Oidc\OidcProvider;
 use App\Services\Oidc\OidcService;
 use BezhanSalleh\LanguageSwitch\Events\LocaleChanged;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonImmutable;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Filament\Actions\Exports\Jobs\ExportCompletion;
 use Filament\Actions\Exports\Jobs\ExportCsv as BaseExportCsv;
 use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportCsv;
@@ -29,6 +33,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Sanctum\Sanctum;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
 final class AppServiceProvider extends ServiceProvider
@@ -55,6 +60,8 @@ final class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict();
         Model::unguard();
         Vite::useAggressivePrefetching();
+
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
         Event::listen(function (SocialiteWasCalled $event): void {
             $oidcService = $this->app->make(OidcService::class);
@@ -116,5 +123,13 @@ final class AppServiceProvider extends ServiceProvider
                 ->visible(outsidePanels: true)
                 ->locales(['de', 'en']);
         });
+
+        Scramble::configure()
+            ->preferPatchMethod()
+            ->withDocumentTransformers(function (OpenApi $openApi): void {
+                $openApi->secure(
+                    SecurityScheme::http('bearer')
+                );
+            });
     }
 }

@@ -11,9 +11,9 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Portfolio;
 use App\Models\Security;
-use App\Models\Trade;
-use App\Models\Transaction;
 use App\Models\User;
+use App\Services\TradeService;
+use App\Services\TransactionService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -121,6 +121,8 @@ final class DemoSeeder extends Seeder
             ]));
         }
 
+        $transactionService = app(TransactionService::class);
+
         foreach ($accounts as $account) {
             $balance = 0.0;
             for ($m = 11; $m >= 0; $m--) {
@@ -150,10 +152,11 @@ final class DemoSeeder extends Seeder
                         }
                     }
 
-                    Transaction::factory()->create([
+                    $transactionService->create([
                         'date_time' => Carbon::now()->subMonths($m)->subDays(fake()->numberBetween(1, 30)),
                         'type' => $type,
                         'amount' => $amount,
+                        'payee' => fake()->company(),
                         'account_id' => $account->id,
                         'category_id' => $category->id,
                     ]);
@@ -179,6 +182,8 @@ final class DemoSeeder extends Seeder
         }
 
         Security::factory(10)->create(['user_id' => $user->id]);
+
+        $tradeService = app(TradeService::class);
 
         foreach ($portfolios as $portfolio) {
             for ($m = 11; $m >= 0; $m--) {
@@ -207,11 +212,14 @@ final class DemoSeeder extends Seeder
                         $quantity = fake()->randomFloat(2, 1, $security->total_quantity);
                     }
 
-                    Trade::factory()->create([
+                    $tradeService->create([
                         'date_time' => Carbon::now()->subMonths($m),
                         'type' => $type,
                         'quantity' => $quantity,
                         'price' => $price,
+                        'tax' => 0.0,
+                        'fee' => 0.0,
+                        'notes' => fake()->sentence(),
                         'account_id' => $account->id,
                         'portfolio_id' => $portfolio->id,
                         'security_id' => $security->id,

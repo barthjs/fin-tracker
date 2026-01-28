@@ -9,10 +9,11 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\TradeExporter;
 use App\Filament\Imports\TradeImporter;
 use App\Filament\Resources\Trades\TradeResource;
+use App\Models\Trade;
+use App\Services\TradeService;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\Rules\File;
 
 final class ListTrades extends ListRecords
 {
@@ -39,14 +40,15 @@ final class ListTrades extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            self::createAction(),
+            self::createAction()
+                /** @phpstan-ignore-next-line */
+                ->action(fn (TradeService $service, array $data): Trade => $service->create($data)),
 
             self::importAction()
                 ->modalHeading(__('trade.import.modal_heading'))
                 ->importer(TradeImporter::class)
                 ->failureNotificationTitle(__('trade.import.failure_heading'))
-                ->successNotificationTitle(__('trade.import.success_heading'))
-                ->fileRules([File::types(['csv'])->max(1024)]),
+                ->successNotificationTitle(__('trade.import.success_heading')),
 
             self::exportAction()
                 ->modalHeading(__('trade.export.modal_heading'))

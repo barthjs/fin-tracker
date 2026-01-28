@@ -17,6 +17,7 @@ use App\Filament\Resources\Users\RelationManagers\SecuritiesRelationManager;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
+use App\Services\SecurityService;
 use BackedEnum;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Select;
@@ -72,11 +73,11 @@ final class SecurityResource extends Resource
 
             TextInput::make('isin')
                 ->label(__('security.fields.isin'))
-                ->maxLength(255),
+                ->maxLength(12),
 
             TextInput::make('symbol')
                 ->label(__('security.fields.symbol'))
-                ->maxLength(255),
+                ->maxLength(10),
 
             TextInput::make('price')
                 ->label(__('fields.price'))
@@ -165,27 +166,8 @@ final class SecurityResource extends Resource
             ])
             ->recordActions([
                 self::tableEditAction()
-                    ->using(function (Security $record, array $data): Security {
-                        $oldPrice = $record->price;
-                        /** @var array<string, mixed> $data * */
-                        $record->update($data);
-
-                        if ($data['price'] !== $oldPrice) {
-                            /** @var array<string> $portfolios */
-                            $portfolios = Trade::where('security_id', $record->id)
-                                ->distinct(['portfolio_id'])
-                                ->pluck('portfolio_id')
-                                ->toArray();
-
-                            if (! empty($portfolios)) {
-                                foreach ($portfolios as $portfolio) {
-                                    Portfolio::updatePortfolioMarketValue($portfolio);
-                                }
-                            }
-                        }
-
-                        return $record;
-                    }),
+                    /** @phpstan-ignore-next-line */
+                    ->action(fn (SecurityService $service, Security $record, array $data): Security => $service->update($record, $data)),
 
                 self::tableDeleteAction(),
             ]);

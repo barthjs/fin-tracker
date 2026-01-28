@@ -12,7 +12,6 @@ use App\Filament\Resources\Categories\CategoryResource;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\Rules\File;
 
 final class ListCategories extends ListRecords
 {
@@ -49,8 +48,7 @@ final class ListCategories extends ListRecords
                 ->modalHeading(__('category.import.modal_heading'))
                 ->importer(CategoryImporter::class)
                 ->failureNotificationTitle(__('category.import.failure_heading'))
-                ->successNotificationTitle(__('category.import.success_heading'))
-                ->fileRules([File::types(['csv'])->max(1024)]),
+                ->successNotificationTitle(__('category.import.success_heading')),
 
             self::exportAction()
                 ->modalHeading(__('category.export.modal_heading'))

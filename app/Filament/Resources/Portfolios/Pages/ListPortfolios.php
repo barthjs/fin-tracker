@@ -9,7 +9,6 @@ use App\Filament\Exports\PortfolioExporter;
 use App\Filament\Imports\PortfolioImporter;
 use App\Filament\Resources\Portfolios\PortfolioResource;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Validation\Rules\File;
 
 final class ListPortfolios extends ListRecords
 {
@@ -26,8 +25,7 @@ final class ListPortfolios extends ListRecords
                 ->modalHeading(__('portfolio.import.modal_heading'))
                 ->importer(PortfolioImporter::class)
                 ->failureNotificationTitle(__('portfolio.import.failure_heading'))
-                ->successNotificationTitle(__('portfolio.import.success_heading'))
-                ->fileRules([File::types(['csv'])->max(1024)]),
+                ->successNotificationTitle(__('portfolio.import.success_heading')),
 
             self::exportAction()
                 ->modalHeading(__('portfolio.export.modal_heading'))
