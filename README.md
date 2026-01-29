@@ -111,7 +111,7 @@ Use the `.env` file to adjust configuration settings:
 | `APP_KEY`                | (required)       | Key used to encrypt and decrypt data. Generate with: `echo -n 'base64:'; openssl rand -base64 32` |
 | `APP_ALLOW_REGISTRATION` | `false`          | Enable/disable user self-registration                                                             |
 | `APP_DEFAULT_CURRENCY`   | `EUR`            | Currency to use when creating new users (ISO 4217).                                               |
-| `LOG_CHANNEL`            | `stdout`         | `stdout` logs to Docker, whereas `file` writes to `/app/storage/fin-tracker.log`                  |
+| `LOG_CHANNEL`            | `stdout`         | `stdout` logs to Docker, whereas `file` writes to `/app/storage/logs/fin-tracker.log`             |
 | `LOG_LEVEL`              | `warning`        | Log level: `debug`, `info`, `warning`, `error`                                                    |
 | `DB_CONNECTION`          | `pgsql`          | Database driver: `pgsql` or `mariadb`                                                             |
 | `DB_HOST`                | `fin-tracker-db` | Database host name (service or container name in Docker Compose).                                 |
