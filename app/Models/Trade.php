@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * @property-read string $id
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Account $account
  * @property-read Portfolio $portfolio
  * @property-read Security $security
+ * @property-read User $user
  */
 final class Trade extends Model
 {
@@ -96,6 +98,16 @@ final class Trade extends Model
     public function security(): BelongsTo
     {
         return $this->belongsTo(Security::class, 'security_id');
+    }
+
+    /**
+     * Owner of this trade.
+     *
+     * @return HasOneThrough<User, Account, $this>
+     */
+    public function user(): HasOneThrough
+    {
+        return $this->hasOneThrough(User::class, Account::class);
     }
 
     protected static function booted(): void

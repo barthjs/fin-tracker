@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
  * @property-read Collection<int, Transaction> $incomingTransfers
+ * @property-read Collection<int, Subscription> $subscriptions
  * @property-read Collection<int, Trade> $trades
  * @property-read Collection<int, Transaction> $transactions
  * @property-read string $balanceColor
@@ -155,6 +156,16 @@ final class Account extends Model implements HasDeletableFiles
     public function incomingTransfers(): HasMany
     {
         return $this->hasMany(Transaction::class, 'transfer_account_id');
+    }
+
+    /**
+     * Subscriptions belonging to this account.
+     *
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class, 'account_id');
     }
 
     /**

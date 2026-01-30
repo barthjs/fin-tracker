@@ -6,7 +6,7 @@ namespace App\Models;
 
 use App\Contracts\HasDeletableFiles;
 use App\Observers\FileCleanupObserver;
-use Carbon\CarbonInterface;
+use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
@@ -17,6 +17,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -39,14 +40,17 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_active
  * @property bool $is_verified
  * @property bool $is_admin
- * @property-read CarbonInterface $created_at
- * @property-read CarbonInterface $updated_at
+ * @property-read CarbonImmutable $created_at
+ * @property-read CarbonImmutable $updated_at
  * @property-read Collection<int, Account> $accounts
  * @property-read Collection<int, Category> $categories
  * @property-read Collection<int, Portfolio> $portfolios
- * @property-read Collection<int, Security> $securities
  * @property-read Collection<int, UserProvider> $providers
+ * @property-read Collection<int, Security> $securities
+ * @property-read Collection<int, Subscription> $subscriptions
  * @property-read Collection<int, PersonalAccessToken> $tokens
+ * @property-read Collection<int, Trade> $trades
+ * @property-read Collection<int, Transaction> $transactions
  */
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasDeletableFiles, HasName
 {
@@ -120,6 +124,14 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     }
 
     /**
+     * @return HasMany<UserProvider, $this>
+     */
+    public function providers(): HasMany
+    {
+        return $this->hasMany(UserProvider::class, 'user_id');
+    }
+
+    /**
      * @return HasMany<Security, $this>
      */
     public function securities(): HasMany
@@ -128,11 +140,27 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     }
 
     /**
-     * @return HasMany<UserProvider, $this>
+     * @return HasManyThrough<Subscription, Account, $this>
      */
-    public function providers(): HasMany
+    public function subscriptions(): HasManyThrough
     {
-        return $this->hasMany(UserProvider::class, 'user_id');
+        return $this->hasManyThrough(Subscription::class, Account::class);
+    }
+
+    /**
+     * @return HasManyThrough<Trade, Account, $this>
+     */
+    public function trades(): HasManyThrough
+    {
+        return $this->hasManyThrough(Trade::class, Account::class);
+    }
+
+    /**
+     * @return HasManyThrough<Transaction, Account, $this>
+     */
+    public function transactions(): HasManyThrough
+    {
+        return $this->hasManyThrough(Transaction::class, Account::class);
     }
 
     public function canAccessPanel(Panel $panel): bool

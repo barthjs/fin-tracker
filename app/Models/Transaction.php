@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * @property-read string $id
@@ -23,9 +24,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $account_id
  * @property string|null $transfer_account_id
  * @property string $category_id
+ * @property string|null $subscription_id
  * @property-read Account $account
  * @property-read Account|null $transferAccount
  * @property-read Category $category
+ * @property-read Subscription|null $subscription
+ * @property-read User $user
  */
 final class Transaction extends Model
 {
@@ -108,6 +112,26 @@ final class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    /**
+     * Subscription this transaction belongs to.
+     *
+     * @return BelongsTo<Subscription, $this>
+     */
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class, 'subscription_id');
+    }
+
+    /**
+     * Owner of this transaction.
+     *
+     * @return HasOneThrough<User, Account, $this>
+     */
+    public function user(): HasOneThrough
+    {
+        return $this->hasOneThrough(User::class, Account::class);
     }
 
     protected static function booted(): void

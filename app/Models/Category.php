@@ -29,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
  * @property-read Collection<int, CategoryStatistic> $statistics
+ * @property-read Collection<int, Subscription> $subscriptions
  * @property-read Collection<int, Transaction> $transactions
  */
 final class Category extends Model
@@ -137,6 +138,16 @@ final class Category extends Model
     public function statistics(): HasMany
     {
         return $this->hasMany(CategoryStatistic::class, 'category_id');
+    }
+
+    /**
+     * Subscriptions in this category.
+     *
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class, 'category_id');
     }
 
     /**
