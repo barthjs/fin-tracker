@@ -8,6 +8,7 @@ use App\Enums\TransactionType;
 use App\Http\Traits\HasDynamicPresenceRule;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Subscription;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -37,6 +38,7 @@ final class StoreTransactionRequest extends FormRequest
                 'different:account_id',
             ],
             'category_id' => [$p, Rule::exists(Category::class, 'id')],
+            'subscription_id' => ['nullable', Rule::exists(Subscription::class, 'id')],
         ];
     }
 }

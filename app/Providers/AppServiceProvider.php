@@ -127,9 +127,10 @@ final class AppServiceProvider extends ServiceProvider
         Scramble::configure()
             ->preferPatchMethod()
             ->withDocumentTransformers(function (OpenApi $openApi): void {
-                $openApi->secure(
-                    SecurityScheme::http('bearer')
-                );
+                /** @var SecurityScheme $scheme */
+                $scheme = SecurityScheme::http('bearer');
+
+                $openApi->secure($scheme);
             });
     }
 }

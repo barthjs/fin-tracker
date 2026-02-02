@@ -11,6 +11,7 @@ enum ApiAbility: string
     case PORTFOLIO = 'portfolio';
     case SECURITY = 'security';
     case STATISTIC = 'statistic';
+    case SUBSCRIPTION = 'subscription';
     case TRANSACTION = 'transaction';
     case TRADE = 'trade';
 

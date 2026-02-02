@@ -28,6 +28,7 @@ final class TransactionResource extends JsonResource
             'account_id' => $this->account_id,
             'transfer_account_id' => $this->transfer_account_id,
             'category_id' => $this->category_id,
+            'subscription_id' => $this->subscription_id,
         ];
     }
 }
