@@ -15,14 +15,17 @@ trait HasResourceTableColumns
             ->view('filament.tables.columns.logo-and-name-column')
             ->label(__('fields.name'))
             ->searchable()
-            ->sortable();
+            ->sortable()
+            ->toggleable();
     }
 
     public static function nameColumn(string $name): TextColumn
     {
         return TextColumn::make($name)
+            ->wrap()
             ->searchable()
-            ->sortable();
+            ->sortable()
+            ->toggleable();
     }
 
     public static function descriptionColumn(?string $name = 'description'): TextColumn
@@ -30,6 +33,7 @@ trait HasResourceTableColumns
         return TextColumn::make($name)
             ->label(__('fields.description'))
             ->wrap()
+            ->searchable()
             ->toggleable();
     }
 
@@ -37,6 +41,7 @@ trait HasResourceTableColumns
     {
         return TextColumn::make($name)
             ->label(__('fields.currency'))
+            ->searchable()
             ->sortable()
             ->toggleable(isToggledHiddenByDefault: true);
     }
@@ -69,21 +74,37 @@ trait HasResourceTableColumns
             ->toggleable(isToggledHiddenByDefault: true);
     }
 
-    public static function notesColumn(?string $name = 'notes'): TextColumn
-    {
-        return TextColumn::make($name)
-            ->label(__('fields.notes'))
-            ->wrap()
-            ->searchable()
-            ->toggleable();
-    }
-
     public static function dateTimeColumn(?string $name = 'date_time'): TextColumn
     {
         return TextColumn::make($name)
             ->label(__('fields.date_time'))
             ->dateTime('Y-m-d, H:i')
             ->fontFamily('mono')
+            ->sortable()
+            ->toggleable();
+    }
+
+    public static function amountColumn(?string $name = 'amount'): TextColumn
+    {
+        return TextColumn::make($name)
+            ->label(__('fields.amount'))
+            ->fontFamily('mono')
+            ->badge()
+            ->copyable()
+            ->numeric(2)
+            ->searchable()
+            ->sortable()
+            ->toggleable();
+    }
+
+    public static function numericColumn(string $name): TextColumn
+    {
+        return TextColumn::make($name)
+            ->fontFamily('mono')
+            ->alignEnd()
+            ->copyable()
+            ->numeric(2)
+            ->searchable()
             ->sortable()
             ->toggleable();
     }

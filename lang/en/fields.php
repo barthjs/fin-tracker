@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 return [
 
-    // Accounts, Categories, Portfolios, Securities
+    // Accounts, Categories, Portfolios, Securities, Subscriptions
     'name' => 'Name',
+    'amount' => 'Amount',
     'description' => 'Description',
     'color' => 'Color',
     'logo' => 'Logo',
@@ -31,5 +32,7 @@ return [
 
     'created_at' => 'Created at',
     'updated_at' => 'Updated at',
+
+    'view' => 'View',
 
 ];

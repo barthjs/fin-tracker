@@ -11,8 +11,8 @@ return [
         'revenues' => 'Einnahmen',
         'buys' => 'Käufe',
         'sells' => 'Verkäufe',
-        'created_from' => 'Von',
-        'created_until' => 'Bis',
+        'from' => 'Von',
+        'until' => 'Bis',
         'unverified' => 'Unverifiziert',
     ],
 

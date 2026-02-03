@@ -24,4 +24,10 @@ trait HasResourceInfolistEntries
             ->size(TextSize::Small)
             ->hidden(fn (?string $state): bool => $state === null);
     }
+
+    public static function dateEntry(string $name): TextEntry
+    {
+        return TextEntry::make($name)
+            ->date('d.m.Y');
+    }
 }

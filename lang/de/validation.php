@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
 
+    'after_or_equal' => 'Das Feld :attribute muss ein Datum nach oder gleich :date sein.',
     'current_password' => ':Attribute ist falsch.',
     'hex_color' => 'Das Feld :attribute muss eine gültige Hexadezimalfarbe sein.',
     'min' => [
