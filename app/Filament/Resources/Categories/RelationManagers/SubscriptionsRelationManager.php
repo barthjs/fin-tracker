@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Categories\RelationManagers;
 
-use App\Filament\Resources\Transactions\TransactionResource;
+use App\Filament\Resources\Subscriptions\SubscriptionResource;
 use App\Models\Category;
 use BackedEnum;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -16,24 +16,24 @@ use Illuminate\Support\Str;
 /**
  * @property Category $ownerRecord
  */
-final class TransactionsRelationManager extends RelationManager
+final class SubscriptionsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'transactions';
+    protected static string $relationship = 'subscriptions';
 
-    protected static string|BackedEnum|null $icon = 'tabler-credit-card';
+    protected static string|BackedEnum|null $icon = 'tabler-calendar-repeat';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return Str::ucfirst(__('transaction.plural_label'));
+        return Str::ucfirst(__('subscription.plural_label'));
     }
 
     public function form(Schema $schema): Schema
     {
-        return TransactionResource::form($schema, category: $this->ownerRecord);
+        return $schema->components(SubscriptionResource::getFormFields(category: $this->ownerRecord));
     }
 
     public function table(Table $table): Table
     {
-        return TransactionResource::table($table);
+        return SubscriptionResource::table($table);
     }
 }

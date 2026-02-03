@@ -12,6 +12,7 @@ use App\Filament\Concerns\HasResourceInfolistEntries;
 use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Categories\Pages\ListCategories;
 use App\Filament\Resources\Categories\Pages\ViewCategory;
+use App\Filament\Resources\Categories\RelationManagers\SubscriptionsRelationManager;
 use App\Filament\Resources\Categories\RelationManagers\TransactionsRelationManager;
 use App\Models\Category;
 use BackedEnum;
@@ -36,7 +37,7 @@ final class CategoryResource extends Resource
 
     protected static ?string $model = Category::class;
 
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 9;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-category';
 
@@ -124,12 +125,9 @@ final class CategoryResource extends Resource
     public static function getTableColumns(): array
     {
         return [
-            TextColumn::make('name')
+            self::nameColumn('name')
                 ->label(__('fields.name'))
-                ->weight(FontWeight::SemiBold)
-                ->wrap()
-                ->searchable()
-                ->sortable(),
+                ->weight(FontWeight::SemiBold),
 
             TextColumn::make('group')
                 ->label(__('category.fields.group'))
@@ -175,6 +173,7 @@ final class CategoryResource extends Resource
     {
         return [
             TransactionsRelationManager::class,
+            SubscriptionsRelationManager::class,
         ];
     }
 

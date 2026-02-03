@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Accounts\RelationManagers;
 
-use App\Filament\Resources\Trades\TradeResource;
+use App\Filament\Resources\Subscriptions\SubscriptionResource;
 use App\Models\Account;
 use BackedEnum;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -16,24 +16,24 @@ use Illuminate\Support\Str;
 /**
  * @property Account $ownerRecord
  */
-final class TradesRelationManager extends RelationManager
+final class SubscriptionsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'trades';
+    protected static string $relationship = 'subscriptions';
 
-    protected static string|BackedEnum|null $icon = 'tabler-exchange';
+    protected static string|BackedEnum|null $icon = 'tabler-calendar-repeat';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
-        return Str::ucfirst(__('trade.plural_label'));
+        return Str::ucfirst(__('subscription.plural_label'));
     }
 
     public function form(Schema $schema): Schema
     {
-        return TradeResource::form($schema, account: $this->ownerRecord);
+        return $schema->components(SubscriptionResource::getFormFields(account: $this->ownerRecord));
     }
 
     public function table(Table $table): Table
     {
-        return TradeResource::table($table);
+        return SubscriptionResource::table($table);
     }
 }

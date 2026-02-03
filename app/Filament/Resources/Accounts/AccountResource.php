@@ -11,6 +11,7 @@ use App\Filament\Concerns\HasResourceInfolistEntries;
 use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts\Pages\ListAccounts;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
+use App\Filament\Resources\Accounts\RelationManagers\SubscriptionsRelationManager;
 use App\Filament\Resources\Accounts\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AccountsRelationManager;
@@ -63,7 +64,7 @@ final class AccountResource extends Resource
             self::currencyField(),
             self::colorField(),
             self::statusToggleField(),
-            self::logoField(directory: 'accounts'),
+            self::logoField('accounts'),
             self::descriptionField(),
         ];
     }
@@ -128,7 +129,9 @@ final class AccountResource extends Resource
                 ->color(fn (Account $record): string => $record->balanceColor)
                 ->money(fn (Account $record): string => $record->currency->value)
                 ->summarize(Sum::make()->money(Currency::getCurrency()))
-                ->sortable(),
+                ->searchable()
+                ->sortable()
+                ->toggleable(),
 
             self::descriptionColumn()
                 ->hiddenOn($hidden),
@@ -143,6 +146,7 @@ final class AccountResource extends Resource
         return [
             TransactionsRelationManager::class,
             TradesRelationManager::class,
+            SubscriptionsRelationManager::class,
         ];
     }
 

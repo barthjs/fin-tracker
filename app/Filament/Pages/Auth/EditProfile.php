@@ -88,7 +88,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
     {
         return $schema
             ->components([
-                self::logoField('avatar', 'users/avatars')
+                self::logoField('users/avatars', 'avatar')
                     ->label(__('user.fields.avatar')),
 
                 $this->getFirstNameFormComponent(),

@@ -10,16 +10,16 @@ use App\Filament\Concerns\HasResourceFormFields;
 use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts;
 use App\Filament\Resources\Categories;
+use App\Filament\Resources\Subscriptions;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Services\TransactionService;
 use BackedEnum;
-use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -27,13 +27,9 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -60,7 +56,7 @@ final class TransactionResource extends Resource
     /**
      * Account and category for default values in relation manager.
      */
-    public static function form(Schema $schema, Account|Model|null $account = null, Category|Model|null $category = null): Schema
+    public static function form(Schema $schema, ?Account $account = null, ?Category $category = null, ?Subscription $subscription = null): Schema
     {
         return $schema->components([
             Section::make()
@@ -69,18 +65,10 @@ final class TransactionResource extends Resource
                     self::dateTimePickerField(),
 
                     self::accountSelectField()
-                        ->getOptionLabelUsing(fn (?string $value): ?string => Account::find($value)?->name)
                         ->default(fn (): ?string => $account instanceof Account ? $account->id : null)
                         ->live(true),
 
-                    TextInput::make('amount')
-                        ->label(__('transaction.fields.amount'))
-                        ->suffix(fn (Get $get): ?string => Account::find($get('account_id'))?->currency?->value)
-                        ->numeric()
-                        ->step(0.01)
-                        ->minValue(0.0)
-                        ->maxValue(1e9)
-                        ->required(),
+                    self::amountField(),
 
                     self::typeSelectField()
                         ->options(TransactionType::class)
@@ -121,6 +109,9 @@ final class TransactionResource extends Resource
                         ->default(fn (): ?string => $category instanceof Category ? $category->id : null),
 
                     self::notesField(),
+
+                    self::subscriptionSelectField()
+                        ->default(fn (): ?string => $subscription instanceof Subscription ? $subscription->id : null),
                 ]),
         ])->columns(1);
     }
@@ -134,82 +125,55 @@ final class TransactionResource extends Resource
             ->columns([
                 self::dateTimeColumn('date_time'),
 
-                TextColumn::make('amount')
-                    ->label(__('transaction.fields.amount'))
-                    ->fontFamily('mono')
-                    ->copyable()
-                    ->badge()
-                    ->color(fn (Transaction $record): string => $record->type->getColor())
-                    ->numeric(2)
-                    ->sortable()
-                    ->toggleable(),
+                self::amountColumn()
+                    ->color(fn (Transaction $record): string => $record->type->getColor()),
 
-                TextColumn::make('payee')
-                    ->label(__('transaction.fields.payee'))
-                    ->wrap()
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
+                self::nameColumn('payee')
+                    ->label(__('transaction.fields.payee')),
 
                 self::logoAndNameColumn('account.name')
-                    ->hiddenOn(Accounts\RelationManagers\TransactionsRelationManager::class)
+                    ->hiddenOn([
+                        Accounts\RelationManagers\TransactionsRelationManager::class,
+                        Subscriptions\RelationManagers\TransactionsRelationManager::class,
+                    ])
                     ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Transaction $record): array => [
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
+                    ]),
+
+                self::nameColumn('category.name')
+                    ->hiddenOn([
+                        Accounts\RelationManagers\TransactionsRelationManager::class,
+                        Subscriptions\RelationManagers\TransactionsRelationManager::class,
                     ])
-                    ->toggleable(),
+                    ->label(Str::ucfirst(__('category.label'))),
 
-                TextColumn::make('category.name')
-                    ->hiddenOn(Categories\RelationManagers\TransactionsRelationManager::class)
-                    ->label(Str::ucfirst(__('category.label')))
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
-
-                self::notesColumn(),
+                self::descriptionColumn('notes')
+                    ->label(__('fields.notes')),
             ])
             ->defaultSort('date_time', 'desc')
             ->filters([
-                SelectFilter::make('type')
-                    ->hiddenOn(ListTransactions::class)
-                    ->label(__('fields.type'))
+                self::typeFilter()
+                    ->hiddenOn([
+                        ListTransactions::class,
+                        Subscriptions\RelationManagers\TransactionsRelationManager::class,
+                    ])
                     ->options(TransactionType::class),
 
-                SelectFilter::make('account_id')
-                    ->hiddenOn(Accounts\RelationManagers\TransactionsRelationManager::class)
-                    ->label(Str::ucfirst(__('account.label')))
-                    ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
+                self::accountFilter()
+                    ->hiddenOn([
+                        Accounts\RelationManagers\TransactionsRelationManager::class,
+                        Subscriptions\RelationManagers\TransactionsRelationManager::class,
+                    ]),
 
-                SelectFilter::make('category_id')
-                    ->hiddenOn(Categories\RelationManagers\TransactionsRelationManager::class)
-                    ->label(Str::ucfirst(__('category.label')))
-                    ->relationship('category', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
+                self::categoryFilter()
+                    ->hiddenOn([
+                        Categories\RelationManagers\TransactionsRelationManager::class,
+                        Subscriptions\RelationManagers\TransactionsRelationManager::class,
+                    ]),
 
-                Filter::make('date')
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label(__('table.filter.created_from'))
-                            ->default(Carbon::today()->startOfYear()),
-
-                        DatePicker::make('until')
-                            ->label(__('table.filter.created_until')),
-                    ])
-                    ->columns(2)
-                    ->query(function (Builder $query, array $data): Builder {
-                        /** @var array{from: string, until: string} $data */
-                        return $query
-                            ->when($data['from'],
-                                fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '>=', $date))
-                            ->when($data['until'],
-                                fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
-                    }),
+                self::dateTimeRangeFilter(),
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(3)
             ->headerActions([
@@ -249,8 +213,7 @@ final class TransactionResource extends Resource
                     self::accountSelectField(),
                 ])
                 /** @phpstan-ignore-next-line */
-                ->action(fn (TransactionService $service, Collection $records, array $data) => $service->bulkEditAccount($records, $data))
-                ->deselectRecordsAfterCompletion(),
+                ->action(fn (TransactionService $service, Collection $records, array $data) => $service->bulkEditAccount($records, $data)),
         ]);
     }
 
