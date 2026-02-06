@@ -33,6 +33,7 @@ final class SubscriptionController
                 AllowedFilter::exact('amount'),
                 AllowedFilter::exact('period_unit'),
                 AllowedFilter::exact('auto_generate_transaction'),
+                AllowedFilter::exact('remind_before_payment'),
                 'color',
                 AllowedFilter::exact('is_active'),
             ])

@@ -18,6 +18,8 @@ return [
         'auto_generate_transaction' => 'Auto-generate transaction',
         'last_generated_at' => 'Last Generated',
         'last_generated_at_placeholder' => 'Never',
+        'remind_before_payment' => 'Enable pre-reminder',
+        'reminder_days_before' => 'Days lead time',
     ],
 
     'interval' => [
@@ -51,6 +53,8 @@ return [
         'catch_up_body' => 'Successfully processed :count outstanding payments for :name (Total: :amount).',
         'failed_title' => 'Subscription failed',
         'failed_body' => 'The automatic booking for ":name" could not be created.',
+        'upcoming_title' => 'Upcoming payment',
+        'upcoming_body' => 'In :days days, the payment for ":name" in the amount of :amount is due.',
     ],
 
 ];

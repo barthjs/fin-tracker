@@ -18,6 +18,8 @@ return [
         'auto_generate_transaction' => 'Automatisch Transaktion erstellen',
         'last_generated_at' => 'Zuletzt erstellt',
         'last_generated_at_placeholder' => 'Nie',
+        'remind_before_payment' => 'Vorab-Erinnerung aktivieren',
+        'reminder_days_before' => 'Tage Vorlaufzeit',
     ],
 
     'interval' => [
@@ -51,6 +53,8 @@ return [
         'catch_up_body' => 'Es wurden :count ausstehende Zahlungen für :name (Gesamt: :amount) erfolgreich nachgeholt.',
         'failed_title' => 'Dauerbuchung fehlgeschlagen',
         'failed_body' => 'Die automatische Buchung für ":name" konnte nicht erstellt werden.',
+        'upcoming_title' => 'Anstehende Zahlung',
+        'upcoming_body' => 'In :days Tagen wird die Zahlung für ":name" über :amount fällig.',
     ],
 
 ];

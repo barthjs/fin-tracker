@@ -34,6 +34,8 @@ final class StoreSubscriptionRequest extends FormRequest
             'next_payment_date' => [$p, 'date', 'after_or_equal:started_at'],
             'ended_at' => ['nullable', 'date', 'after_or_equal:started_at'],
             'auto_generate_transaction' => ['boolean'],
+            'remind_before_payment' => ['boolean'],
+            'reminder_days_before' => ['required_if:remind_before_payment,true', 'integer', 'min:1', 'max:30'],
             'color' => [$p, 'regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/'],
             'is_active' => ['boolean'],
         ];

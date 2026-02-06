@@ -35,6 +35,9 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property CarbonImmutable|null $ended_at
  * @property bool $auto_generate_transaction
  * @property CarbonImmutable|null $last_generated_at
+ * @property bool $remind_before_payment
+ * @property int $reminder_days_before
+ * @property CarbonImmutable|null $last_reminded_at
  * @property string|null $logo
  * @property string $color
  * @property bool $is_active
@@ -59,6 +62,8 @@ final class Subscription extends Model implements HasDeletableFiles
         'amount' => 0.0,
         'period_frequency' => 1,
         'auto_generate_transaction' => true,
+        'remind_before_payment' => false,
+        'reminder_days_before' => 3,
         'is_active' => true,
     ];
 
@@ -86,6 +91,9 @@ final class Subscription extends Model implements HasDeletableFiles
             'ended_at' => 'date',
             'auto_generate_transaction' => 'bool',
             'last_generated_at' => 'timestamp',
+            'remind_before_payment' => 'bool',
+            'reminder_days_before' => 'int',
+            'last_reminded_at' => 'timestamp',
             'is_active' => 'bool',
         ];
     }

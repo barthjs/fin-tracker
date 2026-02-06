@@ -197,6 +197,27 @@ final class SubscriptionResource extends Resource
                                 ]),
                         ]),
                 ]),
+
+            Section::make()
+                ->columnSpanFull()
+                ->schema([
+                    Grid::make(2)
+                        ->schema([
+                            Toggle::make('remind_before_payment')
+                                ->label(__('subscription.fields.remind_before_payment'))
+                                ->live()
+                                ->default(false)
+                                ->inline(false),
+
+                            TextInput::make('reminder_days_before')
+                                ->label(__('subscription.fields.reminder_days_before'))
+                                ->visible(fn (Get $get): bool => (bool) $get('remind_before_payment'))
+                                ->numeric()
+                                ->default(3)
+                                ->minValue(1)
+                                ->maxValue(30),
+                        ]),
+                ]),
         ];
     }
 

@@ -41,6 +41,10 @@ return new class extends Migration
             $table->boolean('auto_generate_transaction')->default(true);
             $table->timestamp('last_generated_at')->nullable()->index();
 
+            $table->boolean('remind_before_payment')->default(false);
+            $table->unsignedTinyInteger('reminder_days_before')->default(3);
+            $table->timestamp('last_reminded_at')->nullable()->index();
+
             $table->string('logo')->nullable();
             $table->string('color');
             $table->boolean('is_active')->default(true);
@@ -48,6 +52,7 @@ return new class extends Migration
             $table->index(['account_id', 'is_active']);
             $table->index(['category_id', 'is_active']);
             $table->index(['is_active', 'auto_generate_transaction', 'next_payment_date'], 'sub_scheduler_index');
+            $table->index(['is_active', 'remind_before_payment', 'next_payment_date'], 'sub_reminder_index');
         });
     }
 };
