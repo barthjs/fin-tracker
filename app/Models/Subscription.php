@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\HasDeletableFiles;
 use App\Enums\PeriodUnit;
 use App\Models\Scopes\UserRelationScope;
+use App\Models\Traits\HasNotificationAssignments;
 use App\Observers\FileCleanupObserver;
 use Carbon\CarbonImmutable;
 use Database\Factories\SubscriptionFactory;
@@ -49,7 +50,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 final class Subscription extends Model implements HasDeletableFiles
 {
     /** @use HasFactory<SubscriptionFactory> */
-    use HasFactory, HasUlids;
+    use HasFactory, HasNotificationAssignments, HasUlids;
 
     protected $table = 'subscriptions';
 
