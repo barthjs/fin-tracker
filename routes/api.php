@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/up', [SystemController::class, 'up'])->name('api.up');
 
+Route::post('/webhook', [SystemController::class, 'webhook'])->name('api.webhook');
+
 Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->name('api.')->group(function (): void {
     Route::get('/health', [SystemController::class, 'health'])->name('health');
     Route::get('/version', [SystemController::class, 'version'])->name('version');

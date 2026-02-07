@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Subscriptions;
 
+use App\Enums\NotificationEventType;
 use App\Enums\PeriodUnit;
 use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Concerns\HasResourceFormFields;
@@ -16,9 +17,11 @@ use App\Filament\Resources\Subscriptions\Pages\ViewSubscription;
 use App\Filament\Resources\Subscriptions\RelationManagers\TransactionsRelationManager;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\NotificationTarget;
 use App\Models\Subscription;
 use App\Services\SubscriptionService;
 use BackedEnum;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -217,6 +220,27 @@ final class SubscriptionResource extends Resource
                                 ->minValue(1)
                                 ->maxValue(30),
                         ]),
+
+                    CheckboxList::make('reminder_targets')
+                        ->label(Str::ucfirst(__('notification_target.plural_label')))
+                        ->visible(fn (Get $get): bool => (bool) $get('remind_before_payment'))
+                        ->options(fn (): array => NotificationTarget::where('is_active', true)->pluck('name', 'id')->toArray())
+                        ->columns(3)
+                        ->gridDirection('row')
+                        ->bulkToggleable()
+                        ->default(fn (): array => NotificationTarget::where('is_active', true)
+                            ->where('is_default', true)
+                            ->pluck('id')
+                            ->toArray()
+                        )
+                        ->loadStateFromRelationshipsUsing(function (Subscription $record, CheckboxList $component): void {
+                            $targetIds = $record->notificationAssignments()
+                                ->where('event_type', NotificationEventType::SUBSCRIPTION_REMINDER)
+                                ->pluck('notification_target_id')
+                                ->toArray();
+
+                            $component->state($targetIds);
+                        }),
                 ]),
         ];
     }
@@ -341,6 +365,7 @@ final class SubscriptionResource extends Resource
                 self::tableEditAction()
                     /** @phpstan-ignore-next-line */
                     ->action(fn (SubscriptionService $service, Subscription $record, array $data): Subscription => $service->update($record, $data)),
+
                 self::tableDeleteAction(),
             ])
             ->toolbarActions([

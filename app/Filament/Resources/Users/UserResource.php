@@ -44,9 +44,16 @@ final class UserResource extends Resource
 
     protected static ?string $model = User::class;
 
+    protected static ?int $navigationSort = 2;
+
     protected static string|BackedEnum|null $navigationIcon = 'tabler-users';
 
     protected static ?string $recordTitleAttribute = 'full_name';
+
+    public static function getNavigationGroup(): string
+    {
+        return __('settings.navigation_group');
+    }
 
     public static function getModelLabel(): string
     {
@@ -270,10 +277,5 @@ final class UserResource extends Resource
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
         ];
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
     }
 }
