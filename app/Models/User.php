@@ -14,6 +14,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -52,7 +53,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read Collection<int, Trade> $trades
  * @property-read Collection<int, Transaction> $transactions
  */
-final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasDeletableFiles, HasName
+final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasDeletableFiles, HasLocalePreference, HasName
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasUlids, Notifiable;
@@ -182,6 +183,11 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     {
         $this->locale = $locale;
         $this->save();
+    }
+
+    public function preferredLocale(): string
+    {
+        return $this->locale;
     }
 
     public function getAppAuthenticationSecret(): ?string

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\NotificationEventType;
 use App\Enums\PeriodUnit;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
 use App\Jobs\ProcessDueSubscriptionJob;
+use App\Jobs\SendSubscriptionReminderJob;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use Carbon\CarbonImmutable;
@@ -30,11 +32,23 @@ final readonly class SubscriptionService
     public function create(array $data): Subscription
     {
         return DB::transaction(function () use ($data): Subscription {
+            $subscription = new Subscription();
+
+            $reminderTargets = $subscription->extractNotificationTargets($data, 'reminder_targets');
+
             if (isset($data['next_payment_date']) && is_string($data['next_payment_date'])) {
                 $data['day_of_month'] = Carbon::parse($data['next_payment_date'])->day;
             }
 
-            $subscription = Subscription::create($data);
+            $subscription->fill($data);
+            $subscription->save();
+
+            if (! empty($reminderTargets)) {
+                $subscription->syncNotificationAssignments(
+                    NotificationEventType::SUBSCRIPTION_REMINDER,
+                    $reminderTargets
+                );
+            }
 
             $this->triggerProcessJobIfDue($subscription);
 
@@ -48,11 +62,20 @@ final readonly class SubscriptionService
     public function update(Subscription $subscription, array $data): Subscription
     {
         return DB::transaction(function () use ($subscription, $data) {
+            $reminderTargets = $subscription->extractNotificationTargets($data, 'reminder_targets');
+
             if (isset($data['next_payment_date']) && is_string($data['next_payment_date'])) {
                 $data['day_of_month'] = Carbon::parse($data['next_payment_date'])->day;
             }
 
             $subscription->update($data);
+
+            if (! empty($reminderTargets)) {
+                $subscription->syncNotificationAssignments(
+                    NotificationEventType::SUBSCRIPTION_REMINDER,
+                    $reminderTargets
+                );
+            }
 
             $refreshed = $subscription->fresh();
             if ($refreshed instanceof Subscription) {
@@ -63,27 +86,32 @@ final readonly class SubscriptionService
         });
     }
 
-    public function triggerProcessJobIfDue(Subscription $subscription): void
+    /**
+     * Dispatches notifications for subscriptions that are due for a reminder.
+     */
+    public function dispatchReminders(): void
     {
-        if (! $subscription->is_active || ! $subscription->auto_generate_transaction) {
-            return;
-        }
+        $today = now()->toDateString();
 
-        $today = Carbon::now()->startOfDay();
-
-        if ($subscription->next_payment_date->lessThan($today)) {
-            ProcessDueSubscriptionJob::dispatch($subscription);
-
-            return;
-        }
-
-        if ($subscription->next_payment_date->isToday()) {
-            $lastGenerated = $subscription->last_generated_at;
-
-            if ($lastGenerated === null || $lastGenerated->lessThan($today)) {
-                ProcessDueSubscriptionJob::dispatch($subscription);
-            }
-        }
+        Subscription::query()
+            ->with(['user', 'notificationAssignments.target'])
+            ->where('is_active', true)
+            ->where('remind_before_payment', true)
+            ->whereRaw('next_payment_date - reminder_days_before <= ?::date', [$today])
+            ->where(function (Builder $query): void {
+                $query->whereNull('last_reminded_at')
+                    ->orWhereRaw('last_reminded_at < next_payment_date - reminder_days_before');
+            })
+            ->where(function (Builder $query) use ($today): void {
+                $query->whereNull('ended_at')
+                    ->orWhere('ended_at', '>=', $today);
+            })
+            ->chunkById(100, function (Collection $subscriptions): void {
+                /** @var Collection<int, Subscription> $subscriptions */
+                foreach ($subscriptions as $subscription) {
+                    SendSubscriptionReminderJob::dispatch($subscription);
+                }
+            });
     }
 
     /**
@@ -155,6 +183,30 @@ final readonly class SubscriptionService
 
             return $lastCreatedTransaction;
         });
+    }
+
+    private function triggerProcessJobIfDue(Subscription $subscription): void
+    {
+        if (! $subscription->is_active || ! $subscription->auto_generate_transaction) {
+            return;
+        }
+
+        $today = Carbon::now()->startOfDay();
+
+        $shouldDispatch = false;
+
+        if ($subscription->next_payment_date->lessThan($today)) {
+            $shouldDispatch = true;
+        } elseif ($subscription->next_payment_date->isToday()) {
+            $lastGenerated = $subscription->last_generated_at;
+            if ($lastGenerated === null || $lastGenerated->lessThan($today)) {
+                $shouldDispatch = true;
+            }
+        }
+
+        if ($shouldDispatch) {
+            DB::afterCommit(fn () => ProcessDueSubscriptionJob::dispatch($subscription));
+        }
     }
 
     private function calculateNextDate(Subscription $subscription): CarbonImmutable

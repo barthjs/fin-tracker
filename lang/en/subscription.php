@@ -53,8 +53,8 @@ return [
         'catch_up_body' => 'Successfully processed :count outstanding payments for :name (Total: :amount).',
         'failed_title' => 'Subscription failed',
         'failed_body' => 'The automatic booking for ":name" could not be created.',
-        'upcoming_title' => 'Upcoming payment',
-        'upcoming_body' => 'In :days days, the payment for ":name" in the amount of :amount is due.',
+        'reminder_title' => 'Payment Reminder: :name',
+        'reminder_body' => 'The next payment for :name (:amount) is due on :date.',
     ],
 
 ];

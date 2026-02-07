@@ -7,7 +7,7 @@ namespace App\Console\Commands;
 use App\Services\SubscriptionService;
 use Illuminate\Console\Command;
 
-final class DispatchDueSubscriptionJobsCommand extends Command
+final class DispatchSubscriptionJobsCommand extends Command
 {
     /**
      * @var string
@@ -21,6 +21,7 @@ final class DispatchDueSubscriptionJobsCommand extends Command
 
     public function handle(SubscriptionService $service): int
     {
+        $service->dispatchReminders();
         $service->dispatchDueSubscriptions();
 
         return self::SUCCESS;

@@ -53,8 +53,8 @@ return [
         'catch_up_body' => 'Es wurden :count ausstehende Zahlungen für :name (Gesamt: :amount) erfolgreich nachgeholt.',
         'failed_title' => 'Dauerbuchung fehlgeschlagen',
         'failed_body' => 'Die automatische Buchung für ":name" konnte nicht erstellt werden.',
-        'upcoming_title' => 'Anstehende Zahlung',
-        'upcoming_body' => 'In :days Tagen wird die Zahlung für ":name" über :amount fällig.',
+        'reminder_title' => ':name fällig',
+        'reminder_body' => 'In Kürze werden :amount für :name abgebucht (:date).',
     ],
 
 ];
