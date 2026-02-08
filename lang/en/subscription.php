@@ -57,4 +57,23 @@ return [
         'reminder_body' => 'The next payment for :name (:amount) is due on :date.',
     ],
 
+    'import' => [
+        'modal_heading' => 'Import Subscriptions',
+        'failure_heading' => 'Subscription import failed',
+        'success_heading' => 'Subscription import successful',
+        'body_heading' => 'The subscription import has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully imported rows: ',
+    ],
+
+    'export' => [
+        'modal_heading' => 'Export Subscriptions',
+        'failure_heading' => 'Subscription export failed',
+        'success_heading' => 'Subscription export successful',
+        'body_heading' => 'The subscription export has been completed.',
+        'body_failure' => 'Failed rows: ',
+        'body_success' => 'Successfully exported rows: ',
+        'file_name' => 'Subscriptions_',
+    ],
+
 ];

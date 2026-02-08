@@ -57,4 +57,23 @@ return [
         'reminder_body' => 'In Kürze werden :amount für :name abgebucht (:date).',
     ],
 
+    'import' => [
+        'modal_heading' => 'Abonnements importieren',
+        'failure_heading' => 'Abonnementimport fehlgeschlagen',
+        'success_heading' => 'Abonnementimport erfolgreich',
+        'body_heading' => 'Der Abonnementimport wurde abgeschlossen.',
+        'body_failure' => 'Fehlgeschlagene Zeilen: ',
+        'body_success' => 'Erfolgreiche importierte Zeilen: ',
+    ],
+
+    'export' => [
+        'modal_heading' => 'Abonnements exportieren',
+        'failure_heading' => 'Abonnementsexport fehlgeschlagen',
+        'success_heading' => 'Abonnementsexport erfolgreich',
+        'body_heading' => 'Der Abonnementsexport wurde abgeschlossen.',
+        'body_failure' => 'Fehlgeschlagene Zeilen: ',
+        'body_success' => 'Erfolgreiche exportierte Zeilen: ',
+        'file_name' => 'Abonnements_',
+    ],
+
 ];

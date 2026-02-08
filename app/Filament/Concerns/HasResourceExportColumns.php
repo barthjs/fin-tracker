@@ -57,6 +57,12 @@ trait HasResourceExportColumns
             ->formatStateUsing(fn (CarbonImmutable $state): string => $state->format('Y-m-d, H:i'));
     }
 
+    public static function dateColumn(string $name): ExportColumn
+    {
+        return ExportColumn::make($name)
+            ->formatStateUsing(fn (?CarbonImmutable $state): string => $state?->format('Y-m-d') ?? '');
+    }
+
     public static function typeColum(?string $name = 'type'): ExportColumn
     {
         return ExportColumn::make($name)
@@ -67,6 +73,12 @@ trait HasResourceExportColumns
     {
         return ExportColumn::make($name)
             ->label(Str::ucfirst(__('account.label')));
+    }
+
+    public static function categoryColumn(?string $name = 'category.name'): ExportColumn
+    {
+        return ExportColumn::make($name)
+            ->label(Str::ucfirst(__('category.label')));
     }
 
     public static function notesColumn(?string $name = 'notes'): ExportColumn

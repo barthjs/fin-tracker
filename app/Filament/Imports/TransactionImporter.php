@@ -11,7 +11,6 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Services\TransactionService;
-use App\Tools\Convertor;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -38,19 +37,6 @@ final class TransactionImporter extends Importer
                     };
                 }),
 
-            ImportColumn::make('account_id')
-                ->label(__('account.label'))
-                ->requiredMapping()
-                ->rules(['required'])
-                ->fillRecordUsing(function (Transaction $record, string $state): void {
-                    $account = Account::whereName($state);
-                    if ($account->count() > 1) {
-                        $record->account_id = Account::getOrCreateDefaultAccount()->id;
-                    } else {
-                        $record->account_id = $account->first()->id ?? Account::getOrCreateDefaultAccount()->id;
-                    }
-                }),
-
             ImportColumn::make('transfer_account_id')
                 ->label(__('account.fields.transfer_account_id'))
                 ->fillRecordUsing(function (Transaction $record, ?string $state): void {
@@ -67,10 +53,7 @@ final class TransactionImporter extends Importer
                 }),
 
             self::numericColumn('amount')
-                ->label(__('transaction.fields.amount'))
-                ->requiredMapping()
-                ->rules(['required'])
-                ->castStateUsing(fn (string $state) => Convertor::formatNumber($state)),
+                ->label(__('transaction.fields.amount')),
 
             ImportColumn::make('payee')
                 ->label(__('transaction.fields.payee'))

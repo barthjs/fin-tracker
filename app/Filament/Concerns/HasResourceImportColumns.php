@@ -26,7 +26,6 @@ trait HasResourceImportColumns
         return ImportColumn::make($name)
             ->label(__('fields.description'))
             ->exampleHeader(__('fields.description'))
-            ->examples(__('account.import.examples.description'))
             ->rules(['max:1000']);
     }
 
@@ -83,6 +82,22 @@ trait HasResourceImportColumns
             });
     }
 
+    public static function dateColumn(string $name): ImportColumn
+    {
+        return ImportColumn::make($name)
+            ->requiredMapping()
+            ->rules(['required'])
+            ->castStateUsing(function (?string $state): ?CarbonImmutable {
+                try {
+                    $carbon = CarbonImmutable::parse($state)->startOfDay();
+                } catch (Exception) {
+                    $carbon = null;
+                }
+
+                return $carbon;
+            });
+    }
+
     public static function typeColumn(?string $name = 'type'): ImportColumn
     {
         return ImportColumn::make($name)
@@ -95,7 +110,7 @@ trait HasResourceImportColumns
     {
         return ImportColumn::make($name)
             ->requiredMapping()
-            ->rules(['required'])
+            ->rules(['required', 'max:1e9'])
             ->castStateUsing(fn (string $state): float => abs(Convertor::formatNumber($state)));
     }
 

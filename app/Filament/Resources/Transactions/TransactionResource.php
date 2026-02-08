@@ -80,6 +80,7 @@ final class TransactionResource extends Resource
                         ->columnSpanFull()
                         ->visible(fn (Get $get): bool => $get('type') === TransactionType::Transfer)
                         ->required(fn (Get $get): bool => $get('type') === TransactionType::Transfer)
+                        ->validationAttribute(__('account.fields.transfer_account_id'))
                         ->selectablePlaceholder(false)
                         ->options(fn (Get $get): array => Account::query()
                             ->where('is_active', true)
