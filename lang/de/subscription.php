@@ -76,4 +76,11 @@ return [
         'file_name' => 'Abonnements_',
     ],
 
+    'stats' => [
+        'monthly_cost' => 'Monatliche Kosten',
+        'avg_per_sub' => 'Ø :amount pro Abo',
+        'yearly_cost' => 'Jährliche Kosten',
+        'amount_due_this_month' => 'Betrag fällig diesem Monat',
+    ],
+
 ];

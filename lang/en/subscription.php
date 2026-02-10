@@ -76,4 +76,11 @@ return [
         'file_name' => 'Subscriptions_',
     ],
 
+    'stats' => [
+        'monthly_cost' => 'Monthly Cost',
+        'avg_per_sub' => 'Ø :amount per subscription',
+        'yearly_cost' => 'Yearly Cost',
+        'amount_due_this_month' => 'Amount Due This Month',
+    ],
+
 ];

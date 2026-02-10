@@ -22,6 +22,10 @@ use Illuminate\Support\Number;
 
 final readonly class SubscriptionService
 {
+    private const float DAYS_IN_YEAR = 365.2425;
+
+    private const float WEEKS_IN_YEAR = 52.1775;
+
     public function __construct(
         private TransactionService $transactionService
     ) {}
@@ -185,6 +189,59 @@ final readonly class SubscriptionService
         });
     }
 
+    /**
+     * @param  Collection<int, Subscription>  $subscriptions
+     * @return array{
+     *     monthly_avg: float,
+     *     yearly_avg: float,
+     *     due_this_month: float,
+     *     daily_chart: array<int, float>
+     * }
+     */
+    public function calculateStats(Collection $subscriptions): array
+    {
+        $monthlyAvg = 0.0;
+        $dueThisMonth = 0.0;
+
+        $now = CarbonImmutable::now();
+        $monthEnd = $now->endOfMonth();
+
+        $dailyChart = array_fill(0, $now->daysInMonth, 0.0);
+
+        foreach ($subscriptions as $sub) {
+            if ($sub->period_frequency < 1) {
+                continue;
+            }
+
+            $monthlyAvg += $this->calculateMonthlyEquivalent($sub);
+
+            $cursor = $sub->next_payment_date;
+
+            if ($cursor->lt($now->subYear())) {
+                continue;
+            }
+
+            while ($cursor->lte($monthEnd)) {
+                if ($cursor->gte($now->startOfDay())) {
+                    $dueThisMonth += $sub->amount;
+                }
+
+                if ($cursor->month === $now->month && $cursor->year === $now->year) {
+                    $dailyChart[$cursor->day - 1] += $sub->amount;
+                }
+
+                $cursor = $this->simulateNextDate($cursor, $sub);
+            }
+        }
+
+        return [
+            'monthly_avg' => $monthlyAvg,
+            'yearly_avg' => $monthlyAvg * 12,
+            'due_this_month' => $dueThisMonth,
+            'daily_chart' => $dailyChart,
+        ];
+    }
+
     private function triggerProcessJobIfDue(Subscription $subscription): void
     {
         if (! $subscription->is_active || ! $subscription->auto_generate_transaction) {
@@ -230,6 +287,26 @@ final readonly class SubscriptionService
         }
 
         return $newDate;
+    }
+
+    private function simulateNextDate(CarbonImmutable $date, Subscription $sub): CarbonImmutable
+    {
+        return match ($sub->period_unit) {
+            PeriodUnit::Day => $date->addDays($sub->period_frequency),
+            PeriodUnit::Week => $date->addWeeks($sub->period_frequency),
+            PeriodUnit::Month => $date->addMonths($sub->period_frequency),
+            PeriodUnit::Year => $date->addYears($sub->period_frequency),
+        };
+    }
+
+    private function calculateMonthlyEquivalent(Subscription $sub): float
+    {
+        return match ($sub->period_unit) {
+            PeriodUnit::Day => $sub->amount * ((self::DAYS_IN_YEAR / 12) / $sub->period_frequency),
+            PeriodUnit::Week => $sub->amount * ((self::WEEKS_IN_YEAR / 12) / $sub->period_frequency),
+            PeriodUnit::Month => $sub->amount / $sub->period_frequency,
+            PeriodUnit::Year => $sub->amount / (12 * $sub->period_frequency),
+        };
     }
 
     private function sendGenerationNotification(Subscription $subscription, int $count): void

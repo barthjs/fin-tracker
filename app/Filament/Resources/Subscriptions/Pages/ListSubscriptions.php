@@ -8,13 +8,15 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\SubscriptionExporter;
 use App\Filament\Imports\SubscriptionImporter;
 use App\Filament\Resources\Subscriptions\SubscriptionResource;
+use App\Filament\Resources\Subscriptions\Widgets\SubscriptionStats;
 use App\Models\Subscription;
 use App\Services\SubscriptionService;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 
 final class ListSubscriptions extends ListRecords
 {
-    use HasResourceActions;
+    use ExposesTableToWidgets, HasResourceActions;
 
     protected static string $resource = SubscriptionResource::class;
 
@@ -42,9 +44,7 @@ final class ListSubscriptions extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            // Todo
-            // SubscriptionStats::class,
-            // SubscriptionCategoryChart::class,
+            SubscriptionStats::class,
         ];
     }
 }
