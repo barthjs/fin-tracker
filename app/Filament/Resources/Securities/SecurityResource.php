@@ -41,7 +41,7 @@ final class SecurityResource extends Resource
 
     protected static ?string $model = Security::class;
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 8;
 
     protected static string|BackedEnum|null $navigationIcon = 'tabler-file-percent';
 
@@ -93,7 +93,7 @@ final class SecurityResource extends Resource
 
             self::colorField(),
             self::statusToggleField(),
-            self::logoField(),
+            self::logoField('securities'),
             self::descriptionField(),
         ];
     }
@@ -190,7 +190,9 @@ final class SecurityResource extends Resource
             TextColumn::make('market_value')
                 ->label(__('fields.market_value'))
                 ->numeric(2)
-                ->sortable(),
+                ->searchable()
+                ->sortable()
+                ->toggleable(),
 
             TextColumn::make('total_quantity')
                 ->hiddenOn($hidden)
@@ -215,25 +217,23 @@ final class SecurityResource extends Resource
 
                     return Number::format($state, 2) ?: null;
                 })
-                ->sortable(),
+                ->searchable()
+                ->sortable()
+                ->toggleable(),
 
             TextColumn::make('price')
                 ->label(__('fields.price'))
                 ->badge()
                 ->numeric(2)
-                ->sortable(),
-
-            TextColumn::make('isin')
-                ->label(__('security.fields.isin'))
                 ->searchable()
                 ->sortable()
                 ->toggleable(),
 
-            TextColumn::make('symbol')
-                ->label(__('security.fields.symbol'))
-                ->searchable()
-                ->sortable()
-                ->toggleable(),
+            self::nameColumn('isin')
+                ->label(__('security.fields.isin')),
+
+            self::nameColumn('symbol')
+                ->label(__('security.fields.symbol')),
 
             self::descriptionColumn()
                 ->hiddenOn($hidden),

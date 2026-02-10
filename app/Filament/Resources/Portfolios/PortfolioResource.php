@@ -63,7 +63,7 @@ final class PortfolioResource extends Resource
             self::currencyField(),
             self::colorField(),
             self::statusToggleField(),
-            self::logoField(directory: 'portfolios'),
+            self::logoField('portfolios'),
             self::descriptionField(),
         ];
     }
@@ -128,7 +128,9 @@ final class PortfolioResource extends Resource
                 ->color(fn (Portfolio $record): string => $record->marketValueColor)
                 ->money(fn (Portfolio $record): string => $record->currency->value)
                 ->summarize(Sum::make()->money(Currency::getCurrency()))
-                ->sortable(),
+                ->searchable()
+                ->sortable()
+                ->toggleable(),
 
             self::descriptionColumn()
                 ->hiddenOn($hidden),

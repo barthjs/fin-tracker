@@ -18,23 +18,16 @@ use App\Models\Security;
 use App\Models\Trade;
 use App\Services\TradeService;
 use BackedEnum;
-use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -58,7 +51,7 @@ final class TradeResource extends Resource
         return __('trade.plural_label');
     }
 
-    public static function form(Schema $schema, Account|Model|null $account = null, Portfolio|Model|null $portfolio = null, Security|Model|null $security = null): Schema
+    public static function form(Schema $schema, ?Account $account = null, ?Portfolio $portfolio = null, ?Security $security = null): Schema
     {
         return $schema->components([
             Section::make()
@@ -138,7 +131,7 @@ final class TradeResource extends Resource
                         ->label(__('trade.fields.total_amount'))
                         ->numeric()
                         ->default(0)
-                        ->suffix(fn (Get $get): ?string => Account::find($get('account_id'))?->currency?->value)
+                        ->suffix(fn (Get $get): ?string => Account::whereKey($get('account_id'))->first()?->currency->value)
                         ->dehydrated(false)
                         ->disabled(),
                 ]),
@@ -147,12 +140,10 @@ final class TradeResource extends Resource
                 ->columns(2)
                 ->schema([
                     self::accountSelectField()
-                        ->getOptionLabelUsing(fn (?string $value): ?string => Account::find($value)?->name)
                         ->default(fn (): ?string => $account instanceof Account ? $account->id : null)
                         ->live(true),
 
                     self::portfolioSelectField()
-                        ->getOptionLabelUsing(fn (?string $value): ?string => Portfolio::find($value)?->name)
                         ->default(fn (): ?string => $portfolio instanceof Portfolio ? $portfolio->id : null),
 
                     self::notesField(),
@@ -169,52 +160,21 @@ final class TradeResource extends Resource
             ->columns([
                 self::dateTimeColumn('date_time'),
 
-                TextColumn::make('total_amount')
+                self::amountColumn('total_amount')
                     ->label(__('trade.fields.total_amount'))
-                    ->alignEnd()
-                    ->fontFamily('mono')
-                    ->copyable()
-                    ->badge()
-                    ->color(fn (Trade $record): string => $record->type->getColor())
-                    ->numeric(2)
-                    ->sortable()
-                    ->toggleable(),
+                    ->color(fn (Trade $record): string => $record->type->getColor()),
 
-                TextColumn::make('quantity')
-                    ->label(__('trade.fields.quantity'))
-                    ->alignEnd()
-                    ->fontFamily('mono')
-                    ->copyable()
-                    ->numeric(2)
-                    ->sortable()
-                    ->toggleable(),
+                self::numericColumn('quantity')
+                    ->label(__('trade.fields.quantity')),
 
-                TextColumn::make('price')
-                    ->label(__('fields.price'))
-                    ->alignEnd()
-                    ->fontFamily('mono')
-                    ->copyable()
-                    ->numeric(2)
-                    ->sortable()
-                    ->toggleable(),
+                self::numericColumn('price')
+                    ->label(__('fields.price')),
 
-                TextColumn::make('tax')
-                    ->label(__('trade.fields.tax'))
-                    ->alignEnd()
-                    ->fontFamily('mono')
-                    ->copyable()
-                    ->numeric(2)
-                    ->sortable()
-                    ->toggleable(),
+                self::numericColumn('tax')
+                    ->label(__('trade.fields.tax')),
 
-                TextColumn::make('fee')
-                    ->label(__('trade.fields.fee'))
-                    ->alignEnd()
-                    ->fontFamily('mono')
-                    ->copyable()
-                    ->numeric(2)
-                    ->sortable()
-                    ->toggleable(),
+                self::numericColumn('fee')
+                    ->label(__('trade.fields.fee')),
 
                 self::logoAndNameColumn('account.name')
                     ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
@@ -222,8 +182,7 @@ final class TradeResource extends Resource
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->account->logo,
                         'name' => $record->account->name,
-                    ])
-                    ->toggleable(),
+                    ]),
 
                 self::logoAndNameColumn('portfolio.name')
                     ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class)
@@ -231,8 +190,7 @@ final class TradeResource extends Resource
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->portfolio->logo,
                         'name' => $record->portfolio->name,
-                    ])
-                    ->toggleable(),
+                    ]),
 
                 self::logoAndNameColumn('security.name')
                     ->hiddenOn(Securities\RelationManagers\TradesRelationManager::class)
@@ -240,61 +198,27 @@ final class TradeResource extends Resource
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->security->logo,
                         'name' => $record->security->name,
-                    ])
-                    ->toggleable(),
+                    ]),
 
-                self::notesColumn()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                self::descriptionColumn('notes')
+                    ->label(__('fields.notes')),
             ])
             ->defaultSort('date_time', 'desc')
             ->filters([
-                SelectFilter::make('type')
+                self::typeFilter()
                     ->hiddenOn(ListTrades::class)
-                    ->label(__('fields.type'))
                     ->options(TradeType::class),
 
-                SelectFilter::make('account_id')
-                    ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
-                    ->label(Str::ucfirst(__('account.label')))
-                    ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
+                self::accountFilter()
+                    ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class),
 
-                SelectFilter::make('portfolio_id')
-                    ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class)
-                    ->label(Str::ucfirst(__('portfolio.label')))
-                    ->relationship('portfolio', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
+                self::portfolioFilter()
+                    ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class),
 
-                SelectFilter::make('security_id')
-                    ->hiddenOn(Securities\RelationManagers\TradesRelationManager::class)
-                    ->label(Str::ucfirst(__('security.label')))
-                    ->relationship('security', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
+                self::securityFilter()
+                    ->hiddenOn(Securities\RelationManagers\TradesRelationManager::class),
 
-                Filter::make('date')
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label(__('table.filter.created_from'))
-                            ->default(Carbon::today()->startOfYear()),
-
-                        DatePicker::make('until')
-                            ->label(__('table.filter.created_until')),
-                    ])
-                    ->columns(2)
-                    ->query(function (Builder $query, array $data): Builder {
-                        /** @var array{from: string, until: string} $data */
-                        return $query
-                            ->when($data['from'],
-                                fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '>=', $date))
-                            ->when($data['until'],
-                                fn (Builder $query, string $date): Builder => $query->whereDate('date_time', '<=', $date));
-                    }),
+                self::dateTimeRangeFilter(),
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(4)
             ->headerActions([
@@ -334,8 +258,7 @@ final class TradeResource extends Resource
                     self::accountSelectField(),
                 ])
                 /** @phpstan-ignore-next-line */
-                ->action(fn (TradeService $service, Collection $records, array $data) => $service->bulkUpdate($records, $data))
-                ->deselectRecordsAfterCompletion(),
+                ->action(fn (TradeService $service, Collection $records, array $data) => $service->bulkUpdate($records, $data)),
 
             self::tableBulkEditAction('portfolio_id')
                 ->label(__('portfolio.buttons.bulk_edit_portfolio'))
@@ -343,8 +266,7 @@ final class TradeResource extends Resource
                     self::portfolioSelectField(),
                 ])
                 /** @phpstan-ignore-next-line */
-                ->action(fn (TradeService $service, Collection $records, array $data) => $service->bulkUpdate($records, $data))
-                ->deselectRecordsAfterCompletion(),
+                ->action(fn (TradeService $service, Collection $records, array $data) => $service->bulkUpdate($records, $data)),
         ]);
     }
 

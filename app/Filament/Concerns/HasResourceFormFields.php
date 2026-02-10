@@ -10,8 +10,12 @@ use App\Filament\Resources\Accounts\AccountResource;
 use App\Filament\Resources\Categories\CategoryResource;
 use App\Filament\Resources\Portfolios\PortfolioResource;
 use App\Filament\Resources\Securities\SecurityResource;
+use App\Filament\Resources\Subscriptions\SubscriptionResource;
+use App\Models\Account;
 use App\Models\Category;
+use App\Models\Portfolio;
 use App\Models\Security;
+use App\Models\Subscription;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -63,7 +67,7 @@ trait HasResourceFormFields
             ->inline(false);
     }
 
-    public static function logoField(?string $name = 'logo', ?string $directory = 'logos'): FileUpload
+    public static function logoField(string $directory, ?string $name = 'logo'): FileUpload
     {
         return FileUpload::make($name)
             ->label(__('fields.logo'))
@@ -105,6 +109,18 @@ trait HasResourceFormFields
             ->required();
     }
 
+    public static function amountField(string $name = 'amount'): TextInput
+    {
+        return TextInput::make($name)
+            ->label(__('fields.amount'))
+            ->numeric()
+            ->step(0.01)
+            ->minValue(0.0)
+            ->maxValue(1e9)
+            ->suffix(fn (Get $get): ?string => Account::whereKey($get('account_id'))->first()?->currency->value)
+            ->required();
+    }
+
     public static function tradeAmountField(string $name): TextInput
     {
         return TextInput::make($name)
@@ -139,6 +155,7 @@ trait HasResourceFormFields
             ->label(Str::ucfirst(__('account.label')))
             ->selectablePlaceholder(false)
             ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
+            ->getOptionLabelUsing(fn (?string $value): ?string => Account::find($value)?->name)
             ->preload()
             ->searchable()
             ->required()
@@ -177,6 +194,7 @@ trait HasResourceFormFields
             ->label(Str::ucfirst(__('portfolio.label')))
             ->selectablePlaceholder(false)
             ->relationship('portfolio', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
+            ->getOptionLabelUsing(fn (?string $value): ?string => Portfolio::find($value)?->name)
             ->preload()
             ->searchable()
             ->required()
@@ -194,5 +212,16 @@ trait HasResourceFormFields
             ->searchable()
             ->required()
             ->createOptionForm(SecurityResource::getFormFields());
+    }
+
+    public static function subscriptionSelectField(string $column = 'subscription_id'): Select
+    {
+        return Select::make($column)
+            ->label(Str::ucfirst(__('subscription.label')))
+            ->relationship('subscription', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
+            ->getOptionLabelUsing(fn (?string $value): ?string => Subscription::find($value)?->name)
+            ->preload()
+            ->searchable()
+            ->createOptionForm(SubscriptionResource::getFormFields());
     }
 }

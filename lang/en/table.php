@@ -11,8 +11,8 @@ return [
         'revenues' => 'Revenues',
         'buys' => 'Buys',
         'sells' => 'Sells',
-        'created_from' => 'From',
-        'created_until' => 'Until',
+        'from' => 'From',
+        'until' => 'Until',
         'unverified' => 'Unverified',
     ],
 

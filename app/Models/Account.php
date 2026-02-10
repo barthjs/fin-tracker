@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\Chartable;
 use App\Contracts\HasDeletableFiles;
 use App\Enums\Currency;
 use App\Enums\TradeType;
 use App\Enums\TransactionType;
 use App\Models\Scopes\UserScope;
+use App\Models\Traits\HasChartDefaults;
 use App\Observers\FileCleanupObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\AccountFactory;
@@ -34,14 +36,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
  * @property-read Collection<int, Transaction> $incomingTransfers
+ * @property-read Collection<int, Subscription> $subscriptions
  * @property-read Collection<int, Trade> $trades
  * @property-read Collection<int, Transaction> $transactions
  * @property-read string $balanceColor
  */
-final class Account extends Model implements HasDeletableFiles
+final class Account extends Model implements Chartable, HasDeletableFiles
 {
     /** @use HasFactory<AccountFactory> */
-    use HasFactory, HasUlids;
+    use HasChartDefaults, HasFactory, HasUlids;
 
     /**
      * The model's default values for attributes.
@@ -155,6 +158,16 @@ final class Account extends Model implements HasDeletableFiles
     public function incomingTransfers(): HasMany
     {
         return $this->hasMany(Transaction::class, 'transfer_account_id');
+    }
+
+    /**
+     * Subscriptions belonging to this account.
+     *
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class, 'account_id');
     }
 
     /**

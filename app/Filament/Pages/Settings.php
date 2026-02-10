@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use BackedEnum;
 use Filament\Pages\Page;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
@@ -17,11 +18,20 @@ final class Settings extends Page
 
     public ?string $latestVersionUrl;
 
+    protected static ?int $navigationSort = 3;
+
+    protected static string|null|BackedEnum $navigationIcon = 'tabler-settings';
+
     protected string $view = 'filament.pages.settings';
 
-    public static function shouldRegisterNavigation(): bool
+    public static function getNavigationGroup(): string
     {
-        return false;
+        return __('settings.navigation_group');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('settings.navigation_label');
     }
 
     public function getTitle(): string

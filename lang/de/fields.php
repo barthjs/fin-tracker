@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 return [
 
-    // Konten, Kategorien, Depots, Wertpapiere
+    // Konten, Kategorien, Depots, Wertpapiere, Abonnements
     'name' => 'Name',
+    'amount' => 'Betrag',
     'description' => 'Beschreibung',
     'color' => 'Farbe',
     'logo' => 'Logo',
@@ -16,20 +17,22 @@ return [
     // Kategorien, Umsätze, Trades
     'type' => 'Typ',
 
-    //  Konten, Depots
+    // Konten, Depots
     'currency' => 'Währung',
 
     // Depots, Wertpapiere
     'market_value' => 'Marktwert',
 
-    //  Wertpapiere, Trades
+    // Wertpapiere, Trades
     'price' => 'Kurs',
 
-    //  Umsätze, Trades
+    // Umsätze, Trades
     'date_time' => 'Datum',
     'notes' => 'Notizen',
 
     'created_at' => 'Erstellt am',
     'updated_at' => 'Aktualisiert am',
+
+    'view' => 'Ansehen',
 
 ];

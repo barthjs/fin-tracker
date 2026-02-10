@@ -9,6 +9,7 @@ use App\Http\Resources\TradeResource;
 use App\Models\Trade;
 use App\Services\TradeService;
 use App\Traits\ApiResponse;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -26,13 +27,21 @@ final class TradeController
     {
         $trades = QueryBuilder::for(Trade::class)
             ->allowedFilters([
-                AllowedFilter::scope('date_time'),
+                AllowedFilter::callback('date_from', function (Builder $query, mixed $value): void {
+                    /** @var Builder<Trade> $query */
+                    $query->where('date_time', '>=', $value);
+                }),
+                AllowedFilter::callback('date_until', function (Builder $query, mixed $value): void {
+                    /** @var Builder<Trade> $query */
+                    $query->where('date_time', '<=', $value);
+                }),
                 AllowedFilter::exact('type'),
                 AllowedFilter::exact('total_amount'),
                 AllowedFilter::exact('quantity'),
                 AllowedFilter::exact('price'),
                 AllowedFilter::exact('tax'),
                 AllowedFilter::exact('fee'),
+                'notes',
                 AllowedFilter::exact('account_id'),
                 AllowedFilter::exact('portfolio_id'),
                 AllowedFilter::exact('security_id'),

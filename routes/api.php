@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PortfolioController;
 use App\Http\Controllers\Api\SecurityController;
 use App\Http\Controllers\Api\StatisticController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\SystemController;
 use App\Http\Controllers\Api\TradeController;
 use App\Http\Controllers\Api\TransactionController;
@@ -16,6 +17,8 @@ use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/up', [SystemController::class, 'up'])->name('api.up');
+
+Route::post('/webhook', [SystemController::class, 'webhook'])->name('api.webhook');
 
 Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->name('api.')->group(function (): void {
     Route::get('/health', [SystemController::class, 'health'])->name('health');
@@ -36,6 +39,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->name('api.')->gr
     Route::apiResource('statistics', StatisticController::class)
         ->only(['index', 'show'])
         ->middleware(CheckAbilities::class.':'.ApiAbility::STATISTIC->value);
+
+    Route::apiResource('subscriptions', SubscriptionController::class)
+        ->middleware(CheckAbilities::class.':'.ApiAbility::SUBSCRIPTION->value);
 
     Route::apiResource('trades', TradeController::class)
         ->middleware(CheckAbilities::class.':'.ApiAbility::TRADE->value);

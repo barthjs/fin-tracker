@@ -7,8 +7,6 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
-use App\Filament\Pages\Settings;
-use App\Filament\Resources\Users\UserResource;
 use App\Http\Middleware\EnsureUserIsVerified;
 use Awcodes\LightSwitch\LightSwitchPlugin;
 use Filament\Actions\Action;
@@ -81,15 +79,6 @@ final class AppPanelProvider extends PanelProvider
             )
             ->userMenuItems([
                 'profile' => fn (Action $action): Action => $action->url(fn (): string => EditProfile::getUrl()),
-                Action::make('settings')
-                    ->icon('tabler-settings')
-                    ->label(fn (): string => __('settings.navigation_label'))
-                    ->url(fn (): string => Settings::getUrl()),
-                Action::make('users')
-                    ->icon('tabler-users')
-                    ->label(fn (): string => ucfirst(__('user.plural_label')))
-                    ->hidden(fn (): bool => ! auth()->user()->is_admin)
-                    ->url(fn (): string => UserResource::getUrl()),
             ])
             ->plugins([
                 LightSwitchPlugin::make(),

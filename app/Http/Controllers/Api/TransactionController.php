@@ -38,6 +38,7 @@ final class TransactionController
                 AllowedFilter::exact('type'),
                 AllowedFilter::exact('amount'),
                 'payee',
+                'notes',
                 AllowedFilter::exact('account_id'),
                 AllowedFilter::exact('transfer_account_id'),
                 AllowedFilter::exact('category_id'),
@@ -50,6 +51,7 @@ final class TransactionController
                 'account_id',
                 'transfer_account_id',
                 'category_id',
+                'subscription_id',
             ])
             ->defaultSort('-date_time')
             ->paginate()

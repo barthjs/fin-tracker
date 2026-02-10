@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\Chartable;
 use App\Enums\CategoryGroup;
 use App\Enums\TransactionType;
 use App\Models\Scopes\UserScope;
+use App\Models\Traits\HasChartDefaults;
 use Carbon\CarbonInterface;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,12 +31,13 @@ use Illuminate\Support\Carbon;
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
  * @property-read Collection<int, CategoryStatistic> $statistics
+ * @property-read Collection<int, Subscription> $subscriptions
  * @property-read Collection<int, Transaction> $transactions
  */
-final class Category extends Model
+final class Category extends Model implements Chartable
 {
     /** @use HasFactory<CategoryFactory> */
-    use HasFactory, HasUlids;
+    use HasChartDefaults, HasFactory, HasUlids;
 
     /**
      * The model's default values for attributes.
@@ -137,6 +140,16 @@ final class Category extends Model
     public function statistics(): HasMany
     {
         return $this->hasMany(CategoryStatistic::class, 'category_id');
+    }
+
+    /**
+     * Subscriptions in this category.
+     *
+     * @return HasMany<Subscription, $this>
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class, 'category_id');
     }
 
     /**
