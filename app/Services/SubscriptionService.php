@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Chartable;
 use App\Enums\NotificationEventType;
 use App\Enums\PeriodUnit;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
@@ -239,6 +240,60 @@ final readonly class SubscriptionService
             'yearly_avg' => $monthlyAvg * 12,
             'due_this_month' => $dueThisMonth,
             'daily_chart' => $dailyChart,
+        ];
+    }
+
+    /**
+     * @param  Collection<int, Subscription>  $subscriptions
+     * @param  'category'|'account'  $relation
+     * @return array{
+     *     labels: array<string>,
+     *     datasets: array<array{
+     *         data: array<float>,
+     *         backgroundColor: array<string>,
+     *         hoverOffset: 4,
+     *      }>
+     * }
+     */
+    public function getChartAllocation(Collection $subscriptions, string $relation): array
+    {
+        $grouped = [];
+
+        foreach ($subscriptions as $sub) {
+            if ($sub->period_frequency < 1) {
+                continue;
+            }
+
+            $relatedModel = $sub->getRelationValue($relation);
+
+            if (! $relatedModel instanceof Chartable) {
+                continue;
+            }
+
+            $key = $relatedModel->getKey();
+
+            if (! isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'label' => $relatedModel->getChartLabel(),
+                    'color' => $relatedModel->getChartColor(),
+                    'sum' => 0.0,
+                ];
+            }
+
+            $grouped[$key]['sum'] += $this->calculateMonthlyEquivalent($sub);
+        }
+
+        uasort($grouped, fn (array $a, array $b): int => $b['sum'] <=> $a['sum']);
+
+        return [
+            'labels' => array_column($grouped, 'label'),
+            'datasets' => [
+                [
+                    'data' => array_column($grouped, 'sum'),
+                    'backgroundColor' => array_column($grouped, 'color'),
+                    'hoverOffset' => 4,
+                ],
+            ],
         ];
     }
 

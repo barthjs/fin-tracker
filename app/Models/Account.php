@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\Chartable;
 use App\Contracts\HasDeletableFiles;
 use App\Enums\Currency;
 use App\Enums\TradeType;
 use App\Enums\TransactionType;
 use App\Models\Scopes\UserScope;
+use App\Models\Traits\HasChartDefaults;
 use App\Observers\FileCleanupObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\AccountFactory;
@@ -39,10 +41,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, Transaction> $transactions
  * @property-read string $balanceColor
  */
-final class Account extends Model implements HasDeletableFiles
+final class Account extends Model implements Chartable, HasDeletableFiles
 {
     /** @use HasFactory<AccountFactory> */
-    use HasFactory, HasUlids;
+    use HasChartDefaults, HasFactory, HasUlids;
 
     /**
      * The model's default values for attributes.

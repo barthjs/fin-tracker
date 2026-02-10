@@ -8,6 +8,8 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\SubscriptionExporter;
 use App\Filament\Imports\SubscriptionImporter;
 use App\Filament\Resources\Subscriptions\SubscriptionResource;
+use App\Filament\Resources\Subscriptions\Widgets\SubscriptionsByAccountChart;
+use App\Filament\Resources\Subscriptions\Widgets\SubscriptionsByCategoryChart;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionStats;
 use App\Models\Subscription;
 use App\Services\SubscriptionService;
@@ -45,6 +47,14 @@ final class ListSubscriptions extends ListRecords
     {
         return [
             SubscriptionStats::class,
+        ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            SubscriptionsByAccountChart::class,
+            SubscriptionsByCategoryChart::class,
         ];
     }
 }
