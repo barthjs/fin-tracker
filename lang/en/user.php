@@ -19,6 +19,7 @@ return [
         'avatar' => 'Avatar',
         'is_verified' => 'Verified',
         'is_admin' => 'Administrator',
+        'timezone' => 'Timezone',
     ],
 
 ];

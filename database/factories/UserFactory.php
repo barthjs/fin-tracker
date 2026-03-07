@@ -40,6 +40,7 @@ final class UserFactory extends Factory
             'is_active' => true,
             'is_verified' => false,
             'is_admin' => false,
+            'timezone' => fake()->timezone(),
         ];
     }
 

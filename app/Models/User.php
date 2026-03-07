@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\TimezoneCast;
 use App\Contracts\HasDeletableFiles;
 use App\Observers\FileCleanupObserver;
 use Carbon\CarbonImmutable;
@@ -41,6 +42,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_active
  * @property bool $is_verified
  * @property bool $is_admin
+ * @property string $timezone
  * @property-read CarbonImmutable $created_at
  * @property-read CarbonImmutable $updated_at
  * @property-read Collection<int, Account> $accounts
@@ -97,6 +99,7 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
             'is_active' => 'bool',
             'is_verified' => 'bool',
             'is_admin' => 'bool',
+            'timezone' => TimezoneCast::class,
         ];
     }
 
