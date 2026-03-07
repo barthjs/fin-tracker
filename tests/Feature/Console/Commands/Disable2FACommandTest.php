@@ -3,14 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use Illuminate\Support\Str;
 
 beforeEach(function () {
-    $this->user = User::factory()
-        ->create([
-            'app_authentication_secret' => Str::random(10),
-            'app_authentication_recovery_codes' => [Str::random(10), Str::random(10)],
-        ]);
+    $this->user = User::factory()->withTwoFactor()->create();
 });
 
 it('disables 2FA via email', function () {

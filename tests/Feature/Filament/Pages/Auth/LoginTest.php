@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -69,6 +70,23 @@ it('shows validation error on failed login', function () {
         ->assertHasErrors(['data.login']);
 
     assertGuest();
+});
+
+it('disallows inactive users', function () {
+    $user = User::factory()->inactive()->create();
+
+    livewire(Login::class)
+        ->fillForm([
+            'login' => $user->username,
+            'password' => 'password',
+        ])
+        ->call('authenticate')
+        ->assertHasErrors(['data.login']);
+
+    actingAs($user);
+
+    get(Filament::getUrl())
+        ->assertForbidden();
 });
 
 test('oidc redirect route redirects to provider authorization endpoint', function () {

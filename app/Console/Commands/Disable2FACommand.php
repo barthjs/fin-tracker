@@ -9,13 +9,16 @@ use Illuminate\Console\Command;
 
 final class Disable2FACommand extends Command
 {
+    /**
+     * @var string
+     */
     protected $signature = 'app:disable-2fa {emailOrUsername?}';
 
+    /**
+     * @var string
+     */
     protected $description = 'Disable 2FA for a user by email or username';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         $emailOrUsername = $this->argument('emailOrUsername');

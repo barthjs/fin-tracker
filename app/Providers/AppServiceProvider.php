@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
@@ -84,7 +85,11 @@ final class AppServiceProvider extends ServiceProvider
         // Filament
         Filament::serving(function (): void {
             Event::listen(function (LocaleChanged $event): void {
-                auth()->user()?->setLocale($event->locale);
+                if (auth()->check()) {
+                    auth()->user()->setLocale($event->locale);
+                } else {
+                    Session::put('locale', $event->locale);
+                }
             });
             Number::useLocale(app()->getLocale());
 
