@@ -156,22 +156,26 @@ trait HasResourceActions
             ->schema([
                 DatePicker::make('from')
                     ->label(__('table.filter.from'))
+                    ->timezone(fn (): string => auth()->user()->timezone)
                     ->default(Carbon::today()->startOfYear()),
 
                 DatePicker::make('until')
-                    ->label(__('table.filter.until')),
+                    ->label(__('table.filter.until'))
+                    ->timezone(fn (): string => auth()->user()->timezone),
             ])
             ->columns(2)
             ->query(function (Builder $query, array $data) use ($column): Builder {
                 /** @var array{from: string, until: string} $data */
+                $userTimezone = auth()->user()->timezone;
+
                 return $query
                     ->when(
                         $data['from'],
-                        fn (Builder $query, string $date): Builder => $query->whereDate($column, '>=', $date)
+                        fn (Builder $query, string $date): Builder => $query->where($column, '>=', Carbon::parse($date, $userTimezone)->startOfDay()->utc())
                     )
                     ->when(
                         $data['until'],
-                        fn (Builder $query, string $date): Builder => $query->whereDate($column, '<=', $date)
+                        fn (Builder $query, string $date): Builder => $query->where($column, '<=', Carbon::parse($date, $userTimezone)->endOfDay()->utc())
                     );
             });
     }
