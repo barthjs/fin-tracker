@@ -51,7 +51,7 @@ final class CategoryExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('category.export.file_name').Carbon::now()->format('Y-m-d-H-i');
+        return __('category.export.file_name').Carbon::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
     public function getJobBatchName(): string
