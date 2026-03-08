@@ -96,27 +96,45 @@ final readonly class SubscriptionService
      */
     public function dispatchReminders(): void
     {
-        $today = now()->toDateString();
+        /** @var \Illuminate\Support\Collection<int, string> $timezones */
+        $timezones = DB::table('accounts')
+            ->join('sys_users', 'accounts.user_id', '=', 'sys_users.id')
+            ->distinct()
+            ->pluck('sys_users.timezone');
 
-        Subscription::query()
-            ->with(['user', 'notificationAssignments.target'])
-            ->where('is_active', true)
-            ->where('remind_before_payment', true)
-            ->whereRaw('next_payment_date - reminder_days_before <= ?::date', [$today])
-            ->where(function (Builder $query): void {
-                $query->whereNull('last_reminded_at')
-                    ->orWhereRaw('last_reminded_at < next_payment_date - reminder_days_before');
-            })
-            ->where(function (Builder $query) use ($today): void {
-                $query->whereNull('ended_at')
-                    ->orWhere('ended_at', '>=', $today);
-            })
-            ->chunkById(100, function (Collection $subscriptions): void {
-                /** @var Collection<int, Subscription> $subscriptions */
-                foreach ($subscriptions as $subscription) {
-                    SendSubscriptionReminderJob::dispatch($subscription);
-                }
-            });
+        foreach ($timezones as $userTz) {
+            // Calculate "today" in the user's timezone
+            $nowInUserTz = now()->setTimezone($userTz);
+            $todayLocalStart = $nowInUserTz->copy()->startOfDay();
+            $tomorrowLocalStart = $nowInUserTz->copy()->addDay()->startOfDay();
+
+            // Convert to UTC for database comparison
+            $todayUtc = $todayLocalStart->setTimezone('UTC')->toDateString();
+            $tomorrowUtc = $tomorrowLocalStart->setTimezone('UTC')->toDateString();
+
+            Subscription::query()
+                ->with(['user', 'notificationAssignments.target'])
+                ->whereHas('user', function (Builder $query) use ($userTz): void {
+                    $query->where('timezone', $userTz);
+                })
+                ->where('is_active', true)
+                ->where('remind_before_payment', true)
+                ->whereRaw('next_payment_date - reminder_days_before <= ?::date', [$tomorrowUtc])
+                ->where(function (Builder $query): void {
+                    $query->whereNull('last_reminded_at')
+                        ->orWhereRaw('last_reminded_at < next_payment_date - reminder_days_before');
+                })
+                ->where(function (Builder $query) use ($todayUtc): void {
+                    $query->whereNull('ended_at')
+                        ->orWhere('ended_at', '>=', $todayUtc);
+                })
+                ->chunkById(100, function (Collection $subscriptions): void {
+                    /** @var Collection<int, Subscription> $subscriptions */
+                    foreach ($subscriptions as $subscription) {
+                        SendSubscriptionReminderJob::dispatch($subscription);
+                    }
+                });
+        }
     }
 
     /**
@@ -124,41 +142,72 @@ final readonly class SubscriptionService
      */
     public function dispatchDueSubscriptions(): void
     {
-        $today = now()->startOfDay();
+        /** @var \Illuminate\Support\Collection<int, string> $timezones */
+        $timezones = DB::table('accounts')
+            ->join('sys_users', 'accounts.user_id', '=', 'sys_users.id')
+            ->distinct()
+            ->pluck('sys_users.timezone');
 
-        Subscription::query()
-            ->with(['account', 'category', 'user'])
-            ->where('is_active', true)
-            ->where('auto_generate_transaction', true)
-            ->where('next_payment_date', '<=', $today->toDateString())
-            ->where(function (Builder $query) use ($today): void {
-                $query->whereNull('last_generated_at')
-                    ->orWhere('last_generated_at', '<', $today);
-            })
-            ->where(function (Builder $query) use ($today): void {
-                $query->whereNull('ended_at')
-                    ->orWhere('ended_at', '>=', $today->toDateString());
-            })
-            ->chunkById(100, function (Collection $subscriptions): void {
-                /** @var Collection<int, Subscription> $subscriptions */
-                foreach ($subscriptions as $subscription) {
-                    ProcessDueSubscriptionJob::dispatch($subscription);
-                }
-            });
+        foreach ($timezones as $userTz) {
+            // Calculate "today" in the user's timezone
+            $nowInUserTz = now()->setTimezone($userTz);
+            $todayLocalStart = $nowInUserTz->copy()->startOfDay();
+            $tomorrowLocalStart = $nowInUserTz->copy()->addDay()->startOfDay();
+
+            // Convert to UTC for database comparison
+            $todayUtc = $todayLocalStart->setTimezone('UTC')->toDateString();
+            $tomorrowUtc = $tomorrowLocalStart->setTimezone('UTC')->toDateString();
+
+            Subscription::query()
+                ->with(['account', 'category', 'user'])
+                ->whereHas('user', function (Builder $query) use ($userTz): void {
+                    $query->where('timezone', $userTz);
+                })
+                ->where('is_active', true)
+                ->where('auto_generate_transaction', true)
+                ->where('next_payment_date', '<=', $tomorrowUtc)
+                ->where(function (Builder $query): void {
+                    $query->whereNull('last_generated_at')
+                        ->orWhereRaw('last_generated_at::date < next_payment_date');
+                })
+                ->where(function (Builder $query) use ($todayUtc): void {
+                    $query->whereNull('ended_at')
+                        ->orWhere('ended_at', '>=', $todayUtc);
+                })
+                ->chunkById(100, function (Collection $subscriptions): void {
+                    /** @var Collection<int, Subscription> $subscriptions */
+                    foreach ($subscriptions as $subscription) {
+                        ProcessDueSubscriptionJob::dispatch($subscription);
+                    }
+                });
+        }
     }
 
     public function generateTransaction(Subscription $subscription): ?Transaction
     {
         return DB::transaction(function () use ($subscription): ?Transaction {
-            $today = now()->startOfDay();
+            $userTz = $subscription->user->timezone;
+            $nowLocal = now()->setTimezone($userTz)->startOfDay();
             $lastCreatedTransaction = null;
             $generatedCount = 0;
 
-            while (
-                $subscription->next_payment_date->lessThanOrEqualTo($today)
-                && ($subscription->ended_at === null || $subscription->next_payment_date->lessThanOrEqualTo($subscription->ended_at))
-            ) {
-                $transactionDate = $subscription->next_payment_date->startOfDay();
+            while (true) {
+                // Interpret the stored date as the local day (00:00) in the user's timezone.
+                $nextDueLocal = $subscription->next_payment_date->shiftTimezone($userTz)->startOfDay();
+
+                if ($nextDueLocal->greaterThan($nowLocal)) {
+                    break;
+                }
+
+                if ($subscription->ended_at !== null) {
+                    $endedAtLocal = $subscription->ended_at->shiftTimezone($userTz)->startOfDay();
+                    if ($nextDueLocal->greaterThan($endedAtLocal)) {
+                        break;
+                    }
+                }
+
+                // Convert the local moment to UTC for the transaction's date_time column.
+                $transactionDate = $nextDueLocal->setTimezone('UTC');
 
                 $lastCreatedTransaction = $this->transactionService->create([
                     'date_time' => $transactionDate,
@@ -168,7 +217,7 @@ final readonly class SubscriptionService
                     'account_id' => $subscription->account_id,
                     'category_id' => $subscription->category_id,
                     'subscription_id' => $subscription->id,
-                    'notes' => __('subscription.generated_note', ['date' => $transactionDate->toDateString()]),
+                    'notes' => __('subscription.generated_note', ['date' => $subscription->next_payment_date->toDateString()]),
                 ]);
 
                 $subscription->next_payment_date = $this->calculateNextDate($subscription);
@@ -204,7 +253,9 @@ final readonly class SubscriptionService
         $monthlyAvg = 0.0;
         $dueThisMonth = 0.0;
 
-        $now = CarbonImmutable::now();
+        $userTz = auth()->user()->timezone;
+
+        $now = CarbonImmutable::now()->setTimezone($userTz);
         $monthEnd = $now->endOfMonth();
 
         $dailyChart = array_fill(0, $now->daysInMonth, 0.0);
@@ -303,15 +354,17 @@ final readonly class SubscriptionService
             return;
         }
 
-        $today = Carbon::now()->startOfDay();
+        $userTz = $subscription->user->timezone;
+        $nowLocal = Carbon::now()->setTimezone($userTz)->startOfDay();
+        $nextDueLocal = $subscription->next_payment_date->shiftTimezone($userTz)->startOfDay();
 
         $shouldDispatch = false;
 
-        if ($subscription->next_payment_date->lessThan($today)) {
+        if ($nextDueLocal->lessThan($nowLocal)) {
             $shouldDispatch = true;
-        } elseif ($subscription->next_payment_date->isToday()) {
+        } elseif ($nextDueLocal->equalTo($nowLocal)) {
             $lastGenerated = $subscription->last_generated_at;
-            if ($lastGenerated === null || $lastGenerated->lessThan($today)) {
+            if ($lastGenerated === null || $lastGenerated->lessThan($nowLocal)) {
                 $shouldDispatch = true;
             }
         }
