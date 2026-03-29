@@ -11,8 +11,8 @@ and system dependencies.
 Tech stack:
 
 - [PHP 8.5](https://php.net/)
-- [Laravel 12](https://laravel.com/)
-- [Filament 4](https://filamentphp.com/)
+- [Laravel 13](https://laravel.com/)
+- [Filament 5](https://filamentphp.com/)
 - [PostgreSQL](https://www.postgresql.org/)
 
 ## Ways to contribute

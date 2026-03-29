@@ -10,9 +10,11 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'table' => 'sys_jobs',
-            'queue' => 'default',
-            'retry_after' => 90,
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'sys_jobs'),
+            'queue' => env('DB_QUEUE', 'default'),
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            'after_commit' => false,
         ],
 
     ],
@@ -23,7 +25,7 @@ return [
     ],
 
     'failed' => [
-        'driver' => 'database-uuids',
+        'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
         'database' => env('DB_CONNECTION', 'pgsql'),
         'table' => 'sys_failed_jobs',
     ],
