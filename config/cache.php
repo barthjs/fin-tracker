@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 return [
 
-    'default' => 'database',
+    'default' => env('CACHE_STORE', 'database'),
 
     'stores' => [
 
         'database' => [
             'driver' => 'database',
-            'table' => 'sys_cache',
-            'lock_table' => 'sys_cache_locks',
+            'connection' => env('DB_CACHE_CONNECTION'),
+            'table' => env('DB_CACHE_TABLE', 'sys_cache'),
+            'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
+            'lock_table' => env('DB_CACHE_LOCK_TABLE', 'sys_cache_locks'),
         ],
 
     ],
 
-    'prefix' => 'fin-tracker_cache_',
+    'prefix' => 'fin-tracker-cache-',
 
 ];

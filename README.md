@@ -250,10 +250,10 @@ your installation:
     <img src="https://img.shields.io/badge/PHP-8.5-777BB4?style=flat-square&logo=php" alt="PHP 8.5">
   </a>
 - <a href="https://laravel.com" target="_blank">
-    <img src="https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel" alt="Laravel 12">
+    <img src="https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square&logo=laravel" alt="Laravel 13">
   </a>
 - <a href="https://filamentphp.com/" target="_blank">
-    <img src="https://img.shields.io/badge/Filament-4-E9B228?style=flat-square" alt="Filament 4">
+    <img src="https://img.shields.io/badge/Filament-5-E9B228?style=flat-square" alt="Filament 5">
   </a>
 - <a href="https://tabler.io/icons" target="_blank">
     <img src="https://img.shields.io/badge/Tabler_Icons-grey?style=flat-square" alt="Tabler Icons">
