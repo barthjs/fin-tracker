@@ -6,12 +6,10 @@ namespace App\Filament\Resources\Subscriptions\RelationManagers;
 
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\Subscription;
-use BackedEnum;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
@@ -20,13 +18,6 @@ use Illuminate\Support\Str;
 final class TransactionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'transactions';
-
-    protected static string|BackedEnum|null $icon = 'tabler-credit-card';
-
-    public static function getTitle(Model $ownerRecord, string $pageClass): string
-    {
-        return Str::ucfirst(__('transaction.plural_label'));
-    }
 
     public function form(Schema $schema): Schema
     {

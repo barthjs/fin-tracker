@@ -13,13 +13,16 @@ use Illuminate\Support\Facades\Log;
 
 final class ResetPasswordCommand extends Command
 {
+    /**
+     * @var string
+     */
     protected $signature = 'app:reset-password {emailOrUsername?}';
 
+    /**
+     * @var string
+     */
     protected $description = 'Reset the password for a user by email or username';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         $emailOrUsername = $this->argument('emailOrUsername');

@@ -24,7 +24,6 @@ pest()->extend(TestCase::class)
         Str::createUlidsNormally();
         Str::createUuidsNormally();
 
-        /** @phpstan-ignore-next-line */
         $this->freezeTime();
     })
     ->in('Feature', 'Unit');

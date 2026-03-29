@@ -44,9 +44,11 @@ it('can register a new user', function () {
         'last_name' => 'User',
         'username' => 'user',
         'email' => 'user@example.com',
+        'locale' => 'en',
         'is_verified' => true,
         'is_active' => true,
         'is_admin' => false,
+        'timezone' => 'UTC',
     ]);
 
     assertAuthenticated();

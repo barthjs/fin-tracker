@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Auth;
 
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
 
 final class Register extends \Filament\Auth\Pages\Register
 {
@@ -21,11 +23,13 @@ final class Register extends \Filament\Auth\Pages\Register
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
+                $this->getTimezoneFormComponent(),
             ]);
     }
 
     protected function handleRegistration(array $data): Model
     {
+        $data['locale'] = Session::pull('locale', 'en');
         $data['is_verified'] = true;
 
         return $this->getUserModel()::create($data);
@@ -62,5 +66,14 @@ final class Register extends \Filament\Auth\Pages\Register
             ->email()
             ->maxLength(255)
             ->unique($this->getUserModel());
+    }
+
+    protected function getTimezoneFormComponent(): Component
+    {
+        return Hidden::make('timezone')
+            ->default('UTC')
+            ->extraAttributes([
+                'x-init' => "\$wire.set('data.timezone', Intl.DateTimeFormat().resolvedOptions().timeZone)",
+            ]);
     }
 }

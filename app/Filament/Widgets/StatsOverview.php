@@ -23,8 +23,9 @@ final class StatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $year = Carbon::now()->year;
-        $monthColumn = mb_strtolower(Carbon::now()->format('M'));
+        $now = Carbon::now()->setTimezone(auth()->user()->timezone);
+        $year = $now->year;
+        $monthColumn = mb_strtolower($now->format('M'));
 
         $totalAssets = Number::currency(
             Account::getActiveBalanceSum() + Portfolio::getActiveMarketValueSum(),
@@ -66,6 +67,7 @@ final class StatsOverview extends BaseWidget
     private function getCategoryChartData(TransactionType $type, int $year): array
     {
         $row = CategoryStatistic::query()
+            /** @phpstan-ignore argument.type (SQL built from constant month names) */
             ->selectRaw(collect(CategoryStatistic::MONTHS)
                 ->map(fn (string $m) => "SUM($m) as $m")
                 ->implode(', '))

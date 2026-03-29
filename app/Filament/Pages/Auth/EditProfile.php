@@ -11,10 +11,12 @@ use App\Services\Oidc\OidcService;
 use App\Services\UserService;
 use Carbon\CarbonImmutable;
 use Closure;
+use DateTimeZone;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -95,6 +97,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
                 $this->getLastNameFormComponent(),
                 $this->getEmailFormComponent(),
                 $this->getUsernameFormComponent(),
+                $this->getTimezoneFormComponent(),
 
                 $this->getCurrentPasswordFormComponent(),
                 $this->getPasswordFormComponent(),
@@ -141,6 +144,19 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             ->maxLength(255)
             ->unique(ignoreRecord: true)
             ->live(debounce: 500);
+    }
+
+    protected function getTimezoneFormComponent(): Component
+    {
+        return Select::make('timezone')
+            ->label(__('user.fields.timezone'))
+            ->options(array_combine(
+                DateTimeZone::listIdentifiers(),
+                DateTimeZone::listIdentifiers()
+            ))
+            ->searchable()
+            ->searchable()
+            ->required();
     }
 
     protected function getCurrentPasswordFormComponent(): Component

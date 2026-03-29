@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\ApiAbility;
 use App\Filament\Pages\Auth\EditProfile;
 use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Hash;
 
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
@@ -15,15 +14,22 @@ beforeEach(function () {
     asUser();
 
     $this->user = auth()->user();
-    $this->user->update([
-        'app_authentication_secret' => Hash::make(Str::random(10)),
-        'app_authentication_recovery_codes' => [Str::random(10), Str::random(10)],
-    ]);
 });
 
 it('renders the profile page', function () {
     livewire(EditProfile::class)
         ->assertOk();
+});
+
+it('can update the name and the timezone', function () {
+    livewire(EditProfile::class)
+        ->fillForm([
+            'first_name' => 'New',
+            'last_name' => 'Name',
+            'timezone' => 'Europe/Berlin',
+        ])
+        ->call('save')
+        ->assertHasNoErrors();
 });
 
 it('redirects unverified users to the profile page', function () {
@@ -49,10 +55,18 @@ it('verifies an unverified user when they set a password', function () {
     expect($this->user->refresh()->is_verified)->toBeTrue();
 });
 
-it('requires the current password to change the username if a password is set', function () {
+it('requires the current password to change the username or email if a password is set', function () {
     livewire(EditProfile::class)
         ->fillForm([
             'username' => 'new.username',
+            'currentPassword' => '',
+        ])
+        ->call('save')
+        ->assertHasErrors(['data.currentPassword']);
+
+    livewire(EditProfile::class)
+        ->fillForm([
+            'email' => '',
             'currentPassword' => '',
         ])
         ->call('save')
@@ -116,15 +130,14 @@ it('automatically selects read ability when write is selected', function () {
         ->fillForm([
             "abilities.{$ability->write()}" => true,
         ])
-        ->assertFormComponentActionDataSet([
+        ->assertSchemaStateSet([
             "abilities.{$ability->read()}" => true,
         ]);
 });
 
 it('can delete an api token', function () {
-    $user = auth()->user();
-    $user->createToken('Delete Me', [ApiAbility::TRANSACTION->read()]);
-    $token = $user->tokens->first();
+    $this->user->createToken('Delete Me', [ApiAbility::TRANSACTION->read()]);
+    $token = $this->user->tokens->first();
 
     livewire(EditProfile::class)
         ->callAction('deleteApiToken', arguments: ['token' => $token->id])
@@ -136,7 +149,7 @@ it('can delete an api token', function () {
 it('displays the active user sessions on the profile page', function () {
     $this->startSession();
 
-    DB::table('sys_sessions')->insert([
+    DB::table(config()->string('session.table'))->insert([
         'id' => 'dummy_session_id',
         'user_id' => $this->user->id,
         'ip_address' => '1.2.3.4',
