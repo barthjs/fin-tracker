@@ -5,8 +5,10 @@
 @endphp
 
 <x-dynamic-component :component="$pageComponent">
-    @if(!auth()->user()->is_verified)
-        <div class="rounded-lg border-l-4 border-warning-500 bg-warning-100 p-4 text-lg text-warning-600 text-center">
+    @if (!auth()->user()->is_verified)
+        <div
+            class="border-warning-500 bg-warning-100 text-warning-600 rounded-lg border-l-4 p-4 text-center text-lg"
+        >
             {{ __('profile.change_password_message') }}
         </div>
     @endif
@@ -18,14 +20,15 @@
             <div class="-mx-6 -my-6 divide-y divide-gray-200 dark:divide-white/5">
                 @foreach ($this->oidcProviders as $slug => $provider)
                     <div
-                        class="flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-white/5 transition duration-200">
+                        class="flex items-center justify-between p-6 transition duration-200 hover:bg-gray-50 dark:hover:bg-white/5"
+                    >
                         <div class="flex items-center gap-4">
-                            <div class="flex items-center justify-center w-8 h-8">
-                                <x-filament::icon :icon="$slug" class="w-full h-full"/>
+                            <div class="flex h-8 w-8 items-center justify-center">
+                                <x-filament::icon :icon="$slug" class="h-full w-full" />
                             </div>
 
                             <div>
-                                <div class="font-medium text-sm">{{ $provider['label'] }}</div>
+                                <div class="text-sm font-medium">{{ $provider['label'] }}</div>
                                 <div class="text-xs text-gray-500">
                                     {{ $provider['is_connected'] ? __('profile.oidc.connected') : __('profile.oidc.not_connected') }}
                                 </div>
@@ -69,20 +72,22 @@
                 </x-filament::empty-state>
             @else
                 @foreach ($this->apiTokens as $token)
-                    <div class="p-6 space-y-4">
+                    <div class="space-y-4 p-6">
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col gap-1">
-                                <div class="text-sm font-medium">
-                                    {{ $token->name }}
-                                </div>
-                                <div class="text-xs text-gray-500 space-y-0.5">
+                                <div class="text-sm font-medium">{{ $token->name }}</div>
+                                <div class="space-y-0.5 text-xs text-gray-500">
                                     <div>
-                                        <span class="font-medium">{{ __('fields.created_at') }}:</span>
+                                        <span class="font-medium"
+                                            >{{ __('fields.created_at') }}:</span
+                                        >
                                         {{ $token->created_at->format('d.m.Y H:i') }}
                                     </div>
                                     @if ($token->expires_at)
                                         <div>
-                                            <span class="font-medium"> {{ __('profile.api_tokens.expires_at') }}:</span>
+                                            <span class="font-medium">
+                                                {{ __('profile.api_tokens.expires_at') }}:</span
+                                            >
                                             {{ $token->expires_at->format('d.m.Y') }}
                                         </div>
                                     @endif
@@ -96,16 +101,17 @@
                             collapsible
                             collapsed
                         >
-                            <ul class="list-disc list-inside text-sm space-y-1">
+                            <ul class="list-inside list-disc space-y-1 text-sm">
                                 @foreach (ApiAbility::cases() as $ability)
                                     @php
                                         $hasRead = in_array($ability->read(), $token->abilities);
                                         $hasWrite = in_array($ability->write(), $token->abilities);
                                     @endphp
-
                                     @if ($hasRead || $hasWrite)
                                         <li>
-                                            <span class="font-medium">{{ Str::ucfirst(__("$ability->value.plural_label")) }}:</span>
+                                            <span class="font-medium"
+                                                >{{ Str::ucfirst(__("$ability->value.plural_label")) }}:</span
+                                            >
                                             {{ $hasWrite ? __('profile.api_tokens.write') : __('profile.api_tokens.read') }}
                                         </li>
                                     @endif
@@ -127,39 +133,45 @@
 
         <div class="-mx-6 -my-6 divide-y divide-gray-200 dark:divide-white/5">
             @foreach ($this->sessions as $session)
-                <div class="flex items-center gap-4 p-6 hover:bg-gray-50 dark:hover:bg-white/5 transition duration-200">
-                    <div class="flex items-center justify-center p-2 rounded-lg bg-gray-100 dark:bg-white/5">
+                <div
+                    class="flex items-center gap-4 p-6 transition duration-200 hover:bg-gray-50 dark:hover:bg-white/5"
+                >
+                    <div
+                        class="flex items-center justify-center rounded-lg bg-gray-100 p-2 dark:bg-white/5"
+                    >
                         @if ($session['device']['is_desktop'])
                             <x-filament::icon
                                 icon="tabler-device-desktop"
-                                class="w-8 h-8 text-gray-500 dark:text-gray-400"
+                                class="h-8 w-8 text-gray-500 dark:text-gray-400"
                             />
                         @else
                             <x-filament::icon
                                 icon="tabler-device-mobile"
-                                class="w-8 h-8 text-gray-500 dark:text-gray-400"
+                                class="h-8 w-8 text-gray-500 dark:text-gray-400"
                             />
                         @endif
                     </div>
 
                     <div class="flex-1">
                         <div class="text-sm font-medium">
-                            {{ $session['device']['platform'] ?: __('profile.sessions.unknown_platform') }}
-                            - {{ $session['device']['browser'] ?: __('profile.sessions.unknown_browser') }}
+                            {{ $session['device']['platform'] ?: __('profile.sessions.unknown_platform') }} - {{ $session['device']['browser'] ?: __('profile.sessions.unknown_browser') }}
                         </div>
 
                         <div class="flex items-center gap-2 text-xs text-gray-500">
                             {{ $session['ip_address'] }}
 
-                            @if($session['is_current_device'])
-                                <div class="flex items-center gap-2 ml-1">
+                            @if ($session['is_current_device'])
+                                <div class="ml-1 flex items-center gap-2">
                                     <span class="relative flex h-2 w-2">
                                         <span
-                                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75">
+                                            class="bg-primary-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                                        >
                                         </span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
+                                        <span
+                                            class="bg-primary-500 relative inline-flex h-2 w-2 rounded-full"
+                                        ></span>
                                     </span>
-                                    <span class="font-semibold text-primary-500">
+                                    <span class="text-primary-500 font-semibold">
                                         {{ __('profile.sessions.this_device') }}
                                     </span>
                                 </div>

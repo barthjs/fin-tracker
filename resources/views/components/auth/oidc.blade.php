@@ -1,15 +1,15 @@
-@props(['mode'])
-@if(!empty($availableProviders))
+@props (['mode'])
+@if (!empty($availableProviders))
     <div class="flex flex-col items-center space-y-4">
-        <div class="flex items-center w-full">
+        <div class="flex w-full items-center">
             <div class="grow border-t border-gray-300 dark:border-gray-700"></div>
             <span class="px-3 text-gray-500">
-            @if($mode === 'login')
+                @if ($mode === 'login')
                     {{ __('or sign in with') }}
                 @else
                     {{ __('or sign up with') }}
                 @endif
-        </span>
+            </span>
             <div class="grow border-t border-gray-300 dark:border-gray-700"></div>
         </div>
 
