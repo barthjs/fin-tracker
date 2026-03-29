@@ -75,10 +75,16 @@
             "composer bump",
             "npx npm-check-updates -u"
         ],
-        "lint": "pint --parallel",
+        "lint": [
+            "pint --parallel",
+            "npm run lint"
+        ],
         "test:type-coverage": "pest --type-coverage --compact --min=100",
         "test:unit": "pest --parallel",
-        "test:lint": "pint --parallel --test",
+        "test:lint": [
+            "pint --parallel --test",
+            "npm run test:lint"
+        ],
         "test:types": "phpstan",
         "test": [
             "@php artisan config:clear",
