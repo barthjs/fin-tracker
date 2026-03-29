@@ -11,6 +11,10 @@ export default defineConfig({
                 'resources/js/main.js'
             ],
             refresh: true,
+            assets: [
+                'resources/fonts',
+                'resources/images',
+            ]
         }),
         tailwindcss(),
     ],
