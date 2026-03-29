@@ -105,6 +105,7 @@ trait HasResourceFormFields
             ->label(__('fields.date_time'))
             ->autofocus()
             ->seconds(false)
+            ->timezone(fn (): string => auth()->user()->timezone)
             ->default(today())
             ->required();
     }

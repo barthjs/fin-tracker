@@ -160,6 +160,7 @@ final class SubscriptionResource extends Resource
                         ->schema([
                             DatePicker::make('started_at')
                                 ->label(__('subscription.fields.started_at'))
+                                ->timezone(fn (): string => auth()->user()->timezone)
                                 ->live()
                                 ->default(today()->toDateString())
                                 ->required()
@@ -175,6 +176,7 @@ final class SubscriptionResource extends Resource
 
                             DatePicker::make('next_payment_date')
                                 ->label(__('subscription.fields.next_payment_date'))
+                                ->timezone(fn (): string => auth()->user()->timezone)
                                 ->helperText(__('subscription.hints.next_payment'))
                                 ->live()
                                 ->required()
@@ -189,6 +191,7 @@ final class SubscriptionResource extends Resource
 
                             DatePicker::make('ended_at')
                                 ->label(__('subscription.fields.ended_at'))
+                                ->timezone(fn (): string => auth()->user()->timezone)
                                 ->nullable()
                                 ->minDate(fn (Get $get): mixed => $get('next_payment_date'))
                                 ->afterOrEqual('next_payment_date')
@@ -292,7 +295,7 @@ final class SubscriptionResource extends Resource
 
                 TextColumn::make('next_payment_date')
                     ->label(__('subscription.fields.next_payment_date'))
-                    ->date('m.d.Y')
+                    ->date('Y-m-d', auth()->user()->timezone)
                     ->sortable()
                     ->toggleable(),
 
@@ -329,13 +332,19 @@ final class SubscriptionResource extends Resource
                     ->schema([
                         DatePicker::make('due_until')
                             ->label(__('subscription.fields.due_until'))
-                            ->default(now()->addMonth()->toDateString()),
+                            ->timezone(fn (): string => auth()->user()->timezone)
+                            ->default(now()->setTimezone(auth()->user()->timezone)->addMonth()->toDateString()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         /** @var array{due_until: string} $data */
                         return $query->when(
                             $data['due_until'],
-                            fn (Builder $query, string $date): Builder => $query->whereDate('next_payment_date', '<=', $date),
+                            function (Builder $query, string $date): Builder {
+                                $userTimezone = auth()->user()->timezone;
+                                $endOfDayUtc = Carbon::parse($date, $userTimezone)->endOfDay()->utc();
+
+                                return $query->where('next_payment_date', '<=', $endOfDayUtc);
+                            },
                         );
                     }),
 

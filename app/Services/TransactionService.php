@@ -11,8 +11,12 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-final class TransactionService
+final readonly class TransactionService
 {
+    public function __construct(
+        private StatisticService $statisticService,
+    ) {}
+
     /**
      * Create a transaction and recalculate balances and statistics.
      *
@@ -30,7 +34,7 @@ final class TransactionService
             ]);
 
             $this->updateAccountBalances($accountIds);
-            $this->updateStats($transaction->category_id, $transaction->date_time);
+            $this->statisticService->updateCategoryStatistics($transaction->category_id, $transaction->date_time);
 
             return $transaction;
         });
@@ -79,8 +83,8 @@ final class TransactionService
                 || $oldCategoryId !== $transaction->category_id;
 
             if ($statsRelevantChanged) {
-                $this->updateStats($oldCategoryId, $oldDate);
-                $this->updateStats($transaction->category_id, $transaction->date_time);
+                $this->statisticService->updateCategoryStatistics($oldCategoryId, $oldDate);
+                $this->statisticService->updateCategoryStatistics($transaction->category_id, $transaction->date_time);
             }
 
             return $transaction;
@@ -104,7 +108,7 @@ final class TransactionService
             $transaction->delete();
 
             $this->updateAccountBalances($accountIds);
-            $this->updateStats($categoryId, $date);
+            $this->statisticService->updateCategoryStatistics($categoryId, $date);
         });
     }
 
@@ -166,7 +170,7 @@ final class TransactionService
             $this->updateAccountBalances(array_unique(array_filter($accountIds)));
 
             foreach ($categoryDates as $cat) {
-                $this->updateStats($cat['id'], $cat['date']);
+                $this->statisticService->updateCategoryStatistics($cat['id'], $cat['date']);
             }
         });
     }
@@ -179,10 +183,5 @@ final class TransactionService
         foreach ($accountIds as $id) {
             Account::updateAccountBalance($id);
         }
-    }
-
-    private function updateStats(string $categoryId, CarbonInterface $date): void
-    {
-        Transaction::updateCategoryStatistics($categoryId, $date);
     }
 }

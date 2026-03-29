@@ -19,6 +19,7 @@ return [
         'avatar' => 'Profilbild',
         'is_verified' => 'Verifiziert',
         'is_admin' => 'Administrator',
+        'timezone' => 'Zeitzone',
     ],
 
 ];

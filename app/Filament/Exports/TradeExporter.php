@@ -71,7 +71,7 @@ final class TradeExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('trade.export.file_name').Carbon::now()->format('Y-m-d-H-i');
+        return __('trade.export.file_name').Carbon::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
     public function getJobBatchName(): string

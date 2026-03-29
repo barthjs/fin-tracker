@@ -40,6 +40,9 @@ final class UserFactory extends Factory
             'is_active' => true,
             'is_verified' => false,
             'is_admin' => false,
+            'timezone' => fake()->timezone(),
+            'app_authentication_secret' => null,
+            'app_authentication_recovery_codes' => null,
         ];
     }
 
@@ -56,5 +59,13 @@ final class UserFactory extends Factory
     public function admin(): self
     {
         return $this->state(['is_admin' => true]);
+    }
+
+    public function withTwoFactor(): self
+    {
+        return $this->state([
+            'app_authentication_secret' => Str::random(10),
+            'app_authentication_recovery_codes' => [Str::random(10), Str::random(10)],
+        ]);
     }
 }

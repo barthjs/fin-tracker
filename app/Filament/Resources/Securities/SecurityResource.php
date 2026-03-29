@@ -158,6 +158,7 @@ final class SecurityResource extends Resource
                         }
                         $caseSql = 'CASE type '.implode(' ', $cases).' END';
 
+                        /** @phpstan-ignore argument.type (SQL built from enum cases) */
                         return $query->orderByRaw($caseSql.' '.($direction === 'desc' ? 'desc' : 'asc'));
                     }),
             ])

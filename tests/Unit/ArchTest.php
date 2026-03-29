@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 arch()->preset()->php();
 arch()->preset()->laravel()->ignoring([
-    'App\Providers\Filament',
     'App\Http\Controllers',
+    'App\Notifications\Channels',
+    'App\Providers\Filament',
 ]);
 arch()->preset()->security();
 

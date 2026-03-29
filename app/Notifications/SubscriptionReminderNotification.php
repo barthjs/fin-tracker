@@ -19,14 +19,14 @@ final class SubscriptionReminderNotification extends Notification implements Has
     use Queueable;
 
     public function __construct(
-        public readonly Subscription $subscription,
-        public readonly NotificationTarget $target
+        private readonly Subscription $subscription,
+        private readonly NotificationTarget $target
     ) {}
 
     /**
      * @return array<class-string>
      */
-    public function via(object $notifiable): array
+    public function via(): array
     {
         return [DynamicTargetChannel::class];
     }
