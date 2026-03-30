@@ -23,6 +23,8 @@ final class StatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
+        Number::useLocale(auth()->user()->locale);
+
         $now = Carbon::now()->setTimezone(auth()->user()->timezone);
         $year = $now->year;
         $monthColumn = mb_strtolower($now->format('M'));

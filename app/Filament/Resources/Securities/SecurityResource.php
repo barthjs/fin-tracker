@@ -29,7 +29,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
 use Filament\Tables\Columns\Column;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -188,14 +187,10 @@ final class SecurityResource extends Resource
                     'name' => $record->name,
                 ]),
 
-            TextColumn::make('market_value')
-                ->label(__('fields.market_value'))
-                ->numeric(2)
-                ->searchable()
-                ->sortable()
-                ->toggleable(),
+            self::numericColumn('market_value')
+                ->label(__('fields.market_value')),
 
-            TextColumn::make('total_quantity')
+            self::numericColumn('total_quantity')
                 ->hiddenOn($hidden)
                 ->label(__('security.fields.total_quantity'))
                 ->formatStateUsing(function (Security $record, float $state) use ($portfolio): ?string {
@@ -213,22 +208,15 @@ final class SecurityResource extends Resource
 
                         $quantity = $buys - $sells;
 
-                        return Number::format($quantity, 2) ?: null;
+                        return Number::format($quantity, 2, locale: auth()->user()->locale) ?: null;
                     }
 
-                    return Number::format($state, 2) ?: null;
-                })
-                ->searchable()
-                ->sortable()
-                ->toggleable(),
+                    return Number::format($state, 2, locale: auth()->user()->locale) ?: null;
+                }),
 
-            TextColumn::make('price')
+            self::numericColumn('price')
                 ->label(__('fields.price'))
-                ->badge()
-                ->numeric(2)
-                ->searchable()
-                ->sortable()
-                ->toggleable(),
+                ->badge(),
 
             self::nameColumn('isin')
                 ->label(__('security.fields.isin')),

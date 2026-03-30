@@ -160,7 +160,6 @@ final class SubscriptionResource extends Resource
                         ->schema([
                             DatePicker::make('started_at')
                                 ->label(__('subscription.fields.started_at'))
-                                ->timezone(fn (): string => auth()->user()->timezone)
                                 ->live()
                                 ->default(today()->toDateString())
                                 ->required()
@@ -176,7 +175,6 @@ final class SubscriptionResource extends Resource
 
                             DatePicker::make('next_payment_date')
                                 ->label(__('subscription.fields.next_payment_date'))
-                                ->timezone(fn (): string => auth()->user()->timezone)
                                 ->helperText(__('subscription.hints.next_payment'))
                                 ->live()
                                 ->required()
@@ -191,7 +189,6 @@ final class SubscriptionResource extends Resource
 
                             DatePicker::make('ended_at')
                                 ->label(__('subscription.fields.ended_at'))
-                                ->timezone(fn (): string => auth()->user()->timezone)
                                 ->nullable()
                                 ->minDate(fn (Get $get): mixed => $get('next_payment_date'))
                                 ->afterOrEqual('next_payment_date')

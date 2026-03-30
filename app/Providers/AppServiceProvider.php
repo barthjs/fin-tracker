@@ -31,7 +31,6 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Sanctum\Sanctum;
@@ -91,7 +90,6 @@ final class AppServiceProvider extends ServiceProvider
                     Session::put('locale', $event->locale);
                 }
             });
-            Number::useLocale(app()->getLocale());
 
             FilamentView::registerRenderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
@@ -104,7 +102,9 @@ final class AppServiceProvider extends ServiceProvider
             );
 
             ModalComponent::closedByClickingAway(! app()->isProduction());
+
             Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
+
             Table::configureUsing(fn (Table $table): Table => $table
                 ->paginationPageOptions([10, 25, 50, 100, 'all'])
                 ->extremePaginationLinks()
