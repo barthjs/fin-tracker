@@ -22,6 +22,8 @@ final class SubscriptionStats extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        Number::useLocale(auth()->user()->locale);
+
         $query = Subscription::query();
         $this->applyFilters($query);
 
