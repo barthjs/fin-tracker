@@ -1,0 +1,19 @@
+#!/command/with-contenv sh
+set -e
+
+if [ -z "${APP_KEY}" ]; then
+    echo "Error: APP_KEY is not set."
+    exit 1
+fi
+
+if [ ! -d "/app/public/vendor/livewire" ]; then
+    php /app/artisan livewire:publish --assets -q
+fi
+
+if [ ! -d "/app/public/vendor/filament" ]; then
+    php /app/artisan filament:assets -q
+fi
+
+s6-setuidgid "${PUID}:${PGID}" php /app/artisan optimize
+s6-setuidgid "${PUID}:${PGID}" php /app/artisan migrate --force
+s6-setuidgid "${PUID}:${PGID}" php /app/artisan db:seed --force
