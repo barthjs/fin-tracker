@@ -95,7 +95,7 @@ finances across multiple bank accounts and investment portfolios.
     docker compose up -d
     ```
 
-5. Log in at [http://localhost](http://localhost) using the default credentials:
+5. Log in at [http://localhost:8080](http://localhost:8080) using the default credentials:
 
     - **Username**: `admin`
     - **Password**: `admin`
@@ -106,20 +106,23 @@ Upon the first login, you will be redirected to the profile page to change the d
 
 Use the `.env` file to adjust configuration settings:
 
-| Environment variable     | Default          | Description                                                                                       |
-|--------------------------|------------------|---------------------------------------------------------------------------------------------------|
-| `APP_KEY`                | (required)       | Key used to encrypt and decrypt data. Generate with: `echo -n 'base64:'; openssl rand -base64 32` |
-| `APP_ALLOW_REGISTRATION` | `false`          | Enable/disable user self-registration                                                             |
-| `APP_DEFAULT_CURRENCY`   | `EUR`            | Currency to use when creating new users (ISO 4217)                                                |
-| `APP_WEBHOOK_SECRET`     | (optional)       | Secret to sign notifications to the webhook channel                                               |
-| `LOG_CHANNEL`            | `stdout`         | `stdout` logs to Docker, whereas `file` writes to `/app/storage/logs/fin-tracker.log`             |
-| `LOG_LEVEL`              | `warning`        | Log level: `debug`, `info`, `warning`, `error`                                                    |
-| `DB_CONNECTION`          | `pgsql`          | Database driver: `pgsql` or `mariadb`                                                             |
-| `DB_HOST`                | `fin-tracker-db` | Database host name (service or container name in Docker Compose)                                  |
-| `DB_PORT`                | `5432`           | Database port (`5432` for pgsql, `3306` for mariadb)                                              |
-| `DB_DATABASE`            | `fin-tracker`    | Database name                                                                                     |
-| `DB_USERNAME`            | `fin-tracker`    | Database username                                                                                 |
-| `DB_PASSWORD`            | (required)       | Database password                                                                                 |
+| Environment variable     | Default                 | Description                                                                                       |
+|--------------------------|-------------------------|---------------------------------------------------------------------------------------------------|
+| `APP_KEY`                | (required)              | Key used to encrypt and decrypt data. Generate with: `echo -n 'base64:'; openssl rand -base64 32` |
+| `APP_URL`                | `http://localhost:8080` | Base URL of the application                                                                       |
+| `APP_ALLOW_REGISTRATION` | `false`                 | Enable/disable user self-registration                                                             |
+| `APP_DEFAULT_CURRENCY`   | `EUR`                   | Currency to use when creating new users (ISO 4217)                                                |
+| `APP_WEBHOOK_SECRET`     | (optional)              | Secret to sign notifications to the webhook channel                                               |
+| `LOG_CHANNEL`            | `stdout`                | `stdout` logs to Docker, whereas `file` writes to `/app/storage/logs/fin-tracker.log`             |
+| `LOG_LEVEL`              | `warning`               | Log level: `debug`, `info`, `warning`, `error`                                                    |
+| `DB_CONNECTION`          | `pgsql`                 | Database driver: `pgsql` or `mariadb`                                                             |
+| `DB_HOST`                | `fin-tracker-db`        | Database host name (service or container name in Docker Compose)                                  |
+| `DB_PORT`                | `5432`                  | Database port (`5432` for pgsql, `3306` for mariadb)                                              |
+| `DB_DATABASE`            | `fin-tracker`           | Database name                                                                                     |
+| `DB_USERNAME`            | `fin-tracker`           | Database username                                                                                 |
+| `DB_PASSWORD`            | (required)              | Database password                                                                                 |
+| `PUID`                   | `1000`                  | User id of the user running the app                                                               |
+| `PGID`                   | `1000`                  | Group id of the user running the app                                                              |
 
 ## OpenID Connect (SSO)
 

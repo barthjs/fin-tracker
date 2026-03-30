@@ -48,7 +48,7 @@ composer setup-dev
 
 Customize the environment via [.env.development](.env.development).
 
-App URL: http://localhost
+App URL: http://localhost:8080
 
 Default admin credentials:
 
