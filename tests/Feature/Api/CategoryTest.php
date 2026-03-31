@@ -15,17 +15,19 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(fn () => asUser());
+beforeEach(function () {
+    $user = User::factory()->verified()->create();
+    $this->user = $user;
+});
 
 describe('Category API', function () {
     test('index returns a list of categories', function () {
-        $user = User::firstOrFail();
-        Category::factory()->count(3)->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
+
+        Category::factory()->count(3)->create(['user_id' => $this->user->id]);
 
         $anotherUser = User::factory()->create();
         Category::factory()->create(['user_id' => $anotherUser->id]);
-
-        actingAsWithAbilities($user, ApiAbility::CATEGORY->all());
 
         getJson(route('api.categories.index'))
             ->assertOk()
@@ -49,22 +51,20 @@ describe('Category API', function () {
     });
 
     test('index can filter categories by name', function () {
-        $user = User::firstOrFail();
-        Category::factory()->create(['name' => 'Food', 'user_id' => $user->id]);
-        Category::factory()->create(['name' => 'Rent', 'user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
-        actingAsWithAbilities($user, ApiAbility::CATEGORY->all());
+        $matchingCategory = Category::factory()->create(['user_id' => $this->user->id]);
+        $nonMatchingCategory = Category::factory()->create(['user_id' => $this->user->id]);
 
-        getJson(route('api.categories.index', ['filter[name]' => 'Food']))
+        getJson(route('api.categories.index', ['filter[name]' => $matchingCategory->name]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.name', 'Food')
-            ->assertJsonMissing(['name' => 'Rent']);
+            ->assertJsonPath('data.0.name', $matchingCategory->name)
+            ->assertJsonMissing(['name' => $nonMatchingCategory->name]);
     });
 
     test('store creates a new category', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::CATEGORY->all());
+        actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         $data = [
             'name' => 'Travel',
@@ -80,14 +80,21 @@ describe('Category API', function () {
             ->assertJsonPath('data.color', $data['color'])
             ->assertJsonPath('data.is_active', $data['is_active']);
 
-        assertDatabaseHas('categories', array_merge($data, ['user_id' => $user->id]));
+        assertDatabaseHas('categories', array_merge($data, ['user_id' => $this->user->id]));
+    });
+
+    test('store fails with invalid data', function () {
+        actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
+
+        postJson(route('api.categories.store'), ['name' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'group']);
     });
 
     test('show returns a single category', function () {
-        $user = User::firstOrFail();
-        $category = Category::factory()->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
-        actingAsWithAbilities($user, ApiAbility::CATEGORY->all());
+        $category = Category::factory()->create(['user_id' => $this->user->id]);
 
         getJson(route('api.categories.show', $category))
             ->assertOk()
@@ -100,15 +107,18 @@ describe('Category API', function () {
     });
 
     test('update modifies an existing category', function () {
-        $user = User::firstOrFail();
-        $category = Category::factory()->create(['name' => 'Old Name', 'user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
-        actingAsWithAbilities($user, ApiAbility::CATEGORY->all());
+        $category = Category::factory()->create([
+            'name' => 'Old Name',
+            'group' => CategoryGroup::VarExpenses->value,
+            'user_id' => $this->user->id,
+        ]);
 
         $data = [
             'name' => 'Updated Name',
             'group' => CategoryGroup::FixRevenues->value,
-            'color' => '#00ff00',
+            'color' => '#000000',
             'is_active' => false,
         ];
 
@@ -123,10 +133,9 @@ describe('Category API', function () {
     });
 
     test('destroy deletes a category', function () {
-        $user = User::firstOrFail();
-        $category = Category::factory()->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
-        actingAsWithAbilities($user, ApiAbility::CATEGORY->all());
+        $category = Category::factory()->create(['user_id' => $this->user->id]);
 
         deleteJson(route('api.categories.destroy', $category))
             ->assertNoContent();
@@ -135,11 +144,10 @@ describe('Category API', function () {
     });
 
     test('destroy fails if category has transactions', function () {
-        $user = User::firstOrFail();
-        $category = Category::factory()->create(['user_id' => $user->id]);
-        Transaction::factory()->create(['category_id' => $category->id]);
+        actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
-        actingAsWithAbilities($user, ApiAbility::CATEGORY->all());
+        $category = Category::factory()->create(['user_id' => $this->user->id]);
+        Transaction::factory()->create(['category_id' => $category->id]);
 
         deleteJson(route('api.categories.destroy', $category))
             ->assertForbidden();
@@ -148,8 +156,7 @@ describe('Category API', function () {
     });
 
     test('forbidden access without correct ability', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, []);
+        actingAsWithAbilities($this->user);
 
         getJson(route('api.categories.index'))
             ->assertStatus(403);

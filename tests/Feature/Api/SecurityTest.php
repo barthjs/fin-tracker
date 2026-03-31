@@ -15,17 +15,19 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(fn () => asUser());
+beforeEach(function () {
+    $user = User::factory()->verified()->create();
+    $this->user = $user;
+});
 
 describe('Security API', function () {
     test('index returns a list of securities', function () {
-        $user = User::firstOrFail();
-        Security::factory()->count(3)->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
+
+        Security::factory()->count(3)->create(['user_id' => $this->user->id]);
 
         $anotherUser = User::factory()->create();
         Security::factory()->create(['user_id' => $anotherUser->id]);
-
-        actingAsWithAbilities($user, ApiAbility::SECURITY->all());
 
         getJson(route('api.securities.index'))
             ->assertOk()
@@ -55,22 +57,20 @@ describe('Security API', function () {
     });
 
     test('index can filter securities by name', function () {
-        $user = User::firstOrFail();
-        Security::factory()->create(['name' => 'Apple Inc.', 'user_id' => $user->id]);
-        Security::factory()->create(['name' => 'Microsoft Corp.', 'user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
-        actingAsWithAbilities($user, ApiAbility::SECURITY->all());
+        $matchingSecurity = Security::factory()->create(['user_id' => $this->user->id]);
+        $nonMatchingSecurity = Security::factory()->create(['user_id' => $this->user->id]);
 
-        getJson(route('api.securities.index', ['filter[name]' => 'Apple Inc.']))
+        getJson(route('api.securities.index', ['filter[name]' => $matchingSecurity->name]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.name', 'Apple Inc.')
-            ->assertJsonMissing(['name' => 'Microsoft Corp.']);
+            ->assertJsonPath('data.0.name', $matchingSecurity->name)
+            ->assertJsonMissing(['name' => $nonMatchingSecurity->name]);
     });
 
     test('store creates a new security', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::SECURITY->all());
+        actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         $data = [
             'name' => 'New Security',
@@ -95,14 +95,21 @@ describe('Security API', function () {
             ->assertJsonPath('data.color', $data['color'])
             ->assertJsonPath('data.is_active', $data['is_active']);
 
-        assertDatabaseHas('securities', array_merge($data, ['user_id' => $user->id]));
+        assertDatabaseHas('securities', array_merge($data, ['user_id' => $this->user->id]));
+    });
+
+    test('store fails with invalid data', function () {
+        actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
+
+        postJson(route('api.securities.store'), ['name' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'type']);
     });
 
     test('show returns a single security', function () {
-        $user = User::firstOrFail();
-        $security = Security::factory()->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
-        actingAsWithAbilities($user, ApiAbility::SECURITY->all());
+        $security = Security::factory()->create(['user_id' => $this->user->id]);
 
         getJson(route('api.securities.show', $security))
             ->assertOk()
@@ -119,10 +126,12 @@ describe('Security API', function () {
     });
 
     test('update modifies an existing security', function () {
-        $user = User::firstOrFail();
-        $security = Security::factory()->create(['name' => 'Old Name', 'user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
-        actingAsWithAbilities($user, ApiAbility::SECURITY->all());
+        $security = Security::factory()->create([
+            'name' => 'Old Name',
+            'user_id' => $this->user->id,
+        ]);
 
         $data = [
             'name' => 'Updated Name',
@@ -131,7 +140,7 @@ describe('Security API', function () {
             'type' => SecurityType::ETF->value,
             'price' => 200.75,
             'description' => 'Updated description',
-            'color' => '#00ff00',
+            'color' => '#000000',
             'is_active' => false,
         ];
 
@@ -150,10 +159,9 @@ describe('Security API', function () {
     });
 
     test('destroy deletes a security', function () {
-        $user = User::firstOrFail();
-        $security = Security::factory()->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
-        actingAsWithAbilities($user, ApiAbility::SECURITY->all());
+        $security = Security::factory()->create(['user_id' => $this->user->id]);
 
         deleteJson(route('api.securities.destroy', $security))
             ->assertNoContent();
@@ -162,11 +170,10 @@ describe('Security API', function () {
     });
 
     test('destroy fails if security has trades', function () {
-        $user = User::firstOrFail();
-        $security = Security::factory()->create(['user_id' => $user->id]);
-        Trade::factory()->create(['security_id' => $security->id]);
+        actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
-        actingAsWithAbilities($user, ApiAbility::SECURITY->all());
+        $security = Security::factory()->create(['user_id' => $this->user->id]);
+        Trade::factory()->create(['security_id' => $security->id]);
 
         deleteJson(route('api.securities.destroy', $security))
             ->assertForbidden();
@@ -175,8 +182,7 @@ describe('Security API', function () {
     });
 
     test('forbidden access without correct ability', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, []);
+        actingAsWithAbilities($this->user);
 
         getJson(route('api.securities.index'))
             ->assertStatus(403);

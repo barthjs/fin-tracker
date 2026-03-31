@@ -18,8 +18,7 @@ describe('System API', function () {
         getJson(route('api.version'))
             ->assertUnauthorized();
 
-        asUser();
-        $user = User::firstOrFail();
+        $user = User::factory()->verified()->create();
         actingAsWithAbilities($user);
 
         getJson(route('api.version'))
@@ -31,8 +30,7 @@ describe('System API', function () {
         getJson(route('api.health'))
             ->assertUnauthorized();
 
-        asUser();
-        $user = User::firstOrFail();
+        $user = User::factory()->verified()->create();
         actingAsWithAbilities($user);
 
         getJson(route('api.health'))

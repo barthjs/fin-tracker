@@ -16,14 +16,16 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(fn () => asUser());
+beforeEach(function () {
+    $user = User::factory()->verified()->create();
+    $this->user = $user;
+});
 
 describe('Transaction API', function () {
     test('index returns a list of transactions', function () {
-        $user = User::firstOrFail();
-        Transaction::factory()->count(3)->create();
+        actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
-        actingAsWithAbilities($user, ApiAbility::TRANSACTION->all());
+        Transaction::factory()->count(3)->create();
 
         getJson(route('api.transactions.index'))
             ->assertOk()
@@ -46,11 +48,10 @@ describe('Transaction API', function () {
     });
 
     test('store creates a new transaction', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::TRANSACTION->all());
+        actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
-        $account = Account::factory()->create(['user_id' => $user->id]);
-        $category = Category::factory()->create(['user_id' => $user->id]);
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        $category = Category::factory()->create(['user_id' => $this->user->id]);
 
         $data = [
             'date_time' => now()->toDateTimeString(),
@@ -75,11 +76,18 @@ describe('Transaction API', function () {
         $this->assertEquals(-100.5, $account->fresh()?->balance);
     });
 
-    test('update modifies an existing transaction', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::TRANSACTION->all());
+    test('store fails with invalid data', function () {
+        actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
-        $account = Account::factory()->create(['user_id' => $user->id]);
+        postJson(route('api.transactions.store'), ['amount' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['date_time', 'type', 'amount', 'account_id', 'category_id']);
+    });
+
+    test('update modifies an existing transaction', function () {
+        actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
+
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
         $transaction = Transaction::factory()->create([
             'account_id' => $account->id,
             'amount' => 50.0,
@@ -109,10 +117,9 @@ describe('Transaction API', function () {
     });
 
     test('destroy deletes a transaction', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::TRANSACTION->all());
+        actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
-        $account = Account::factory()->create(['user_id' => $user->id]);
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
         $transaction = Transaction::factory()->create([
             'type' => TransactionType::Expense,
             'amount' => 100,
@@ -124,5 +131,12 @@ describe('Transaction API', function () {
 
         assertDatabaseMissing('transactions', ['id' => $transaction->id]);
         $this->assertEquals(0.0, $account->fresh()?->balance);
+    });
+
+    test('forbidden access without correct ability', function () {
+        actingAsWithAbilities($this->user);
+
+        getJson(route('api.transactions.index'))
+            ->assertStatus(403);
     });
 });

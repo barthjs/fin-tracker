@@ -15,17 +15,19 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(fn () => asUser());
+beforeEach(function () {
+    $user = User::factory()->verified()->create();
+    $this->user = $user;
+});
 
 describe('Account API', function () {
     test('index returns a list of accounts', function () {
-        $user = User::firstOrFail();
-        Account::factory()->count(3)->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
+
+        Account::factory(3)->create(['user_id' => $this->user->id]);
 
         $anotherUser = User::factory()->create();
         Account::factory()->create(['user_id' => $anotherUser->id]);
-
-        actingAsWithAbilities($user, ApiAbility::ACCOUNT->all());
 
         getJson(route('api.accounts.index'))
             ->assertOk()
@@ -51,22 +53,20 @@ describe('Account API', function () {
     });
 
     test('index can filter accounts by name', function () {
-        $user = User::firstOrFail();
-        Account::factory()->create(['name' => 'Savings', 'user_id' => $user->id]);
-        Account::factory()->create(['name' => 'Checking', 'user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
-        actingAsWithAbilities($user, ApiAbility::ACCOUNT->all());
+        $matchingAccount = Account::factory()->create(['user_id' => $this->user->id]);
+        $nonMatchingAccount = Account::factory()->create(['user_id' => $this->user->id]);
 
-        getJson(route('api.accounts.index', ['filter[name]' => 'Savings']))
+        getJson(route('api.accounts.index', ['filter[name]' => $matchingAccount->name]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.name', 'Savings')
-            ->assertJsonMissing(['name' => 'Checking']);
+            ->assertJsonPath('data.0.name', $matchingAccount->name)
+            ->assertJsonMissing(['name' => $nonMatchingAccount->name]);
     });
 
     test('store creates a new account', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::ACCOUNT->all());
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         $data = [
             'name' => 'New Account',
@@ -84,14 +84,21 @@ describe('Account API', function () {
             ->assertJsonPath('data.color', $data['color'])
             ->assertJsonPath('data.is_active', $data['is_active']);
 
-        assertDatabaseHas('accounts', array_merge($data, ['user_id' => $user->id]));
+        assertDatabaseHas('accounts', array_merge($data, ['user_id' => $this->user->id]));
+    });
+
+    test('store fails with invalid data', function () {
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
+
+        postJson(route('api.accounts.store'), ['name' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'currency']);
     });
 
     test('show returns a single account', function () {
-        $user = User::firstOrFail();
-        $account = Account::factory()->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
-        actingAsWithAbilities($user, ApiAbility::ACCOUNT->all());
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
 
         getJson(route('api.accounts.show', $account))
             ->assertOk()
@@ -105,15 +112,13 @@ describe('Account API', function () {
     });
 
     test('update modifies an existing account', function () {
-        $user = User::firstOrFail();
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
+
         $account = Account::factory()->create([
             'name' => 'Old Name',
             'currency' => Currency::EUR,
-            'user_id' => $user->id,
-            'is_active' => true,
+            'user_id' => $this->user->id,
         ]);
-
-        actingAsWithAbilities($user, ApiAbility::ACCOUNT->all());
 
         $data = [
             'name' => 'Updated Name',
@@ -135,10 +140,9 @@ describe('Account API', function () {
     });
 
     test('destroy deletes an account', function () {
-        $user = User::firstOrFail();
-        $account = Account::factory()->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
-        actingAsWithAbilities($user, ApiAbility::ACCOUNT->all());
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
 
         deleteJson(route('api.accounts.destroy', $account))
             ->assertNoContent();
@@ -147,11 +151,10 @@ describe('Account API', function () {
     });
 
     test('destroy fails if account has transactions', function () {
-        $user = User::firstOrFail();
-        $account = Account::factory()->create(['user_id' => $user->id]);
-        Transaction::factory()->create(['account_id' => $account->id]);
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
-        actingAsWithAbilities($user, ApiAbility::ACCOUNT->all());
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        Transaction::factory()->create(['account_id' => $account->id]);
 
         deleteJson(route('api.accounts.destroy', $account))
             ->assertForbidden();
@@ -160,8 +163,7 @@ describe('Account API', function () {
     });
 
     test('forbidden access without correct ability', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, []);
+        actingAsWithAbilities($this->user);
 
         getJson(route('api.accounts.index'))
             ->assertStatus(403);
