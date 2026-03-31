@@ -5,20 +5,14 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\User;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Signature('disable-2fa {emailOrUsername?}')]
+#[Description('Disable 2FA for a user by email or username')]
 final class Disable2FACommand extends Command
 {
-    /**
-     * @var string
-     */
-    protected $signature = 'app:disable-2fa {emailOrUsername?}';
-
-    /**
-     * @var string
-     */
-    protected $description = 'Disable 2FA for a user by email or username';
-
     public function handle(): int
     {
         $emailOrUsername = $this->argument('emailOrUsername');

@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\App;
 
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -27,18 +29,10 @@ use Illuminate\Support\Facades\Storage;
  *     - Delete the export record afterward.
  * - Livewire temporary files: Delete all files older than 24 hours.
  */
+#[Signature('app:cleanup-data')]
+#[Description('Cleanup old data.')]
 final class CleanupDataCommand extends Command
 {
-    /**
-     * @var string
-     */
-    protected $signature = 'app:cleanup-data';
-
-    /**
-     * @var string
-     */
-    protected $description = 'Cleanup old data.';
-
     private CarbonInterface $cutoff;
 
     public function handle(): int
@@ -57,11 +51,11 @@ final class CleanupDataCommand extends Command
     public function cleanupCache(): void
     {
         DB::table(config()->string('cache.stores.database.table'))
-            ->where('expiration', '<=', time())
+            ->where('expiration', '<', time())
             ->delete();
 
         DB::table(config()->string('cache.stores.database.lock_table'))
-            ->where('expiration', '<=', time())
+            ->where('expiration', '<', time())
             ->delete();
     }
 
