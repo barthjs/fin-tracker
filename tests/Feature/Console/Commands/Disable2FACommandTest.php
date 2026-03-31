@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\Disable2FACommand;
 use App\Models\User;
 
 beforeEach(function () {
@@ -9,7 +10,7 @@ beforeEach(function () {
 });
 
 it('disables 2FA via email', function () {
-    $this->artisan('app:disable-2fa', ['emailOrUsername' => $this->user->email])
+    $this->artisan(Disable2FACommand::class, ['emailOrUsername' => $this->user->email])
         ->expectsConfirmation('Disabling 2FA for user '.$this->user->username, 'yes')
         ->assertExitCode(0);
 
@@ -19,7 +20,7 @@ it('disables 2FA via email', function () {
 });
 
 it('disables 2FA via username', function () {
-    $this->artisan('app:disable-2fa', ['emailOrUsername' => $this->user->username])
+    $this->artisan(Disable2FACommand::class, ['emailOrUsername' => $this->user->username])
         ->expectsConfirmation('Disabling 2FA for user '.$this->user->username, 'yes')
         ->assertExitCode(0);
 

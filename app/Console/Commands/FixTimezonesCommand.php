@@ -6,24 +6,18 @@ namespace App\Console\Commands;
 
 use Carbon\Carbon;
 use DateTimeZone;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 use Symfony\Component\Console\Helper\ProgressBar;
 
+#[Signature('fix-timezones {--timezone=UTC : The fallback timezone to use if the user timezone is UTC} {--force : Skip confirmation prompt}')]
+#[Description('Corrects timestamps by treating existing database values as local time and converting them to UTC.')]
 final class FixTimezonesCommand extends Command
 {
-    /**
-     * @var string
-     */
-    protected $signature = 'app:fix-timezones {--timezone=UTC : The fallback timezone to use if the user timezone is UTC} {--force : Skip confirmation prompt}';
-
-    /**
-     * @var string
-     */
-    protected $description = 'Corrects timestamps by treating existing database values as local time and converting them to UTC.';
-
     public function handle(): int
     {
         $this->warn('CRITICAL WARNING: This command converts existing local timestamps to UTC.');

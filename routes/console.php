@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Console\Commands\CleanupDataCommand;
-use App\Console\Commands\DispatchSubscriptionJobsCommand;
+use App\Console\Commands\App\CleanupDataCommand;
+use App\Console\Commands\App\DispatchSubscriptionJobsCommand;
 use Illuminate\Queue\Console\FlushFailedCommand;
 use Illuminate\Queue\Console\PruneBatchesCommand;
 use Illuminate\Queue\Console\PruneFailedJobsCommand;

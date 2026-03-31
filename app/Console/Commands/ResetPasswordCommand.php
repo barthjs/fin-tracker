@@ -6,23 +6,17 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use Exception;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
+#[Signature('reset-password {emailOrUsername?}')]
+#[Description('Reset the password for a user by email or username')]
 final class ResetPasswordCommand extends Command
 {
-    /**
-     * @var string
-     */
-    protected $signature = 'app:reset-password {emailOrUsername?}';
-
-    /**
-     * @var string
-     */
-    protected $description = 'Reset the password for a user by email or username';
-
     public function handle(): int
     {
         $emailOrUsername = $this->argument('emailOrUsername');

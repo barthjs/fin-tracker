@@ -188,7 +188,7 @@ If you lose access to your account, you can reset your password or disable 2FA v
 To reset a user's password:
 
 ```shell
-docker compose exec fin-tracker php artisan app:reset-password
+docker compose exec fin-tracker php artisan reset-password
 ```
 
 ### Disable 2FA
@@ -196,7 +196,7 @@ docker compose exec fin-tracker php artisan app:reset-password
 To disable two-factor authentication for a user:
 
 ```shell
-docker compose exec fin-tracker php artisan app:disable-2fa
+docker compose exec fin-tracker php artisan disable-2fa
 ```
 
 ## Screenshots
