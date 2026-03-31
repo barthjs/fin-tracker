@@ -3,10 +3,14 @@
 declare(strict_types=1);
 
 use App\Enums\CategoryGroup;
+use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Categories\Pages\ListCategories;
 use App\Filament\Resources\Categories\Pages\ViewCategory;
+use App\Filament\Resources\Categories\RelationManagers\SubscriptionsRelationManager;
 use App\Filament\Resources\Categories\RelationManagers\TransactionsRelationManager;
+use App\Models\Account;
 use App\Models\Category;
+use App\Models\Subscription;
 
 use function Pest\Livewire\livewire;
 
@@ -85,4 +89,18 @@ it('can load the transactions relation manager', function () {
     ])
         ->assertOk()
         ->assertCanSeeTableRecords($category->transactions);
+});
+
+it('can load the subscriptions relation manager', function () {
+    $account = Account::factory()->create();
+    $category = Category::factory()->create();
+
+    $subscription = Subscription::factory()->create(['account_id' => $account->id, 'category_id' => $category->id]);
+
+    livewire(SubscriptionsRelationManager::class, [
+        'ownerRecord' => $account,
+        'pageClass' => ViewAccount::class,
+    ])
+        ->assertOk()
+        ->assertCanSeeTableRecords([$subscription]);
 });
