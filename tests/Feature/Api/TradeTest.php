@@ -18,15 +18,15 @@ use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
 beforeEach(function () {
-    asUser();
+    $user = User::factory()->verified()->create();
+    $this->user = $user;
 });
 
 describe('Trade API', tests: function () {
     test('index returns a list of trades', function () {
-        $user = User::firstOrFail();
-        Trade::factory()->count(3)->create();
+        actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
-        actingAsWithAbilities($user, ApiAbility::TRADE->all());
+        Trade::factory()->count(3)->create();
 
         getJson(route('api.trades.index'))
             ->assertOk()
@@ -52,12 +52,11 @@ describe('Trade API', tests: function () {
     });
 
     test('store creates a new trade', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::TRADE->all());
+        actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
-        $account = Account::factory()->create(['user_id' => $user->id]);
-        $portfolio = Portfolio::factory()->create(['user_id' => $user->id]);
-        $security = Security::factory()->create(['price' => 100, 'user_id' => $user->id]);
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
+        $security = Security::factory()->create(['price' => 100, 'user_id' => $this->user->id]);
 
         $data = [
             'date_time' => now()->toDateTimeString(),
@@ -93,13 +92,20 @@ describe('Trade API', tests: function () {
         $this->assertEquals(10, $security->fresh()?->total_quantity);
     });
 
-    test('update modifies an existing trade', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::TRADE->all());
+    test('store fails with invalid data', function () {
+        actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
-        $account = Account::factory()->create(['user_id' => $user->id]);
-        $portfolio = Portfolio::factory()->create(['user_id' => $user->id]);
-        $security = Security::factory()->create(['price' => 100, 'user_id' => $user->id]);
+        postJson(route('api.trades.store'), ['quantity' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['date_time', 'type', 'quantity', 'price', 'account_id', 'portfolio_id', 'security_id']);
+    });
+
+    test('update modifies an existing trade', function () {
+        actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
+
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
+        $security = Security::factory()->create(['price' => 100, 'user_id' => $this->user->id]);
 
         $trade = Trade::factory()->create([
             'type' => TradeType::Buy,
@@ -145,12 +151,11 @@ describe('Trade API', tests: function () {
     });
 
     test('destroy deletes a trade', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::TRADE->all());
+        actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
-        $account = Account::factory()->create(['user_id' => $user->id]);
-        $portfolio = Portfolio::factory()->create(['user_id' => $user->id]);
-        $security = Security::factory()->create(['price' => 100, 'user_id' => $user->id]);
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
+        $security = Security::factory()->create(['price' => 100, 'user_id' => $this->user->id]);
 
         $trade = Trade::factory()->create([
             'type' => TradeType::Buy,
@@ -170,5 +175,12 @@ describe('Trade API', tests: function () {
         $this->assertEquals(0, $account->fresh()?->balance);
         $this->assertEquals(0, $portfolio->fresh()?->market_value);
         $this->assertEquals(0, $security->fresh()?->total_quantity);
+    });
+
+    test('forbidden access without correct ability', function () {
+        actingAsWithAbilities($this->user);
+
+        getJson(route('api.trades.index'))
+            ->assertStatus(403);
     });
 });

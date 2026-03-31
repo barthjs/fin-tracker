@@ -15,17 +15,19 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(fn () => asUser());
+beforeEach(function () {
+    $user = User::factory()->verified()->create();
+    $this->user = $user;
+});
 
 describe('Portfolio API', function () {
     test('index returns a list of portfolios', function () {
-        $user = User::firstOrFail();
-        Portfolio::factory()->count(3)->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
+
+        Portfolio::factory()->count(3)->create(['user_id' => $this->user->id]);
 
         $anotherUser = User::factory()->create();
         Portfolio::factory()->create(['user_id' => $anotherUser->id]);
-
-        actingAsWithAbilities($user, ApiAbility::PORTFOLIO->all());
 
         getJson(route('api.portfolios.index'))
             ->assertOk()
@@ -51,22 +53,20 @@ describe('Portfolio API', function () {
     });
 
     test('index can filter portfolios by name', function () {
-        $user = User::firstOrFail();
-        Portfolio::factory()->create(['name' => 'Main Portfolio', 'user_id' => $user->id]);
-        Portfolio::factory()->create(['name' => 'Secondary Portfolio', 'user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
-        actingAsWithAbilities($user, ApiAbility::PORTFOLIO->all());
+        $matchingPortfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
+        $nonMatchingPortfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
 
-        getJson(route('api.portfolios.index', ['filter[name]' => 'Main Portfolio']))
+        getJson(route('api.portfolios.index', ['filter[name]' => $matchingPortfolio->name]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.name', 'Main Portfolio')
-            ->assertJsonMissing(['name' => 'Secondary Portfolio']);
+            ->assertJsonPath('data.0.name', $matchingPortfolio->name)
+            ->assertJsonMissing(['name' => $nonMatchingPortfolio->name]);
     });
 
     test('store creates a new portfolio', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, ApiAbility::PORTFOLIO->all());
+        actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         $data = [
             'name' => 'New Portfolio',
@@ -84,14 +84,21 @@ describe('Portfolio API', function () {
             ->assertJsonPath('data.color', $data['color'])
             ->assertJsonPath('data.is_active', $data['is_active']);
 
-        assertDatabaseHas('portfolios', array_merge($data, ['user_id' => $user->id]));
+        assertDatabaseHas('portfolios', array_merge($data, ['user_id' => $this->user->id]));
+    });
+
+    test('store fails with invalid data', function () {
+        actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
+
+        postJson(route('api.portfolios.store'), ['name' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'currency']);
     });
 
     test('show returns a single portfolio', function () {
-        $user = User::firstOrFail();
-        $portfolio = Portfolio::factory()->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
-        actingAsWithAbilities($user, ApiAbility::PORTFOLIO->all());
+        $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
 
         getJson(route('api.portfolios.show', $portfolio))
             ->assertOk()
@@ -105,10 +112,13 @@ describe('Portfolio API', function () {
     });
 
     test('update modifies an existing portfolio', function () {
-        $user = User::firstOrFail();
-        $portfolio = Portfolio::factory()->create(['name' => 'Old Name', 'user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
-        actingAsWithAbilities($user, ApiAbility::PORTFOLIO->all());
+        $portfolio = Portfolio::factory()->create([
+            'name' => 'Old Name',
+            'currency' => Currency::EUR,
+            'user_id' => $this->user->id,
+        ]);
 
         $data = [
             'name' => 'Updated Name',
@@ -130,10 +140,9 @@ describe('Portfolio API', function () {
     });
 
     test('destroy deletes a portfolio', function () {
-        $user = User::firstOrFail();
-        $portfolio = Portfolio::factory()->create(['user_id' => $user->id]);
+        actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
-        actingAsWithAbilities($user, ApiAbility::PORTFOLIO->all());
+        $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
 
         deleteJson(route('api.portfolios.destroy', $portfolio))
             ->assertNoContent();
@@ -142,11 +151,10 @@ describe('Portfolio API', function () {
     });
 
     test('destroy fails if portfolio has trades', function () {
-        $user = User::firstOrFail();
-        $portfolio = Portfolio::factory()->create(['user_id' => $user->id]);
-        Trade::factory()->create(['portfolio_id' => $portfolio->id]);
+        actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
-        actingAsWithAbilities($user, ApiAbility::PORTFOLIO->all());
+        $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
+        Trade::factory()->create(['portfolio_id' => $portfolio->id]);
 
         deleteJson(route('api.portfolios.destroy', $portfolio))
             ->assertForbidden();
@@ -155,8 +163,7 @@ describe('Portfolio API', function () {
     });
 
     test('forbidden access without correct ability', function () {
-        $user = User::firstOrFail();
-        actingAsWithAbilities($user, []);
+        actingAsWithAbilities($this->user);
 
         getJson(route('api.portfolios.index'))
             ->assertStatus(403);

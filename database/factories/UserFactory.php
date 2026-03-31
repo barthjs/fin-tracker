@@ -40,7 +40,7 @@ final class UserFactory extends Factory
             'is_active' => true,
             'is_verified' => false,
             'is_admin' => false,
-            'timezone' => fake()->timezone(),
+            'timezone' => 'UTC',
             'app_authentication_secret' => null,
             'app_authentication_recovery_codes' => null,
         ];
