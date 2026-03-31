@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 use App\Filament\Resources\Accounts\Pages\ListAccounts;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
+use App\Filament\Resources\Accounts\RelationManagers\SubscriptionsRelationManager;
 use App\Filament\Resources\Accounts\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager;
 use App\Models\Account;
+use App\Models\Category;
+use App\Models\Subscription;
 
 use function Pest\Livewire\livewire;
 
@@ -86,4 +89,18 @@ it('can load the trades relation manager', function () {
     ])
         ->assertOk()
         ->assertCanSeeTableRecords($account->trades);
+});
+
+it('can load the subscriptions relation manager', function () {
+    $account = Account::factory()->create();
+    $category = Category::factory()->create();
+
+    $subscription = Subscription::factory()->create(['account_id' => $account->id, 'category_id' => $category->id]);
+
+    livewire(SubscriptionsRelationManager::class, [
+        'ownerRecord' => $account,
+        'pageClass' => ViewAccount::class,
+    ])
+        ->assertOk()
+        ->assertCanSeeTableRecords([$subscription]);
 });
