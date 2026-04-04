@@ -88,6 +88,10 @@ trait HasResourceImportColumns
             ->requiredMapping()
             ->rules(['required'])
             ->castStateUsing(function (?string $state): ?CarbonImmutable {
+                if ($state === null) {
+                    return null;
+                }
+
                 try {
                     $carbon = CarbonImmutable::parse($state)->startOfDay();
                 } catch (Exception) {

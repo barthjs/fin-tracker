@@ -121,6 +121,13 @@ Use the `.env` file to adjust configuration settings:
 | `DB_DATABASE`            | `fin-tracker`           | Database name                                                                                     |
 | `DB_USERNAME`            | `fin-tracker`           | Database username                                                                                 |
 | `DB_PASSWORD`            | (required)              | Database password                                                                                 |
+| `MAIL_SCHEME`            | `smpts`                 | Mail scheme: `smtps`, `smtp`,                                                                     |
+| `MAIL_HOST`              | (required)              | Mail server host                                                                                  |
+| `MAIL_PORT`              | `465`                   | Mail server port                                                                                  |
+| `MAIL_USERNAME`          | (required)              | Mail server username                                                                              |
+| `MAIL_PASSWORD`          | (required)              | Mail server password                                                                              |
+| `MAIL_FROM_ADDRESS`      | (required)              | Sender email address                                                                              |
+| `MAIL_FROM_NAME`         | `Fin-Tracker`           | Sender name                                                                                       |
 | `PUID`                   | `1000`                  | User id of the user running the app                                                               |
 | `PGID`                   | `1000`                  | Group id of the user running the app                                                              |
 

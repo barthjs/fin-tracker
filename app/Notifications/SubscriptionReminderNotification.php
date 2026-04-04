@@ -21,9 +21,7 @@ final class SubscriptionReminderNotification extends Notification implements Has
     public function __construct(
         private readonly Subscription $subscription,
         private readonly NotificationTarget $target
-    ) {
-        Number::useLocale($this->subscription->user->locale);
-    }
+    ) {}
 
     /**
      * @return array<class-string>
@@ -40,6 +38,8 @@ final class SubscriptionReminderNotification extends Notification implements Has
 
     public function toNotificationPayload(): NotificationPayload
     {
+        Number::useLocale($this->subscription->user->locale);
+
         $amount = Number::currency(
             $this->subscription->amount,
             $this->subscription->account->currency->value

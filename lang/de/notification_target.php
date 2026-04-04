@@ -28,6 +28,11 @@ return [
             'content_type_json' => 'JSON (application/json)',
             'content_type_form' => 'Form URL Encoded (application/x-www-form-urlencoded)',
         ],
+
+        'email' => [
+            'label' => 'E-Mail',
+            'email' => 'E-Mail-Adresse',
+        ],
     ],
 
     'actions' => [

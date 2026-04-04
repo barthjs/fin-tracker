@@ -129,6 +129,16 @@ final class NotificationTargetResource extends Resource
                         ->visible(fn (Get $get): bool => $get('type') === NotificationProviderType::GENERIC_WEBHOOK),
 
                     Group::make()
+                        ->schema([
+                            TextInput::make('configuration.email')
+                                ->label(__('notification_target.configuration.email.email'))
+                                ->email()
+                                ->required()
+                                ->maxLength(255),
+                        ])
+                        ->visible(fn (Get $get): bool => $get('type') === NotificationProviderType::EMAIL),
+
+                    Group::make()
                         ->visible(fn (Get $get): bool => $get('type') === NotificationProviderType::DATABASE),
                 ]),
         ];

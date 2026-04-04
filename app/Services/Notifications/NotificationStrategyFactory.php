@@ -6,6 +6,7 @@ namespace App\Services\Notifications;
 
 use App\Enums\NotificationProviderType;
 use App\Services\Notifications\Strategies\DatabaseStrategy;
+use App\Services\Notifications\Strategies\EmailStrategy;
 use App\Services\Notifications\Strategies\GenericWebhookStrategy;
 use App\Services\Notifications\Strategies\NotificationSenderStrategy;
 
@@ -18,6 +19,7 @@ final readonly class NotificationStrategyFactory
     {
         return match ($type) {
             NotificationProviderType::DATABASE => new DatabaseStrategy(),
+            NotificationProviderType::EMAIL => new EmailStrategy(),
             NotificationProviderType::GENERIC_WEBHOOK => new GenericWebhookStrategy(),
         };
     }

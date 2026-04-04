@@ -6,6 +6,7 @@ namespace App\Services\Notifications;
 
 use App\Enums\NotificationProviderType;
 use App\Services\Notifications\Configs\DatabaseConfig;
+use App\Services\Notifications\Configs\EmailConfig;
 use App\Services\Notifications\Configs\GenericWebhookConfig;
 use App\Services\Notifications\Configs\NotificationConfig;
 
@@ -20,6 +21,7 @@ final readonly class NotificationConfigFactory
     {
         return match ($type) {
             NotificationProviderType::DATABASE => DatabaseConfig::fromArray($data),
+            NotificationProviderType::EMAIL => EmailConfig::fromArray($data),
             NotificationProviderType::GENERIC_WEBHOOK => GenericWebhookConfig::fromArray($data),
         };
     }
