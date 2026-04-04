@@ -11,12 +11,14 @@ use Filament\Support\Contracts\HasLabel;
 enum NotificationProviderType: string implements HasColor, HasIcon, HasLabel
 {
     case DATABASE = 'database';
+    case EMAIL = 'email';
     case GENERIC_WEBHOOK = 'generic_webhook';
 
     public function getColor(): string
     {
         return match ($this) {
             self::DATABASE => 'info',
+            self::EMAIL => 'warning',
             self::GENERIC_WEBHOOK => 'success',
         };
     }
@@ -30,6 +32,7 @@ enum NotificationProviderType: string implements HasColor, HasIcon, HasLabel
     {
         return match ($this) {
             self::DATABASE => 'tabler-database',
+            self::EMAIL => 'tabler-mail',
             self::GENERIC_WEBHOOK => 'tabler-webhook',
         };
     }
