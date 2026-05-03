@@ -5,10 +5,14 @@ includes:
 parameters:
     paths:
         - app
+        - bootstrap/app.php
         - database
+        - public
         - routes
 
     level: max
+
+    reportUnmatchedIgnoredErrors: false
 
     ignoreErrors:
         - '#Cannot access property .* on App\\Models\\User\|null#'

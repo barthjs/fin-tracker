@@ -115,15 +115,16 @@ Use the `.env` file to adjust configuration settings:
 | `APP_WEBHOOK_SECRET`     | (optional)              | Secret to sign notifications to the webhook channel                                               |
 | `LOG_CHANNEL`            | `stdout`                | `stdout` logs to Docker, whereas `file` writes to `/app/storage/logs/fin-tracker.log`             |
 | `LOG_LEVEL`              | `warning`               | Log level: `debug`, `info`, `warning`, `error`                                                    |
-| `DB_CONNECTION`          | `pgsql`                 | Database driver: `pgsql` or `mariadb`                                                             |
-| `DB_HOST`                | `fin-tracker-db`        | Database host name (service or container name in Docker Compose)                                  |
-| `DB_PORT`                | `5432`                  | Database port (`5432` for pgsql, `3306` for mariadb)                                              |
+| `DB_CONNECTION`          | `pgsql`                 | Database driver: `pgsql`, `mariadb`, `mysql`                                                      |
+| `DB_HOST`                | `database`              | Database host name (service or container name in Docker Compose)                                  |
+| `DB_PORT`                | `5432`                  | Database port (`5432` for pgsql, `3306` for mariadb and mysql)                                    |
 | `DB_DATABASE`            | `fin-tracker`           | Database name                                                                                     |
-| `DB_USERNAME`            | `fin-tracker`           | Database username                                                                                 |
+| `DB_USERNAME`            | `postgres`              | Database username                                                                                 |
 | `DB_PASSWORD`            | (required)              | Database password                                                                                 |
-| `MAIL_SCHEME`            | `smpts`                 | Mail scheme: `smtps`, `smtp`,                                                                     |
+| `MAIL_MAILER`            | `smtp`                  | Mail driver: `smtp`, `log`                                                                        |
+| `MAIL_SCHEME`            | `smpts`                 | Mail scheme: `smtps`, `smtp`                                                                      |
 | `MAIL_HOST`              | (required)              | Mail server host                                                                                  |
-| `MAIL_PORT`              | `465`                   | Mail server port                                                                                  |
+| `MAIL_PORT`              | (required)              | Mail server port                                                                                  |
 | `MAIL_USERNAME`          | (required)              | Mail server username                                                                              |
 | `MAIL_PASSWORD`          | (required)              | Mail server password                                                                              |
 | `MAIL_FROM_ADDRESS`      | (required)              | Sender email address                                                                              |

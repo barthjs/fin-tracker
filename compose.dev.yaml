@@ -22,11 +22,11 @@ services:
       - 5432:5432
     volumes:
       - ./database:/pgsqldump
-      - db:/var/lib/postgresql
+      - db_data:/var/lib/postgresql
     environment:
       - POSTGRES_DB=${DB_DATABASE}
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
 
 volumes:
-  db:
+  db_data:

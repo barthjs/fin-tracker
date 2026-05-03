@@ -11,7 +11,7 @@ return [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', 'fin-tracker-db'),
+            'host' => env('DB_HOST', 'database'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'fin-tracker'),
             'username' => env('DB_USERNAME', 'root'),
@@ -31,7 +31,7 @@ return [
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', 'fin-tracker-db'),
+            'host' => env('DB_HOST', 'database'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'fin-tracker'),
             'username' => env('DB_USERNAME', 'root'),
@@ -51,7 +51,7 @@ return [
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', 'fin-tracker-db'),
+            'host' => env('DB_HOST', 'database'),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'fin-tracker'),
             'username' => env('DB_USERNAME', 'postgres'),
@@ -67,6 +67,7 @@ return [
 
     'migrations' => [
         'table' => 'sys_migrations',
+        'update_date_on_publish' => true,
     ],
 
 ];

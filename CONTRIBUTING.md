@@ -10,10 +10,9 @@ and system dependencies.
 
 Tech stack:
 
-- [PHP 8.5](https://php.net/)
-- [Laravel 13](https://laravel.com/)
-- [Filament 5](https://filamentphp.com/)
-- [PostgreSQL](https://www.postgresql.org/)
+- [PHP](https://php.net/)
+- [Laravel](https://laravel.com/)
+- [Filament](https://filamentphp.com/)
 
 ## Ways to contribute
 
@@ -69,7 +68,7 @@ docker compose -f compose.dev.yaml restart
 docker compose -f compose.dev.yaml stop
 
 # Shell into the app container as the application user 
-docker exec -it -u application fin-tracker bash
+docker exec -it -u application fin-tracker zsh
 ```
 
 ## Composer scripts

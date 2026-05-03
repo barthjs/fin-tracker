@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
 
-    'default' => 'database',
+    'default' => env('QUEUE_CONNECTION', 'database'),
 
     'connections' => [
 
