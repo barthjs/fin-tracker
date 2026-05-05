@@ -37,15 +37,13 @@ final class SecurityImporter extends Importer
                 ->examples(__('security.import.examples.type'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->castStateUsing(function (string $state): SecurityType {
-                    return match ($state) {
-                        SecurityType::Bond->getLabel() => SecurityType::Bond,
-                        SecurityType::Derivative->getLabel() => SecurityType::Derivative,
-                        SecurityType::ETF->getLabel() => SecurityType::ETF,
-                        SecurityType::Fund->getLabel() => SecurityType::Fund,
-                        SecurityType::Stock->getLabel() => SecurityType::Stock,
-                        default => SecurityType::Stock,
-                    };
+                ->castStateUsing(fn (string $state): SecurityType => match ($state) {
+                    SecurityType::Bond->getLabel() => SecurityType::Bond,
+                    SecurityType::Derivative->getLabel() => SecurityType::Derivative,
+                    SecurityType::ETF->getLabel() => SecurityType::ETF,
+                    SecurityType::Fund->getLabel() => SecurityType::Fund,
+                    SecurityType::Stock->getLabel() => SecurityType::Stock,
+                    default => SecurityType::Stock,
                 }),
 
             ImportColumn::make('symbol')
@@ -71,7 +69,7 @@ final class SecurityImporter extends Importer
         $body = __('security.import.body_heading')."\n\r".
             __('security.import.body_success').number_format($import->successful_rows);
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        if (($failedRowsCount = $import->getFailedRowsCount()) !== 0) {
             $body .= "\n\r".__('security.import.body_failure').number_format($failedRowsCount);
         }
 
@@ -84,7 +82,7 @@ final class SecurityImporter extends Importer
             ->where('user_id', auth()->id())
             ->where('name', $this->data['name'])
             ->where('type', $this->data['type'])
-            ->when(! empty($this->data['color']), function (Builder $query): void {
+            ->unless(empty($this->data['color']), function (Builder $query): void {
                 $query->where('color', $this->data['color']);
             })
             ->first() ?? new Security([

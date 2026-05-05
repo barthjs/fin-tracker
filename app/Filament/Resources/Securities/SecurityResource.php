@@ -36,7 +36,10 @@ use Number;
 
 final class SecurityResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceInfolistEntries;
+    use HasResourceTableColumns;
 
     protected static ?string $model = Security::class;
 
@@ -135,7 +138,7 @@ final class SecurityResource extends Resource
             ->modelLabel(__('security.label'))
             ->pluralModelLabel(__('security.plural_label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
-                if (! $table->getActiveFiltersCount()) {
+                if ($table->getActiveFiltersCount() === 0) {
                     return $query->where('is_active', true);
                 }
 
@@ -155,6 +158,7 @@ final class SecurityResource extends Resource
                             $label = str_replace("'", "''", $case->getLabel());
                             $cases[] = "WHEN '".$case->value."' THEN '".mb_strtolower($label)."'";
                         }
+
                         $caseSql = 'CASE type '.implode(' ', $cases).' END';
 
                         /** @phpstan-ignore argument.type (SQL built from enum cases) */
@@ -195,13 +199,13 @@ final class SecurityResource extends Resource
                 ->label(__('security.fields.total_quantity'))
                 ->formatStateUsing(function (Security $record, float $state) use ($portfolio): ?string {
                     // Show only the quantity of the current portfolio on the relation manager
-                    if ($portfolio) {
-                        $buys = (float) Trade::where('portfolio_id', $portfolio->id)
+                    if ($portfolio instanceof Portfolio) {
+                        $buys = (float) Trade::query()->where('portfolio_id', $portfolio->id)
                             ->where('security_id', $record->id)
                             ->where('type', TradeType::Buy)
                             ->sum('quantity');
 
-                        $sells = (float) Trade::where('portfolio_id', $portfolio->id)
+                        $sells = (float) Trade::query()->where('portfolio_id', $portfolio->id)
                             ->where('security_id', $record->id)
                             ->where('type', TradeType::Sell)
                             ->sum('quantity');

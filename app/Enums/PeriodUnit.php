@@ -14,23 +14,6 @@ enum PeriodUnit: string implements HasColor, HasLabel
     case Month = 'month';
     case Year = 'year';
 
-    public function getLabel(): string
-    {
-        return trans_choice("subscription.units.$this->value", 1);
-    }
-
-    public function getLabelByFrequency(int $count): string
-    {
-        if ($count === 1) {
-            return __("subscription.interval.single.$this->value");
-        }
-
-        return __('subscription.interval.multiple', [
-            'count' => $count,
-            'unit' => trans_choice("subscription.units.$this->value", $count),
-        ]);
-    }
-
     public function getColor(): string
     {
         return match ($this) {
@@ -39,5 +22,22 @@ enum PeriodUnit: string implements HasColor, HasLabel
             self::Month => 'warning',
             self::Year => 'success',
         };
+    }
+
+    public function getLabel(): string
+    {
+        return trans_choice('subscription.units.'.$this->value, 1);
+    }
+
+    public function getLabelByFrequency(int $count): string
+    {
+        if ($count === 1) {
+            return __('subscription.interval.single.'.$this->value);
+        }
+
+        return __('subscription.interval.multiple', [
+            'count' => $count,
+            'unit' => trans_choice('subscription.units.'.$this->value, $count),
+        ]);
     }
 }

@@ -106,7 +106,7 @@ trait HasResourceFormFields
             ->autofocus()
             ->seconds(false)
             ->timezone(fn (): string => auth()->user()->timezone)
-            ->default(today())
+            ->default(today()->timezone(auth()->user()->timezone)->startOfDay())
             ->required();
     }
 
@@ -118,7 +118,7 @@ trait HasResourceFormFields
             ->step(0.01)
             ->minValue(0.0)
             ->maxValue(1e9)
-            ->suffix(fn (Get $get): ?string => Account::whereKey($get('account_id'))->first()?->currency->value)
+            ->suffix(fn (Get $get): ?string => Account::query()->whereKey($get('account_id'))->first()?->currency->value)
             ->required();
     }
 
@@ -156,7 +156,7 @@ trait HasResourceFormFields
             ->label(Str::ucfirst(__('account.label')))
             ->selectablePlaceholder(false)
             ->relationship('account', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-            ->getOptionLabelUsing(fn (?string $value): ?string => Account::find($value)?->name)
+            ->getOptionLabelUsing(fn (?string $value): ?string => Account::query()->find($value)?->name)
             ->preload()
             ->searchable()
             ->required()
@@ -182,7 +182,7 @@ trait HasResourceFormFields
                     return $query;
                 }
             )
-            ->getOptionLabelUsing(fn (?string $value): ?string => Category::find($value)?->name)
+            ->getOptionLabelUsing(fn (?string $value): ?string => Category::query()->find($value)?->name)
             ->preload()
             ->searchable()
             ->required()
@@ -195,7 +195,7 @@ trait HasResourceFormFields
             ->label(Str::ucfirst(__('portfolio.label')))
             ->selectablePlaceholder(false)
             ->relationship('portfolio', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-            ->getOptionLabelUsing(fn (?string $value): ?string => Portfolio::find($value)?->name)
+            ->getOptionLabelUsing(fn (?string $value): ?string => Portfolio::query()->find($value)?->name)
             ->preload()
             ->searchable()
             ->required()
@@ -208,7 +208,7 @@ trait HasResourceFormFields
             ->label(Str::ucfirst(__('security.label')))
             ->selectablePlaceholder(false)
             ->relationship('security', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-            ->getOptionLabelUsing(fn (?string $value): ?string => Security::find($value)?->name)
+            ->getOptionLabelUsing(fn (?string $value): ?string => Security::query()->find($value)?->name)
             ->preload()
             ->searchable()
             ->required()
@@ -220,7 +220,7 @@ trait HasResourceFormFields
         return Select::make($column)
             ->label(Str::ucfirst(__('subscription.label')))
             ->relationship('subscription', 'name', fn (Builder $query): Builder => $query->where('is_active', true))
-            ->getOptionLabelUsing(fn (?string $value): ?string => Subscription::find($value)?->name)
+            ->getOptionLabelUsing(fn (?string $value): ?string => Subscription::query()->find($value)?->name)
             ->preload()
             ->searchable()
             ->createOptionForm(SubscriptionResource::getFormFields());

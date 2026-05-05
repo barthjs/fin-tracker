@@ -18,19 +18,19 @@ use function Pest\Laravel\get;
 use function Pest\Laravel\post;
 use function Pest\Livewire\livewire;
 
-it('renders the login page', function () {
+it('renders the login page', function (): void {
     livewire(Login::class)
         ->assertOk()
         ->assertSee(__('user.fields.username_or_email'))
         ->assertSee(__('filament-panels::auth/pages/login.form.password.label'));
 });
 
-it('redirects unauthenticated users to the login page', function () {
+it('redirects unauthenticated users to the login page', function (): void {
     get(Filament::getUrl())
         ->assertRedirect(Filament::getLoginUrl());
 });
 
-it('can log in with email', function () {
+it('can log in with email', function (): void {
     $user = User::factory()->create();
 
     livewire(Login::class)
@@ -45,7 +45,7 @@ it('can log in with email', function () {
     assertAuthenticatedAs($user);
 });
 
-it('can log in with username', function () {
+it('can log in with username', function (): void {
     $user = User::factory()->create();
 
     livewire(Login::class)
@@ -60,7 +60,7 @@ it('can log in with username', function () {
     assertAuthenticatedAs($user);
 });
 
-it('shows validation error on failed login', function () {
+it('shows validation error on failed login', function (): void {
     livewire(Login::class)
         ->fillForm([
             'login' => 'wrong-user',
@@ -72,7 +72,7 @@ it('shows validation error on failed login', function () {
     assertGuest();
 });
 
-it('disallows inactive users', function () {
+it('disallows inactive users', function (): void {
     $user = User::factory()->inactive()->create();
 
     livewire(Login::class)
@@ -89,7 +89,7 @@ it('disallows inactive users', function () {
         ->assertForbidden();
 });
 
-test('oidc redirect route redirects to provider authorization endpoint', function () {
+test('oidc redirect route redirects to provider authorization endpoint', function (): void {
     $baseUrl = config()->string('services.oidc.base_url');
     Http::fake([
         config()->string('services.oidc.base_url').'/.well-known/openid-configuration' => Http::response([
@@ -103,7 +103,7 @@ test('oidc redirect route redirects to provider authorization endpoint', functio
         ->assertRedirectContains($baseUrl.'/auth');
 });
 
-test('oidc callback creates new user and redirects to dashboard', function () {
+test('oidc callback creates new user and redirects to dashboard', function (): void {
     Socialite::fake('oidc', (new SocialiteUser)->map([
         'id' => 1,
         'name' => 'Test User',
@@ -128,7 +128,7 @@ test('oidc callback creates new user and redirects to dashboard', function () {
     assertAuthenticated();
 });
 
-test('oidc callback prevents login on email collision', function () {
+test('oidc callback prevents login on email collision', function (): void {
     User::factory()->create(['email' => 'collision@example.com']);
 
     Socialite::fake('oidc', (new SocialiteUser)->map([
@@ -143,7 +143,7 @@ test('oidc callback prevents login on email collision', function () {
     assertGuest();
 });
 
-test('users can logout', function () {
+test('users can logout', function (): void {
     asUser();
 
     post(Filament::getLogoutUrl())

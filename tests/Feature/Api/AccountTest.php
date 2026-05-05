@@ -15,13 +15,13 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $user = User::factory()->verified()->create();
     $this->user = $user;
 });
 
-describe('Account API', function () {
-    test('index returns a list of accounts', function () {
+describe('Account API', function (): void {
+    test('index returns a list of accounts', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         Account::factory(3)->create(['user_id' => $this->user->id]);
@@ -52,7 +52,7 @@ describe('Account API', function () {
             ]);
     });
 
-    test('index can filter accounts by name', function () {
+    test('index can filter accounts by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         $matchingAccount = Account::factory()->create(['user_id' => $this->user->id]);
@@ -65,7 +65,7 @@ describe('Account API', function () {
             ->assertJsonMissing(['name' => $nonMatchingAccount->name]);
     });
 
-    test('store creates a new account', function () {
+    test('store creates a new account', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         $data = [
@@ -87,7 +87,7 @@ describe('Account API', function () {
         assertDatabaseHas('accounts', array_merge($data, ['user_id' => $this->user->id]));
     });
 
-    test('store fails with invalid data', function () {
+    test('store fails with invalid data', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         postJson(route('api.accounts.store'), ['name' => ''])
@@ -95,7 +95,7 @@ describe('Account API', function () {
             ->assertJsonValidationErrors(['name', 'currency']);
     });
 
-    test('show returns a single account', function () {
+    test('show returns a single account', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -111,7 +111,7 @@ describe('Account API', function () {
             ->assertJsonPath('data.is_active', $account->is_active);
     });
 
-    test('update modifies an existing account', function () {
+    test('update modifies an existing account', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         $account = Account::factory()->create([
@@ -139,7 +139,7 @@ describe('Account API', function () {
         assertDatabaseHas('accounts', array_merge($data, ['id' => $account->id]));
     });
 
-    test('destroy deletes an account', function () {
+    test('destroy deletes an account', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -150,7 +150,7 @@ describe('Account API', function () {
         assertDatabaseMissing('accounts', ['id' => $account->id]);
     });
 
-    test('destroy fails if account has transactions', function () {
+    test('destroy fails if account has transactions', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -162,7 +162,7 @@ describe('Account API', function () {
         assertDatabaseHas('accounts', ['id' => $account->id]);
     });
 
-    test('forbidden access without correct ability', function () {
+    test('forbidden access without correct ability', function (): void {
         actingAsWithAbilities($this->user);
 
         getJson(route('api.accounts.index'))

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Console\Commands\App\CleanupDataCommand;
+use App\Console\Commands\App\AppCleanupTempDataCommand;
 use App\Console\Commands\App\DispatchSubscriptionJobsCommand;
 use Illuminate\Queue\Console\FlushFailedCommand;
 use Illuminate\Queue\Console\PruneBatchesCommand;
@@ -11,7 +11,7 @@ use Laravel\Sanctum\Console\Commands\PruneExpired;
 
 Schedule::command(DispatchSubscriptionJobsCommand::class)->everyThirtyMinutes()->withoutOverlapping();
 
-Schedule::command(CleanupDataCommand::class)->everyThreeHours()->withoutOverlapping();
+Schedule::command(AppCleanupTempDataCommand::class)->everyThreeHours()->withoutOverlapping();
 
 Schedule::command(PruneBatchesCommand::class)->everySixHours()->withoutOverlapping();
 Schedule::command(PruneFailedJobsCommand::class)->everySixHours()->withoutOverlapping();

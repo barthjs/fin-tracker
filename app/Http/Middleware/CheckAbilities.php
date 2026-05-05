@@ -25,9 +25,7 @@ final class CheckAbilities
             ? $ability->read()
             : $ability->write();
 
-        if ($user === null || ! $user->tokenCan($requiredAbility)) {
-            throw new MissingAbilityException($requiredAbility);
-        }
+        throw_if($user === null || ! $user->tokenCan($requiredAbility), MissingAbilityException::class, $requiredAbility);
 
         return $next($request);
     }

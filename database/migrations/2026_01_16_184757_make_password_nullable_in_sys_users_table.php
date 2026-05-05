@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('sys_users', function (Blueprint $table) {
+        Schema::table('sys_users', function (Blueprint $table): void {
             $table->string('password')->nullable()->change();
         });
     }

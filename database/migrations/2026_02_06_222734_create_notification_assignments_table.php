@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notification_assignments', function (Blueprint $table) {
+        Schema::create('notification_assignments', function (Blueprint $table): void {
             $table->ulid('id')->primary();
 
             $table->foreignUlid('notification_target_id')

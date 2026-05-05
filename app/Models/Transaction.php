@@ -8,6 +8,7 @@ use App\Enums\TransactionType;
 use App\Models\Scopes\UserRelationScope;
 use Carbon\CarbonInterface;
 use Database\Factories\TransactionFactory;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,12 +32,13 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property-read Subscription|null $subscription
  * @property-read User $user
  */
+#[WithoutTimestamps]
 final class Transaction extends Model
 {
     /** @use HasFactory<TransactionFactory> */
-    use HasFactory, HasUlids;
+    use HasFactory;
 
-    public $timestamps = false;
+    use HasUlids;
 
     /**
      * The model's default values for attributes.

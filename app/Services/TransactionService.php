@@ -26,7 +26,7 @@ final readonly class TransactionService
     {
         return DB::transaction(function () use ($data): Transaction {
             /** @var Transaction $transaction */
-            $transaction = Transaction::create($data);
+            $transaction = Transaction::query()->create($data);
 
             $accountIds = array_filter([
                 $transaction->account_id,
@@ -124,7 +124,7 @@ final readonly class TransactionService
             return;
         }
 
-        DB::transaction(function () use ($transactions, $data) {
+        DB::transaction(function () use ($transactions, $data): void {
             /** @var array<string> $oldAccountIds */
             $oldAccountIds = $transactions->pluck('account_id')->unique()->toArray();
 

@@ -15,13 +15,13 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $user = User::factory()->verified()->create();
     $this->user = $user;
 });
 
-describe('Security API', function () {
-    test('index returns a list of securities', function () {
+describe('Security API', function (): void {
+    test('index returns a list of securities', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         Security::factory()->count(3)->create(['user_id' => $this->user->id]);
@@ -56,7 +56,7 @@ describe('Security API', function () {
             ]);
     });
 
-    test('index can filter securities by name', function () {
+    test('index can filter securities by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         $matchingSecurity = Security::factory()->create(['user_id' => $this->user->id]);
@@ -69,7 +69,7 @@ describe('Security API', function () {
             ->assertJsonMissing(['name' => $nonMatchingSecurity->name]);
     });
 
-    test('store creates a new security', function () {
+    test('store creates a new security', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         $data = [
@@ -98,7 +98,7 @@ describe('Security API', function () {
         assertDatabaseHas('securities', array_merge($data, ['user_id' => $this->user->id]));
     });
 
-    test('store fails with invalid data', function () {
+    test('store fails with invalid data', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         postJson(route('api.securities.store'), ['name' => ''])
@@ -106,7 +106,7 @@ describe('Security API', function () {
             ->assertJsonValidationErrors(['name', 'type']);
     });
 
-    test('show returns a single security', function () {
+    test('show returns a single security', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         $security = Security::factory()->create(['user_id' => $this->user->id]);
@@ -125,7 +125,7 @@ describe('Security API', function () {
             ->assertJsonPath('data.is_active', $security->is_active);
     });
 
-    test('update modifies an existing security', function () {
+    test('update modifies an existing security', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         $security = Security::factory()->create([
@@ -158,7 +158,7 @@ describe('Security API', function () {
         assertDatabaseHas('securities', array_merge($data, ['id' => $security->id]));
     });
 
-    test('destroy deletes a security', function () {
+    test('destroy deletes a security', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         $security = Security::factory()->create(['user_id' => $this->user->id]);
@@ -169,7 +169,7 @@ describe('Security API', function () {
         assertDatabaseMissing('securities', ['id' => $security->id]);
     });
 
-    test('destroy fails if security has trades', function () {
+    test('destroy fails if security has trades', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
         $security = Security::factory()->create(['user_id' => $this->user->id]);
@@ -181,7 +181,7 @@ describe('Security API', function () {
         assertDatabaseHas('securities', ['id' => $security->id]);
     });
 
-    test('forbidden access without correct ability', function () {
+    test('forbidden access without correct ability', function (): void {
         actingAsWithAbilities($this->user);
 
         getJson(route('api.securities.index'))

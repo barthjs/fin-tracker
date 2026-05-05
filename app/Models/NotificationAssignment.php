@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\NotificationEventType;
+use Database\Factories\NotificationAssignmentFactory;
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -19,13 +23,14 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read NotificationTarget $target
  * @property-read Model $notifiable
  */
+#[Table(name: 'notification_assignments')]
+#[WithoutTimestamps]
 final class NotificationAssignment extends Model
 {
+    /** @use HasFactory<NotificationAssignmentFactory> */
+    use HasFactory;
+
     use HasUlids;
-
-    public $timestamps = false;
-
-    protected $table = 'notification_assignments';
 
     /**
      * @return array<string, string>

@@ -59,7 +59,7 @@ final class SecurityController
      */
     public function store(StoreSecurityRequest $request): SecurityResource
     {
-        $security = Security::create($request->validated());
+        $security = Security::query()->create($request->validated());
 
         return new SecurityResource($security);
     }

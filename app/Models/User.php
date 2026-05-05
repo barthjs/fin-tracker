@@ -16,6 +16,8 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -55,12 +57,21 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read Collection<int, Trade> $trades
  * @property-read Collection<int, Transaction> $transactions
  */
+#[Hidden([
+    'password',
+    'remember_token',
+    'app_authentication_secret',
+])]
+#[Table(name: 'sys_users')]
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasDeletableFiles, HasLocalePreference, HasName
 {
-    /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, HasUlids, Notifiable;
+    use HasApiTokens;
 
-    protected $table = 'sys_users';
+    /** @use HasFactory<UserFactory> */
+    use HasFactory;
+
+    use HasUlids;
+    use Notifiable;
 
     /**
      * The model's default values for attributes.
@@ -72,17 +83,6 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
         'is_active' => true,
         'is_verified' => false,
         'is_admin' => false,
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-        'app_authentication_secret',
     ];
 
     /**

@@ -18,7 +18,7 @@ final readonly class NotificationTargetService
         return DB::transaction(function () use ($data): NotificationTarget {
             $data['configuration'] ??= [];
 
-            return NotificationTarget::create($data);
+            return NotificationTarget::query()->create($data);
         });
     }
 

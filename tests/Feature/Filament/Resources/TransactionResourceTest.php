@@ -12,7 +12,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
 
-it('renders the list page', function () {
+it('renders the list page', function (): void {
     $account = Account::factory()->create();
     $category = Category::factory()->create();
 
@@ -29,7 +29,7 @@ it('renders the list page', function () {
         ->assertCanSeeTableRecords($transactions);
 });
 
-it('can create a transaction', function () {
+it('can create a transaction', function (): void {
     $account = Account::factory()->create();
     $category = Category::factory()->create();
 
@@ -46,7 +46,7 @@ it('can create a transaction', function () {
     $this->assertDatabaseHas('transactions', $data);
 });
 
-it('can edit a transaction', function () {
+it('can edit a transaction', function (): void {
     $transaction = Transaction::factory()->create();
 
     $data = Transaction::factory()

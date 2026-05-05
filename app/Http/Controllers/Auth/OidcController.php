@@ -71,7 +71,7 @@ final readonly class OidcController
             Auth::login($user, remember: true);
 
             return redirect()->intended(Filament::getUrl());
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $this->setNotificationLocale($request);
 
             Notification::make()
@@ -79,7 +79,7 @@ final readonly class OidcController
                 ->title(__('profile.oidc.auth_failed_title', ['provider' => ucfirst($provider)]))
                 ->send();
 
-            Log::error("OIDC Login failed for provider $provider: ".$e->getMessage());
+            Log::error(sprintf('OIDC Login failed for provider %s: ', $provider).$throwable->getMessage());
 
             return redirect()->intended(Filament::getLoginUrl());
         }

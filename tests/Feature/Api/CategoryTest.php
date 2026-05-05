@@ -15,13 +15,13 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $user = User::factory()->verified()->create();
     $this->user = $user;
 });
 
-describe('Category API', function () {
-    test('index returns a list of categories', function () {
+describe('Category API', function (): void {
+    test('index returns a list of categories', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         Category::factory()->count(3)->create(['user_id' => $this->user->id]);
@@ -50,7 +50,7 @@ describe('Category API', function () {
             ]);
     });
 
-    test('index can filter categories by name', function () {
+    test('index can filter categories by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         $matchingCategory = Category::factory()->create(['user_id' => $this->user->id]);
@@ -63,7 +63,7 @@ describe('Category API', function () {
             ->assertJsonMissing(['name' => $nonMatchingCategory->name]);
     });
 
-    test('store creates a new category', function () {
+    test('store creates a new category', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         $data = [
@@ -83,7 +83,7 @@ describe('Category API', function () {
         assertDatabaseHas('categories', array_merge($data, ['user_id' => $this->user->id]));
     });
 
-    test('store fails with invalid data', function () {
+    test('store fails with invalid data', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         postJson(route('api.categories.store'), ['name' => ''])
@@ -91,7 +91,7 @@ describe('Category API', function () {
             ->assertJsonValidationErrors(['name', 'group']);
     });
 
-    test('show returns a single category', function () {
+    test('show returns a single category', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         $category = Category::factory()->create(['user_id' => $this->user->id]);
@@ -106,7 +106,7 @@ describe('Category API', function () {
             ->assertJsonPath('data.is_active', $category->is_active);
     });
 
-    test('update modifies an existing category', function () {
+    test('update modifies an existing category', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         $category = Category::factory()->create([
@@ -132,7 +132,7 @@ describe('Category API', function () {
         assertDatabaseHas('categories', array_merge($data, ['id' => $category->id]));
     });
 
-    test('destroy deletes a category', function () {
+    test('destroy deletes a category', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         $category = Category::factory()->create(['user_id' => $this->user->id]);
@@ -143,7 +143,7 @@ describe('Category API', function () {
         assertDatabaseMissing('categories', ['id' => $category->id]);
     });
 
-    test('destroy fails if category has transactions', function () {
+    test('destroy fails if category has transactions', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
         $category = Category::factory()->create(['user_id' => $this->user->id]);
@@ -155,7 +155,7 @@ describe('Category API', function () {
         assertDatabaseHas('categories', ['id' => $category->id]);
     });
 
-    test('forbidden access without correct ability', function () {
+    test('forbidden access without correct ability', function (): void {
         actingAsWithAbilities($this->user);
 
         getJson(route('api.categories.index'))

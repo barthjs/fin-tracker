@@ -46,7 +46,7 @@ final readonly class GenericWebhookStrategy implements NotificationSenderStrateg
         if (! empty($secret)) {
             $signature = hash_hmac(algo: 'sha256', data: $bodyContent, key: $secret);
             $client->withHeaders([
-                'X-Signature-256' => "sha256=$signature",
+                'X-Signature-256' => 'sha256='.$signature,
             ]);
         } else {
             Log::warning('Sending webhook to '.$config->url.' without secret.');

@@ -29,7 +29,7 @@ final readonly class OidcService
             /** @phpstan-ignore-next-line */
             if (isset($config['oidc_enabled']) && $config['oidc_enabled']) {
                 $enabledProviders[$provider] = [
-                    'label' => config()->string("services.$provider.label"),
+                    'label' => config()->string(sprintf('services.%s.label', $provider)),
                 ];
             }
         }
@@ -39,7 +39,7 @@ final readonly class OidcService
 
     public function isEnabled(string $provider): bool
     {
-        return config()->boolean("services.$provider.oidc_enabled");
+        return config()->boolean(sprintf('services.%s.oidc_enabled', $provider));
     }
 
     /**
@@ -50,17 +50,13 @@ final readonly class OidcService
     public function handleCallback(string $provider, SocialiteUser $socialiteUser): User
     {
         $userProvider = UserProvider::findForProvider($provider, $socialiteUser);
-        if ($userProvider !== null) {
+        if ($userProvider instanceof UserProvider) {
             return $userProvider->user;
         }
 
-        if (! config()->boolean('app.allow_registration')) {
-            throw new RuntimeException('Registration is disabled');
-        }
+        throw_unless(config()->boolean('app.allow_registration'), RuntimeException::class, 'Registration is disabled');
 
-        if (User::where('email', $socialiteUser->getEmail())->exists()) {
-            throw new RuntimeException('Email collision');
-        }
+        throw_if(User::query()->where('email', $socialiteUser->getEmail())->exists(), RuntimeException::class, 'Email collision');
 
         $avatarPath = $this->downloadAvatar($socialiteUser->getAvatar());
 
@@ -71,11 +67,12 @@ final readonly class OidcService
 
                 return $user;
             });
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             if (is_string($avatarPath)) {
                 Storage::disk('public')->delete($avatarPath);
             }
-            throw $e;
+
+            throw $throwable;
         }
     }
 
@@ -192,7 +189,7 @@ final readonly class OidcService
         $username = $base;
         $counter = 1;
 
-        while (User::where('username', $username)->exists()) {
+        while (User::query()->where('username', $username)->exists()) {
             $username = $base.$counter;
             $counter++;
         }

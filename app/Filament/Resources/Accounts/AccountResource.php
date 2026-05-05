@@ -29,7 +29,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 final class AccountResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceInfolistEntries;
+    use HasResourceTableColumns;
 
     protected static ?string $model = Account::class;
 
@@ -96,7 +99,7 @@ final class AccountResource extends Resource
             ->modelLabel(__('account.label'))
             ->pluralModelLabel(__('account.plural_label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
-                if (! $table->getActiveFiltersCount()) {
+                if ($table->getActiveFiltersCount() === 0) {
                     return $query->where('is_active', true);
                 }
 

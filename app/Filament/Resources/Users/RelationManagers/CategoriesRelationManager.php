@@ -32,7 +32,7 @@ final class CategoriesRelationManager extends RelationManager
     public static function getBadge(Model $ownerRecord, string $pageClass): string
     {
         /** @var Category $ownerRecord */
-        return (string) Category::withoutGlobalScopes()->where('user_id', $ownerRecord->id)->count();
+        return (string) Category::query()->withoutGlobalScopes()->where('user_id', $ownerRecord->id)->count();
     }
 
     public function form(Schema $schema): Schema

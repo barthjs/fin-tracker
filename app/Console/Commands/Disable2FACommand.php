@@ -10,7 +10,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('disable-2fa {emailOrUsername?}')]
-#[Description('Disable 2FA for a user by email or username')]
+#[Description('Disable 2FA for a user')]
 final class Disable2FACommand extends Command
 {
     public function handle(): int
@@ -21,19 +21,19 @@ final class Disable2FACommand extends Command
         }
 
         if (filter_var($emailOrUsername, FILTER_VALIDATE_EMAIL)) {
-            $user = User::where('email', '=', $emailOrUsername)->first();
+            $user = User::query()->where('email', '=', $emailOrUsername)->first();
         } else {
-            $user = User::where('username', '=', $emailOrUsername)->first();
+            $user = User::query()->where('username', '=', $emailOrUsername)->first();
         }
 
         if ($user === null) {
             $this->error('User not found');
 
-            return 1;
+            return self::FAILURE;
         }
 
         if (! $this->confirm('Disabling 2FA for user '.$user->username, true)) {
-            return 1;
+            return self::FAILURE;
         }
 
         $user->update([
@@ -43,6 +43,6 @@ final class Disable2FACommand extends Command
 
         $this->info('2FA disabled successfully');
 
-        return 0;
+        return self::SUCCESS;
     }
 }

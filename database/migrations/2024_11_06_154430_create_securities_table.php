@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('securities', function (Blueprint $table) {
+        Schema::create('securities', function (Blueprint $table): void {
             $table->ulid('id')->primary();
 
             $table->string('name')->index();

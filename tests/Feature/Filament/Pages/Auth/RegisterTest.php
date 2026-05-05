@@ -11,7 +11,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
-it('renders the register page', function () {
+it('renders the register page', function (): void {
     livewire(Register::class)
         ->assertOk()
         ->assertSee(__('user.fields.username'))
@@ -20,12 +20,12 @@ it('renders the register page', function () {
         ->assertSee(__('filament-panels::auth/pages/register.form.email.label'));
 });
 
-it('shows oidc buttons on register page when enabled', function () {
+it('shows oidc buttons on register page when enabled', function (): void {
     get(Filament::getRegistrationUrl())
         ->assertSee('OIDC');
 });
 
-it('can register a new user', function () {
+it('can register a new user', function (): void {
     livewire(Register::class)
         ->fillForm([
             'username' => 'user',
@@ -54,7 +54,7 @@ it('can register a new user', function () {
     assertAuthenticated();
 });
 
-it('validates unique username', function () {
+it('validates unique username', function (): void {
     User::factory()->create(['username' => 'user']);
 
     livewire(Register::class)
@@ -68,7 +68,7 @@ it('validates unique username', function () {
         ->assertHasErrors(['data.username']);
 });
 
-it('validates unique email', function () {
+it('validates unique email', function (): void {
     User::factory()->create(['email' => 'user@example.com']);
 
     livewire(Register::class)
@@ -82,7 +82,7 @@ it('validates unique email', function () {
         ->assertHasErrors(['data.email']);
 });
 
-it('requires password confirmation', function () {
+it('requires password confirmation', function (): void {
     livewire(Register::class)
         ->fillForm([
             'username' => 'user',

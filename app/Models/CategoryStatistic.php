@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Models\Scopes\CategoryStatisticScope;
 use Database\Factories\CategoryStatisticFactory;
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,19 +31,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read float $dec
  * @property-read Category $category
  */
+#[Table(name: 'category_statistics')]
+#[WithoutTimestamps]
 final class CategoryStatistic extends Model
 {
     /** @use HasFactory<CategoryStatisticFactory> */
-    use HasFactory, HasUlids;
+    use HasFactory;
+
+    use HasUlids;
 
     public const array MONTHS = [
         'jan', 'feb', 'mar', 'apr', 'may', 'jun',
         'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
     ];
-
-    public $timestamps = false;
-
-    protected $table = 'category_statistics';
 
     /**
      * The model's default values for attributes.

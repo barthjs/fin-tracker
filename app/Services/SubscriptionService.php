@@ -17,7 +17,8 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
+use Illuminate\Foundation\Bus\PendingDispatch;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Number;
 
@@ -42,13 +43,13 @@ final readonly class SubscriptionService
             $reminderTargets = $subscription->extractNotificationTargets($data, 'reminder_targets');
 
             if (isset($data['next_payment_date']) && is_string($data['next_payment_date'])) {
-                $data['day_of_month'] = Carbon::parse($data['next_payment_date'])->day;
+                $data['day_of_month'] = Date::parse($data['next_payment_date'])->day;
             }
 
             $subscription->fill($data);
             $subscription->save();
 
-            if (! empty($reminderTargets)) {
+            if ($reminderTargets !== []) {
                 $subscription->syncNotificationAssignments(
                     NotificationEventType::SUBSCRIPTION_REMINDER,
                     $reminderTargets
@@ -66,16 +67,16 @@ final readonly class SubscriptionService
      */
     public function update(Subscription $subscription, array $data): Subscription
     {
-        return DB::transaction(function () use ($subscription, $data) {
+        return DB::transaction(function () use ($subscription, $data): Subscription {
             $reminderTargets = $subscription->extractNotificationTargets($data, 'reminder_targets');
 
             if (isset($data['next_payment_date']) && is_string($data['next_payment_date'])) {
-                $data['day_of_month'] = Carbon::parse($data['next_payment_date'])->day;
+                $data['day_of_month'] = Date::parse($data['next_payment_date'])->day;
             }
 
             $subscription->update($data);
 
-            if (! empty($reminderTargets)) {
+            if ($reminderTargets !== []) {
                 $subscription->syncNotificationAssignments(
                     NotificationEventType::SUBSCRIPTION_REMINDER,
                     $reminderTargets
@@ -131,7 +132,7 @@ final readonly class SubscriptionService
                 ->chunkById(100, function (Collection $subscriptions): void {
                     /** @var Collection<int, Subscription> $subscriptions */
                     foreach ($subscriptions as $subscription) {
-                        SendSubscriptionReminderJob::dispatch($subscription);
+                        dispatch(new SendSubscriptionReminderJob($subscription));
                     }
                 });
         }
@@ -177,7 +178,7 @@ final readonly class SubscriptionService
                 ->chunkById(100, function (Collection $subscriptions): void {
                     /** @var Collection<int, Subscription> $subscriptions */
                     foreach ($subscriptions as $subscription) {
-                        ProcessDueSubscriptionJob::dispatch($subscription);
+                        dispatch(new ProcessDueSubscriptionJob($subscription));
                     }
                 });
         }
@@ -217,7 +218,7 @@ final readonly class SubscriptionService
                     'account_id' => $subscription->account_id,
                     'category_id' => $subscription->category_id,
                     'subscription_id' => $subscription->id,
-                    'notes' => __('subscription.generated_note', ['date' => $subscription->next_payment_date->toDateString()]),
+                    'notes' => $subscription->description ?: __('subscription.generated_note', ['date' => $subscription->next_payment_date->toDateString()]),
                 ]);
 
                 $subscription->next_payment_date = $this->calculateNextDate($subscription);
@@ -355,7 +356,7 @@ final readonly class SubscriptionService
         }
 
         $userTz = $subscription->user->timezone;
-        $nowLocal = Carbon::now()->setTimezone($userTz)->startOfDay();
+        $nowLocal = Date::now()->setTimezone($userTz)->startOfDay();
         $nextDueLocal = $subscription->next_payment_date->shiftTimezone($userTz)->startOfDay();
 
         $shouldDispatch = false;
@@ -370,7 +371,7 @@ final readonly class SubscriptionService
         }
 
         if ($shouldDispatch) {
-            DB::afterCommit(fn () => ProcessDueSubscriptionJob::dispatch($subscription));
+            DB::afterCommit(fn (): PendingDispatch => dispatch(new ProcessDueSubscriptionJob($subscription)));
         }
     }
 
@@ -391,7 +392,7 @@ final readonly class SubscriptionService
         // Re-align to the original intended day if the target month allows it.
         // This prevents a subscription starting on the 31st from getting "stuck" on the 28th/30th.
         if ($unit === PeriodUnit::Month || $unit === PeriodUnit::Year) {
-            $newDate = $newDate->day(min($anchorDay, $newDate->daysInMonth));
+            return $newDate->day(min($anchorDay, $newDate->daysInMonth));
         }
 
         return $newDate;

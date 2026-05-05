@@ -11,7 +11,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
 
-it('renders the settings page', function () {
+it('renders the settings page', function (): void {
     Http::fake([
         'https://api.github.com/repos/barthjs/fin-tracker/releases/latest' => Http::response([
             'tag_name' => 'v1.2.3',

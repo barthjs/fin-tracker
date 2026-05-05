@@ -12,7 +12,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
 
-it('renders the list page', function () {
+it('renders the list page', function (): void {
     $portfolios = Portfolio::factory()->count(3)->create();
 
     livewire(ListPortfolios::class)
@@ -20,7 +20,7 @@ it('renders the list page', function () {
         ->assertCanSeeTableRecords($portfolios);
 });
 
-it('can filter portfolios by inactivity', function () {
+it('can filter portfolios by inactivity', function (): void {
     $activePortfolio = Portfolio::factory()->create(['is_active' => true]);
     $inactivePortfolio = Portfolio::factory()->create(['is_active' => false]);
 
@@ -32,7 +32,7 @@ it('can filter portfolios by inactivity', function () {
         ->assertCanNotSeeTableRecords([$activePortfolio]);
 });
 
-it('can create a portfolio', function () {
+it('can create a portfolio', function (): void {
     $data = Portfolio::factory()->make()->toArray();
 
     livewire(ListPortfolios::class)
@@ -42,7 +42,7 @@ it('can create a portfolio', function () {
     $this->assertDatabaseHas('portfolios', $data);
 });
 
-it('renders the view page', function () {
+it('renders the view page', function (): void {
     $portfolio = Portfolio::factory()->create();
 
     livewire(ViewPortfolio::class, [
@@ -55,7 +55,7 @@ it('renders the view page', function () {
         ], 'infolist');
 });
 
-it('can edit a portfolio', function () {
+it('can edit a portfolio', function (): void {
     $portfolio = Portfolio::factory()->create();
     $data = Portfolio::factory()->make()->toArray();
 
@@ -66,7 +66,7 @@ it('can edit a portfolio', function () {
     $this->assertDatabaseHas('portfolios', array_merge(['id' => $portfolio->id], $data));
 });
 
-it('can load the securities relation manager', function () {
+it('can load the securities relation manager', function (): void {
     $portfolio = Portfolio::factory()->create();
 
     livewire(SecuritiesRelationManager::class, [
@@ -77,7 +77,7 @@ it('can load the securities relation manager', function () {
         ->assertCanSeeTableRecords($portfolio->securities);
 });
 
-it('can load the trades relation manager', function () {
+it('can load the trades relation manager', function (): void {
     $portfolio = Portfolio::factory()->create();
 
     livewire(TradesRelationManager::class, [

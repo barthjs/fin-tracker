@@ -51,7 +51,7 @@ final class CategoryController
      */
     public function store(StoreCategoryRequest $request): CategoryResource
     {
-        $category = Category::create($request->validated());
+        $category = Category::query()->create($request->validated());
 
         return new CategoryResource($category);
     }

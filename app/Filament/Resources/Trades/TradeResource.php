@@ -8,7 +8,7 @@ use App\Enums\TradeType;
 use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Concerns\HasResourceFormFields;
 use App\Filament\Concerns\HasResourceTableColumns;
-use App\Filament\Resources\Accounts;
+use App\Filament\Resources\Accounts\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\Portfolios;
 use App\Filament\Resources\Securities;
 use App\Filament\Resources\Trades\Pages\ListTrades;
@@ -33,7 +33,9 @@ use Illuminate\Support\Str;
 
 final class TradeResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceTableColumns;
 
     protected static ?string $model = Trade::class;
 
@@ -131,7 +133,7 @@ final class TradeResource extends Resource
                         ->label(__('trade.fields.total_amount'))
                         ->numeric()
                         ->default(0)
-                        ->suffix(fn (Get $get): ?string => Account::whereKey($get('account_id'))->first()?->currency->value)
+                        ->suffix(fn (Get $get): ?string => Account::query()->whereKey($get('account_id'))->first()?->currency->value)
                         ->dehydrated(false)
                         ->disabled(),
                 ]),
@@ -177,7 +179,7 @@ final class TradeResource extends Resource
                     ->label(__('trade.fields.fee')),
 
                 self::logoAndNameColumn('account.name')
-                    ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class)
+                    ->hiddenOn(TradesRelationManager::class)
                     ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Trade $record): array => [
                         'logo' => $record->account->logo,
@@ -210,7 +212,7 @@ final class TradeResource extends Resource
                     ->options(TradeType::class),
 
                 self::accountFilter()
-                    ->hiddenOn(Accounts\RelationManagers\TradesRelationManager::class),
+                    ->hiddenOn(TradesRelationManager::class),
 
                 self::portfolioFilter()
                     ->hiddenOn(Portfolios\RelationManagers\TradesRelationManager::class),

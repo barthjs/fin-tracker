@@ -16,13 +16,13 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $user = User::factory()->verified()->create();
     $this->user = $user;
 });
 
-describe('Transaction API', function () {
-    test('index returns a list of transactions', function () {
+describe('Transaction API', function (): void {
+    test('index returns a list of transactions', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
         Transaction::factory()->count(3)->create();
@@ -47,7 +47,7 @@ describe('Transaction API', function () {
             ]);
     });
 
-    test('store creates a new transaction', function () {
+    test('store creates a new transaction', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -76,7 +76,7 @@ describe('Transaction API', function () {
         $this->assertEquals(-100.5, $account->fresh()?->balance);
     });
 
-    test('store fails with invalid data', function () {
+    test('store fails with invalid data', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
         postJson(route('api.transactions.store'), ['amount' => ''])
@@ -84,7 +84,7 @@ describe('Transaction API', function () {
             ->assertJsonValidationErrors(['date_time', 'type', 'amount', 'account_id', 'category_id']);
     });
 
-    test('update modifies an existing transaction', function () {
+    test('update modifies an existing transaction', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -116,7 +116,7 @@ describe('Transaction API', function () {
         $this->assertEquals(75.0, $account->fresh()?->balance);
     });
 
-    test('destroy deletes a transaction', function () {
+    test('destroy deletes a transaction', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -133,7 +133,7 @@ describe('Transaction API', function () {
         $this->assertEquals(0.0, $account->fresh()?->balance);
     });
 
-    test('forbidden access without correct ability', function () {
+    test('forbidden access without correct ability', function (): void {
         actingAsWithAbilities($this->user);
 
         getJson(route('api.transactions.index'))

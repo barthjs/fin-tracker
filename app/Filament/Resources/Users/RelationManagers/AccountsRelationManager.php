@@ -31,7 +31,7 @@ final class AccountsRelationManager extends RelationManager
     public static function getBadge(Model $ownerRecord, string $pageClass): string
     {
         /** @var Account $ownerRecord */
-        return (string) Account::withoutGlobalScopes()->where('user_id', $ownerRecord->id)->count();
+        return (string) Account::query()->withoutGlobalScopes()->where('user_id', $ownerRecord->id)->count();
     }
 
     public function form(Schema $schema): Schema

@@ -22,7 +22,7 @@ final class CategoryStatisticFactory extends Factory
     public function definition(): array
     {
         return [
-            'year' => fake()->year,
+            'year' => fake()->year(),
             'jan' => fake()->randomFloat(2, 0, 1000),
             'feb' => fake()->randomFloat(2, 0, 1000),
             'mar' => fake()->randomFloat(2, 0, 1000),

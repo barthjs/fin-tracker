@@ -37,7 +37,7 @@ final class AccountImporter extends Importer
         $body = __('account.import.body_heading')."\n\r".
             __('account.import.body_success').number_format($import->successful_rows);
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        if (($failedRowsCount = $import->getFailedRowsCount()) !== 0) {
             $body .= "\n\r".__('account.import.body_failure').number_format($failedRowsCount);
         }
 
@@ -50,7 +50,7 @@ final class AccountImporter extends Importer
             ->where('user_id', auth()->id())
             ->where('name', $this->data['name'])
             ->where('currency', $this->data['currency'])
-            ->when(! empty($this->data['color']), function (Builder $query): void {
+            ->unless(empty($this->data['color']), function (Builder $query): void {
                 $query->where('color', $this->data['color']);
             })
             ->first() ?? new Account([

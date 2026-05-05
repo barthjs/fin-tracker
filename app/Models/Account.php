@@ -43,8 +43,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 final class Account extends Model implements Chartable, HasDeletableFiles
 {
+    use HasChartDefaults;
+
     /** @use HasFactory<AccountFactory> */
-    use HasChartDefaults, HasFactory, HasUlids;
+    use HasFactory;
+
+    use HasUlids;
 
     /**
      * The model's default values for attributes.
@@ -67,8 +71,8 @@ final class Account extends Model implements Chartable, HasDeletableFiles
     {
         $user ??= auth()->user();
 
-        return self::where('user_id', $user->id)->where('name', 'Demo')->first() ??
-            self::create([
+        return self::query()->where('user_id', $user->id)->where('name', 'Demo')->first() ??
+            self::query()->create([
                 'name' => 'Demo',
                 'currency' => Currency::getCurrency(),
                 'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
@@ -89,33 +93,33 @@ final class Account extends Model implements Chartable, HasDeletableFiles
      */
     public static function updateAccountBalance(string $accountId): void
     {
-        $revenue = (float) Transaction::where('account_id', $accountId)
+        $revenue = (float) Transaction::query()->where('account_id', $accountId)
             ->where('type', TransactionType::Revenue)
             ->sum('amount');
 
-        $expense = (float) Transaction::where('account_id', $accountId)
+        $expense = (float) Transaction::query()->where('account_id', $accountId)
             ->where('type', TransactionType::Expense)
             ->sum('amount');
 
-        $outgoingTransfers = (float) Transaction::where('account_id', $accountId)
+        $outgoingTransfers = (float) Transaction::query()->where('account_id', $accountId)
             ->where('type', TransactionType::Transfer)
             ->sum('amount');
 
-        $incomingTransfers = (float) Transaction::where('transfer_account_id', $accountId)
+        $incomingTransfers = (float) Transaction::query()->where('transfer_account_id', $accountId)
             ->where('type', TransactionType::Transfer)
             ->sum('amount');
 
-        $buyTrades = (float) Trade::where('account_id', $accountId)
+        $buyTrades = (float) Trade::query()->where('account_id', $accountId)
             ->where('type', TradeType::Buy)
             ->sum('total_amount');
 
-        $sellTrades = (float) Trade::where('account_id', $accountId)
+        $sellTrades = (float) Trade::query()->where('account_id', $accountId)
             ->where('type', TradeType::Sell)
             ->sum('total_amount');
 
         $balance = $revenue - $expense - $outgoingTransfers + $incomingTransfers - $buyTrades + $sellTrades;
 
-        self::whereKey($accountId)->update(['balance' => $balance]);
+        self::query()->whereKey($accountId)->update(['balance' => $balance]);
     }
 
     /**
@@ -123,7 +127,7 @@ final class Account extends Model implements Chartable, HasDeletableFiles
      */
     public static function getActiveBalanceSum(): float
     {
-        return (float) self::where('is_active', true)->sum('balance');
+        return (float) self::query()->where('is_active', true)->sum('balance');
     }
 
     /**

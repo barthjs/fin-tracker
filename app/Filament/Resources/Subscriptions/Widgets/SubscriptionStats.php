@@ -16,7 +16,8 @@ use Illuminate\Support\Number;
 
 final class SubscriptionStats extends StatsOverviewWidget
 {
-    use HasSubscriptionFilters, InteractsWithPageTable;
+    use HasSubscriptionFilters;
+    use InteractsWithPageTable;
 
     protected ?string $pollingInterval = null;
 
@@ -31,7 +32,7 @@ final class SubscriptionStats extends StatsOverviewWidget
         $subCount = $subscriptions->count();
         $currency = Currency::getCurrency();
 
-        $stats = app(SubscriptionService::class)->calculateStats($subscriptions);
+        $stats = resolve(SubscriptionService::class)->calculateStats($subscriptions);
 
         $avgMonthlyPerSub = $subCount > 0 ? $stats['monthly_avg'] / $subCount : 0;
 

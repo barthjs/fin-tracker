@@ -72,7 +72,7 @@ trait HasNotificationAssignments
             ->where('event_type', $event)
             ->delete();
 
-        if (empty($targetIds)) {
+        if ($targetIds === []) {
             return;
         }
 
@@ -88,6 +88,6 @@ trait HasNotificationAssignments
             ];
         }
 
-        NotificationAssignment::insert($assignments);
+        NotificationAssignment::query()->insert($assignments);
     }
 }

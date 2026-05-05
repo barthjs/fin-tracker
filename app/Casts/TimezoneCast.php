@@ -29,7 +29,7 @@ final class TimezoneCast implements CastsAttributes
     {
         if (! is_string($value) || ! in_array($value, DateTimeZone::listIdentifiers(), true)) {
             $displayValue = is_string($value) ? $value : gettype($value);
-            throw new InvalidArgumentException("Invalid timezone identifier: {$displayValue}");
+            throw new InvalidArgumentException('Invalid timezone identifier: '.$displayValue);
         }
 
         return $value;

@@ -40,7 +40,10 @@ use Illuminate\Validation\Rules\Password;
 
 final class UserResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceInfolistEntries;
+    use HasResourceTableColumns;
 
     protected static ?string $model = User::class;
 
@@ -164,15 +167,15 @@ final class UserResource extends Resource
                     ->schema([
                         TextEntry::make('username')
                             ->label(__('user.fields.username'))
-                            ->tooltip(fn (User $record): string => ! $record->is_active ? (string) __('fields.status_inactive') : (string) __('fields.status_active'))
-                            ->color(fn (User $record): string => ! $record->is_active ? 'danger' : 'success')
+                            ->tooltip(fn (User $record): string => $record->is_active ? (string) __('fields.status_active') : (string) __('fields.status_inactive'))
+                            ->color(fn (User $record): string => $record->is_active ? 'success' : 'danger')
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
 
                         TextEntry::make('email')
                             ->label(__('filament-panels::auth/pages/edit-profile.form.email.label'))
-                            ->tooltip(fn (User $record): string => ! $record->is_active ? (string) __('fields.status_inactive') : (string) __('fields.status_active'))
-                            ->color(fn (User $record): string => ! $record->is_active ? 'danger' : 'success')
+                            ->tooltip(fn (User $record): string => $record->is_active ? (string) __('fields.status_active') : (string) __('fields.status_inactive'))
+                            ->color(fn (User $record): string => $record->is_active ? 'success' : 'danger')
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
 
@@ -255,7 +258,7 @@ final class UserResource extends Resource
             self::tableEditAction(),
 
             self::tableDeleteAction()
-                ->using(fn (User $record) => app(UserService::class)->delete($record)),
+                ->using(fn (User $record) => resolve(UserService::class)->delete($record)),
         ];
     }
 

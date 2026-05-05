@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Concerns;
 
-use Carbon\Carbon;
 use Filament\Actions\BulkAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -16,6 +15,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
 use Livewire\Attributes\On;
@@ -157,7 +157,7 @@ trait HasResourceActions
                 DatePicker::make('from')
                     ->label(__('table.filter.from'))
                     ->timezone(fn (): string => auth()->user()->timezone)
-                    ->default(Carbon::today()->startOfYear()),
+                    ->default(Date::today()->startOfYear()),
 
                 DatePicker::make('until')
                     ->label(__('table.filter.until'))
@@ -171,11 +171,11 @@ trait HasResourceActions
                 return $query
                     ->when(
                         $data['from'],
-                        fn (Builder $query, string $date): Builder => $query->where($column, '>=', Carbon::parse($date, $userTimezone)->startOfDay()->utc())
+                        fn (Builder $query, string $date): Builder => $query->where($column, '>=', Date::parse($date, $userTimezone)->startOfDay()->utc())
                     )
                     ->when(
                         $data['until'],
-                        fn (Builder $query, string $date): Builder => $query->where($column, '<=', Carbon::parse($date, $userTimezone)->endOfDay()->utc())
+                        fn (Builder $query, string $date): Builder => $query->where($column, '<=', Date::parse($date, $userTimezone)->endOfDay()->utc())
                     );
             });
     }

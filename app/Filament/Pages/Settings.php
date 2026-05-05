@@ -14,9 +14,9 @@ use Throwable;
 
 final class Settings extends Page
 {
-    public ?string $latestVersion;
+    public ?string $latestVersion = null;
 
-    public ?string $latestVersionUrl;
+    public ?string $latestVersionUrl = null;
 
     protected static ?int $navigationSort = 3;
 
@@ -57,7 +57,7 @@ final class Settings extends Page
     private function getLatestVersion(): ?string
     {
         /** @var string|null */
-        return Cache::remember('github.latest_version', now()->addHour(), function () {
+        return Cache::remember('github.latest_version', now()->addHour(), function (): ?string {
             try {
                 /** @var Response $response */
                 $response = Http::retry(3, 100)
@@ -86,11 +86,11 @@ final class Settings extends Page
 
                 return null;
 
-            } catch (Throwable $e) {
+            } catch (Throwable $throwable) {
                 Log::error('Exception occurred while fetching latest version from GitHub', [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
+                    'message' => $throwable->getMessage(),
+                    'file' => $throwable->getFile(),
+                    'line' => $throwable->getLine(),
                 ]);
 
                 return null;

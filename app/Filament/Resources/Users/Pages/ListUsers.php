@@ -22,16 +22,16 @@ final class ListUsers extends ListRecords
         return [
             'all' => Tab::make()
                 ->label(__('table.filter.all'))
-                ->badge(User::count()),
+                ->badge(User::query()->count()),
 
             'inactive' => Tab::make()
                 ->label(__('fields.status_inactive'))
-                ->badge(User::where('is_active', false)->count())
+                ->badge(User::query()->where('is_active', false)->count())
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('is_active', false)),
 
             'unverified' => Tab::make()
                 ->label(__('table.filter.unverified'))
-                ->badge(User::where('is_verified', false)->count())
+                ->badge(User::query()->where('is_verified', false)->count())
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('is_verified', false)),
         ];
     }

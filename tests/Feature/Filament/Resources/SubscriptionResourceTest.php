@@ -12,7 +12,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
 
-it('renders the list page', function () {
+it('renders the list page', function (): void {
     $account = Account::factory()->create();
     $category = Category::factory()->create();
     $subscriptions = Subscription::factory()->count(3)->create(['account_id' => $account->id, 'category_id' => $category->id]);
@@ -22,7 +22,7 @@ it('renders the list page', function () {
         ->assertCanSeeTableRecords($subscriptions);
 });
 
-it('can delete a subscription', function () {
+it('can delete a subscription', function (): void {
     $account = Account::factory()->create();
     $category = Category::factory()->create();
     $subscription = Subscription::factory()->create(['account_id' => $account->id, 'category_id' => $category->id]);

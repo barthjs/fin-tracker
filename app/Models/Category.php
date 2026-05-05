@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 
 /**
  * @property-read string $id
@@ -36,8 +36,12 @@ use Illuminate\Support\Carbon;
  */
 final class Category extends Model implements Chartable
 {
+    use HasChartDefaults;
+
     /** @use HasFactory<CategoryFactory> */
-    use HasChartDefaults, HasFactory, HasUlids;
+    use HasFactory;
+
+    use HasUlids;
 
     /**
      * The model's default values for attributes.
@@ -55,16 +59,16 @@ final class Category extends Model implements Chartable
      */
     public static function getChartData(TransactionType $type): array
     {
-        $categories = self::where('is_active', true)->where('type', $type)->get();
+        $categories = self::query()->where('is_active', true)->where('type', $type)->get();
 
-        $monthColumn = mb_strtolower(Carbon::createFromDate(null, Carbon::today()->month)->format('M'));
-        $year = Carbon::now()->year;
+        $monthColumn = mb_strtolower(Date::createFromDate(null, Date::today()->month)->format('M'));
+        $year = Date::now()->year;
 
         $data = [];
 
         foreach ($categories as $category) {
             /** @var float $sum */
-            $sum = CategoryStatistic::where('category_id', $category->id)
+            $sum = CategoryStatistic::query()->where('category_id', $category->id)
                 ->where('year', $year)
                 ->value($monthColumn) ?? 0.0;
 
@@ -77,9 +81,7 @@ final class Category extends Model implements Chartable
 
         // Sort descending by sum
         usort($data,
-            function (array $a, array $b): int {
-                return $b['sum'] <=> $a['sum'];
-            }
+            fn (array $a, array $b): int => $b['sum'] <=> $a['sum']
         );
 
         return [
@@ -100,8 +102,8 @@ final class Category extends Model implements Chartable
     {
         $user ??= auth()->user();
 
-        return self::where('user_id', $user->id)->where('name', 'Demo')->first() ??
-            self::create([
+        return self::query()->where('user_id', $user->id)->where('name', 'Demo')->first() ??
+            self::query()->create([
                 'name' => 'Demo',
                 'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
                 'user_id' => $user->id,

@@ -11,7 +11,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asAdmin());
 
-it('renders the list page', function () {
+it('renders the list page', function (): void {
     $securities = Security::factory()->count(3)->create();
 
     livewire(ListSecurities::class)
@@ -19,7 +19,7 @@ it('renders the list page', function () {
         ->assertCanSeeTableRecords($securities);
 });
 
-it('can filter securities by inactivity', function () {
+it('can filter securities by inactivity', function (): void {
     $activeSecurity = Security::factory()->create(['is_active' => true]);
     $inactiveSecurity = Security::factory()->create(['is_active' => false]);
 
@@ -31,7 +31,7 @@ it('can filter securities by inactivity', function () {
         ->assertCanNotSeeTableRecords([$activeSecurity]);
 });
 
-it('can create a security', function () {
+it('can create a security', function (): void {
     $data = Security::factory()->make()->toArray();
 
     livewire(ListSecurities::class)
@@ -41,7 +41,7 @@ it('can create a security', function () {
     $this->assertDatabaseHas('securities', $data);
 });
 
-it('renders the view page', function () {
+it('renders the view page', function (): void {
     $security = Security::factory()->create();
 
     livewire(ViewSecurity::class, [
@@ -56,7 +56,7 @@ it('renders the view page', function () {
         ], 'infolist');
 });
 
-it('can edit a security', function () {
+it('can edit a security', function (): void {
     $security = Security::factory()->create();
 
     $data = Security::factory()->make()->toArray();
@@ -70,7 +70,7 @@ it('can edit a security', function () {
     $this->assertDatabaseHas('securities', array_merge(['id' => $security->id], $data));
 });
 
-it('can load the trades relation manager', function () {
+it('can load the trades relation manager', function (): void {
     $security = Security::factory()->create();
 
     livewire(TradesRelationManager::class, [

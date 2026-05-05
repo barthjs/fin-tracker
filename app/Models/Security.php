@@ -41,7 +41,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 final class Security extends Model implements HasDeletableFiles
 {
     /** @use HasFactory<SecurityFactory> */
-    use HasFactory, HasUlids;
+    use HasFactory;
+
+    use HasUlids;
 
     /**
      * The model's default values for attributes.
@@ -66,8 +68,8 @@ final class Security extends Model implements HasDeletableFiles
     {
         $user ??= auth()->user();
 
-        return self::where('user_id', $user->id)->where('name', 'Demo')->first() ??
-            self::create([
+        return self::query()->where('user_id', $user->id)->where('name', 'Demo')->first() ??
+            self::query()->create([
                 'name' => 'Demo',
                 'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
                 'user_id' => $user->id,
@@ -79,16 +81,16 @@ final class Security extends Model implements HasDeletableFiles
      */
     public static function updateSecurityQuantity(string $securityId): void
     {
-        $security = self::find($securityId);
+        $security = self::query()->find($securityId);
         if (! $security) {
             return;
         }
 
-        $buys = (float) Trade::where('security_id', $securityId)
+        $buys = (float) Trade::query()->where('security_id', $securityId)
             ->where('type', TradeType::Buy)
             ->sum('quantity');
 
-        $sells = (float) Trade::where('security_id', $securityId)
+        $sells = (float) Trade::query()->where('security_id', $securityId)
             ->where('type', TradeType::Sell)
             ->sum('quantity');
 

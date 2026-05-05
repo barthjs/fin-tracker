@@ -7,10 +7,10 @@ namespace App\Filament\Exports;
 use App\Enums\TradeType;
 use App\Filament\Concerns\HasResourceExportColumns;
 use App\Models\Trade;
-use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
 final class TradeExporter extends Exporter
@@ -62,7 +62,7 @@ final class TradeExporter extends Exporter
         $body = __('trade.export.body_heading')."\n\r".
             __('trade.export.body_success').number_format($export->successful_rows);
 
-        if ($failedRowsCount = $export->getFailedRowsCount()) {
+        if (($failedRowsCount = $export->getFailedRowsCount()) !== 0) {
             $body .= "\n\r".__('trade.export.body_failure').number_format($failedRowsCount);
         }
 
@@ -71,7 +71,7 @@ final class TradeExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('trade.export.file_name').Carbon::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
+        return __('trade.export.file_name').Date::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
     public function getJobBatchName(): string

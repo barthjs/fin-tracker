@@ -24,7 +24,8 @@
                     :spa-mode="false"
                     @class([
                         'w-full',
-                        'md:col-span-2' => $loop->last && count($availableProviders) % 2 !== 0 && count($availableProviders) > 1,
+                        'md:col-span-2' =>
+                            $loop->last && count($availableProviders) % 2 !== 0 && count($availableProviders) > 1
                     ])
                 >
                     {{ $provider['label'] }}

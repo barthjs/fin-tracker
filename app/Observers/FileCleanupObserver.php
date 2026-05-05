@@ -26,8 +26,11 @@ final class FileCleanupObserver
             $oldPath = $model->getOriginal($field);
             /** @var string|null $newPath */
             $newPath = $model->getAttribute($field);
+            if (! $oldPath) {
+                continue;
+            }
 
-            if (! $oldPath || $oldPath === $newPath) {
+            if ($oldPath === $newPath) {
                 continue;
             }
 
@@ -37,6 +40,7 @@ final class FileCleanupObserver
                 if (is_string($newPath)) {
                     $this->deleteFile($disk, $newPath);
                 }
+
                 throw $e;
             }
         }
@@ -54,7 +58,7 @@ final class FileCleanupObserver
             $path = $model->getAttribute($field);
 
             if ($path) {
-                $this->deleteFile($disk, "$path");
+                $this->deleteFile($disk, $path);
             }
         }
     }
@@ -70,8 +74,6 @@ final class FileCleanupObserver
             return;
         }
 
-        if (! Storage::disk($disk)->delete($path)) {
-            throw new RuntimeException("Could not delete file: $path on disk $disk");
-        }
+        throw_unless(Storage::disk($disk)->delete($path), RuntimeException::class, sprintf('Could not delete file: %s on disk %s', $path, $disk));
     }
 }

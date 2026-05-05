@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use DateTimeZone;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use stdClass;
@@ -86,9 +87,9 @@ final class FixTimezonesCommand extends Command
 
                     $sourceTimezone = ($userTz === 'UTC') ? $fallbackTimezone : $userTz;
 
-                    $correctedUtc = Carbon::createFromFormat('Y-m-d H:i:s', $dateTime, $sourceTimezone);
+                    $correctedUtc = Date::createFromFormat('Y-m-d H:i:s', $dateTime, $sourceTimezone);
 
-                    if ($correctedUtc === null) {
+                    if (! $correctedUtc instanceof CarbonInterface) {
                         $this->error('Failed to convert transaction timestamp for transaction ID '.$transactionId.'.');
                         Log::error('Failed to convert transaction timestamp for transaction ID '.$transactionId.'.');
 
@@ -141,9 +142,9 @@ final class FixTimezonesCommand extends Command
 
                     $sourceTimezone = ($userTz === 'UTC') ? $fallbackTimezone : $userTz;
 
-                    $correctedUtc = Carbon::createFromFormat('Y-m-d H:i:s', $dateTime, $sourceTimezone);
+                    $correctedUtc = Date::createFromFormat('Y-m-d H:i:s', $dateTime, $sourceTimezone);
 
-                    if ($correctedUtc === null) {
+                    if (! $correctedUtc instanceof CarbonInterface) {
                         $this->error('Failed to convert trade timestamp for trade ID '.$tradeId.'.');
                         Log::error('Failed to convert trade timestamp for trade ID '.$tradeId.'.');
 

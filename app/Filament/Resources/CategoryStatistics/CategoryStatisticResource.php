@@ -19,7 +19,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
 final class CategoryStatisticResource extends Resource
@@ -73,19 +73,19 @@ final class CategoryStatisticResource extends Resource
                 SelectFilter::make('year')
                     ->label(__('table.filter.year'))
                     ->options(function (): array {
-                        $years = CategoryStatistic::select('year')
+                        $years = CategoryStatistic::query()->select('year')
                             ->distinct()
                             ->orderBy('year', 'desc')
                             ->pluck('year', 'year')
                             ->toArray();
 
                         if (empty($years)) {
-                            return [Carbon::now()->year => Carbon::now()->year];
+                            return [Date::now()->year => Date::now()->year];
                         }
 
                         return $years;
                     })
-                    ->default(Carbon::now()->year),
+                    ->default(Date::now()->year),
             ])
             ->recordActions([])
             ->recordUrl(fn (CategoryStatistic $record): string => ViewCategory::getUrl(['record' => $record->category_id]));
@@ -102,14 +102,12 @@ final class CategoryStatisticResource extends Resource
                     ->label(Str::ucfirst(__('category.label')))
                     ->wrap(),
             ],
-            array_map(function (string $month): TextColumn {
-                return TextColumn::make($month)
-                    ->label(__("category_statistic.fields.$month"))
-                    ->alignEnd()
-                    ->numeric(2)
-                    ->summarize(Sum::make()->money(Currency::getCurrency()))
-                    ->toggleable();
-            }, CategoryStatistic::MONTHS)
+            array_map(fn (string $month): TextColumn => TextColumn::make($month)
+                ->label(__('category_statistic.fields.'.$month))
+                ->alignEnd()
+                ->numeric(2)
+                ->summarize(Sum::make()->money(Currency::getCurrency()))
+                ->toggleable(), CategoryStatistic::MONTHS)
         );
     }
 

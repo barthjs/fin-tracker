@@ -23,6 +23,7 @@ final class StatisticService
             if ($category === null) {
                 return;
             }
+
             $timezone = $category->user->timezone;
         } else {
             $timezone = auth()->user()->timezone;
@@ -47,10 +48,7 @@ final class StatisticService
             ])
             ->sum('amount');
 
-        $stat = CategoryStatistic::updateOrCreate(
-            ['category_id' => $categoryId, 'year' => $year],
-            [$monthColumn => $sumPerMonth]
-        );
+        $stat = CategoryStatistic::query()->updateOrCreate(['category_id' => $categoryId, 'year' => $year], [$monthColumn => $sumPerMonth]);
 
         if ($stat->yearlySum() === 0.0) {
             $stat->delete();

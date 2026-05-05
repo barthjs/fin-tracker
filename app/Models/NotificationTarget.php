@@ -10,6 +10,7 @@ use App\Services\Notifications\Configs\NotificationConfig;
 use App\Services\Notifications\NotificationConfigFactory;
 use Carbon\CarbonImmutable;
 use Database\Factories\NotificationTargetFactory;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,12 +31,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read User $user
  * @property-read Collection<int, NotificationAssignment> $assignments
  */
+#[Table(name: 'notification_targets')]
 final class NotificationTarget extends Model
 {
     /** @use HasFactory<NotificationTargetFactory> */
-    use HasFactory, HasUlids;
+    use HasFactory;
 
-    protected $table = 'notification_targets';
+    use HasUlids;
 
     /**
      * @var array<string, mixed>

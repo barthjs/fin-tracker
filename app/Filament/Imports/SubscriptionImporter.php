@@ -11,7 +11,6 @@ use App\Services\SubscriptionService;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 
 final class SubscriptionImporter extends Importer
@@ -88,21 +87,21 @@ final class SubscriptionImporter extends Importer
         $body = __('subscription.import.body_heading')."\n\r".
             __('subscription.import.body_success').number_format($import->successful_rows);
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        if (($failedRowsCount = $import->getFailedRowsCount()) !== 0) {
             $body .= "\n\r".__('subscription.import.body_failure').number_format($failedRowsCount);
         }
 
         return $body;
     }
 
-    public function resolveRecord(): Model
+    public function resolveRecord(): Subscription
     {
         return new Subscription;
     }
 
     public function saveRecord(): void
     {
-        $service = app(SubscriptionService::class);
+        $service = resolve(SubscriptionService::class);
 
         $data = collect($this->record?->toArray() ?? [])
             ->except(['account', 'category'])

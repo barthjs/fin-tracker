@@ -101,7 +101,7 @@ final class TransactionImporter extends Importer
         $body = __('transaction.import.body_heading')."\n\r".
             __('transaction.import.body_success').number_format($import->successful_rows);
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        if (($failedRowsCount = $import->getFailedRowsCount()) !== 0) {
             $body .= "\n\r".__('transaction.import.body_failure').number_format($failedRowsCount);
         }
 
@@ -115,7 +115,7 @@ final class TransactionImporter extends Importer
 
     public function saveRecord(): void
     {
-        $service = app(TransactionService::class);
+        $service = resolve(TransactionService::class);
         /** @phpstan-ignore-next-line  */
         $this->record = $service->create($this->record->toArray());
     }

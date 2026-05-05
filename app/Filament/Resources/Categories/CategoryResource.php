@@ -16,7 +16,6 @@ use App\Filament\Resources\Categories\RelationManagers\SubscriptionsRelationMana
 use App\Filament\Resources\Categories\RelationManagers\TransactionsRelationManager;
 use App\Models\Category;
 use BackedEnum;
-use Carbon\Carbon;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Field;
 use Filament\Infolists\Components\TextEntry;
@@ -30,10 +29,14 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Date;
 
 final class CategoryResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceInfolistEntries;
+    use HasResourceTableColumns;
 
     protected static ?string $model = Category::class;
 
@@ -83,13 +86,11 @@ final class CategoryResource extends Resource
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
 
-                        TextEntry::make(Carbon::today()->format('Y'))
+                        TextEntry::make(Date::today()->format('Y'))
                             ->money(Currency::getCurrency())
-                            ->state(function (Category $record): float {
-                                return $record->statistics()
-                                    ->where('year', now()->year)
-                                    ->first()?->yearlySum() ?? 0.0;
-                            })
+                            ->state(fn (Category $record): float => $record->statistics()
+                                ->where('year', now()->year)
+                                ->first()?->yearlySum() ?? 0.0)
                             ->size(TextSize::Medium)
                             ->weight(FontWeight::SemiBold),
                     ])
@@ -106,7 +107,7 @@ final class CategoryResource extends Resource
             ->modelLabel(__('category.label'))
             ->pluralModelLabel(__('category.plural_label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
-                if (! $table->getActiveFiltersCount()) {
+                if ($table->getActiveFiltersCount() === 0) {
                     return $query->where('is_active', true);
                 }
 

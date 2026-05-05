@@ -14,10 +14,10 @@ use App\Models\Security;
 use App\Models\User;
 use App\Services\TradeService;
 use App\Services\TransactionService;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Date;
 
 final class DemoSeeder extends Seeder
 {
@@ -121,7 +121,7 @@ final class DemoSeeder extends Seeder
             ]));
         }
 
-        $transactionService = app(TransactionService::class);
+        $transactionService = resolve(TransactionService::class);
 
         foreach ($accounts as $account) {
             $balance = 0.0;
@@ -153,7 +153,7 @@ final class DemoSeeder extends Seeder
                     }
 
                     $transactionService->create([
-                        'date_time' => Carbon::now()->subMonths($m)->subDays(fake()->numberBetween(1, 30)),
+                        'date_time' => Date::now()->subMonths($m)->subDays(fake()->numberBetween(1, 30)),
                         'type' => $type,
                         'amount' => $amount,
                         'payee' => fake()->company(),
@@ -183,15 +183,15 @@ final class DemoSeeder extends Seeder
 
         Security::factory(10)->create(['user_id' => $user->id]);
 
-        $tradeService = app(TradeService::class);
+        $tradeService = resolve(TradeService::class);
 
         foreach ($portfolios as $portfolio) {
             for ($m = 11; $m >= 0; $m--) {
                 for ($i = 0; $i < 2; $i++) {
                     /** @var Security $security */
-                    $security = Security::withoutGlobalScopes()->where('user_id', $user->id)->get()->random();
+                    $security = Security::query()->withoutGlobalScopes()->where('user_id', $user->id)->get()->random();
                     /** @var Account $account */
-                    $account = Account::withoutGlobalScopes()->where('user_id', $user->id)->get()->random();
+                    $account = Account::query()->withoutGlobalScopes()->where('user_id', $user->id)->get()->random();
 
                     if ($security->total_quantity <= 0) {
                         $type = TradeType::Buy;
@@ -213,7 +213,7 @@ final class DemoSeeder extends Seeder
                     }
 
                     $tradeService->create([
-                        'date_time' => Carbon::now()->subMonths($m),
+                        'date_time' => Date::now()->subMonths($m),
                         'type' => $type,
                         'quantity' => $quantity,
                         'price' => $price,

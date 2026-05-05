@@ -11,7 +11,7 @@
                     target="_blank"
                     size="LARGE"
                 >
-                    {{ __('settings.latest_version')}}: {{ $latestVersion }}
+                    {{ __('settings.latest_version') }}: {{ $latestVersion }}
                 </x-filament::link>
             </div>
             <div class="py-1">

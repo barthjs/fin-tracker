@@ -6,7 +6,6 @@ namespace App\Filament\Pages\Auth;
 
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
@@ -32,10 +31,10 @@ final class Register extends \Filament\Auth\Pages\Register
         $data['locale'] = Session::pull('locale', 'en');
         $data['is_verified'] = true;
 
-        return $this->getUserModel()::create($data);
+        return $this->getUserModel()::query()->create($data);
     }
 
-    protected function getUsernameFormComponent(): Component
+    protected function getUsernameFormComponent(): TextInput
     {
         return TextInput::make('username')
             ->label(__('user.fields.username'))
@@ -45,21 +44,21 @@ final class Register extends \Filament\Auth\Pages\Register
             ->unique($this->getUserModel());
     }
 
-    protected function getFirstNameComponent(): Component
+    protected function getFirstNameComponent(): TextInput
     {
         return TextInput::make('first_name')
             ->label(__('user.fields.first_name'))
             ->maxLength(255);
     }
 
-    protected function getLastNameComponent(): Component
+    protected function getLastNameComponent(): TextInput
     {
         return TextInput::make('last_name')
             ->label(__('user.fields.last_name'))
             ->maxLength(255);
     }
 
-    protected function getEmailFormComponent(): Component
+    protected function getEmailFormComponent(): TextInput
     {
         return TextInput::make('email')
             ->label(__('filament-panels::auth/pages/register.form.email.label'))
@@ -68,7 +67,7 @@ final class Register extends \Filament\Auth\Pages\Register
             ->unique($this->getUserModel());
     }
 
-    protected function getTimezoneFormComponent(): Component
+    protected function getTimezoneFormComponent(): Hidden
     {
         return Hidden::make('timezone')
             ->default('UTC')

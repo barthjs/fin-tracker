@@ -27,17 +27,15 @@ final class TotalOverviewTable extends TableWidget
 
     protected static ?int $sort = 6;
 
-    protected static ?string $pollingInterval = null;
-
     protected int|string|array $columnSpan = 'full';
 
     public static function canView(): bool
     {
-        if (Account::count() > 0 || Portfolio::count() > 0) {
+        if (Account::query()->count() > 0) {
             return true;
         }
 
-        return false;
+        return Portfolio::query()->count() > 0;
     }
 
     public function table(Table $table): Table

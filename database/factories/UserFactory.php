@@ -31,7 +31,7 @@ final class UserFactory extends Factory
         return [
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
-            'username' => fake()->unique()->userName,
+            'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'avatar' => fake()->imageUrl(),
             'locale' => fake()->randomElement(['en', 'de']),

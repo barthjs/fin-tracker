@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\App;
 
-use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,15 +29,15 @@ use Illuminate\Support\Facades\Storage;
  *     - Delete the export record afterward.
  * - Livewire temporary files: Delete all files older than 24 hours.
  */
-#[Signature('app:cleanup-data')]
-#[Description('Cleanup old data.')]
-final class CleanupDataCommand extends Command
+#[Signature('app:cleanup-temp-data')]
+#[Description('Cleanup old temporary data and notifications')]
+final class AppCleanupTempDataCommand extends Command
 {
     private CarbonInterface $cutoff;
 
     public function handle(): int
     {
-        $this->cutoff = Carbon::now()->subDays(7);
+        $this->cutoff = Date::now()->subDays(7);
 
         $this->cleanupCache();
         $this->cleanupNotifications();
@@ -81,7 +81,7 @@ final class CleanupDataCommand extends Command
             if (
                 ! $import->failedRows()->exists() ||
                 /** @phpstan-ignore-next-line */
-                ($import->completed_at !== null && Carbon::createFromTimestamp($import->completed_at)->lt($this->cutoff))
+                ($import->completed_at !== null && Date::createFromTimestamp($import->completed_at)->lt($this->cutoff))
             ) {
                 $import->delete();
             }
@@ -96,7 +96,7 @@ final class CleanupDataCommand extends Command
             ->get();
 
         foreach ($exports as $export) {
-            $exportFolder = "filament_exports/$export->id";
+            $exportFolder = 'filament_exports/'.$export->id;
             if (Storage::disk($export->file_disk)->exists($exportFolder)) {
                 Storage::disk($export->file_disk)->deleteDirectory($exportFolder);
             }
@@ -118,9 +118,12 @@ final class CleanupDataCommand extends Command
 
         /** @var string $path */
         foreach ($storage->files('livewire-tmp') as $path) {
+            // @codeCoverageIgnoreStart
             if (! $storage->exists($path)) {
                 continue;
             }
+
+            // @codeCoverageIgnoreEnd
 
             if (now()->subHours(24)->timestamp > $storage->lastModified($path)) {
                 $storage->delete($path);

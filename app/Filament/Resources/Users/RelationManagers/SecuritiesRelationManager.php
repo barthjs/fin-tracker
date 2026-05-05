@@ -32,7 +32,7 @@ final class SecuritiesRelationManager extends RelationManager
     public static function getBadge(Model $ownerRecord, string $pageClass): string
     {
         /** @var Security $ownerRecord */
-        return (string) Security::withoutGlobalScopes()->where('user_id', $ownerRecord->id)->count();
+        return (string) Security::query()->withoutGlobalScopes()->where('user_id', $ownerRecord->id)->count();
     }
 
     public function form(Schema $schema): Schema

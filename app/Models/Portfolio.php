@@ -39,7 +39,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 final class Portfolio extends Model implements HasDeletableFiles
 {
     /** @use HasFactory<PortfolioFactory> */
-    use HasFactory, HasUlids;
+    use HasFactory;
+
+    use HasUlids;
 
     /**
      * The model's default values for attributes.
@@ -62,8 +64,8 @@ final class Portfolio extends Model implements HasDeletableFiles
     {
         $user ??= auth()->user();
 
-        return self::where('user_id', $user->id)->where('name', 'Demo')->first() ??
-            self::create([
+        return self::query()->where('user_id', $user->id)->where('name', 'Demo')->first() ??
+            self::query()->create([
                 'name' => 'Demo',
                 'currency' => Currency::getCurrency(),
                 'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
@@ -82,7 +84,7 @@ final class Portfolio extends Model implements HasDeletableFiles
     public static function updatePortfolioMarketValue(string $portfolioId): void
     {
         // Aggregate quantities per security
-        $quantities = Trade::where('portfolio_id', $portfolioId)
+        $quantities = Trade::query()->where('portfolio_id', $portfolioId)
             ->selectRaw(
                 'security_id, SUM(CASE WHEN type = ? THEN quantity ELSE -quantity END) as total_quantity',
                 [TradeType::Buy->value]
@@ -91,12 +93,12 @@ final class Portfolio extends Model implements HasDeletableFiles
             ->get();
 
         if ($quantities->isEmpty()) {
-            self::whereKey($portfolioId)->update(['market_value' => 0.0]);
+            self::query()->whereKey($portfolioId)->update(['market_value' => 0.0]);
 
             return;
         }
 
-        $securities = Security::whereIn('id', $quantities->pluck('security_id')->all())
+        $securities = Security::query()->whereIn('id', $quantities->pluck('security_id')->all())
             ->get()
             ->keyBy('id');
 
@@ -111,7 +113,7 @@ final class Portfolio extends Model implements HasDeletableFiles
             $marketValue += (float) $totalQuantity * $security->price;
         }
 
-        self::whereKey($portfolioId)->update(['market_value' => $marketValue]);
+        self::query()->whereKey($portfolioId)->update(['market_value' => $marketValue]);
     }
 
     /**
@@ -119,7 +121,7 @@ final class Portfolio extends Model implements HasDeletableFiles
      */
     public static function getActiveMarketValueSum(): float
     {
-        return (float) self::where('is_active', true)->sum('market_value');
+        return (float) self::query()->where('is_active', true)->sum('market_value');
     }
 
     /**

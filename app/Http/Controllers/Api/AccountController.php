@@ -52,7 +52,7 @@ final class AccountController
      */
     public function store(StoreAccountRequest $request): AccountResource
     {
-        $account = Account::create($request->validated());
+        $account = Account::query()->create($request->validated());
 
         return new AccountResource($account);
     }

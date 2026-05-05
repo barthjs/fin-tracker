@@ -17,7 +17,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asAdmin());
 
-it('renders the list page', function () {
+it('renders the list page', function (): void {
     $users = User::factory()->count(3)->create();
 
     livewire(ListUsers::class)
@@ -25,7 +25,7 @@ it('renders the list page', function () {
         ->assertCanSeeTableRecords($users);
 });
 
-it('renders the view page', function () {
+it('renders the view page', function (): void {
     $user = User::factory()->create();
 
     livewire(ViewUser::class, [
@@ -39,7 +39,7 @@ it('renders the view page', function () {
         ], 'infolist');
 });
 
-it('can load the accounts relation manager', function () {
+it('can load the accounts relation manager', function (): void {
     $user = User::factory()->create();
 
     livewire(AccountsRelationManager::class, [
@@ -50,7 +50,7 @@ it('can load the accounts relation manager', function () {
         ->assertCanSeeTableRecords($user->accounts);
 });
 
-it('can load the categories relation manager', function () {
+it('can load the categories relation manager', function (): void {
     $user = User::factory()->create();
 
     livewire(CategoriesRelationManager::class, [
@@ -61,7 +61,7 @@ it('can load the categories relation manager', function () {
         ->assertCanSeeTableRecords($user->categories);
 });
 
-it('can load the portfolios relation manager', function () {
+it('can load the portfolios relation manager', function (): void {
     $user = User::factory()->create();
 
     livewire(PortfoliosRelationManager::class, [
@@ -72,7 +72,7 @@ it('can load the portfolios relation manager', function () {
         ->assertCanSeeTableRecords($user->portfolios);
 });
 
-it('can load the securities relation manager', function () {
+it('can load the securities relation manager', function (): void {
     $user = User::factory()->create();
 
     livewire(SecuritiesRelationManager::class, [

@@ -10,7 +10,7 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Concerns\HasResourceFormFields;
 use App\Filament\Concerns\HasResourceInfolistEntries;
 use App\Filament\Concerns\HasResourceTableColumns;
-use App\Filament\Resources\Accounts;
+use App\Filament\Resources\Accounts\RelationManagers\SubscriptionsRelationManager;
 use App\Filament\Resources\Categories;
 use App\Filament\Resources\Subscriptions\Pages\ListSubscriptions;
 use App\Filament\Resources\Subscriptions\Pages\ViewSubscription;
@@ -41,12 +41,15 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
 final class SubscriptionResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceInfolistEntries;
+    use HasResourceTableColumns;
 
     protected static ?string $model = Subscription::class;
 
@@ -169,7 +172,7 @@ final class SubscriptionResource extends Resource
                                     }
 
                                     if (blank($get('next_payment_date'))) {
-                                        $set('next_payment_date', Carbon::parse($state)->toDateString());
+                                        $set('next_payment_date', Date::parse($state)->toDateString());
                                     }
                                 }),
 
@@ -224,11 +227,11 @@ final class SubscriptionResource extends Resource
                     CheckboxList::make('reminder_targets')
                         ->label(Str::ucfirst(__('notification_target.plural_label')))
                         ->visible(fn (Get $get): bool => (bool) $get('remind_before_payment'))
-                        ->options(fn (): array => NotificationTarget::where('is_active', true)->pluck('name', 'id')->toArray())
+                        ->options(fn (): array => NotificationTarget::query()->where('is_active', true)->pluck('name', 'id')->toArray())
                         ->columns(3)
                         ->gridDirection('row')
                         ->bulkToggleable()
-                        ->default(fn (): array => NotificationTarget::where('is_active', true)
+                        ->default(fn (): array => NotificationTarget::query()->where('is_active', true)
                             ->where('is_default', true)
                             ->pluck('id')
                             ->toArray()
@@ -305,7 +308,7 @@ final class SubscriptionResource extends Resource
                     ->toggleable(),
 
                 self::logoAndNameColumn('account.name')
-                    ->hiddenOn(Accounts\RelationManagers\SubscriptionsRelationManager::class)
+                    ->hiddenOn(SubscriptionsRelationManager::class)
                     ->label(Str::ucfirst(__('account.label')))
                     ->state(fn (Subscription $record): array => [
                         'logo' => $record->account->logo,
@@ -338,7 +341,7 @@ final class SubscriptionResource extends Resource
                             $data['due_until'],
                             function (Builder $query, string $date): Builder {
                                 $userTimezone = auth()->user()->timezone;
-                                $endOfDayUtc = Carbon::parse($date, $userTimezone)->endOfDay()->utc();
+                                $endOfDayUtc = Date::parse($date, $userTimezone)->endOfDay()->utc();
 
                                 return $query->where('next_payment_date', '<=', $endOfDayUtc);
                             },
@@ -346,7 +349,7 @@ final class SubscriptionResource extends Resource
                     }),
 
                 self::accountFilter()
-                    ->hiddenOn(Accounts\RelationManagers\SubscriptionsRelationManager::class),
+                    ->hiddenOn(SubscriptionsRelationManager::class),
 
                 self::categoryFilter()
                     ->hiddenOn(Categories\RelationManagers\SubscriptionsRelationManager::class),

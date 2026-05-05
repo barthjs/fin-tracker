@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trades', function (Blueprint $table) {
+        Schema::create('trades', function (Blueprint $table): void {
             $table->ulid('id')->primary();
 
             $table->dateTime('date_time')->index();

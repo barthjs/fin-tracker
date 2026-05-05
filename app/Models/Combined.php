@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\CombinedFactory;
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -15,9 +19,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $type
  * @property-read string|null $logo
  */
+#[Table(name: 'combined_models')]
+#[WithoutIncrementing]
 final class Combined extends Model
 {
-    public $incrementing = false;
-
-    protected $table = 'combined_models';
+    /** @use HasFactory<CombinedFactory> */
+    use HasFactory;
 }

@@ -12,16 +12,16 @@ enum TradeType: string implements HasColor, HasLabel
     case Buy = 'buy';
     case Sell = 'sell';
 
-    public function getLabel(): string
-    {
-        return __('trade.type.'.$this->value);
-    }
-
     public function getColor(): string
     {
         return match ($this) {
             self::Buy => 'success',
             self::Sell => 'danger',
         };
+    }
+
+    public function getLabel(): string
+    {
+        return __('trade.type.'.$this->value);
     }
 }

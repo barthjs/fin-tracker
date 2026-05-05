@@ -23,11 +23,6 @@ enum NotificationProviderType: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getLabel(): string
-    {
-        return __('notification_target.configuration.'.$this->value.'.label');
-    }
-
     public function getIcon(): string
     {
         return match ($this) {
@@ -35,5 +30,10 @@ enum NotificationProviderType: string implements HasColor, HasIcon, HasLabel
             self::EMAIL => 'tabler-mail',
             self::GENERIC_WEBHOOK => 'tabler-webhook',
         };
+    }
+
+    public function getLabel(): string
+    {
+        return __('notification_target.configuration.'.$this->value.'.label');
     }
 }

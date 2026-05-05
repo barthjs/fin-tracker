@@ -13,11 +13,6 @@ enum TransactionType: string implements HasColor, HasLabel
     case Revenue = 'revenue';
     case Transfer = 'transfer';
 
-    public function getLabel(): string
-    {
-        return __('transaction.type.'.$this->value);
-    }
-
     public function getColor(): string
     {
         return match ($this) {
@@ -25,5 +20,10 @@ enum TransactionType: string implements HasColor, HasLabel
             self::Revenue => 'success',
             self::Transfer => 'warning',
         };
+    }
+
+    public function getLabel(): string
+    {
+        return __('transaction.type.'.$this->value);
     }
 }

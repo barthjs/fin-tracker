@@ -16,7 +16,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
 
-it('renders the list page', function () {
+it('renders the list page', function (): void {
     $categories = Category::factory()->count(3)->create();
 
     livewire(ListCategories::class)
@@ -24,7 +24,7 @@ it('renders the list page', function () {
         ->assertCanSeeTableRecords($categories);
 });
 
-it('can filter categories by inactivity', function () {
+it('can filter categories by inactivity', function (): void {
     $activeCategory = Category::factory()->create(['is_active' => true]);
     $inactiveCategory = Category::factory()->create(['is_active' => false]);
 
@@ -36,7 +36,7 @@ it('can filter categories by inactivity', function () {
         ->assertCanNotSeeTableRecords([$activeCategory]);
 });
 
-it('can create a category', function () {
+it('can create a category', function (): void {
     $data = [
         'name' => fake()->word(),
         'group' => CategoryGroup::VarExpenses,
@@ -51,7 +51,7 @@ it('can create a category', function () {
     $this->assertDatabaseHas('categories', $data);
 });
 
-it('renders the view page', function () {
+it('renders the view page', function (): void {
     $category = Category::factory()->create();
 
     livewire(ViewCategory::class, [
@@ -63,7 +63,7 @@ it('renders the view page', function () {
         ], 'infolist');
 });
 
-it('can edit a category', function () {
+it('can edit a category', function (): void {
     $category = Category::factory()->create(['group' => CategoryGroup::FixExpenses]);
 
     $data = [
@@ -80,7 +80,7 @@ it('can edit a category', function () {
     $this->assertDatabaseHas('categories', array_merge(['id' => $category->id], $data));
 });
 
-it('can load the transactions relation manager', function () {
+it('can load the transactions relation manager', function (): void {
     $category = Category::factory()->create();
 
     livewire(TransactionsRelationManager::class, [
@@ -91,7 +91,7 @@ it('can load the transactions relation manager', function () {
         ->assertCanSeeTableRecords($category->transactions);
 });
 
-it('can load the subscriptions relation manager', function () {
+it('can load the subscriptions relation manager', function (): void {
     $account = Account::factory()->create();
     $category = Category::factory()->create();
 

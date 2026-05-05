@@ -122,21 +122,21 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
         return $this->wasUnverified ? Filament::getUrl() : null;
     }
 
-    protected function getFirstNameFormComponent(): Component
+    protected function getFirstNameFormComponent(): TextInput
     {
         return TextInput::make('first_name')
             ->label(__('user.fields.first_name'))
             ->maxLength(255);
     }
 
-    protected function getLastNameFormComponent(): Component
+    protected function getLastNameFormComponent(): TextInput
     {
         return TextInput::make('last_name')
             ->label(__('user.fields.last_name'))
             ->maxLength(255);
     }
 
-    protected function getUsernameFormComponent(): Component
+    protected function getUsernameFormComponent(): TextInput
     {
         return TextInput::make('username')
             ->label(__('user.fields.username'))
@@ -146,7 +146,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             ->live(debounce: 500);
     }
 
-    protected function getTimezoneFormComponent(): Component
+    protected function getTimezoneFormComponent(): Select
     {
         return Select::make('timezone')
             ->label(__('user.fields.timezone'))
@@ -159,7 +159,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             ->required();
     }
 
-    protected function getCurrentPasswordFormComponent(): Component
+    protected function getCurrentPasswordFormComponent(): TextInput
     {
         /** @var User $user */
         $user = auth()->user();
@@ -223,7 +223,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
             ->color('primary')
             ->size('sm')
             ->label(__('profile.api_tokens.create'))
-            ->mountUsing(fn () => $this->newApiToken = null)
+            ->mountUsing(fn (): null => $this->newApiToken = null)
             ->schema([
                 TextInput::make('plain_token')
                     ->label(__('profile.api_tokens.token_value'))
@@ -259,8 +259,8 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
                                 ->label(__('profile.api_tokens.select_all'))
                                 ->action(function (Set $set): void {
                                     foreach (ApiAbility::cases() as $ability) {
-                                        $set("abilities.{$ability->read()}", true);
-                                        $set("abilities.{$ability->write()}", true);
+                                        $set('abilities.'.$ability->read(), true);
+                                        $set('abilities.'.$ability->write(), true);
                                     }
                                 }),
 
@@ -269,7 +269,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
                                 ->color('gray')
                                 ->size('sm')
                                 ->label(__('profile.api_tokens.deselect_all'))
-                                ->action(fn (Set $set) => $set('abilities', [])),
+                                ->action(fn (Set $set): mixed => $set('abilities', [])),
                         ])->columnSpanFull(),
                         ...collect(ApiAbility::cases())->map(function (ApiAbility $ability): Component {
                             $readKey = $ability->read();
@@ -278,20 +278,20 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
                             return Grid::make()
                                 ->columns(3)
                                 ->schema([
-                                    TextEntry::make("label_$ability->value}")
+                                    TextEntry::make(sprintf('label_%s}', $ability->value))
                                         ->hiddenLabel()
-                                        ->state(Str::ucfirst(__("$ability->value.plural_label"))),
+                                        ->state(Str::ucfirst(__($ability->value.'.plural_label'))),
 
-                                    Checkbox::make("abilities.$readKey")
+                                    Checkbox::make('abilities.'.$readKey)
                                         ->label(__('profile.api_tokens.read'))
                                         ->live(),
 
-                                    Checkbox::make("abilities.$writeKey")
+                                    Checkbox::make('abilities.'.$writeKey)
                                         ->label(__('profile.api_tokens.write'))
                                         ->live()
                                         ->afterStateUpdated(function (mixed $state, Set $set) use ($readKey): void {
                                             if ($state) {
-                                                $set("abilities.$readKey", true);
+                                                $set('abilities.'.$readKey, true);
                                             }
                                         }),
                                 ]);
@@ -308,7 +308,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
                 /** @var array{name: string, abilities: array<string, bool>, expires_at: string|null} $data */
                 $selectedAbilities = array_keys(array_filter(
                     $data['abilities'],
-                    fn (bool $value): bool => $value === true
+                    fn (bool $value): bool => $value
                 ));
 
                 $expiresAt = is_string($data['expires_at'])
@@ -425,7 +425,7 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
 
     private function loadOidcProviders(): void
     {
-        $service = app(OidcService::class);
+        $service = resolve(OidcService::class);
         $enabled = $service->getEnabledProviders();
 
         $connected = auth()->user()->providers;

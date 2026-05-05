@@ -9,10 +9,10 @@ use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\CategoryStatistic;
 use App\Models\Portfolio;
-use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Date;
 use Number;
 
 final class StatsOverview extends BaseWidget
@@ -25,7 +25,7 @@ final class StatsOverview extends BaseWidget
     {
         Number::useLocale(auth()->user()->locale);
 
-        $now = Carbon::now()->setTimezone(auth()->user()->timezone);
+        $now = Date::now()->setTimezone(auth()->user()->timezone);
         $year = $now->year;
         $monthColumn = mb_strtolower($now->format('M'));
 
@@ -56,7 +56,8 @@ final class StatsOverview extends BaseWidget
 
     private function getCategorySumByMonth(TransactionType $type, int $year, string $month): string
     {
-        $sum = (float) CategoryStatistic::where('year', $year)
+        $sum = (float) CategoryStatistic::query()
+            ->where('year', $year)
             ->whereHas('category', fn (Builder $query): Builder => $query->where('type', $type))
             ->sum($month);
 
@@ -71,7 +72,7 @@ final class StatsOverview extends BaseWidget
         $row = CategoryStatistic::query()
             /** @phpstan-ignore argument.type (SQL built from constant month names) */
             ->selectRaw(collect(CategoryStatistic::MONTHS)
-                ->map(fn (string $m) => "SUM($m) as $m")
+                ->map(fn (string $m): string => sprintf('SUM(%s) as %s', $m, $m))
                 ->implode(', '))
             ->where('year', $year)
             ->whereHas('category', fn (Builder $query): Builder => $query->where('type', $type))

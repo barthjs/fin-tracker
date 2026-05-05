@@ -31,7 +31,9 @@ use Illuminate\Validation\Rules\Unique;
 
 final class NotificationTargetResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceTableColumns;
 
     protected static ?string $model = NotificationTarget::class;
 
@@ -72,9 +74,7 @@ final class NotificationTargetResource extends Resource
                 ->columnSpanFull()
                 ->schema([
                     self::nameField()
-                        ->unique(modifyRuleUsing: function (Unique $rule, ?NotificationTarget $record) {
-                            return $rule->where('user_id', auth()->id())->ignore($record?->id);
-                        }),
+                        ->unique(modifyRuleUsing: fn (Unique $rule, ?NotificationTarget $record) => $rule->where('user_id', auth()->id())->ignore($record?->id)),
 
                     ToggleButtons::make('type')
                         ->label(__('fields.type'))
@@ -92,7 +92,7 @@ final class NotificationTargetResource extends Resource
                 ]),
 
             Section::make(__('notification_target.fields.configuration'))
-                ->visible(fn (Get $get) => $get('type') !== NotificationProviderType::DATABASE)
+                ->visible(fn (Get $get): bool => $get('type') !== NotificationProviderType::DATABASE)
                 ->columnSpanFull()
                 ->schema([
                     Group::make()
@@ -172,7 +172,7 @@ final class NotificationTargetResource extends Resource
                     ->icon('tabler-send')
                     ->color('info')
                     ->requiresConfirmation()
-                    ->action(function (NotificationTarget $record, NotificationStrategyFactory $factory) {
+                    ->action(function (NotificationTarget $record, NotificationStrategyFactory $factory): void {
                         try {
                             $payload = new NotificationPayload(
                                 title: __('notification_target.test_payload.title'),
@@ -190,9 +190,9 @@ final class NotificationTargetResource extends Resource
                                 ->title(__('notification_target.actions.ping_success'))
                                 ->success()
                                 ->send();
-                        } catch (Exception $e) {
+                        } catch (Exception $exception) {
                             Notification::make()
-                                ->title(__('notification_target.actions.ping_failed', ['error' => $e->getMessage()]))
+                                ->title(__('notification_target.actions.ping_failed', ['error' => $exception->getMessage()]))
                                 ->danger()
                                 ->persistent()
                                 ->send();

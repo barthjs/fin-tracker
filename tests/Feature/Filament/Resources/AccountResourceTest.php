@@ -15,7 +15,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
 
-it('renders the list page', function () {
+it('renders the list page', function (): void {
     $accounts = Account::factory()->count(3)->create();
 
     livewire(ListAccounts::class)
@@ -23,7 +23,7 @@ it('renders the list page', function () {
         ->assertCanSeeTableRecords($accounts);
 });
 
-it('can filter accounts by inactivity', function () {
+it('can filter accounts by inactivity', function (): void {
     $activeAccount = Account::factory()->create(['is_active' => true]);
     $inactiveAccount = Account::factory()->create(['is_active' => false]);
 
@@ -35,7 +35,7 @@ it('can filter accounts by inactivity', function () {
         ->assertCanNotSeeTableRecords([$activeAccount]);
 });
 
-it('can create an account', function () {
+it('can create an account', function (): void {
     $data = Account::factory()->make()->toArray();
 
     livewire(ListAccounts::class)
@@ -45,7 +45,7 @@ it('can create an account', function () {
     $this->assertDatabaseHas('accounts', $data);
 });
 
-it('renders the view page', function () {
+it('renders the view page', function (): void {
     $account = Account::factory()->create();
 
     livewire(ViewAccount::class, [
@@ -58,7 +58,7 @@ it('renders the view page', function () {
         ], 'infolist');
 });
 
-it('can edit an account', function () {
+it('can edit an account', function (): void {
     $account = Account::factory()->create();
     $data = Account::factory()->make()->toArray();
 
@@ -69,7 +69,7 @@ it('can edit an account', function () {
     $this->assertDatabaseHas('accounts', array_merge(['id' => $account->id], $data));
 });
 
-it('can load the transactions relation manager', function () {
+it('can load the transactions relation manager', function (): void {
     $account = Account::factory()->create();
 
     livewire(TransactionsRelationManager::class, [
@@ -80,7 +80,7 @@ it('can load the transactions relation manager', function () {
         ->assertCanSeeTableRecords($account->transactions);
 });
 
-it('can load the trades relation manager', function () {
+it('can load the trades relation manager', function (): void {
     $account = Account::factory()->create();
 
     livewire(TradesRelationManager::class, [
@@ -91,7 +91,7 @@ it('can load the trades relation manager', function () {
         ->assertCanSeeTableRecords($account->trades);
 });
 
-it('can load the subscriptions relation manager', function () {
+it('can load the subscriptions relation manager', function (): void {
     $account = Account::factory()->create();
     $category = Category::factory()->create();
 

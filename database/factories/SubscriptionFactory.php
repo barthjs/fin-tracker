@@ -24,7 +24,7 @@ final class SubscriptionFactory extends Factory
         return [
             'name' => fake()->name(),
             'description' => fake()->realText(),
-            'amount' => fake()->randomFloat(),
+            'amount' => fake()->randomFloat(2, 10, 10000),
             'period_unit' => fake()->randomElement(PeriodUnit::cases()),
             'period_frequency' => fake()->numberBetween(1, 365),
             'day_of_month' => CarbonImmutable::now()->day,

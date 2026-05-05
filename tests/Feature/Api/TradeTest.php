@@ -17,13 +17,13 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $user = User::factory()->verified()->create();
     $this->user = $user;
 });
 
-describe('Trade API', tests: function () {
-    test('index returns a list of trades', function () {
+describe('Trade API', tests: function (): void {
+    test('index returns a list of trades', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
         Trade::factory()->count(3)->create();
@@ -51,7 +51,7 @@ describe('Trade API', tests: function () {
             ]);
     });
 
-    test('store creates a new trade', function () {
+    test('store creates a new trade', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -84,7 +84,7 @@ describe('Trade API', tests: function () {
 
         assertDatabaseHas('trades', $data);
 
-        $trade = Trade::where('account_id', $account->id)->firstOrFail();
+        $trade = Trade::query()->where('account_id', $account->id)->firstOrFail();
         $this->assertEquals(1007, $trade->total_amount);
 
         $this->assertEquals(-1007, $account->fresh()?->balance);
@@ -92,7 +92,7 @@ describe('Trade API', tests: function () {
         $this->assertEquals(10, $security->fresh()?->total_quantity);
     });
 
-    test('store fails with invalid data', function () {
+    test('store fails with invalid data', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
         postJson(route('api.trades.store'), ['quantity' => ''])
@@ -100,7 +100,7 @@ describe('Trade API', tests: function () {
             ->assertJsonValidationErrors(['date_time', 'type', 'quantity', 'price', 'account_id', 'portfolio_id', 'security_id']);
     });
 
-    test('update modifies an existing trade', function () {
+    test('update modifies an existing trade', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -150,7 +150,7 @@ describe('Trade API', tests: function () {
         $this->assertEquals(20, $security->fresh()?->total_quantity);
     });
 
-    test('destroy deletes a trade', function () {
+    test('destroy deletes a trade', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -177,7 +177,7 @@ describe('Trade API', tests: function () {
         $this->assertEquals(0, $security->fresh()?->total_quantity);
     });
 
-    test('forbidden access without correct ability', function () {
+    test('forbidden access without correct ability', function (): void {
         actingAsWithAbilities($this->user);
 
         getJson(route('api.trades.index'))

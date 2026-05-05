@@ -23,6 +23,7 @@ final class NotificationTargetFactory extends Factory
         return [
             'name' => fake()->name(),
             'type' => fake()->randomElement(NotificationProviderType::cases()),
+            'configuration' => [],
             'is_default' => false,
             'is_active' => true,
         ];

@@ -23,7 +23,7 @@ final class SecurityService
 
             if ($oldPrice !== $security->price) {
                 /** @var array<string> $portfolios */
-                $portfolios = Trade::where('security_id', $security->id)
+                $portfolios = Trade::query()->where('security_id', $security->id)
                     ->distinct(['portfolio_id'])
                     ->pluck('portfolio_id')
                     ->toArray();

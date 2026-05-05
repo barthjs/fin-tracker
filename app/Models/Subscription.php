@@ -11,6 +11,8 @@ use App\Models\Traits\HasNotificationAssignments;
 use App\Observers\FileCleanupObserver;
 use Carbon\CarbonImmutable;
 use Database\Factories\SubscriptionFactory;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,12 +49,17 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property-read Collection<int, Transaction> $transactions
  * @property-read User $user
  */
+#[Hidden([
+    'day_of_month',
+])]
+#[Table(name: 'subscriptions')]
 final class Subscription extends Model implements HasDeletableFiles
 {
     /** @use HasFactory<SubscriptionFactory> */
-    use HasFactory, HasNotificationAssignments, HasUlids;
+    use HasFactory;
 
-    protected $table = 'subscriptions';
+    use HasNotificationAssignments;
+    use HasUlids;
 
     /**
      * The model's default values for attributes.
@@ -66,15 +73,6 @@ final class Subscription extends Model implements HasDeletableFiles
         'remind_before_payment' => false,
         'reminder_days_before' => 3,
         'is_active' => true,
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'day_of_month',
     ];
 
     /**

@@ -21,7 +21,7 @@ final class TradeService
     {
         return DB::transaction(function () use ($data): Trade {
             /** @var Trade $trade */
-            $trade = Trade::create($data);
+            $trade = Trade::query()->create($data);
 
             $this->refreshContext([$trade->account_id], [$trade->portfolio_id], [$trade->security_id]);
 

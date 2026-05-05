@@ -1,5 +1,6 @@
 @php
-    use App\Enums\ApiAbility;use App\Filament\Pages\Auth\EditProfile;
+    use App\Enums\ApiAbility;
+    use App\Filament\Pages\Auth\EditProfile;
     use Carbon\Carbon;
     $pageComponent = EditProfile::isSimple() ? 'filament-panels::page.simple' : 'filament-panels::page';
 @endphp
@@ -9,7 +10,11 @@
         <div
             class="border-warning-500 bg-warning-100 text-warning-600 rounded-lg border-l-4 p-4 text-center text-lg"
         >
-            {{ __('profile.change_password_message') }}
+            {{
+                __(
+                    'profile.change_password_message',
+                )
+            }}
         </div>
     @endif
 
@@ -30,14 +35,22 @@
                             <div>
                                 <div class="text-sm font-medium">{{ $provider['label'] }}</div>
                                 <div class="text-xs text-gray-500">
-                                    {{ $provider['is_connected'] ? __('profile.oidc.connected') : __('profile.oidc.not_connected') }}
+                                    {{
+                                        $provider['is_connected']
+                                            ? __('profile.oidc.connected')
+                                            : __('profile.oidc.not_connected')
+                                    }}
                                 </div>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-2">
                             @if ($provider['is_connected'])
-                                {{ ($this->removeProviderAction)(['id' => $provider['id']]) }}
+                                {{
+                                    ($this->removeProviderAction)([
+                                        'id' => $provider['id'],
+                                    ])
+                                }}
                             @else
                                 <x-filament::button
                                     icon="tabler-link-plus"
@@ -81,19 +94,31 @@
                                         <span class="font-medium"
                                             >{{ __('fields.created_at') }}:</span
                                         >
-                                        {{ $token->created_at->format('d.m.Y H:i') }}
+                                        {{
+                                            $token->created_at->format(
+                                                'd.m.Y H:i',
+                                            )
+                                        }}
                                     </div>
                                     @if ($token->expires_at)
                                         <div>
                                             <span class="font-medium">
                                                 {{ __('profile.api_tokens.expires_at') }}:</span
                                             >
-                                            {{ $token->expires_at->format('d.m.Y') }}
+                                            {{
+                                                $token->expires_at->format(
+                                                    'd.m.Y',
+                                                )
+                                            }}
                                         </div>
                                     @endif
                                 </div>
                             </div>
-                            {{ ($this->deleteApiTokenAction)(['token' => $token->id]) }}
+                            {{
+                                ($this->deleteApiTokenAction)([
+                                    'token' => $token->id,
+                                ])
+                            }}
                         </div>
 
                         <x-filament::section
@@ -112,7 +137,11 @@
                                             <span class="font-medium"
                                                 >{{ Str::ucfirst(__("$ability->value.plural_label")) }}:</span
                                             >
-                                            {{ $hasWrite ? __('profile.api_tokens.write') : __('profile.api_tokens.read') }}
+                                            {{
+                                                $hasWrite
+                                                    ? __('profile.api_tokens.write')
+                                                    : __('profile.api_tokens.read')
+                                            }}
                                         </li>
                                     @endif
                                 @endforeach
@@ -154,7 +183,13 @@
 
                     <div class="flex-1">
                         <div class="text-sm font-medium">
-                            {{ $session['device']['platform'] ?: __('profile.sessions.unknown_platform') }} - {{ $session['device']['browser'] ?: __('profile.sessions.unknown_browser') }}
+                            {{
+                                $session['device']['platform'] ?:
+                                    __('profile.sessions.unknown_platform')
+                            }} - {{
+                                $session['device']['browser'] ?:
+                                    __('profile.sessions.unknown_browser')
+                            }}
                         </div>
 
                         <div class="flex items-center gap-2 text-xs text-gray-500">
@@ -178,7 +213,11 @@
                             @else
                                 <span class="text-gray-300 dark:text-gray-600">•</span>
                                 <span>
-                                    {{ __('profile.sessions.last_active') }} {{ Carbon::createFromTimestamp($session['last_active'])->diffForHumans() }}
+                                    {{ __('profile.sessions.last_active') }} {{
+                                        Carbon::createFromTimestamp(
+                                            $session['last_active'],
+                                        )->diffForHumans()
+                                    }}
                                 </span>
                             @endif
                         </div>

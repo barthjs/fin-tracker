@@ -6,15 +6,15 @@ use App\Models\User;
 
 use function Pest\Laravel\getJson;
 
-describe('System API', function () {
-    test('up route returns ok for everyone', function () {
+describe('System API', function (): void {
+    test('up route returns ok for everyone', function (): void {
         getJson(route('api.up'))
             ->assertOk()
             ->assertJson(['status' => 'ok'])
             ->assertJsonCount(1);
     });
 
-    test('version route is protected and returns version', function () {
+    test('version route is protected and returns version', function (): void {
         getJson(route('api.version'))
             ->assertUnauthorized();
 
@@ -26,7 +26,7 @@ describe('System API', function () {
             ->assertJson(['version' => config('app.version')]);
     });
 
-    test('health route is protected and returns health status', function () {
+    test('health route is protected and returns health status', function (): void {
         getJson(route('api.health'))
             ->assertUnauthorized();
 

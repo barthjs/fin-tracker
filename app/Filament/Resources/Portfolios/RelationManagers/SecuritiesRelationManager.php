@@ -50,7 +50,7 @@ final class SecuritiesRelationManager extends RelationManager
                     ->pluck('security_id')
                     ->toArray();
 
-                return Security::whereIn('id', $securityIds);
+                return Security::query()->whereIn('id', $securityIds);
             })
             ->columns($columns)
             ->recordUrl(fn (Security $record): string => ViewSecurity::getUrl(['record' => $record->id]));

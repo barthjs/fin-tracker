@@ -52,7 +52,7 @@ final class PortfolioController
      */
     public function store(StorePortfolioRequest $request): PortfolioResource
     {
-        $portfolio = Portfolio::create($request->validated());
+        $portfolio = Portfolio::query()->create($request->validated());
 
         return new PortfolioResource($portfolio);
     }

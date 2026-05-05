@@ -18,7 +18,8 @@ use Filament\Resources\Pages\ListRecords;
 
 final class ListSubscriptions extends ListRecords
 {
-    use ExposesTableToWidgets, HasResourceActions;
+    use ExposesTableToWidgets;
+    use HasResourceActions;
 
     protected static string $resource = SubscriptionResource::class;
 

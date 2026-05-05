@@ -8,10 +8,10 @@ use App\Enums\CategoryGroup;
 use App\Enums\TransactionType;
 use App\Filament\Concerns\HasResourceExportColumns;
 use App\Models\Category;
-use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Illuminate\Support\Facades\Date;
 
 final class CategoryExporter extends Exporter
 {
@@ -42,7 +42,7 @@ final class CategoryExporter extends Exporter
         $body = __('category.export.body_heading')."\n\r".
             __('category.export.body_success').number_format($export->successful_rows);
 
-        if ($failedRowsCount = $export->getFailedRowsCount()) {
+        if (($failedRowsCount = $export->getFailedRowsCount()) !== 0) {
             $body .= "\n\r".__('category.export.body_failure').number_format($failedRowsCount);
         }
 
@@ -51,7 +51,7 @@ final class CategoryExporter extends Exporter
 
     public function getFileName(Export $export): string
     {
-        return __('category.export.file_name').Carbon::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
+        return __('category.export.file_name').Date::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
     public function getJobBatchName(): string

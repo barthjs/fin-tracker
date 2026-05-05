@@ -14,7 +14,8 @@ use Illuminate\Support\Str;
 
 final class SubscriptionsByCategoryChart extends ChartWidget
 {
-    use HasSubscriptionFilters, InteractsWithPageTable;
+    use HasSubscriptionFilters;
+    use InteractsWithPageTable;
 
     protected ?string $pollingInterval = null;
 
@@ -30,7 +31,7 @@ final class SubscriptionsByCategoryChart extends ChartWidget
 
         $subscriptions = $query->with('category')->get();
 
-        return app(SubscriptionService::class)->getChartAllocation($subscriptions, 'category');
+        return resolve(SubscriptionService::class)->getChartAllocation($subscriptions, 'category');
     }
 
     protected function getTablePage(): string

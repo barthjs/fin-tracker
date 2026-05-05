@@ -16,13 +16,13 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $user = User::factory()->verified()->create();
     $this->user = $user;
 });
 
-describe('Subscription API', function () {
-    test('index returns a list of subscriptions', function () {
+describe('Subscription API', function (): void {
+    test('index returns a list of subscriptions', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SUBSCRIPTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -68,7 +68,7 @@ describe('Subscription API', function () {
             ]);
     });
 
-    test('index can filter subscriptions by name', function () {
+    test('index can filter subscriptions by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SUBSCRIPTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -83,7 +83,7 @@ describe('Subscription API', function () {
             ->assertJsonMissing(['name' => $nonMatchingSubscription->name]);
     });
 
-    test('store creates a new subscription', function () {
+    test('store creates a new subscription', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SUBSCRIPTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -97,7 +97,7 @@ describe('Subscription API', function () {
             'category_id' => $category->id,
             'period_unit' => PeriodUnit::Month->value,
             'period_frequency' => 1,
-            'started_at' => now()->startOfDay()->toDateTimeString(),
+            'started_at' => today()->toDateTimeString(),
             'next_payment_date' => now()->addMonth()->toDateTimeString(),
             'auto_generate_transaction' => true,
             'color' => '#ff0000',
@@ -125,7 +125,7 @@ describe('Subscription API', function () {
         ]);
     });
 
-    test('store fails with invalid data', function () {
+    test('store fails with invalid data', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SUBSCRIPTION->all());
 
         postJson(route('api.subscriptions.store'), ['name' => ''])
@@ -133,7 +133,7 @@ describe('Subscription API', function () {
             ->assertJsonValidationErrors(['name', 'amount', 'account_id', 'category_id', 'period_unit', 'started_at']);
     });
 
-    test('show returns a single subscription', function () {
+    test('show returns a single subscription', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SUBSCRIPTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -152,7 +152,7 @@ describe('Subscription API', function () {
             ->assertJsonPath('data.is_active', $subscription->is_active);
     });
 
-    test('update modifies an existing subscription', function () {
+    test('update modifies an existing subscription', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SUBSCRIPTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -198,7 +198,7 @@ describe('Subscription API', function () {
         ]);
     });
 
-    test('destroy deletes a subscription', function () {
+    test('destroy deletes a subscription', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SUBSCRIPTION->all());
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
@@ -211,7 +211,7 @@ describe('Subscription API', function () {
         assertDatabaseMissing('subscriptions', ['id' => $subscription->id]);
     });
 
-    test('forbidden access without correct ability', function () {
+    test('forbidden access without correct ability', function (): void {
         actingAsWithAbilities($this->user, []);
 
         getJson(route('api.subscriptions.index'))

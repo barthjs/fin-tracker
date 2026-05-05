@@ -10,7 +10,7 @@ use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
 
-it('renders the dashboard page', function () {
+it('renders the dashboard page', function (): void {
     livewire(Dashboard::class)
         ->assertOk();
 });

@@ -15,13 +15,13 @@ use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $user = User::factory()->verified()->create();
     $this->user = $user;
 });
 
-describe('Portfolio API', function () {
-    test('index returns a list of portfolios', function () {
+describe('Portfolio API', function (): void {
+    test('index returns a list of portfolios', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         Portfolio::factory()->count(3)->create(['user_id' => $this->user->id]);
@@ -52,7 +52,7 @@ describe('Portfolio API', function () {
             ]);
     });
 
-    test('index can filter portfolios by name', function () {
+    test('index can filter portfolios by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         $matchingPortfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
@@ -65,7 +65,7 @@ describe('Portfolio API', function () {
             ->assertJsonMissing(['name' => $nonMatchingPortfolio->name]);
     });
 
-    test('store creates a new portfolio', function () {
+    test('store creates a new portfolio', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         $data = [
@@ -87,7 +87,7 @@ describe('Portfolio API', function () {
         assertDatabaseHas('portfolios', array_merge($data, ['user_id' => $this->user->id]));
     });
 
-    test('store fails with invalid data', function () {
+    test('store fails with invalid data', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         postJson(route('api.portfolios.store'), ['name' => ''])
@@ -95,7 +95,7 @@ describe('Portfolio API', function () {
             ->assertJsonValidationErrors(['name', 'currency']);
     });
 
-    test('show returns a single portfolio', function () {
+    test('show returns a single portfolio', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
@@ -111,7 +111,7 @@ describe('Portfolio API', function () {
             ->assertJsonPath('data.is_active', $portfolio->is_active);
     });
 
-    test('update modifies an existing portfolio', function () {
+    test('update modifies an existing portfolio', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         $portfolio = Portfolio::factory()->create([
@@ -139,7 +139,7 @@ describe('Portfolio API', function () {
         assertDatabaseHas('portfolios', array_merge($data, ['id' => $portfolio->id]));
     });
 
-    test('destroy deletes a portfolio', function () {
+    test('destroy deletes a portfolio', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
@@ -150,7 +150,7 @@ describe('Portfolio API', function () {
         assertDatabaseMissing('portfolios', ['id' => $portfolio->id]);
     });
 
-    test('destroy fails if portfolio has trades', function () {
+    test('destroy fails if portfolio has trades', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
         $portfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
@@ -162,7 +162,7 @@ describe('Portfolio API', function () {
         assertDatabaseHas('portfolios', ['id' => $portfolio->id]);
     });
 
-    test('forbidden access without correct ability', function () {
+    test('forbidden access without correct ability', function (): void {
         actingAsWithAbilities($this->user);
 
         getJson(route('api.portfolios.index'))

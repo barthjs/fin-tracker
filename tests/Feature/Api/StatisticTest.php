@@ -10,13 +10,13 @@ use App\Models\User;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $user = User::factory()->verified()->create();
     $this->user = $user;
 });
 
-describe('Statistic API', function () {
-    test('index returns a list of statistics', function () {
+describe('Statistic API', function (): void {
+    test('index returns a list of statistics', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::STATISTIC->all());
 
         $category = Category::factory()->create(['user_id' => $this->user->id]);
@@ -51,7 +51,7 @@ describe('Statistic API', function () {
             ]);
     });
 
-    test('index can filter statistics by year', function () {
+    test('index can filter statistics by year', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::STATISTIC->all());
 
         $category = Category::factory()->create(['user_id' => $this->user->id]);
@@ -65,7 +65,7 @@ describe('Statistic API', function () {
             ->assertJsonMissing(['year' => $statistic2024->year]);
     });
 
-    test('index can filter statistics by category_id', function () {
+    test('index can filter statistics by category_id', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::STATISTIC->all());
 
         $category1 = Category::factory()->create(['user_id' => $this->user->id]);
@@ -80,7 +80,7 @@ describe('Statistic API', function () {
             ->assertJsonMissing(['category_id' => $category2->id]);
     });
 
-    test('index can filter statistics by category type and group', function () {
+    test('index can filter statistics by category type and group', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::STATISTIC->all());
 
         $category1 = Category::factory()->create([
@@ -106,7 +106,7 @@ describe('Statistic API', function () {
             ->assertJsonPath('data.0.category_id', $category2->id);
     });
 
-    test('index can include category relationship', function () {
+    test('index can include category relationship', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::STATISTIC->all());
 
         $category = Category::factory()->create(['user_id' => $this->user->id]);
@@ -126,7 +126,7 @@ describe('Statistic API', function () {
             ]);
     });
 
-    test('show returns a single statistic with category', function () {
+    test('show returns a single statistic with category', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::STATISTIC->all());
 
         $category = Category::factory()->create(['user_id' => $this->user->id]);
@@ -155,14 +155,14 @@ describe('Statistic API', function () {
             ]);
     });
 
-    test('forbidden access without correct ability', function () {
+    test('forbidden access without correct ability', function (): void {
         actingAsWithAbilities($this->user, []);
 
         getJson(route('api.statistics.index'))
             ->assertStatus(403);
     });
 
-    test('index only returns statistics for user categories', function () {
+    test('index only returns statistics for user categories', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::STATISTIC->all());
 
         $anotherUser = User::factory()->create();

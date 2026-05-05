@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Pages\Auth;
 
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Component;
 use Illuminate\Validation\ValidationException;
 use SensitiveParameter;
 
@@ -22,7 +21,7 @@ final class Login extends \Filament\Auth\Pages\Login
      * Overriding the default login form to allow users
      * to log in with either their username or email.
      */
-    protected function getEmailFormComponent(): Component
+    protected function getEmailFormComponent(): TextInput
     {
         return TextInput::make('login')
             ->label(__('user.fields.username_or_email'))

@@ -21,6 +21,8 @@ use Filament\Actions\Exports\Jobs\ExportCompletion;
 use Filament\Actions\Exports\Jobs\ExportCsv as BaseExportCsv;
 use Filament\Actions\Imports\Jobs\ImportCsv as BaseImportCsv;
 use Filament\Facades\Filament;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentView;
 use Filament\Support\View\Components\ModalComponent;
 use Filament\Tables\Table;
@@ -55,13 +57,8 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Laravel
-        Date::use(CarbonImmutable::class);
-        Model::shouldBeStrict();
-        Model::unguard();
-        Vite::useAggressivePrefetching();
-
-        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        $this->configureDefaults();
+        $this->configureFilament();
 
         Event::listen(function (SocialiteWasCalled $event): void {
             $oidcService = $this->app->make(OidcService::class);
@@ -80,8 +77,32 @@ final class AppServiceProvider extends ServiceProvider
                 }
             }
         });
+    }
 
-        // Filament
+    private function configureDefaults(): void
+    {
+        Date::use(CarbonImmutable::class);
+        Model::shouldBeStrict();
+        Model::unguard();
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        Vite::useAggressivePrefetching();
+
+        // @codeCoverageIgnoreStart
+        Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
+
+        Scramble::configure()
+            ->preferPatchMethod()
+            ->withDocumentTransformers(function (OpenApi $openApi): void {
+                /** @var SecurityScheme $scheme */
+                $scheme = SecurityScheme::http('bearer');
+
+                $openApi->secure($scheme);
+            });
+        // @codeCoverageIgnoreEnd
+    }
+
+    private function configureFilament(): void
+    {
         Filament::serving(function (): void {
             Event::listen(function (LocaleChanged $event): void {
                 if (auth()->check()) {
@@ -90,6 +111,10 @@ final class AppServiceProvider extends ServiceProvider
                     Session::put('locale', $event->locale);
                 }
             });
+
+            FilamentAsset::register([
+                Js::make('main', Vite::asset('resources/js/main.js')),
+            ]);
 
             FilamentView::registerRenderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
@@ -102,8 +127,6 @@ final class AppServiceProvider extends ServiceProvider
             );
 
             ModalComponent::closedByClickingAway(! app()->isProduction());
-
-            Password::defaults(fn (): ?Password => app()->isProduction() ? Password::min(12) : null);
 
             Table::configureUsing(fn (Table $table): Table => $table
                 ->paginationPageOptions([10, 25, 50, 100, 'all'])
@@ -128,14 +151,5 @@ final class AppServiceProvider extends ServiceProvider
                 ->visible(outsidePanels: true)
                 ->locales(['de', 'en']);
         });
-
-        Scramble::configure()
-            ->preferPatchMethod()
-            ->withDocumentTransformers(function (OpenApi $openApi): void {
-                /** @var SecurityScheme $scheme */
-                $scheme = SecurityScheme::http('bearer');
-
-                $openApi->secure($scheme);
-            });
     }
 }

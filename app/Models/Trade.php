@@ -8,6 +8,7 @@ use App\Enums\TradeType;
 use App\Models\Scopes\UserRelationScope;
 use Carbon\CarbonInterface;
 use Database\Factories\TradeFactory;
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,12 +33,13 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property-read Security $security
  * @property-read User $user
  */
+#[WithoutTimestamps]
 final class Trade extends Model
 {
     /** @use HasFactory<TradeFactory> */
-    use HasFactory, HasUlids;
+    use HasFactory;
 
-    public $timestamps = false;
+    use HasUlids;
 
     /**
      * The model's default values for attributes.

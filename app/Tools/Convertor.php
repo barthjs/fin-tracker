@@ -14,32 +14,31 @@ final class Convertor
         $sign = 1;
         if (empty($sanitized) || $sanitized === '-' || $sanitized === '+') {
             // Handle cases where the input is empty or just a sign.
-            $floatValue = 0.0;
-        } else {
-            if (str_starts_with($sanitized, '-')) {
-                $sign = -1; // Set sign for negative numbers
-                $sanitized = mb_substr($sanitized, 1);
-            } elseif (str_starts_with($sanitized, '+')) {
-                $sanitized = mb_substr($sanitized, 1);
-            }
-
-            // Handle different formats with both period and comma present.
-            if (str_contains($sanitized, '.') && str_contains($sanitized, ',')) {
-                if (mb_strrpos($sanitized, '.') < mb_strrpos($sanitized, ',')) {
-                    // Assume period as thousands separator, replace comma with period for decimal
-                    $sanitized = str_replace(['.', ','], ['', '.'], $sanitized);
-                } else {
-                    // Assume comma as thousands separator
-                    $sanitized = str_replace(',', '', $sanitized);
-                }
-            } else {
-                // Treat comma as a decimal separator if present
-                $sanitized = str_replace(',', '.', $sanitized);
-            }
-            // Convert sanitized string to a float and apply the sign.
-            $floatValue = (float) $sanitized * $sign;
+            return 0.0;
         }
 
-        return $floatValue;
+        if (str_starts_with($sanitized, '-')) {
+            $sign = -1; // Set sign for negative numbers
+            $sanitized = mb_substr($sanitized, 1);
+        } elseif (str_starts_with($sanitized, '+')) {
+            $sanitized = mb_substr($sanitized, 1);
+        }
+
+        // Handle different formats with both period and comma present.
+        if (str_contains($sanitized, '.') && str_contains($sanitized, ',')) {
+            if (mb_strrpos($sanitized, '.') < mb_strrpos($sanitized, ',')) {
+                // Assume period as thousands separator, replace comma with period for decimal
+                $sanitized = str_replace(['.', ','], ['', '.'], $sanitized);
+            } else {
+                // Assume comma as thousands separator
+                $sanitized = str_replace(',', '', $sanitized);
+            }
+        } else {
+            // Treat comma as a decimal separator if present
+            $sanitized = str_replace(',', '.', $sanitized);
+        }
+
+        // Convert sanitized string to a float and apply the sign.
+        return (float) $sanitized * $sign;
     }
 }

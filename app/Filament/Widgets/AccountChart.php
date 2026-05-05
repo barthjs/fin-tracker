@@ -37,7 +37,8 @@ final class AccountChart extends ChartWidget
 
     protected function getData(): array
     {
-        $accounts = Account::where('is_active', true)
+        $accounts = Account::query()
+            ->where('is_active', true)
             ->orderBy('balance', 'desc')
             ->get();
 

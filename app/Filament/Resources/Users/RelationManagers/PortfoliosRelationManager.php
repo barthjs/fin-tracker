@@ -32,7 +32,7 @@ final class PortfoliosRelationManager extends RelationManager
     public static function getBadge(Model $ownerRecord, string $pageClass): string
     {
         /** @var Portfolio $ownerRecord */
-        return (string) Portfolio::withoutGlobalScopes()->where('user_id', $ownerRecord->id)->count();
+        return (string) Portfolio::query()->withoutGlobalScopes()->where('user_id', $ownerRecord->id)->count();
     }
 
     public function form(Schema $schema): Schema

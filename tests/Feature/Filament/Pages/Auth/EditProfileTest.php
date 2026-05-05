@@ -10,18 +10,18 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
+beforeEach(function (): void {
     asUser();
 
     $this->user = auth()->user();
 });
 
-it('renders the profile page', function () {
+it('renders the profile page', function (): void {
     livewire(EditProfile::class)
         ->assertOk();
 });
 
-it('can update the name and the timezone', function () {
+it('can update the name and the timezone', function (): void {
     livewire(EditProfile::class)
         ->fillForm([
             'first_name' => 'New',
@@ -32,14 +32,14 @@ it('can update the name and the timezone', function () {
         ->assertHasNoErrors();
 });
 
-it('redirects unverified users to the profile page', function () {
+it('redirects unverified users to the profile page', function (): void {
     $this->user->update(['is_verified' => false]);
 
     get(Filament::getUrl())
         ->assertRedirect(EditProfile::getUrl());
 });
 
-it('verifies an unverified user when they set a password', function () {
+it('verifies an unverified user when they set a password', function (): void {
     $this->user->update(['is_verified' => false]);
 
     livewire(EditProfile::class)
@@ -55,7 +55,7 @@ it('verifies an unverified user when they set a password', function () {
     expect($this->user->refresh()->is_verified)->toBeTrue();
 });
 
-it('requires the current password to change the username or email if a password is set', function () {
+it('requires the current password to change the username or email if a password is set', function (): void {
     livewire(EditProfile::class)
         ->fillForm([
             'username' => 'new.username',
@@ -73,7 +73,7 @@ it('requires the current password to change the username or email if a password 
         ->assertHasErrors(['data.currentPassword']);
 });
 
-it('does not require the current password if the user has no password set', function () {
+it('does not require the current password if the user has no password set', function (): void {
     $this->user->update(['password' => null]);
     $this->user->providers()->create(['provider_name' => 'oidc', 'provider_id' => '1']);
 
@@ -85,7 +85,7 @@ it('does not require the current password if the user has no password set', func
         ->assertHasNoFormErrors();
 });
 
-it('can remove a linked OIDC provider', function () {
+it('can remove a linked OIDC provider', function (): void {
     $provider = $this->user->providers()->create(['provider_name' => 'oidc', 'provider_id' => '1']);
 
     livewire(EditProfile::class)
@@ -95,7 +95,7 @@ it('can remove a linked OIDC provider', function () {
     assertDatabaseMissing('sys_user_providers', ['id' => $provider->id]);
 });
 
-it('disables provider removal if it is the only login method', function () {
+it('disables provider removal if it is the only login method', function (): void {
     $this->user->update(['password' => null]);
     $this->user->providers()->create(['provider_name' => 'oidc', 'provider_id' => '123']);
 
@@ -103,7 +103,7 @@ it('disables provider removal if it is the only login method', function () {
         ->assertActionDisabled('removeProvider');
 });
 
-it('can create an api token with specific abilities', function () {
+it('can create an api token with specific abilities', function (): void {
     $ability = ApiAbility::ACCOUNT;
 
     livewire(EditProfile::class)
@@ -122,20 +122,20 @@ it('can create an api token with specific abilities', function () {
         ->and($user->tokens->first()->abilities)->toContain($ability->read());
 });
 
-it('automatically selects read ability when write is selected', function () {
+it('automatically selects read ability when write is selected', function (): void {
     $ability = ApiAbility::PORTFOLIO;
 
     livewire(EditProfile::class)
         ->mountAction('createApiToken')
         ->fillForm([
-            "abilities.{$ability->write()}" => true,
+            'abilities.'.$ability->write() => true,
         ])
         ->assertSchemaStateSet([
-            "abilities.{$ability->read()}" => true,
+            'abilities.'.$ability->read() => true,
         ]);
 });
 
-it('can delete an api token', function () {
+it('can delete an api token', function (): void {
     $this->user->createToken('Delete Me', [ApiAbility::TRANSACTION->read()]);
     $token = $this->user->tokens->first();
 
@@ -146,7 +146,7 @@ it('can delete an api token', function () {
     assertDatabaseMissing('sys_personal_access_tokens', ['id' => $token->id]);
 });
 
-it('displays the active user sessions on the profile page', function () {
+it('displays the active user sessions on the profile page', function (): void {
     $this->startSession();
 
     DB::table(config()->string('session.table'))->insert([
@@ -164,7 +164,7 @@ it('displays the active user sessions on the profile page', function () {
         ->assertSee('Firefox');
 });
 
-it('deletes the user account after password confirmation', function () {
+it('deletes the user account after password confirmation', function (): void {
     livewire(EditProfile::class)
         ->callAction('deleteUserAccount', data: [
             'currentPassword' => 'password',

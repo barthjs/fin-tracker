@@ -89,7 +89,7 @@ final class TradeImporter extends Importer
         $body = __('trade.import.body_heading')."\n\r".
             __('trade.import.body_success').number_format($import->successful_rows);
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        if (($failedRowsCount = $import->getFailedRowsCount()) !== 0) {
             $body .= "\n\r".__('trade.import.body_failure').number_format($failedRowsCount);
         }
 
@@ -103,7 +103,7 @@ final class TradeImporter extends Importer
 
     public function saveRecord(): void
     {
-        $service = app(TradeService::class);
+        $service = resolve(TradeService::class);
         /** @phpstan-ignore-next-line  */
         $this->record = $service->create($this->record->toArray());
     }

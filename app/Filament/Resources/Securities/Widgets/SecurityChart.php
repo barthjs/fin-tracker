@@ -32,7 +32,7 @@ final class SecurityChart extends ChartWidget
 
     protected function getData(): array
     {
-        $securities = Security::where('is_active', true)
+        $securities = Security::query()->where('is_active', true)
             ->orderBy('market_value', 'desc')
             ->get();
 

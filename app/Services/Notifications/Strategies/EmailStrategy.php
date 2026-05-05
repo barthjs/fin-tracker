@@ -33,12 +33,12 @@ final readonly class EmailStrategy implements NotificationSenderStrategy
                     body: $payload->body,
                 )
             );
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             Log::error('Email notification failed', [
                 'email' => $config->email,
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
             ]);
-            throw new RuntimeException('Email notification failed: '.$e->getMessage());
+            throw new RuntimeException('Email notification failed: '.$throwable->getMessage(), $throwable->getCode(), $throwable);
         }
     }
 }

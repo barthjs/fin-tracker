@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\CarbonInterface;
+use Database\Factories\UserProviderFactory;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Socialite\Contracts\User as SocialiteUserContract;
@@ -19,11 +22,13 @@ use Laravel\Socialite\Contracts\User as SocialiteUserContract;
  * @property string $provider_id
  * @property-read User $user
  */
+#[Table(name: 'sys_user_providers')]
 final class UserProvider extends Model
 {
-    use HasUlids;
+    /** @use HasFactory<UserProviderFactory> */
+    use HasFactory;
 
-    protected $table = 'sys_user_providers';
+    use HasUlids;
 
     public static function findForProvider(string $provider, SocialiteUserContract $oauthUser): ?self
     {

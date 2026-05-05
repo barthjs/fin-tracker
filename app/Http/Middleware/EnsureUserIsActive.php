@@ -18,9 +18,7 @@ final class EnsureUserIsActive
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()->is_active) {
-            throw new AuthenticationException('Inactive user');
-        }
+        throw_unless($request->user()->is_active, AuthenticationException::class, 'Inactive user');
 
         return $next($request);
     }

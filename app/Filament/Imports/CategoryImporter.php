@@ -30,15 +30,13 @@ final class CategoryImporter extends Importer
                 ->examples(__('category.import.examples.group'))
                 ->requiredMapping()
                 ->rules(['required'])
-                ->castStateUsing(function (string $state): CategoryGroup {
-                    return match ($state) {
-                        CategoryGroup::FixExpenses->getLabel() => CategoryGroup::FixExpenses,
-                        CategoryGroup::VarExpenses->getLabel() => CategoryGroup::VarExpenses,
-                        CategoryGroup::FixRevenues->getLabel() => CategoryGroup::FixRevenues,
-                        CategoryGroup::VarRevenues->getLabel() => CategoryGroup::VarRevenues,
-                        CategoryGroup::Transfers->getLabel() => CategoryGroup::Transfers,
-                        default => CategoryGroup::VarExpenses,
-                    };
+                ->castStateUsing(fn (string $state): CategoryGroup => match ($state) {
+                    CategoryGroup::FixExpenses->getLabel() => CategoryGroup::FixExpenses,
+                    CategoryGroup::VarExpenses->getLabel() => CategoryGroup::VarExpenses,
+                    CategoryGroup::FixRevenues->getLabel() => CategoryGroup::FixRevenues,
+                    CategoryGroup::VarRevenues->getLabel() => CategoryGroup::VarRevenues,
+                    CategoryGroup::Transfers->getLabel() => CategoryGroup::Transfers,
+                    default => CategoryGroup::VarExpenses,
                 }),
 
             self::colorColumn(),
@@ -51,7 +49,7 @@ final class CategoryImporter extends Importer
         $body = __('category.import.body_heading')."\n\r".
             __('category.import.body_success').number_format($import->successful_rows);
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
+        if (($failedRowsCount = $import->getFailedRowsCount()) !== 0) {
             $body .= "\n\r".__('category.import.body_failure').number_format($failedRowsCount);
         }
 
@@ -64,7 +62,7 @@ final class CategoryImporter extends Importer
             ->where('user_id', auth()->user()->id)
             ->where('name', $this->data['name'])
             ->where('group', $this->data['group'])
-            ->when(! empty($this->data['color']), function (Builder $query): void {
+            ->unless(empty($this->data['color']), function (Builder $query): void {
                 $query->where('color', $this->data['color']);
             })->first() ?? new Category([
                 'name' => $this->data['name'],

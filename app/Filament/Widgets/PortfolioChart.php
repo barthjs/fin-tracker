@@ -37,7 +37,8 @@ final class PortfolioChart extends ChartWidget
 
     protected function getData(): array
     {
-        $portfolios = Portfolio::where('is_active', true)
+        $portfolios = Portfolio::query()
+            ->where('is_active', true)
             ->orderBy('market_value', 'desc')
             ->get();
 

@@ -15,11 +15,6 @@ enum CategoryGroup: string implements HasColor, HasLabel
     case VarRevenues = 'var_revenues';
     case Transfers = 'transfers';
 
-    public function getLabel(): string
-    {
-        return __('category.group.'.$this->value);
-    }
-
     public function getColor(): string
     {
         return match ($this) {
@@ -27,5 +22,10 @@ enum CategoryGroup: string implements HasColor, HasLabel
             self::FixRevenues, self::VarRevenues => 'success',
             self::Transfers => 'warning',
         };
+    }
+
+    public function getLabel(): string
+    {
+        return __('category.group.'.$this->value);
     }
 }

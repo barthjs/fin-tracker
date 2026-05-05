@@ -28,7 +28,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 final class PortfolioResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceInfolistEntries, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceInfolistEntries;
+    use HasResourceTableColumns;
 
     protected static ?string $model = Portfolio::class;
 
@@ -95,7 +98,7 @@ final class PortfolioResource extends Resource
             ->modelLabel(__('portfolio.label'))
             ->pluralModelLabel(__('portfolio.plural_label'))
             ->modifyQueryUsing(function (Builder $query, Table $table): Builder {
-                if (! $table->getActiveFiltersCount()) {
+                if ($table->getActiveFiltersCount() === 0) {
                     return $query->where('is_active', true);
                 }
 

@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\PersonalAccessTokenFactory;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+#[Table(name: 'sys_personal_access_tokens')]
 final class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
 {
-    use HasUlids;
+    /** @use HasFactory<PersonalAccessTokenFactory> */
+    use HasFactory;
 
-    protected $table = 'sys_personal_access_tokens';
+    use HasUlids;
 
     /**
      * @return Attribute<mixed, mixed>

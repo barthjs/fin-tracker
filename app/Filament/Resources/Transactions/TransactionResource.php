@@ -8,7 +8,7 @@ use App\Enums\TransactionType;
 use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Concerns\HasResourceFormFields;
 use App\Filament\Concerns\HasResourceTableColumns;
-use App\Filament\Resources\Accounts;
+use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager;
 use App\Filament\Resources\Categories;
 use App\Filament\Resources\Subscriptions;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
@@ -35,7 +35,9 @@ use Illuminate\Support\Str;
 
 final class TransactionResource extends Resource
 {
-    use HasResourceActions, HasResourceFormFields, HasResourceTableColumns;
+    use HasResourceActions;
+    use HasResourceFormFields;
+    use HasResourceTableColumns;
 
     protected static ?string $model = Transaction::class;
 
@@ -73,7 +75,7 @@ final class TransactionResource extends Resource
                     self::typeSelectField()
                         ->options(TransactionType::class)
                         ->default(TransactionType::Expense)
-                        ->afterStateUpdated(fn (Set $set) => $set('category_id', null)),
+                        ->afterStateUpdated(fn (Set $set): mixed => $set('category_id', null)),
 
                     Select::make('transfer_account_id')
                         ->label(__('account.fields.transfer_account_id'))
@@ -137,7 +139,7 @@ final class TransactionResource extends Resource
 
                 self::logoAndNameColumn('account.name')
                     ->hiddenOn([
-                        Accounts\RelationManagers\TransactionsRelationManager::class,
+                        TransactionsRelationManager::class,
                         Subscriptions\RelationManagers\TransactionsRelationManager::class,
                     ])
                     ->label(Str::ucfirst(__('account.label')))
@@ -148,7 +150,7 @@ final class TransactionResource extends Resource
 
                 self::nameColumn('category.name')
                     ->hiddenOn([
-                        Accounts\RelationManagers\TransactionsRelationManager::class,
+                        TransactionsRelationManager::class,
                         Subscriptions\RelationManagers\TransactionsRelationManager::class,
                     ])
                     ->label(Str::ucfirst(__('category.label'))),
@@ -167,7 +169,7 @@ final class TransactionResource extends Resource
 
                 self::accountFilter()
                     ->hiddenOn([
-                        Accounts\RelationManagers\TransactionsRelationManager::class,
+                        TransactionsRelationManager::class,
                         Subscriptions\RelationManagers\TransactionsRelationManager::class,
                     ]),
 

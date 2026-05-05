@@ -24,34 +24,31 @@ final class DatabaseSeeder extends Seeder
             return;
         }
 
-        if (User::where('is_admin', '=', true)->count() === 0) {
-            User::create(
-                [
-                    'first_name' => 'Admin',
-                    'last_name' => 'Admin',
-                    'username' => 'admin',
-                    'email' => 'admin@example.com',
-                    'password' => Hash::make('admin'),
-                    'is_active' => true,
-                    'is_verified' => ! App::isProduction(),
-                    'is_admin' => true,
-                ]
-            ) |> $this->generateDefaults(...);
+        if (User::query()->where('is_admin', '=', true)->count() === 0) {
+            User::query()->create([
+                'first_name' => 'Admin',
+                'last_name' => 'Admin',
+                'username' => 'admin',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('admin'),
+                'is_active' => true,
+                'is_verified' => ! App::isProduction(),
+                'is_admin' => true,
+            ]) |> $this->generateDefaults(...);
         }
 
         if (! App::isLocal()) {
             return;
         }
 
-        User::firstOrCreate(['username' => 'user', 'email' => 'user@example.com'],
-            [
-                'first_name' => 'User',
-                'last_name' => 'User',
-                'password' => Hash::make('user'),
-                'is_active' => true,
-                'is_verified' => true,
-                'is_admin' => false,
-            ]) |> $this->generateDefaults(...);
+        User::query()->firstOrCreate(['username' => 'user', 'email' => 'user@example.com'], [
+            'first_name' => 'User',
+            'last_name' => 'User',
+            'password' => Hash::make('user'),
+            'is_active' => true,
+            'is_verified' => true,
+            'is_admin' => false,
+        ]) |> $this->generateDefaults(...);
 
         $this->call([
             DemoSeeder::class,

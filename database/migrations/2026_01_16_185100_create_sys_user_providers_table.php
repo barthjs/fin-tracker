@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sys_user_providers', function (Blueprint $table) {
+        Schema::create('sys_user_providers', function (Blueprint $table): void {
             $table->ulid('id')->primary();
             $table->timestamps();
 
