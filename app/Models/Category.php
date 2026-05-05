@@ -9,21 +9,23 @@ use App\Enums\CategoryGroup;
 use App\Enums\TransactionType;
 use App\Models\Scopes\UserScope;
 use App\Models\Traits\HasChartDefaults;
+use App\Observers\CategoryObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\CategoryFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Date;
 
 /**
  * @property-read string $id
  * @property string $name
  * @property CategoryGroup $group
- * @property-read TransactionType $type
+ * @property TransactionType $type
  * @property string $color
  * @property bool $is_active
  * @property string $user_id
@@ -34,6 +36,8 @@ use Illuminate\Support\Facades\Date;
  * @property-read Collection<int, Subscription> $subscriptions
  * @property-read Collection<int, Transaction> $transactions
  */
+#[ObservedBy([CategoryObserver::class])]
+#[ScopedBy(UserScope::class)]
 final class Category extends Model implements Chartable
 {
     use HasChartDefaults;
@@ -55,64 +59,6 @@ final class Category extends Model implements Chartable
     ];
 
     /**
-     * @return array{labels: list<string>, series: list<float>, colors: list<string|null>}
-     */
-    public static function getChartData(TransactionType $type): array
-    {
-        $categories = self::query()->where('is_active', true)->where('type', $type)->get();
-
-        $monthColumn = mb_strtolower(Date::createFromDate(null, Date::today()->month)->format('M'));
-        $year = Date::now()->year;
-
-        $data = [];
-
-        foreach ($categories as $category) {
-            /** @var float $sum */
-            $sum = CategoryStatistic::query()->where('category_id', $category->id)
-                ->where('year', $year)
-                ->value($monthColumn) ?? 0.0;
-
-            $data[] = [
-                'label' => $category->name,
-                'sum' => $sum,
-                'color' => $category->color,
-            ];
-        }
-
-        // Sort descending by sum
-        usort($data,
-            fn (array $a, array $b): int => $b['sum'] <=> $a['sum']
-        );
-
-        return [
-            'labels' => array_column($data, 'label'),
-            'series' => array_column($data, 'sum'),
-            'colors' => array_column($data, 'color'),
-        ];
-    }
-
-    /**
-     * Retrieve or create the default category for the current user.
-     *
-     * Attempts to find a category named 'Demo' for the authenticated user.
-     * If no such category exists, a new one is created with that name
-     * and a randomly generated color.
-     */
-    public static function getOrCreateDefaultCategory(?User $user = null): self
-    {
-        $user ??= auth()->user();
-
-        return self::query()->where('user_id', $user->id)->where('name', 'Demo')->first() ??
-            self::query()->create([
-                'name' => 'Demo',
-                'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
-                'user_id' => $user->id,
-            ]);
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     public function casts(): array
@@ -162,39 +108,5 @@ final class Category extends Model implements Chartable
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class, 'category_id');
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new UserScope);
-
-        self::creating(function (Category $category): void {
-            $category->name = mb_trim($category->name);
-            /** @phpstan-ignore-next-line */
-            $category->type = self::getType($category->group);
-
-            /** @phpstan-ignore-next-line */
-            if ($category->user_id === null) {
-                $category->user_id = auth()->user()->id;
-            }
-        });
-
-        self::updating(function (Category $category): void {
-            $category->name = mb_trim($category->name);
-            /** @phpstan-ignore-next-line */
-            $category->type = self::getType($category->group);
-        });
-    }
-
-    /**
-     * Set the type based on the group.
-     */
-    private static function getType(CategoryGroup $group): TransactionType
-    {
-        return match ($group) {
-            CategoryGroup::FixExpenses, CategoryGroup::VarExpenses => TransactionType::Expense,
-            CategoryGroup::FixRevenues, CategoryGroup::VarRevenues => TransactionType::Revenue,
-            CategoryGroup::Transfers => TransactionType::Transfer,
-        };
     }
 }

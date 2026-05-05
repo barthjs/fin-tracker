@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Models\Scopes\CategoryStatisticScope;
 use Database\Factories\CategoryStatisticFactory;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read float $dec
  * @property-read Category $category
  */
+#[ScopedBy(CategoryStatisticScope::class)]
 #[Table(name: 'category_statistics')]
 #[WithoutTimestamps]
 final class CategoryStatistic extends Model
@@ -66,6 +68,27 @@ final class CategoryStatistic extends Model
     ];
 
     /**
+     * @return array<string, string>
+     */
+    public function casts(): array
+    {
+        return [
+            'jan' => 'float',
+            'feb' => 'float',
+            'mar' => 'float',
+            'apr' => 'float',
+            'may' => 'float',
+            'jun' => 'float',
+            'jul' => 'float',
+            'aug' => 'float',
+            'sep' => 'float',
+            'oct' => 'float',
+            'nov' => 'float',
+            'dec' => 'float',
+        ];
+    }
+
+    /**
      * Get the sum of all months.
      */
     public function yearlySum(): float
@@ -87,10 +110,5 @@ final class CategoryStatistic extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new CategoryStatisticScope);
     }
 }

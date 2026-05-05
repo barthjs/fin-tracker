@@ -9,9 +9,12 @@ use App\Enums\PeriodUnit;
 use App\Models\Scopes\UserRelationScope;
 use App\Models\Traits\HasNotificationAssignments;
 use App\Observers\FileCleanupObserver;
+use App\Observers\SubscriptionObserver;
 use Carbon\CarbonImmutable;
 use Database\Factories\SubscriptionFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -49,6 +52,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property-read Collection<int, Transaction> $transactions
  * @property-read User $user
  */
+#[ObservedBy([SubscriptionObserver::class, FileCleanupObserver::class])]
+#[ScopedBy(UserRelationScope::class)]
 #[Hidden([
     'day_of_month',
 ])]
@@ -158,16 +163,5 @@ final class Subscription extends Model implements HasDeletableFiles
     public function getFileDisk(): string
     {
         return 'public';
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new UserRelationScope());
-
-        self::saving(function (self $model): void {
-            $model->name = mb_trim($model->name);
-        });
-
-        self::observe(FileCleanupObserver::class);
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
+use App\Actions\GetOrCreateDefaultAccount;
+use App\Actions\GetOrCreateDefaultCategory;
 use App\Enums\CategoryGroup;
 use App\Enums\TransactionType;
 use App\Filament\Concerns\HasResourceImportColumns;
@@ -46,9 +48,9 @@ final class TransactionImporter extends Importer
 
                     $account = Account::whereName($state);
                     if ($account->count() > 1) {
-                        $record->transfer_account_id = Account::getOrCreateDefaultAccount()->id;
+                        $record->transfer_account_id = resolve(GetOrCreateDefaultAccount::class)()->id;
                     } else {
-                        $record->transfer_account_id = $account->first()->id ?? Account::getOrCreateDefaultAccount()->id;
+                        $record->transfer_account_id = $account->first()->id ?? resolve(GetOrCreateDefaultAccount::class)()->id;
                     }
                 }),
 
@@ -81,9 +83,9 @@ final class TransactionImporter extends Importer
 
                     $result = $query->get();
                     if ($result->count() > 1) {
-                        $record->category_id = Category::getOrCreateDefaultCategory()->id;
+                        $record->category_id = resolve(GetOrCreateDefaultCategory::class)()->id;
                     } else {
-                        $record->category_id = $result->first()->id ?? Category::getOrCreateDefaultCategory()->id;
+                        $record->category_id = $result->first()->id ?? resolve(GetOrCreateDefaultCategory::class)()->id;
                     }
                 }),
 

@@ -6,11 +6,13 @@ namespace App\Models;
 
 use App\Contracts\HasDeletableFiles;
 use App\Enums\Currency;
-use App\Enums\TradeType;
 use App\Models\Scopes\UserScope;
 use App\Observers\FileCleanupObserver;
+use App\Observers\PortfolioObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\PortfolioFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -36,6 +38,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, Trade> $trades
  * @property-read string $marketValueColor
  */
+#[ObservedBy([PortfolioObserver::class, FileCleanupObserver::class])]
+#[ScopedBy(UserScope::class)]
 final class Portfolio extends Model implements HasDeletableFiles
 {
     /** @use HasFactory<PortfolioFactory> */
@@ -52,69 +56,6 @@ final class Portfolio extends Model implements HasDeletableFiles
         'market_value' => 0.0,
         'is_active' => true,
     ];
-
-    /**
-     * Retrieve or create the default portfolio for the current user.
-     *
-     * Attempts to find a portfolio named 'Demo' for the authenticated user.
-     * If no such portfolio exists, a new one is created with that name
-     * and a randomly generated color.
-     */
-    public static function getOrCreateDefaultPortfolio(?User $user = null): self
-    {
-        $user ??= auth()->user();
-
-        return self::query()->where('user_id', $user->id)->where('name', 'Demo')->first() ??
-            self::query()->create([
-                'name' => 'Demo',
-                'currency' => Currency::getCurrency(),
-                'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
-                'user_id' => $user->id,
-            ]);
-    }
-
-    /**
-     * Recalculate and update the market value for the portfolio.
-     *
-     * The market value is derived from all trades in the portfolio:
-     * - BUY trades increase position (positive quantity)
-     * - SELL trades decrease position (negative quantity)
-     * - Market value is calculated as 'sum(quantity * current security price)'
-     */
-    public static function updatePortfolioMarketValue(string $portfolioId): void
-    {
-        // Aggregate quantities per security
-        $quantities = Trade::query()->where('portfolio_id', $portfolioId)
-            ->selectRaw(
-                'security_id, SUM(CASE WHEN type = ? THEN quantity ELSE -quantity END) as total_quantity',
-                [TradeType::Buy->value]
-            )
-            ->groupBy(['security_id'])
-            ->get();
-
-        if ($quantities->isEmpty()) {
-            self::query()->whereKey($portfolioId)->update(['market_value' => 0.0]);
-
-            return;
-        }
-
-        $securities = Security::query()->whereIn('id', $quantities->pluck('security_id')->all())
-            ->get()
-            ->keyBy('id');
-
-        $marketValue = 0.0;
-
-        /** @var Collection<int, Trade> $quantities */
-        foreach ($quantities as $item) {
-            /** @var Security $security */
-            $security = $securities->get($item->security_id);
-            /** @var string $totalQuantity */
-            $totalQuantity = $item['total_quantity'];
-            $marketValue += (float) $totalQuantity * $security->price;
-        }
-
-        self::query()->whereKey($portfolioId)->update(['market_value' => $marketValue]);
-    }
 
     /**
      * Returns the sum of all active portfolios market values.
@@ -178,26 +119,6 @@ final class Portfolio extends Model implements HasDeletableFiles
     public function getFileDisk(): string
     {
         return 'public';
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new UserScope);
-
-        self::creating(function (Portfolio $portfolio): void {
-            $portfolio->name = mb_trim($portfolio->name);
-
-            /** @phpstan-ignore-next-line */
-            if ($portfolio->user_id === null) {
-                $portfolio->user_id = auth()->user()->id;
-            }
-        });
-
-        self::updating(function (Portfolio $portfolio): void {
-            $portfolio->name = mb_trim($portfolio->name);
-        });
-
-        self::observe(FileCleanupObserver::class);
     }
 
     /**

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Actions\GetCategoryChartData;
 use App\Enums\TransactionType;
-use App\Models\Category;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Str;
 
@@ -38,7 +38,7 @@ final class ExpenseChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = Category::getChartData(TransactionType::Expense);
+        $data = resolve(GetCategoryChartData::class)(TransactionType::Expense);
 
         return [
             'datasets' => [

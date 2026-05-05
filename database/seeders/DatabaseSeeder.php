@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Account;
-use App\Models\Category;
-use App\Models\Portfolio;
-use App\Models\Security;
+use App\Actions\GetOrCreateDefaultAccount;
+use App\Actions\GetOrCreateDefaultCategory;
+use App\Actions\GetOrCreateDefaultPortfolio;
+use App\Actions\GetOrCreateDefaultSecurity;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\App;
@@ -57,9 +57,9 @@ final class DatabaseSeeder extends Seeder
 
     private function generateDefaults(User $user): void
     {
-        Account::getOrCreateDefaultAccount($user);
-        Portfolio::getOrCreateDefaultPortfolio($user);
-        Security::getOrCreateDefaultSecurity($user);
-        Category::getOrCreateDefaultCategory($user);
+        resolve(GetOrCreateDefaultAccount::class)($user);
+        resolve(GetOrCreateDefaultPortfolio::class)($user);
+        resolve(GetOrCreateDefaultSecurity::class)($user);
+        resolve(GetOrCreateDefaultCategory::class)($user);
     }
 }

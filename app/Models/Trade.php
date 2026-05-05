@@ -6,8 +6,11 @@ namespace App\Models;
 
 use App\Enums\TradeType;
 use App\Models\Scopes\UserRelationScope;
+use App\Observers\TradeObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\TradeFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,6 +36,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property-read Security $security
  * @property-read User $user
  */
+#[ObservedBy([TradeObserver::class])]
+#[ScopedBy(UserRelationScope::class)]
 #[WithoutTimestamps]
 final class Trade extends Model
 {
@@ -109,31 +114,13 @@ final class Trade extends Model
      */
     public function user(): HasOneThrough
     {
-        return $this->hasOneThrough(User::class, Account::class);
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new UserRelationScope());
-
-        self::creating(function (Trade $trade): void {
-            // Only needed in importer
-            /** @phpstan-ignore-next-line */
-            if ($trade->account_id === null) {
-                $trade->account_id = Account::getOrCreateDefaultAccount()->id;
-            }
-
-            // Only needed in importer
-            /** @phpstan-ignore-next-line */
-            if ($trade->portfolio_id === null) {
-                $trade->portfolio_id = Portfolio::getOrCreateDefaultPortfolio()->id;
-            }
-
-            // Only needed in importer
-            /** @phpstan-ignore-next-line */
-            if ($trade->security_id === null) {
-                $trade->security_id = Security::getOrCreateDefaultSecurity()->id;
-            }
-        });
+        return $this->hasOneThrough(
+            User::class,
+            Account::class,
+            'id',
+            'id',
+            'account_id',
+            'user_id'
+        );
     }
 }

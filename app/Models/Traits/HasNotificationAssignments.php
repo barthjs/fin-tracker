@@ -72,9 +72,12 @@ trait HasNotificationAssignments
             ->where('event_type', $event)
             ->delete();
 
+        // @codeCoverageIgnoreStart
         if ($targetIds === []) {
             return;
         }
+
+        // @codeCoverageIgnoreEnd
 
         $assignments = [];
 

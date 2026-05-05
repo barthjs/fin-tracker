@@ -7,13 +7,14 @@ namespace App\Models;
 use App\Contracts\Chartable;
 use App\Contracts\HasDeletableFiles;
 use App\Enums\Currency;
-use App\Enums\TradeType;
-use App\Enums\TransactionType;
 use App\Models\Scopes\UserScope;
 use App\Models\Traits\HasChartDefaults;
+use App\Observers\AccountObserver;
 use App\Observers\FileCleanupObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\AccountFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -41,6 +42,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, Transaction> $transactions
  * @property-read string $balanceColor
  */
+#[ObservedBy([AccountObserver::class, FileCleanupObserver::class])]
+#[ScopedBy(UserScope::class)]
 final class Account extends Model implements Chartable, HasDeletableFiles
 {
     use HasChartDefaults;
@@ -61,68 +64,6 @@ final class Account extends Model implements Chartable, HasDeletableFiles
     ];
 
     /**
-     * Retrieve or create the default account for the current user.
-     *
-     * Attempts to find an account named 'Demo' for the authenticated user.
-     * If no such account exists, a new one is created with that name
-     * and a randomly generated color.
-     */
-    public static function getOrCreateDefaultAccount(?User $user = null): self
-    {
-        $user ??= auth()->user();
-
-        return self::query()->where('user_id', $user->id)->where('name', 'Demo')->first() ??
-            self::query()->create([
-                'name' => 'Demo',
-                'currency' => Currency::getCurrency(),
-                'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
-                'user_id' => $user->id,
-            ]);
-    }
-
-    /**
-     * Recalculate and update the balance for the account.
-     *
-     * The balance is derived from all financial activities linked to the account:
-     * - Revenues increase the balance.
-     * - Expenses decrease the balance.
-     * - Transfers decrease the balance if the account is the source
-     *   and increase it if the account is the target.
-     * - Trades decrease the balance when assets are bought,
-     *   and increase it when assets are sold.
-     */
-    public static function updateAccountBalance(string $accountId): void
-    {
-        $revenue = (float) Transaction::query()->where('account_id', $accountId)
-            ->where('type', TransactionType::Revenue)
-            ->sum('amount');
-
-        $expense = (float) Transaction::query()->where('account_id', $accountId)
-            ->where('type', TransactionType::Expense)
-            ->sum('amount');
-
-        $outgoingTransfers = (float) Transaction::query()->where('account_id', $accountId)
-            ->where('type', TransactionType::Transfer)
-            ->sum('amount');
-
-        $incomingTransfers = (float) Transaction::query()->where('transfer_account_id', $accountId)
-            ->where('type', TransactionType::Transfer)
-            ->sum('amount');
-
-        $buyTrades = (float) Trade::query()->where('account_id', $accountId)
-            ->where('type', TradeType::Buy)
-            ->sum('total_amount');
-
-        $sellTrades = (float) Trade::query()->where('account_id', $accountId)
-            ->where('type', TradeType::Sell)
-            ->sum('total_amount');
-
-        $balance = $revenue - $expense - $outgoingTransfers + $incomingTransfers - $buyTrades + $sellTrades;
-
-        self::query()->whereKey($accountId)->update(['balance' => $balance]);
-    }
-
-    /**
      * Returns the sum of all active accounts' balances.
      */
     public static function getActiveBalanceSum(): float
@@ -131,8 +72,6 @@ final class Account extends Model implements Chartable, HasDeletableFiles
     }
 
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     public function casts(): array
@@ -205,26 +144,6 @@ final class Account extends Model implements Chartable, HasDeletableFiles
     public function getFileDisk(): string
     {
         return 'public';
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new UserScope);
-
-        self::creating(function (Account $account): void {
-            $account->name = mb_trim($account->name);
-
-            /** @phpstan-ignore-next-line */
-            if ($account->user_id === null) {
-                $account->user_id = auth()->user()->id;
-            }
-        });
-
-        self::updating(function (Account $account): void {
-            $account->name = mb_trim($account->name);
-        });
-
-        self::observe(FileCleanupObserver::class);
     }
 
     /**

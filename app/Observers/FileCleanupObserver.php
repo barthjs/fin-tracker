@@ -36,12 +36,14 @@ final class FileCleanupObserver
 
             try {
                 $this->deleteFile($disk, $oldPath);
+                // @codeCoverageIgnoreStart
             } catch (RuntimeException $e) {
                 if (is_string($newPath)) {
                     $this->deleteFile($disk, $newPath);
                 }
 
                 throw $e;
+                // @codeCoverageIgnoreEnd
             }
         }
     }

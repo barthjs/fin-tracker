@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Actions\RecalculateAccountBalance;
 use App\Enums\TransactionType;
-use App\Models\Account;
 use App\Models\Transaction;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
@@ -15,6 +15,7 @@ final readonly class TransactionService
 {
     public function __construct(
         private StatisticService $statisticService,
+        private RecalculateAccountBalance $recalculateAccountBalance,
     ) {}
 
     /**
@@ -181,7 +182,7 @@ final readonly class TransactionService
     private function updateAccountBalances(array $accountIds): void
     {
         foreach ($accountIds as $id) {
-            Account::updateAccountBalance($id);
+            ($this->recalculateAccountBalance)($id);
         }
     }
 }

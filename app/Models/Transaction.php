@@ -6,8 +6,11 @@ namespace App\Models;
 
 use App\Enums\TransactionType;
 use App\Models\Scopes\UserRelationScope;
+use App\Observers\TransactionObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\TransactionFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,6 +35,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
  * @property-read Subscription|null $subscription
  * @property-read User $user
  */
+#[ObservedBy([TransactionObserver::class])]
+#[ScopedBy(UserRelationScope::class)]
 #[WithoutTimestamps]
 final class Transaction extends Model
 {
@@ -51,8 +56,6 @@ final class Transaction extends Model
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     public function casts(): array
@@ -111,39 +114,13 @@ final class Transaction extends Model
      */
     public function user(): HasOneThrough
     {
-        return $this->hasOneThrough(User::class, Account::class);
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new UserRelationScope());
-
-        self::creating(function (Transaction $transaction): void {
-            $transaction->payee = $transaction->payee === null ? null : mb_trim($transaction->payee);
-
-            if ($transaction->type !== TransactionType::Transfer) {
-                $transaction->transfer_account_id = null;
-            }
-
-            // Only needed in importer
-            /** @phpstan-ignore-next-line */
-            if ($transaction->account_id === null) {
-                $transaction->account_id = Account::getOrCreateDefaultAccount()->id;
-            }
-
-            // Only needed in importer
-            /** @phpstan-ignore-next-line */
-            if ($transaction->category_id === null) {
-                $transaction->category_id = Category::getOrCreateDefaultCategory()->id;
-            }
-        });
-
-        self::updating(function (Transaction $transaction): void {
-            $transaction->payee = $transaction->payee === null ? null : mb_trim($transaction->payee);
-
-            if ($transaction->type !== TransactionType::Transfer) {
-                $transaction->transfer_account_id = null;
-            }
-        });
+        return $this->hasOneThrough(
+            User::class,
+            Account::class,
+            'id',
+            'id',
+            'account_id',
+            'user_id'
+        );
     }
 }

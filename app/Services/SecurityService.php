@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Portfolio;
+use App\Actions\RecalculatePortfolioMarketValue;
 use App\Models\Security;
 use App\Models\Trade;
 use Illuminate\Support\Facades\DB;
 
-final class SecurityService
+final readonly class SecurityService
 {
+    public function __construct(
+        private RecalculatePortfolioMarketValue $recalculatePortfolioMarketValue,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -30,7 +34,7 @@ final class SecurityService
 
                 if (! empty($portfolios)) {
                     foreach ($portfolios as $portfolio) {
-                        Portfolio::updatePortfolioMarketValue($portfolio);
+                        ($this->recalculatePortfolioMarketValue)($portfolio);
                     }
                 }
             }

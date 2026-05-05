@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\NotificationEventType;
 use App\Models\NotificationAssignment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -16,6 +17,8 @@ final class NotificationAssignmentFactory extends Factory
 
     public function definition(): array
     {
-        return [];
+        return [
+            'event_type' => fake()->randomElement(NotificationEventType::cases()),
+        ];
     }
 }

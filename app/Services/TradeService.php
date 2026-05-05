@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Actions\RecalculateAccountBalance;
+use App\Actions\RecalculatePortfolioMarketValue;
+use App\Actions\RecalculateSecurityQuantity;
 use App\Enums\TradeType;
-use App\Models\Account;
-use App\Models\Portfolio;
-use App\Models\Security;
 use App\Models\Trade;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-final class TradeService
+final readonly class TradeService
 {
+    public function __construct(
+        private RecalculateAccountBalance $recalculateAccountBalance,
+        private RecalculatePortfolioMarketValue $recalculatePortfolioMarketValue,
+        private RecalculateSecurityQuantity $recalculateSecurityQuantity,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -158,15 +164,15 @@ final class TradeService
     private function refreshContext(array $accountIds, array $portfolioIds, array $securityIds): void
     {
         foreach (array_unique(array_filter($accountIds)) as $id) {
-            Account::updateAccountBalance($id);
+            ($this->recalculateAccountBalance)($id);
         }
 
         foreach (array_unique(array_filter($portfolioIds)) as $id) {
-            Portfolio::updatePortfolioMarketValue($id);
+            ($this->recalculatePortfolioMarketValue)($id);
         }
 
         foreach (array_unique(array_filter($securityIds)) as $id) {
-            Security::updateSecurityQuantity($id);
+            ($this->recalculateSecurityQuantity)($id);
         }
     }
 }

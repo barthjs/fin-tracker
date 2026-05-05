@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Imports;
 
+use App\Actions\GetOrCreateDefaultAccount;
+use App\Actions\GetOrCreateDefaultPortfolio;
+use App\Actions\GetOrCreateDefaultSecurity;
 use App\Enums\TradeType;
 use App\Filament\Concerns\HasResourceImportColumns;
 use App\Models\Account;
@@ -52,9 +55,9 @@ final class TradeImporter extends Importer
                 ->fillRecordUsing(function (Trade $record, ?string $state): void {
                     $account = Account::whereName($state);
                     if ($account->count() > 1) {
-                        $record->account_id = Account::getOrCreateDefaultAccount()->id;
+                        $record->account_id = resolve(GetOrCreateDefaultAccount::class)()->id;
                     } else {
-                        $record->account_id = $account->first()->id ?? Account::getOrCreateDefaultAccount()->id;
+                        $record->account_id = $account->first()->id ?? resolve(GetOrCreateDefaultAccount::class)()->id;
                     }
                 }),
 
@@ -63,9 +66,9 @@ final class TradeImporter extends Importer
                 ->fillRecordUsing(function (Trade $record, ?string $state): void {
                     $portfolio = Portfolio::whereName($state);
                     if ($portfolio->count() > 1) {
-                        $record->portfolio_id = Portfolio::getOrCreateDefaultPortfolio()->id;
+                        $record->portfolio_id = resolve(GetOrCreateDefaultPortfolio::class)()->id;
                     } else {
-                        $record->portfolio_id = $portfolio->first()->id ?? Portfolio::getOrCreateDefaultPortfolio()->id;
+                        $record->portfolio_id = $portfolio->first()->id ?? resolve(GetOrCreateDefaultPortfolio::class)()->id;
                     }
                 }),
 
@@ -74,9 +77,9 @@ final class TradeImporter extends Importer
                 ->fillRecordUsing(function (Trade $record, ?string $state): void {
                     $security = Security::whereIsin($state);
                     if ($security->count() > 1) {
-                        $record->security_id = Security::getOrCreateDefaultSecurity()->id;
+                        $record->security_id = resolve(GetOrCreateDefaultSecurity::class)()->id;
                     } else {
-                        $record->security_id = $security->first()->id ?? Security::getOrCreateDefaultSecurity()->id;
+                        $record->security_id = $security->first()->id ?? resolve(GetOrCreateDefaultSecurity::class)()->id;
                     }
                 }),
 

@@ -17,6 +17,7 @@ use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -63,6 +64,7 @@ use Laravel\Sanctum\HasApiTokens;
     'app_authentication_secret',
 ])]
 #[Table(name: 'sys_users')]
+#[ObservedBy([FileCleanupObserver::class])]
 final class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasDeletableFiles, HasLocalePreference, HasName
 {
     use HasApiTokens;
@@ -86,8 +88,6 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     public function casts(): array
@@ -238,7 +238,5 @@ final class User extends Authenticatable implements FilamentUser, HasAppAuthenti
         self::creating(function (User $user): void {
             $user->locale = app()->getLocale();
         });
-
-        self::observe(FileCleanupObserver::class);
     }
 }

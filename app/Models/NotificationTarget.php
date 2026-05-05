@@ -6,10 +6,13 @@ namespace App\Models;
 
 use App\Enums\NotificationProviderType;
 use App\Models\Scopes\UserScope;
+use App\Observers\NotificationTargetObserver;
 use App\Services\Notifications\Configs\NotificationConfig;
 use App\Services\Notifications\NotificationConfigFactory;
 use Carbon\CarbonImmutable;
 use Database\Factories\NotificationTargetFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -32,6 +35,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, NotificationAssignment> $assignments
  */
 #[Table(name: 'notification_targets')]
+#[ObservedBy([NotificationTargetObserver::class])]
+#[ScopedBy(UserScope::class)]
 final class NotificationTarget extends Model
 {
     /** @use HasFactory<NotificationTargetFactory> */
@@ -79,17 +84,5 @@ final class NotificationTarget extends Model
     public function assignments(): HasMany
     {
         return $this->hasMany(NotificationAssignment::class);
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new UserScope());
-
-        self::creating(function (self $model): void {
-            /** @phpstan-ignore-next-line */
-            if ($model->user_id === null) {
-                $model->user_id = auth()->user()->id;
-            }
-        });
     }
 }

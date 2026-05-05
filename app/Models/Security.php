@@ -6,11 +6,13 @@ namespace App\Models;
 
 use App\Contracts\HasDeletableFiles;
 use App\Enums\SecurityType;
-use App\Enums\TradeType;
 use App\Models\Scopes\UserScope;
 use App\Observers\FileCleanupObserver;
+use App\Observers\SecurityObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\SecurityFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,6 +40,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read User $user
  * @property-read Collection<int, Trade> $trades
  */
+#[ObservedBy([SecurityObserver::class, FileCleanupObserver::class])]
+#[ScopedBy(UserScope::class)]
 final class Security extends Model implements HasDeletableFiles
 {
     /** @use HasFactory<SecurityFactory> */
@@ -58,50 +62,6 @@ final class Security extends Model implements HasDeletableFiles
     ];
 
     /**
-     * Retrieve or create the default security for the current user.
-     *
-     * Attempts to find a security named 'Demo' for the authenticated user.
-     * If no such security exists, a new one is created with that name
-     * and a randomly generated color.
-     */
-    public static function getOrCreateDefaultSecurity(?User $user = null): self
-    {
-        $user ??= auth()->user();
-
-        return self::query()->where('user_id', $user->id)->where('name', 'Demo')->first() ??
-            self::query()->create([
-                'name' => 'Demo',
-                'color' => mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
-                'user_id' => $user->id,
-            ]);
-    }
-
-    /**
-     * Recalculate and update the total quantity for the security.
-     */
-    public static function updateSecurityQuantity(string $securityId): void
-    {
-        $security = self::query()->find($securityId);
-        if (! $security) {
-            return;
-        }
-
-        $buys = (float) Trade::query()->where('security_id', $securityId)
-            ->where('type', TradeType::Buy)
-            ->sum('quantity');
-
-        $sells = (float) Trade::query()->where('security_id', $securityId)
-            ->where('type', TradeType::Sell)
-            ->sum('quantity');
-
-        $totalQuantity = $buys - $sells;
-
-        $security->update(['total_quantity' => $totalQuantity]);
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     public function casts(): array
@@ -155,33 +115,5 @@ final class Security extends Model implements HasDeletableFiles
     public function getFileDisk(): string
     {
         return 'public';
-    }
-
-    protected static function booted(): void
-    {
-        self::addGlobalScope(new UserScope);
-
-        self::creating(function (Security $security): void {
-            self::trimFields($security);
-
-            /** @phpstan-ignore-next-line */
-            if ($security->user_id === null) {
-                $security->user_id = auth()->user()->id;
-            }
-        });
-
-        self::updating(function (Security $security): void {
-            self::trimFields($security);
-        });
-
-        self::observe(FileCleanupObserver::class);
-    }
-
-    private static function trimFields(self $security): void
-    {
-        $security->name = mb_trim($security->name);
-        $security->isin = $security->isin === null ? null : mb_trim($security->isin);
-        $security->symbol = $security->symbol === null ? null : mb_trim($security->symbol);
-        $security->description = $security->description === null ? null : mb_trim($security->description);
     }
 }
