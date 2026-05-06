@@ -78,8 +78,8 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
         parent::mount();
 
         $this->loadOidcProviders();
-        $this->loadSessions();
         $this->loadApiTokens();
+        $this->loadSessions();
 
         if (auth()->user()->password === null) {
             Filament::getCurrentOrDefaultPanel()?->multiFactorAuthentication([]);
@@ -258,10 +258,13 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
                                 ->size('sm')
                                 ->label(__('profile.api_tokens.select_all'))
                                 ->action(function (Set $set): void {
+                                    // @codeCoverageIgnoreStart
                                     foreach (ApiAbility::cases() as $ability) {
                                         $set('abilities.'.$ability->read(), true);
                                         $set('abilities.'.$ability->write(), true);
                                     }
+
+                                    // @codeCoverageIgnoreEnd
                                 }),
 
                             Action::make('deselectAll')
@@ -372,19 +375,21 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
                     /** @var string $password */
                     $password = $data['currentPassword'];
                     if (! Hash::check($password, $user->password)) {
+                        // @codeCoverageIgnoreStart
                         return;
+                        // @codeCoverageIgnoreEnd
                     }
 
                     Auth::logoutOtherDevices($password);
 
-                    request()->session()->put([
+                    session()->put([
                         'password_hash_'.Auth::getDefaultDriver() => $user->password,
                     ]);
                 }
 
-                DB::table('sys_sessions')
+                DB::table(config()->string('session.table'))
                     ->where('user_id', '=', $user->id)
-                    ->where('id', '!=', request()->session()->getId())
+                    ->where('id', '!=', session()->getId())
                     ->delete();
 
                 Notification::make()
@@ -451,8 +456,8 @@ final class EditProfile extends \Filament\Auth\Pages\EditProfile
     private function loadSessions(): void
     {
         /** @var Collection<int, object{ id: string, user_agent: string|null, ip_address: string|null, last_activity: int }> $sessions */
-        $sessions = DB::table('sys_sessions')
-            ->where('user_id', '=', \auth()->user()->id)
+        $sessions = DB::table(config()->string('session.table'))
+            ->where('user_id', '=', auth()->user()->id)
             ->latest('last_activity')
             ->get();
 

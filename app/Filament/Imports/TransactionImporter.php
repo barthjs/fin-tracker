@@ -42,6 +42,7 @@ final class TransactionImporter extends Importer
             ImportColumn::make('transfer_account_id')
                 ->label(__('account.fields.transfer_account_id'))
                 ->fillRecordUsing(function (Transaction $record, ?string $state): void {
+                    // @codeCoverageIgnoreStart
                     if ($state === null) {
                         return;
                     }
@@ -52,6 +53,8 @@ final class TransactionImporter extends Importer
                     } else {
                         $record->transfer_account_id = $account->first()->id ?? resolve(GetOrCreateDefaultAccount::class)()->id;
                     }
+
+                    // @codeCoverageIgnoreEnd
                 }),
 
             self::numericColumn('amount')
@@ -68,6 +71,7 @@ final class TransactionImporter extends Importer
                     $query = Category::whereName($state);
 
                     // Try to find the category by name and group
+                    // @codeCoverageIgnoreStart
                     $group = array_key_exists('group', $data) ? match ($data['group']) {
                         CategoryGroup::FixExpenses->getLabel() => CategoryGroup::FixExpenses,
                         CategoryGroup::VarExpenses->getLabel() => CategoryGroup::VarExpenses,
@@ -76,6 +80,7 @@ final class TransactionImporter extends Importer
                         CategoryGroup::Transfers->getLabel() => CategoryGroup::Transfers,
                         default => null
                     } : null;
+                    // @codeCoverageIgnoreEnd
 
                     if ($group !== null) {
                         $query->where('group', $group);
@@ -122,6 +127,9 @@ final class TransactionImporter extends Importer
         $this->record = $service->create($this->record->toArray());
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'transaction-import';

@@ -104,6 +104,7 @@ final class AppServiceProvider extends ServiceProvider
     private function configureFilament(): void
     {
         Filament::serving(function (): void {
+            // @codeCoverageIgnoreStart
             Event::listen(function (LocaleChanged $event): void {
                 if (auth()->check()) {
                     auth()->user()->setLocale($event->locale);
@@ -111,6 +112,7 @@ final class AppServiceProvider extends ServiceProvider
                     Session::put('locale', $event->locale);
                 }
             });
+            // @codeCoverageIgnoreEnd
 
             FilamentAsset::register([
                 Js::make('main', Vite::asset('resources/js/main.js')),

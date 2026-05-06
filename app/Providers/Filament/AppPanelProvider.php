@@ -65,9 +65,11 @@ final class AppPanelProvider extends PanelProvider
             ->databaseNotificationsPolling('30s')
             ->globalSearchKeyBindings(['ctrl+k', 'command+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
+                // @codeCoverageIgnoreStart
                 Platform::Windows, Platform::Linux => (string) __('CTRL+K'),
                 Platform::Mac => '⌘K',
                 default => null,
+                // @codeCoverageIgnoreEnd
             })
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

@@ -34,6 +34,9 @@ final class SubscriptionsByCategoryChart extends ChartWidget
         return resolve(SubscriptionService::class)->getChartAllocation($subscriptions, 'category');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     protected function getTablePage(): string
     {
         return ListSubscriptions::class;

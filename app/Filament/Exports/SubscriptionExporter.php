@@ -77,6 +77,9 @@ final class SubscriptionExporter extends Exporter
         return __('subscription.export.file_name').Date::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'subscription-export';

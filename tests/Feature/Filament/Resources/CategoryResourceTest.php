@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\CategoryGroup;
+use App\Enums\TransactionType;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Categories\Pages\ListCategories;
 use App\Filament\Resources\Categories\Pages\ViewCategory;
@@ -12,6 +13,8 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Subscription;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertModelMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
@@ -21,7 +24,9 @@ it('renders the list page', function (): void {
 
     livewire(ListCategories::class)
         ->assertOk()
-        ->assertCanSeeTableRecords($categories);
+        ->assertCanSeeTableRecords($categories)
+        ->assertActionExists('import')
+        ->assertActionExists('export');
 });
 
 it('can filter categories by inactivity', function (): void {
@@ -48,7 +53,7 @@ it('can create a category', function (): void {
         ->callAction('create', $data)
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('categories', $data);
+    assertDatabaseHas('categories', $data);
 });
 
 it('renders the view page', function (): void {
@@ -77,7 +82,32 @@ it('can edit a category', function (): void {
         ->callAction('edit', $data)
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('categories', array_merge(['id' => $category->id], $data));
+    assertDatabaseHas('categories', array_merge(['id' => $category->id], $data));
+});
+
+it('can bulk edit the group of categories', function (): void {
+    $categories = Category::factory()->count(2)->create(['group' => CategoryGroup::VarExpenses]);
+
+    livewire(ListCategories::class)
+        ->callTableBulkAction('group', $categories, ['group' => CategoryGroup::FixRevenues->value]);
+
+    foreach ($categories as $category) {
+        $this->assertDatabaseHas('categories', [
+            'id' => $category->id,
+            'group' => CategoryGroup::FixRevenues->value,
+            'type' => TransactionType::Revenue->value,
+        ]);
+    }
+});
+
+it('can delete a category', function (): void {
+    $category = Category::factory()->create();
+
+    livewire(ViewCategory::class, ['record' => $category->id])
+        ->callAction('delete')
+        ->assertHasNoActionErrors();
+
+    assertModelMissing($category);
 });
 
 it('can load the transactions relation manager', function (): void {
@@ -103,4 +133,27 @@ it('can load the subscriptions relation manager', function (): void {
     ])
         ->assertOk()
         ->assertCanSeeTableRecords([$subscription]);
+});
+
+it('can search categories by their group label', function (): void {
+    $expense = Category::factory()->create(['group' => CategoryGroup::VarExpenses]);
+    $revenue = Category::factory()->create(['group' => CategoryGroup::VarRevenues]);
+
+    livewire(ListCategories::class)
+        ->searchTable(CategoryGroup::VarExpenses->getLabel())
+        ->assertCanSeeTableRecords([$expense])
+        ->assertCanNotSeeTableRecords([$revenue]);
+});
+
+it('filters categories by type via tabs', function (): void {
+    $expense = Category::factory()->create(['group' => CategoryGroup::VarExpenses]);
+    $revenue = Category::factory()->create(['group' => CategoryGroup::VarRevenues]);
+
+    livewire(ListCategories::class)
+        ->set('activeTab', TransactionType::Expense->value)
+        ->assertCanSeeTableRecords([$expense])
+        ->assertCanNotSeeTableRecords([$revenue])
+        ->set('activeTab', TransactionType::Revenue->value)
+        ->assertCanSeeTableRecords([$revenue])
+        ->assertCanNotSeeTableRecords([$expense]);
 });

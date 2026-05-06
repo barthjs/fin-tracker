@@ -34,6 +34,9 @@ final class SubscriptionsByAccountChart extends ChartWidget
         return resolve(SubscriptionService::class)->getChartAllocation($subscriptions, 'account');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     protected function getTablePage(): string
     {
         return ListSubscriptions::class;

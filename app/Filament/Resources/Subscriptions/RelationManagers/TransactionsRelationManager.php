@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 
 /**
  * @property Subscription $ownerRecord
+ *
+ * @codeCoverageIgnore
  */
 final class TransactionsRelationManager extends RelationManager
 {

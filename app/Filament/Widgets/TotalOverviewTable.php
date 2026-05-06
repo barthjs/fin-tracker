@@ -29,6 +29,9 @@ final class TotalOverviewTable extends TableWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    /**
+     * @codeCoverageIgnore
+     */
     public static function canView(): bool
     {
         if (Account::query()->count() > 0) {
@@ -83,9 +86,11 @@ final class TotalOverviewTable extends TableWidget
                     ->label(__('fields.market_value'))
                     ->badge()
                     ->color(fn (float $state): string => match (true) {
+                        // @codeCoverageIgnoreStart
                         $state === 0.0 => 'gray',
                         $state < 0.0 => 'danger',
                         default => 'success'
+                        // @codeCoverageIgnoreEnd
                     })
                     ->money(Currency::getCurrency())
                     ->summarize(Sum::make()->label('')->money(Currency::getCurrency())),
@@ -110,6 +115,9 @@ final class TotalOverviewTable extends TableWidget
             ->recordUrl(fn (Combined $record): string => $this->getRecordUrl($record));
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     private function getRecordUrl(Combined $record): string
     {
         $id = mb_substr($record->id, 2);

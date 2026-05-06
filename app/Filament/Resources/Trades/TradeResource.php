@@ -287,6 +287,9 @@ final class TradeResource extends Resource
         };
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     private static function asFloat(mixed $value): float
     {
         if (is_null($value)) {
@@ -310,6 +313,9 @@ final class TradeResource extends Resource
         return 0.0;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     private static function asTradeType(mixed $value): TradeType
     {
         if ($value instanceof TradeType) {

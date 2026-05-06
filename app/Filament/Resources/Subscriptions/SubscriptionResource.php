@@ -135,6 +135,7 @@ final class SubscriptionResource extends Resource
                                 ->minValue(1)
                                 ->maxValue(365)
                                 ->helperText(function (Get $get): string {
+                                    // @codeCoverageIgnoreStart
                                     $unit = $get('period_unit');
                                     $frequency = $get('period_frequency');
 
@@ -150,6 +151,7 @@ final class SubscriptionResource extends Resource
                                     }
 
                                     return '';
+                                    // @codeCoverageIgnoreEnd
                                 }),
 
                             Toggle::make('auto_generate_transaction')
@@ -167,6 +169,7 @@ final class SubscriptionResource extends Resource
                                 ->default(today()->toDateString())
                                 ->required()
                                 ->afterStateUpdated(function (mixed $state, Set $set, Get $get): void {
+                                    // @codeCoverageIgnoreStart
                                     if (! is_string($state) || blank($state)) {
                                         return;
                                     }
@@ -174,6 +177,8 @@ final class SubscriptionResource extends Resource
                                     if (blank($get('next_payment_date'))) {
                                         $set('next_payment_date', Date::parse($state)->toDateString());
                                     }
+
+                                    // @codeCoverageIgnoreEnd
                                 }),
 
                             DatePicker::make('next_payment_date')

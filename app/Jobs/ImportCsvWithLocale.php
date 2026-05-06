@@ -10,6 +10,9 @@ use Illuminate\Support\Number;
 
 final class ImportCsvWithLocale extends ImportCsv
 {
+    /**
+     * @codeCoverageIgnore Thin locale wrapper; only runs inside the Filament import batch pipeline.
+     */
     public function handle(): void
     {
         /** @var User $user */

@@ -2,12 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Enums\TradeType;
 use App\Filament\Resources\Portfolios\Pages\ListPortfolios;
 use App\Filament\Resources\Portfolios\Pages\ViewPortfolio;
 use App\Filament\Resources\Portfolios\RelationManagers\SecuritiesRelationManager;
 use App\Filament\Resources\Portfolios\RelationManagers\TradesRelationManager;
+use App\Models\Account;
 use App\Models\Portfolio;
+use App\Models\Security;
+use App\Models\Trade;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertModelMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
@@ -17,7 +23,9 @@ it('renders the list page', function (): void {
 
     livewire(ListPortfolios::class)
         ->assertOk()
-        ->assertCanSeeTableRecords($portfolios);
+        ->assertCanSeeTableRecords($portfolios)
+        ->assertActionExists('import')
+        ->assertActionExists('export');
 });
 
 it('can filter portfolios by inactivity', function (): void {
@@ -39,7 +47,7 @@ it('can create a portfolio', function (): void {
         ->callAction('create', $data)
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('portfolios', $data);
+    assertDatabaseHas('portfolios', $data);
 });
 
 it('renders the view page', function (): void {
@@ -63,18 +71,38 @@ it('can edit a portfolio', function (): void {
         ->callAction('edit', $data)
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('portfolios', array_merge(['id' => $portfolio->id], $data));
+    assertDatabaseHas('portfolios', array_merge(['id' => $portfolio->id], $data));
 });
 
-it('can load the securities relation manager', function (): void {
+it('can delete a portfolio', function (): void {
     $portfolio = Portfolio::factory()->create();
+
+    livewire(ViewPortfolio::class, ['record' => $portfolio->id])
+        ->callAction('delete')
+        ->assertHasNoActionErrors();
+
+    assertModelMissing($portfolio);
+});
+
+it('can load the securities relation manager and shows the per-portfolio quantity', function (): void {
+    $portfolio = Portfolio::factory()->create();
+    $account = Account::factory()->create();
+    $security = Security::factory()->create();
+    Trade::factory()->create([
+        'type' => TradeType::Buy,
+        'quantity' => 10.0,
+        'account_id' => $account->id,
+        'portfolio_id' => $portfolio->id,
+        'security_id' => $security->id,
+    ]);
 
     livewire(SecuritiesRelationManager::class, [
         'ownerRecord' => $portfolio,
         'pageClass' => ViewPortfolio::class,
     ])
+        ->loadTable()
         ->assertOk()
-        ->assertCanSeeTableRecords($portfolio->securities);
+        ->assertCanSeeTableRecords([$security]);
 });
 
 it('can load the trades relation manager', function (): void {

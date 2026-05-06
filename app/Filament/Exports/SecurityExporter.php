@@ -63,6 +63,9 @@ final class SecurityExporter extends Exporter
         return __('security.export.file_name').Date::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'security-export';

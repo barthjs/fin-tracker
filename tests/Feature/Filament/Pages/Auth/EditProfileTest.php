@@ -122,6 +122,32 @@ it('can create an api token with specific abilities', function (): void {
         ->and($user->tokens->first()->abilities)->toContain($ability->read());
 });
 
+it('requires at least one ability when creating an api token', function (): void {
+    livewire(EditProfile::class)
+        ->callAction('createApiToken', [
+            'name' => 'No Abilities',
+            'abilities' => [],
+        ])
+        ->assertHasActionErrors(['name']);
+
+    expect(auth()->user()->tokens()->count())->toBe(0);
+});
+
+it('can create an api token with an expiry date', function (): void {
+    livewire(EditProfile::class)
+        ->callAction('createApiToken', [
+            'name' => 'Expiring Token',
+            'abilities' => [ApiAbility::ACCOUNT->read() => true],
+            'expires_at' => today()->addMonth()->toDateString(),
+        ])
+        ->assertHasNoFormErrors();
+
+    $token = auth()->user()->tokens()->where('name', 'Expiring Token')->first();
+
+    expect($token)->not->toBeNull()
+        ->and($token->expires_at)->not->toBeNull();
+});
+
 it('automatically selects read ability when write is selected', function (): void {
     $ability = ApiAbility::PORTFOLIO;
 
@@ -155,13 +181,74 @@ it('displays the active user sessions on the profile page', function (): void {
         'ip_address' => '1.2.3.4',
         'user_agent' => 'Firefox',
         'payload' => base64_encode('data'),
-        'last_activity' => time(),
+        'last_activity' => now()->timestamp,
     ]);
 
     livewire(EditProfile::class)
         ->assertOk()
         ->assertSee('1.2.3.4')
         ->assertSee('Firefox');
+});
+
+it('requires the correct password to log out other sessions', function (): void {
+    $this->startSession();
+
+    DB::table(config()->string('session.table'))->insert([
+        'id' => 'other_session',
+        'user_id' => $this->user->id,
+        'ip_address' => '1.2.3.4',
+        'user_agent' => 'Firefox',
+        'payload' => base64_encode('data'),
+        'last_activity' => now()->timestamp,
+    ]);
+
+    livewire(EditProfile::class)
+        ->callAction('logoutOtherBrowserSessions', ['currentPassword' => 'wrong-password'])
+        ->assertHasActionErrors(['currentPassword']);
+
+    expect(
+        DB::table(config()->string('session.table'))->where('id', 'other_session')->exists()
+    )->toBeTrue();
+});
+
+it('does not require a password to log out other sessions when the user has not password set', function (): void {
+    $this->user->update(['password' => null]);
+    $this->startSession();
+    DB::table(config()->string('session.table'))->insert([
+        'id' => 'other_session',
+        'user_id' => $this->user->id,
+        'ip_address' => '1.2.3.4',
+        'user_agent' => 'Firefox',
+        'payload' => base64_encode('data'),
+        'last_activity' => now()->timestamp,
+    ]);
+
+    livewire(EditProfile::class)
+        ->callAction('logoutOtherBrowserSessions')
+        ->assertHasNoErrors();
+
+    expect(
+        DB::table(config()->string('session.table'))->where('id', 'other_session')->exists()
+    )->toBeFalse();
+});
+
+it('logs out other browser sessions', function (): void {
+    $this->startSession();
+
+    DB::table(config()->string('session.table'))->insert([
+        'id' => 'other_session_id',
+        'user_id' => $this->user->id,
+        'ip_address' => '5.6.7.8',
+        'user_agent' => 'Chrome',
+        'payload' => base64_encode('data'),
+        'last_activity' => time(),
+    ]);
+
+    livewire(EditProfile::class)
+        ->callAction('logoutOtherBrowserSessions', data: ['currentPassword' => 'password'])
+        ->assertHasNoErrors();
+
+    assertDatabaseMissing(config()->string('session.table'), ['id' => 'other_session_id']);
 });
 
 it('deletes the user account after password confirmation', function (): void {

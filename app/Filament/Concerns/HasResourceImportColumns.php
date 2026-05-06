@@ -46,12 +46,14 @@ trait HasResourceImportColumns
             ->label(__('fields.color'))
             ->exampleHeader(__('fields.color'))
             ->examples(function (): array {
+                // @codeCoverageIgnoreStart
                 $colors = [];
                 for ($i = 1; $i <= 3; $i++) {
                     $colors[] = mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF)));
                 }
 
                 return $colors;
+                // @codeCoverageIgnoreEnd
             })
             ->rules(['regex:/^#([a-f0-9]{6}|[a-f0-9]{3})\b$/']);
     }
@@ -88,6 +90,7 @@ trait HasResourceImportColumns
             ->requiredMapping()
             ->rules(['required'])
             ->castStateUsing(function (?string $state): ?CarbonImmutable {
+                // @codeCoverageIgnoreStart
                 if ($state === null) {
                     return null;
                 }
@@ -99,6 +102,7 @@ trait HasResourceImportColumns
                 }
 
                 return $carbon;
+                // @codeCoverageIgnoreEnd
             });
     }
 

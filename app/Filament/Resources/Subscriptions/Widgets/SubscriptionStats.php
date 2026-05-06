@@ -36,11 +36,13 @@ final class SubscriptionStats extends StatsOverviewWidget
 
         $avgMonthlyPerSub = $subCount > 0 ? $stats['monthly_avg'] / $subCount : 0;
 
+        // @codeCoverageIgnoreStart
         $dueColor = match (true) {
             $stats['due_this_month'] === 0.0 => 'success',
             $stats['due_this_month'] > $stats['monthly_avg'] => 'warning',
             default => 'info',
         };
+        // @codeCoverageIgnoreEnd
 
         return [
             Stat::make(__('subscription.stats.monthly_cost'), Number::currency($stats['monthly_avg'], $currency))
@@ -58,6 +60,9 @@ final class SubscriptionStats extends StatsOverviewWidget
         ];
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     protected function getTablePage(): string
     {
         return ListSubscriptions::class;

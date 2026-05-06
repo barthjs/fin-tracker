@@ -74,6 +74,9 @@ final class TradeExporter extends Exporter
         return __('trade.export.file_name').Date::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'trade-export';

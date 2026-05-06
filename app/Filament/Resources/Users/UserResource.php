@@ -53,6 +53,9 @@ final class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'full_name';
 
+    /**
+     * @codeCoverageIgnore
+     */
     public static function getNavigationGroup(): string
     {
         return __('settings.navigation_group');

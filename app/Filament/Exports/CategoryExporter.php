@@ -54,6 +54,9 @@ final class CategoryExporter extends Exporter
         return __('category.export.file_name').Date::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'category-export';

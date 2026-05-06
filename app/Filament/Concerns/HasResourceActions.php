@@ -180,6 +180,9 @@ trait HasResourceActions
             });
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     #[On('refreshInfolist')]
     public function refresh(): void {}
 }

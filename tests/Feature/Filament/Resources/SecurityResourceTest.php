@@ -2,11 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Enums\TradeType;
 use App\Filament\Resources\Securities\Pages\ListSecurities;
 use App\Filament\Resources\Securities\Pages\ViewSecurity;
 use App\Filament\Resources\Securities\RelationManagers\TradesRelationManager;
+use App\Models\Account;
+use App\Models\Portfolio;
 use App\Models\Security;
+use App\Models\Trade;
+use Filament\Actions\Testing\TestAction;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertModelMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asAdmin());
@@ -16,7 +23,9 @@ it('renders the list page', function (): void {
 
     livewire(ListSecurities::class)
         ->assertOk()
-        ->assertCanSeeTableRecords($securities);
+        ->assertCanSeeTableRecords($securities)
+        ->assertActionExists('import')
+        ->assertActionExists('export');
 });
 
 it('can filter securities by inactivity', function (): void {
@@ -38,7 +47,7 @@ it('can create a security', function (): void {
         ->callAction('create', $data)
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('securities', $data);
+    assertDatabaseHas('securities', $data);
 });
 
 it('renders the view page', function (): void {
@@ -67,7 +76,17 @@ it('can edit a security', function (): void {
         ->callAction('edit', $data)
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('securities', array_merge(['id' => $security->id], $data));
+    assertDatabaseHas('securities', array_merge(['id' => $security->id], $data));
+});
+
+it('can delete a security', function (): void {
+    $security = Security::factory()->create();
+
+    livewire(ViewSecurity::class, ['record' => $security->id])
+        ->callAction('delete')
+        ->assertHasNoActionErrors();
+
+    assertModelMissing($security);
 });
 
 it('can load the trades relation manager', function (): void {
@@ -79,4 +98,27 @@ it('can load the trades relation manager', function (): void {
     ])
         ->assertOk()
         ->assertCanSeeTableRecords($security->trades);
+});
+
+it('recalculates portfolio market value when the price changes', function (): void {
+    $account = Account::factory()->create();
+    $portfolio = Portfolio::factory()->create();
+    $security = Security::factory()->create(['price' => 10.0]);
+
+    Trade::factory()->create([
+        'type' => TradeType::Buy,
+        'quantity' => 5.0,
+        'account_id' => $account->id,
+        'portfolio_id' => $portfolio->id,
+        'security_id' => $security->id,
+    ]);
+
+    $data = Security::factory()->make(['price' => 20.0])->toArray();
+
+    livewire(ListSecurities::class)
+        ->callAction(TestAction::make('edit')->table($security), $data)
+        ->assertHasNoFormErrors();
+
+    expect($security->fresh()?->price)->toBe(20.0)
+        ->and($portfolio->fresh()?->market_value)->toBe(100.0);
 });

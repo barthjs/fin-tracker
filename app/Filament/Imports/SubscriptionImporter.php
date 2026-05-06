@@ -111,6 +111,9 @@ final class SubscriptionImporter extends Importer
         $this->record = $service->create($data);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'subscription-import';

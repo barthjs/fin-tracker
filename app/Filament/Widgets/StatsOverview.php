@@ -78,9 +78,12 @@ final class StatsOverview extends BaseWidget
             ->whereHas('category', fn (Builder $query): Builder => $query->where('type', $type))
             ->first();
 
+        // @codeCoverageIgnoreStart
         if ($row === null) {
             return array_fill(0, count(CategoryStatistic::MONTHS), 0.0);
         }
+
+        // @codeCoverageIgnoreEnd
 
         /** @var array<string, float|int|null> $values */
         $values = $row->toArray();

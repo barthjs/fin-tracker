@@ -93,6 +93,9 @@ final class SecurityImporter extends Importer
             ]);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'security-import';

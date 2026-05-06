@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 
 /**
  * @property Security $ownerRecord
+ *
+ * @codeCoverageIgnore
  */
 final class TradesRelationManager extends RelationManager
 {

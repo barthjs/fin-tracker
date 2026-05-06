@@ -111,6 +111,9 @@ final class TradeImporter extends Importer
         $this->record = $service->create($this->record->toArray());
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'trade-import';

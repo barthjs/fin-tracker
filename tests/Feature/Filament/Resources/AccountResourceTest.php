@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\TransactionType;
 use App\Filament\Resources\Accounts\Pages\ListAccounts;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
 use App\Filament\Resources\Accounts\RelationManagers\SubscriptionsRelationManager;
@@ -10,7 +11,10 @@ use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Subscription;
+use Filament\Actions\Testing\TestAction;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertModelMissing;
 use function Pest\Livewire\livewire;
 
 beforeEach(fn () => asUser());
@@ -20,7 +24,9 @@ it('renders the list page', function (): void {
 
     livewire(ListAccounts::class)
         ->assertOk()
-        ->assertCanSeeTableRecords($accounts);
+        ->assertCanSeeTableRecords($accounts)
+        ->assertActionExists('import')
+        ->assertActionExists('export');
 });
 
 it('can filter accounts by inactivity', function (): void {
@@ -42,7 +48,7 @@ it('can create an account', function (): void {
         ->callAction('create', $data)
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('accounts', $data);
+    assertDatabaseHas('accounts', $data);
 });
 
 it('renders the view page', function (): void {
@@ -66,18 +72,37 @@ it('can edit an account', function (): void {
         ->callAction('edit', $data)
         ->assertHasNoFormErrors();
 
-    $this->assertDatabaseHas('accounts', array_merge(['id' => $account->id], $data));
+    assertDatabaseHas('accounts', array_merge(['id' => $account->id], $data));
+});
+
+it('can delete an account', function (): void {
+    $account = Account::factory()->create();
+
+    livewire(ViewAccount::class, ['record' => $account->id])
+        ->callAction('delete')
+        ->assertHasNoActionErrors();
+
+    assertModelMissing($account);
 });
 
 it('can load the transactions relation manager', function (): void {
     $account = Account::factory()->create();
+    $category = Category::factory()->create();
 
     livewire(TransactionsRelationManager::class, [
         'ownerRecord' => $account,
         'pageClass' => ViewAccount::class,
     ])
         ->assertOk()
-        ->assertCanSeeTableRecords($account->transactions);
+        ->assertCanSeeTableRecords($account->transactions)
+        ->callAction(TestAction::make('create')->table(), [
+            'date_time' => now()->startOfMinute()->toDateTimeString(),
+            'type' => TransactionType::Expense->value,
+            'amount' => 50,
+            'payee' => 'Shop',
+            'category_id' => $category->id,
+        ])
+        ->assertHasNoFormErrors();
 });
 
 it('can load the trades relation manager', function (): void {

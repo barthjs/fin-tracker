@@ -61,6 +61,9 @@ final class AccountImporter extends Importer
             ]);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'account-import';

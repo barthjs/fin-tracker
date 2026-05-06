@@ -48,6 +48,9 @@ final class PortfolioExporter extends Exporter
         return __('portfolio.export.file_name').Date::now().Date::now()->timezone(auth()->user()->timezone)->format('Y-m-d-H-i');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'portfolio-export';

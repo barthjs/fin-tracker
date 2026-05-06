@@ -14,7 +14,6 @@ use App\Models\NotificationTarget;
 use App\Services\Notifications\NotificationStrategyFactory;
 use App\Services\NotificationTargetService;
 use BackedEnum;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -28,6 +27,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rules\Unique;
+use Throwable;
 
 final class NotificationTargetResource extends Resource
 {
@@ -43,6 +43,9 @@ final class NotificationTargetResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * @codeCoverageIgnore
+     */
     public static function getNavigationGroup(): string
     {
         return __('settings.navigation_group');
@@ -190,12 +193,14 @@ final class NotificationTargetResource extends Resource
                                 ->title(__('notification_target.actions.ping_success'))
                                 ->success()
                                 ->send();
-                        } catch (Exception $exception) {
+                            // @codeCoverageIgnoreStart
+                        } catch (Throwable $throwable) {
                             Notification::make()
-                                ->title(__('notification_target.actions.ping_failed', ['error' => $exception->getMessage()]))
+                                ->title(__('notification_target.actions.ping_failed', ['error' => $throwable->getMessage()]))
                                 ->danger()
                                 ->persistent()
                                 ->send();
+                            // @codeCoverageIgnoreEnd
                         }
                     }),
 

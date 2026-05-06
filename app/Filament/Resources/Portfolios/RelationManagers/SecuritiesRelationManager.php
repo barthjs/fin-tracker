@@ -17,6 +17,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class SecuritiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'securities';

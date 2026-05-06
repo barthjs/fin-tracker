@@ -61,6 +61,9 @@ final class PortfolioImporter extends Importer
             ]);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'portfolio-import';

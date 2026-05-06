@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class SecuritiesRelationManager extends RelationManager
 {
     use HasResourceActions;

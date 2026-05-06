@@ -68,6 +68,9 @@ final class Settings extends Page
                     ])
                     ->get('https://api.github.com/repos/barthjs/fin-tracker/releases/latest');
 
+                // @codeCoverageIgnoreStart
+                // Unreachable in practice: Http::retry() throws on failed responses,
+                // so a non-successful response is handled by the catch block below.
                 if (! $response->successful()) {
                     Log::warning('Failed to fetch latest version from GitHub API', [
                         'status' => $response->status(),
@@ -76,6 +79,8 @@ final class Settings extends Page
 
                     return null;
                 }
+
+                // @codeCoverageIgnoreEnd
 
                 $data = $response->json();
                 if (is_array($data) && array_key_exists('tag_name', $data) && is_string($data['tag_name'])) {

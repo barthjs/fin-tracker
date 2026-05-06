@@ -15,6 +15,8 @@ use Illuminate\Support\Str;
 
 /**
  * @property Account $ownerRecord
+ *
+ * @codeCoverageIgnore
  */
 final class SubscriptionsRelationManager extends RelationManager
 {

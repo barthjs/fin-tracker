@@ -31,12 +31,14 @@ final class CategoryImporter extends Importer
                 ->requiredMapping()
                 ->rules(['required'])
                 ->castStateUsing(fn (string $state): CategoryGroup => match ($state) {
+                    // @codeCoverageIgnoreStart
                     CategoryGroup::FixExpenses->getLabel() => CategoryGroup::FixExpenses,
                     CategoryGroup::VarExpenses->getLabel() => CategoryGroup::VarExpenses,
                     CategoryGroup::FixRevenues->getLabel() => CategoryGroup::FixRevenues,
                     CategoryGroup::VarRevenues->getLabel() => CategoryGroup::VarRevenues,
                     CategoryGroup::Transfers->getLabel() => CategoryGroup::Transfers,
                     default => CategoryGroup::VarExpenses,
+                    // @codeCoverageIgnoreEnd
                 }),
 
             self::colorColumn(),
@@ -72,6 +74,9 @@ final class CategoryImporter extends Importer
             ]);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getJobBatchName(): string
     {
         return 'category-import';

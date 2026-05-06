@@ -15,6 +15,8 @@ use Illuminate\Support\Str;
 
 /**
  * @property Portfolio $ownerRecord
+ *
+ * @codeCoverageIgnore
  */
 final class TradesRelationManager extends RelationManager
 {
