@@ -47,3 +47,35 @@ it('fails when user is not found', function (): void {
         ->expectsOutput('User not found')
         ->assertFailed();
 });
+
+it('asks for the user when no argument is given', function (): void {
+    artisan(ResetPasswordCommand::class)
+        ->expectsQuestion('Enter email or username to reset password', $this->user->username)
+        ->expectsConfirmation('Resetting password for user '.$this->user->username, 'yes')
+        ->expectsQuestion('Enter new password for user: '.$this->user->username, 'newpassword123')
+        ->expectsQuestion('Confirm password', 'newpassword123')
+        ->assertSuccessful();
+});
+
+it('cancels when the confirmation is declined', function (): void {
+    artisan(ResetPasswordCommand::class, ['emailOrUsername' => $this->user->username])
+        ->expectsConfirmation('Resetting password for user '.$this->user->username, 'no')
+        ->assertSuccessful();
+
+    expect(Hash::check('oldpassword', $this->user->refresh()->password))->toBeTrue();
+});
+
+it('retries when the password is empty or does not match', function (): void {
+    artisan(ResetPasswordCommand::class, ['emailOrUsername' => $this->user->username])
+        ->expectsConfirmation('Resetting password for user '.$this->user->username, 'yes')
+        ->expectsQuestion('Enter new password for user: '.$this->user->username, '')
+        ->expectsOutput('Password cannot be empty')
+        ->expectsQuestion('Enter new password for user: '.$this->user->username, 'first')
+        ->expectsQuestion('Confirm password', 'second')
+        ->expectsOutput('Passwords do not match')
+        ->expectsQuestion('Enter new password for user: '.$this->user->username, 'final-password')
+        ->expectsQuestion('Confirm password', 'final-password')
+        ->assertSuccessful();
+
+    expect(Hash::check('final-password', $this->user->refresh()->password))->toBeTrue();
+});

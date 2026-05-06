@@ -74,9 +74,12 @@ final class AppCleanupTempDataCommand extends Command
 
         foreach ($imports as $import) {
             // Delete the file immediately if completed
+            // @codeCoverageIgnoreStart
             if (file_exists($import->file_path)) {
-                @unlink($import->file_path);
+                unlink($import->file_path);
             }
+
+            // @codeCoverageIgnoreEnd
 
             if (
                 ! $import->failedRows()->exists() ||

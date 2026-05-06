@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\User;
-use Exception;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 
 #[Signature('reset-password {emailOrUsername?}')]
 #[Description('Reset the password for a user')]
@@ -61,22 +59,15 @@ final class ResetPasswordCommand extends Command
             $password = $inputPassword;
         }
 
-        try {
-            $user->password = Hash::make($password);
-            $user->remember_token = null;
-            $user->save();
+        $user->password = Hash::make($password);
+        $user->remember_token = null;
+        $user->save();
 
-            DB::table(config()->string('session.table'))
-                ->where('user_id', $user->id)
-                ->delete();
+        DB::table(config()->string('session.table'))
+            ->where('user_id', $user->id)
+            ->delete();
 
-            $this->info('Password reset successfully');
-        } catch (Exception $exception) {
-            Log::error('Password reset failed for user: '.$user->username, ['exception' => $exception]);
-            $this->error('An error occurred while resetting the password.');
-
-            return self::FAILURE;
-        }
+        $this->info('Password reset successfully');
 
         return self::SUCCESS;
     }
