@@ -51,6 +51,24 @@ describe('Trade API', tests: function (): void {
             ]);
     });
 
+    test('index filters by date range', function (): void {
+        actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
+
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        $old = Trade::factory()->create(['account_id' => $account->id, 'date_time' => now()->subYear()]);
+        $recent = Trade::factory()->create(['account_id' => $account->id, 'date_time' => now()]);
+
+        getJson(route('api.trades.index', ['filter[date_from]' => now()->subMonth()->toDateString()]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $recent->id);
+
+        getJson(route('api.trades.index', ['filter[date_until]' => now()->subMonth()->toDateString()]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $old->id);
+    });
+
     test('store creates a new trade', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
 
@@ -175,6 +193,17 @@ describe('Trade API', tests: function (): void {
         $this->assertEquals(0, $account->fresh()?->balance);
         $this->assertEquals(0, $portfolio->fresh()?->market_value);
         $this->assertEquals(0, $security->fresh()?->total_quantity);
+    });
+
+    test('show returns a single trade', function (): void {
+        actingAsWithAbilities($this->user, ApiAbility::TRADE->all());
+
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        $trade = Trade::factory()->create(['account_id' => $account->id]);
+
+        getJson(route('api.trades.show', $trade))
+            ->assertOk()
+            ->assertJsonPath('data.id', $trade->id);
     });
 
     test('forbidden access without correct ability', function (): void {

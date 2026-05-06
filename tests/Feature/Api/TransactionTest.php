@@ -47,6 +47,24 @@ describe('Transaction API', function (): void {
             ]);
     });
 
+    test('index filters by date range', function (): void {
+        actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
+
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        $old = Transaction::factory()->create(['account_id' => $account->id, 'date_time' => now()->subYear()]);
+        $recent = Transaction::factory()->create(['account_id' => $account->id, 'date_time' => now()]);
+
+        getJson(route('api.transactions.index', ['filter[date_from]' => now()->subMonth()->toDateString()]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $recent->id);
+
+        getJson(route('api.transactions.index', ['filter[date_until]' => now()->subMonth()->toDateString()]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $old->id);
+    });
+
     test('store creates a new transaction', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
 
@@ -131,6 +149,17 @@ describe('Transaction API', function (): void {
 
         assertDatabaseMissing('transactions', ['id' => $transaction->id]);
         $this->assertEquals(0.0, $account->fresh()?->balance);
+    });
+
+    test('show returns a single transaction', function (): void {
+        actingAsWithAbilities($this->user, ApiAbility::TRANSACTION->all());
+
+        $account = Account::factory()->create(['user_id' => $this->user->id]);
+        $transaction = Transaction::factory()->create(['account_id' => $account->id]);
+
+        getJson(route('api.transactions.show', $transaction))
+            ->assertOk()
+            ->assertJsonPath('data.id', $transaction->id);
     });
 
     test('forbidden access without correct ability', function (): void {

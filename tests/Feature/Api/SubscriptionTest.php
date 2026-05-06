@@ -73,8 +73,8 @@ describe('Subscription API', function (): void {
 
         $account = Account::factory()->create(['user_id' => $this->user->id]);
         $category = Category::factory()->create(['user_id' => $this->user->id]);
-        $matchingSubscription = Subscription::factory()->create(['account_id' => $account->id, 'category_id' => $category->id]);
-        $nonMatchingSubscription = Subscription::factory()->create(['account_id' => $account->id, 'category_id' => $category->id]);
+        $matchingSubscription = Subscription::factory()->create(['account_id' => $account->id, 'category_id' => $category->id, 'name' => 'Filterable Subscription A']);
+        $nonMatchingSubscription = Subscription::factory()->create(['account_id' => $account->id, 'category_id' => $category->id, 'name' => 'Other Subscription B']);
 
         getJson(route('api.subscriptions.index', ['filter[name]' => $matchingSubscription->name]))
             ->assertOk()

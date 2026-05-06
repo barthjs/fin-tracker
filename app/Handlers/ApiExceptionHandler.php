@@ -24,66 +24,49 @@ final class ApiExceptionHandler
 
     public function register(Exceptions $exceptions): void
     {
-        $exceptions->render(function (AuthenticationException $e, Request $request): ?JsonResponse {
-            if ($request->is('api/*')) {
-                return $this->unauthorizedResponse();
-            }
-
-            return null;
-        });
-
-        $exceptions->render(function (AuthorizationException|AccessDeniedHttpException $e, Request $request): ?JsonResponse {
-            if ($request->is('api/*')) {
-                return $this->forbiddenResponse();
-            }
-
-            return null;
-        });
-
-        $exceptions->render(function (MissingAbilityException $e, Request $request): ?JsonResponse {
-            if ($request->is('api/*')) {
-                return $this->errorResponse(
-                    ApiError::FORBIDDEN,
-                    'Missing required API token ability'
-                );
-            }
-
-            return null;
-        });
-
-        $exceptions->render(function (NotFoundHttpException $e, Request $request): ?JsonResponse {
-            if ($request->is('api/*')) {
-                return $this->notFoundResponse();
-            }
-
-            return null;
-        });
-
-        $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request): ?JsonResponse {
-            if ($request->is('api/*')) {
-                return $this->methodNotAllowedResponse();
-            }
-
-            return null;
-        });
-
-        $exceptions->render(function (ValidationException $e, Request $request): ?JsonResponse {
-            if ($request->is('api/*')) {
-                /** @phpstan-ignore-next-line */
-                return $this->validationFailedResponse($e->errors());
-            }
-
-            return null;
-        });
-
         $exceptions->render(function (Throwable $e, Request $request): ?JsonResponse {
-            if ($request->is('api/*')) {
-                return $this->serverErrorResponse();
+            if (! $request->is('api/*')) {
+                return null;
             }
 
-            return null;
+            return match (true) {
+                $e instanceof AuthorizationException,
+                $e instanceof AuthenticationException => $this->unauthorizedResponse(),
+
+                $e instanceof AccessDeniedHttpException => $this->handleAuthorization($e),
+
+                $e instanceof NotFoundHttpException => $this->notFoundResponse(),
+
+                $e instanceof MethodNotAllowedHttpException => $this->methodNotAllowedResponse(),
+
+                $e instanceof ValidationException => $this->handleValidation($e),
+
+                // @codeCoverageIgnoreStart
+                default => $this->serverErrorResponse($e, $request),
+                // @codeCoverageIgnoreEnd
+            };
         });
 
         $exceptions->shouldRenderJsonWhen(fn (Request $request): bool => $request->is('api/*'));
+    }
+
+    private function handleAuthorization(Throwable $e): JsonResponse
+    {
+        if ($e instanceof MissingAbilityException || $e->getPrevious() instanceof MissingAbilityException) {
+            return $this->errorResponse(
+                ApiError::FORBIDDEN,
+                'Missing required API token ability'
+            );
+        }
+
+        // @codeCoverageIgnoreStart
+        return $this->forbiddenResponse();
+        // @codeCoverageIgnoreEnd
+    }
+
+    private function handleValidation(ValidationException $e): JsonResponse
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->validationFailedResponse($e->errors());
     }
 }

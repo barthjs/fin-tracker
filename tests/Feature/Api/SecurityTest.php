@@ -59,8 +59,8 @@ describe('Security API', function (): void {
     test('index can filter securities by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::SECURITY->all());
 
-        $matchingSecurity = Security::factory()->create(['user_id' => $this->user->id]);
-        $nonMatchingSecurity = Security::factory()->create(['user_id' => $this->user->id]);
+        $matchingSecurity = Security::factory()->create(['user_id' => $this->user->id, 'name' => 'Filterable Security Alpha']);
+        $nonMatchingSecurity = Security::factory()->create(['user_id' => $this->user->id, 'name' => 'Other Security Beta']);
 
         getJson(route('api.securities.index', ['filter[name]' => $matchingSecurity->name]))
             ->assertOk()

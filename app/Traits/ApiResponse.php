@@ -6,6 +6,9 @@ namespace App\Traits;
 
 use App\Enums\ApiError;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 trait ApiResponse
 {
@@ -41,8 +44,13 @@ trait ApiResponse
         );
     }
 
-    public function serverErrorResponse(): JsonResponse
+    /**
+     * @codeCoverageIgnore
+     */
+    public function serverErrorResponse(Throwable $throwable, Request $request): JsonResponse
     {
+        Log::error('Server error', ['exception' => $throwable, 'request' => $request]);
+
         return $this->errorResponse(ApiError::INTERNAL_ERROR);
     }
 

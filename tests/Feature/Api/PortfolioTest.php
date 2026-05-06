@@ -55,8 +55,8 @@ describe('Portfolio API', function (): void {
     test('index can filter portfolios by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::PORTFOLIO->all());
 
-        $matchingPortfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
-        $nonMatchingPortfolio = Portfolio::factory()->create(['user_id' => $this->user->id]);
+        $matchingPortfolio = Portfolio::factory()->create(['user_id' => $this->user->id, 'name' => 'Filterable Portfolio Alpha']);
+        $nonMatchingPortfolio = Portfolio::factory()->create(['user_id' => $this->user->id, 'name' => 'Other Portfolio Beta']);
 
         getJson(route('api.portfolios.index', ['filter[name]' => $matchingPortfolio->name]))
             ->assertOk()

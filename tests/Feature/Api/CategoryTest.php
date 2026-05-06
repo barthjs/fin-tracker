@@ -53,8 +53,8 @@ describe('Category API', function (): void {
     test('index can filter categories by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::CATEGORY->all());
 
-        $matchingCategory = Category::factory()->create(['user_id' => $this->user->id]);
-        $nonMatchingCategory = Category::factory()->create(['user_id' => $this->user->id]);
+        $matchingCategory = Category::factory()->create(['user_id' => $this->user->id, 'name' => 'Filterable Category A']);
+        $nonMatchingCategory = Category::factory()->create(['user_id' => $this->user->id, 'name' => 'Other Category B']);
 
         getJson(route('api.categories.index', ['filter[name]' => $matchingCategory->name]))
             ->assertOk()

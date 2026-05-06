@@ -55,8 +55,8 @@ describe('Account API', function (): void {
     test('index can filter accounts by name', function (): void {
         actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
 
-        $matchingAccount = Account::factory()->create(['user_id' => $this->user->id]);
-        $nonMatchingAccount = Account::factory()->create(['user_id' => $this->user->id]);
+        $matchingAccount = Account::factory()->create(['user_id' => $this->user->id, 'name' => 'Filterable Account A']);
+        $nonMatchingAccount = Account::factory()->create(['user_id' => $this->user->id, 'name' => 'Other Account B']);
 
         getJson(route('api.accounts.index', ['filter[name]' => $matchingAccount->name]))
             ->assertOk()
