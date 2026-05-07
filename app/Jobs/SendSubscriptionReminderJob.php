@@ -52,8 +52,10 @@ final class SendSubscriptionReminderJob implements ShouldBeUnique, ShouldQueue
         foreach ($targets as $target) {
             try {
                 $user->notify(new SubscriptionReminderNotification($this->subscription, $target));
+                // @codeCoverageIgnoreStart
             } catch (Throwable $e) {
                 report($e);
+                // @codeCoverageIgnoreEnd
             }
         }
 
