@@ -56,6 +56,8 @@ final class OidcProvider extends AbstractProvider implements ProviderInterface
      * {@inheritdoc}
      *
      * @return array<string, mixed>
+     *
+     * @codeCoverageIgnore Uses the Guzzle HTTP client directly, exercised in integration not unit tests.
      */
     protected function getUserByToken(mixed $token): array
     {

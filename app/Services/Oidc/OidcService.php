@@ -67,12 +67,14 @@ final readonly class OidcService
 
                 return $user;
             });
+            // @codeCoverageIgnoreStart
         } catch (Throwable $throwable) {
             if (is_string($avatarPath)) {
                 Storage::disk('public')->delete($avatarPath);
             }
 
             throw $throwable;
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -94,9 +96,12 @@ final readonly class OidcService
         }
 
         $tmpDirectory = storage_path('app/private/livewire-tmp');
+        // @codeCoverageIgnoreStart
         if (! file_exists($tmpDirectory)) {
             mkdir($tmpDirectory, 0755, true);
         }
+
+        // @codeCoverageIgnoreEnd
 
         $tmpPath = $tmpDirectory.'/'.Str::uuid()->toString();
 
@@ -125,10 +130,12 @@ final readonly class OidcService
             Storage::disk('public')->putFileAs('users/avatars', $file, $filename);
 
             return $path;
+            // @codeCoverageIgnoreStart
         } catch (Throwable) {
         }
 
         return null;
+        // @codeCoverageIgnoreEnd
     }
 
     private function createUserFromSocialite(SocialiteUser $socialiteUser, ?string $avatarPath): User

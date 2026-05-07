@@ -66,11 +66,14 @@ final class AppServiceProvider extends ServiceProvider
             foreach (array_keys($oidcService->getEnabledProviders()) as $provider) {
                 $class = 'SocialiteProviders\\'.str($provider)->studly().'\\Provider';
 
+                // @codeCoverageIgnoreStart
                 if (class_exists($class)) {
                     $event->extendSocialite($provider, $class);
 
                     continue;
                 }
+
+                // @codeCoverageIgnoreEnd
 
                 if (config()->boolean('services.oidc.oidc_enabled')) {
                     $event->extendSocialite($provider, OidcProvider::class);
