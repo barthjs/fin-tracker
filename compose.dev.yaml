@@ -13,6 +13,8 @@ services:
       - ./:/app
     extra_hosts:
       - host.docker.internal:host-gateway
+    environment:
+      - DB_HOST=${DB_HOST}
 
   database:
     image: postgres:18-alpine
