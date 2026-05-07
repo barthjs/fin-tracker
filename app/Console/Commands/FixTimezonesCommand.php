@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Log;
 use stdClass;
 use Symfony\Component\Console\Helper\ProgressBar;
 
+/**
+ * @codeCoverageIgnore
+ */
 #[Signature('fix-timezones {--timezone=UTC : The fallback timezone to use if the user timezone is UTC} {--force : Skip confirmation prompt}')]
 #[Description('Corrects timestamps by treating existing database values as local time and converting them to UTC.')]
 final class FixTimezonesCommand extends Command
