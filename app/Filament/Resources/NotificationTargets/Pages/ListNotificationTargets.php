@@ -21,7 +21,7 @@ final class ListNotificationTargets extends ListRecords
         return [
             self::createAction()
                 /** @phpstan-ignore-next-line */
-                ->action(fn (NotificationTargetService $service, array $data): NotificationTarget => $service->create($data)),
+                ->using(fn (NotificationTargetService $service, array $data): NotificationTarget => $service->create($data)),
         ];
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Trade;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertModelMissing;
@@ -106,12 +107,22 @@ it('can load the securities relation manager and shows the per-portfolio quantit
 });
 
 it('can load the trades relation manager', function (): void {
+    $account = Account::factory()->create();
     $portfolio = Portfolio::factory()->create();
+    $security = Security::factory()->create();
+
+    $data = Trade::factory()->make([
+        'account_id' => $account->id,
+        'portfolio_id' => $portfolio->id,
+        'security_id' => $security->id,
+    ])->toArray();
+    $data['date_time'] = now()->startOfMinute()->toDateTimeString();
 
     livewire(TradesRelationManager::class, [
         'ownerRecord' => $portfolio,
         'pageClass' => ViewPortfolio::class,
     ])
         ->assertOk()
-        ->assertCanSeeTableRecords($portfolio->trades);
+        ->assertCanSeeTableRecords($portfolio->trades)
+        ->callAction(TestAction::make('create')->table(), $data);
 });

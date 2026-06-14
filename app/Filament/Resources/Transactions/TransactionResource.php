@@ -20,6 +20,7 @@ use App\Services\TransactionService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -32,6 +33,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 final class TransactionResource extends Resource
 {
@@ -70,7 +72,10 @@ final class TransactionResource extends Resource
                         ->default(fn (): ?string => $account instanceof Account ? $account->id : null)
                         ->live(true),
 
-                    self::amountField(),
+                    self::amountField()
+                        ->extraInputAttributes([
+                            'x-on:focus-amount-field.window' => '$nextTick(() => $el.focus())',
+                        ]),
 
                     self::typeSelectField()
                         ->options(TransactionType::class)
@@ -183,10 +188,12 @@ final class TransactionResource extends Resource
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(3)
             ->headerActions([
-                self::tableCreateAction()
-                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTransactions)
-                    /** @phpstan-ignore-next-line */
-                    ->action(fn (TransactionService $service, array $data): Transaction => $service->create($data)),
+                self::configureCreateAction()
+                    ->hidden(fn (?Component $livewire = null): bool => $livewire instanceof ListTransactions)
+                    ->after(function (Component $livewire): void {
+                        $livewire->dispatch('focus-amount-field');
+                        $livewire->dispatch('refreshInfolist');
+                    }),
             ])
             ->recordActions(self::getActions())
             ->toolbarActions(self::getBulkActions());
@@ -228,5 +235,20 @@ final class TransactionResource extends Resource
         return [
             'index' => ListTransactions::route('/'),
         ];
+    }
+
+    public static function configureCreateAction(): CreateAction
+    {
+        return self::createAction()
+            // @phpstan-ignore-next-line
+            ->using(fn (TransactionService $service, array $data): Transaction => $service->create($data))
+            ->preserveFormDataWhenCreatingAnother([
+                'date_time',
+                'type',
+                'account_id',
+                'transfer_account_id',
+                'category_id',
+                'subscription_id',
+            ]);
     }
 }

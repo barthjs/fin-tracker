@@ -20,6 +20,7 @@ use App\Services\TradeService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -30,6 +31,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 final class TradeResource extends Resource
 {
@@ -75,7 +77,9 @@ final class TradeResource extends Resource
                                 self::asTradeType($get('type')),
                             ));
                         })
-                        ->required(),
+                        ->extraInputAttributes([
+                            'x-on:focus-quantity-field.window' => '$nextTick(() => $el.focus())',
+                        ]),
 
                     self::tradeAmountField('price')
                         ->label(__('fields.price'))
@@ -224,10 +228,12 @@ final class TradeResource extends Resource
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(4)
             ->headerActions([
-                self::tableCreateAction()
-                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListTrades)
-                    /** @phpstan-ignore-next-line */
-                    ->action(fn (TradeService $service, array $data): Trade => $service->create($data)),
+                self::configureCreateAction()
+                    ->hidden(fn (?Component $livewire = null): bool => $livewire instanceof ListTrades)
+                    ->after(function (Component $livewire): void {
+                        $livewire->dispatch('focus-quantity-field');
+                        $livewire->dispatch('refreshInfolist');
+                    }),
             ])
             ->recordActions(self::getActions())
             ->toolbarActions(self::getBulkActions());
@@ -277,6 +283,20 @@ final class TradeResource extends Resource
         return [
             'index' => ListTrades::route('/'),
         ];
+    }
+
+    public static function configureCreateAction(): CreateAction
+    {
+        return self::createAction()
+            // @phpstan-ignore-next-line
+            ->using(fn (TradeService $service, array $data): Trade => $service->create($data))
+            ->preserveFormDataWhenCreatingAnother([
+                'date_time',
+                'type',
+                'account_id',
+                'portfolio_id',
+                'security_id',
+            ]);
     }
 
     private static function calculateTotalAmount(float $quantity, float $price, float $tax, float $fee, TradeType $type): float

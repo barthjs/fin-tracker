@@ -9,11 +9,10 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\TradeExporter;
 use App\Filament\Imports\TradeImporter;
 use App\Filament\Resources\Trades\TradeResource;
-use App\Models\Trade;
-use App\Services\TradeService;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Component;
 
 final class ListTrades extends ListRecords
 {
@@ -40,9 +39,8 @@ final class ListTrades extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            self::createAction()
-                /** @phpstan-ignore-next-line */
-                ->action(fn (TradeService $service, array $data): Trade => $service->create($data)),
+            TradeResource::configureCreateAction()
+                ->after(fn (Component $livewire) => $livewire->dispatch('focus-quantity-field')),
 
             self::importAction()
                 ->modalHeading(__('trade.import.modal_heading'))

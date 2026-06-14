@@ -25,6 +25,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
 trait HasResourceFormFields
@@ -105,8 +106,9 @@ trait HasResourceFormFields
             ->label(__('fields.date_time'))
             ->autofocus()
             ->seconds(false)
-            ->timezone(fn (): string => auth()->user()->timezone)
             ->default(today()->timezone(auth()->user()->timezone)->startOfDay())
+            ->formatStateUsing(fn (?string $state): string => Date::parse($state)->timezone(auth()->user()->timezone)->toDateTimeString())
+            ->dehydrateStateUsing(fn (?string $state): string => Date::parse($state, auth()->user()->timezone)->utc()->toDateTimeString())
             ->required();
     }
 

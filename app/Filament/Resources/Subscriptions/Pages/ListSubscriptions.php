@@ -11,8 +11,6 @@ use App\Filament\Resources\Subscriptions\SubscriptionResource;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionsByAccountChart;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionsByCategoryChart;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionStats;
-use App\Models\Subscription;
-use App\Services\SubscriptionService;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 
@@ -26,9 +24,7 @@ final class ListSubscriptions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            self::createAction()
-                /** @phpstan-ignore-next-line */
-                ->action(fn (SubscriptionService $service, array $data): Subscription => $service->create($data)),
+            SubscriptionResource::configureCreateAction(),
 
             self::importAction()
                 ->modalHeading(__('subscription.import.modal_heading'))

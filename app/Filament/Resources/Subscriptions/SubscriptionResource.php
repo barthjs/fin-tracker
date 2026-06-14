@@ -21,6 +21,7 @@ use App\Models\NotificationTarget;
 use App\Models\Subscription;
 use App\Services\SubscriptionService;
 use BackedEnum;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -43,6 +44,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 final class SubscriptionResource extends Resource
 {
@@ -90,7 +92,11 @@ final class SubscriptionResource extends Resource
                         ->schema([
                             Grid::make(2)
                                 ->schema([
-                                    self::nameField(),
+                                    self::nameField()
+                                        ->extraInputAttributes([
+                                            'x-on:focus-name-field.window' => '$nextTick(() => $el.focus())',
+                                        ]),
+
                                     self::amountField(),
                                 ]),
 
@@ -370,10 +376,8 @@ final class SubscriptionResource extends Resource
             ], FiltersLayout::AboveContentCollapsible)
             ->filtersFormColumns(3)
             ->headerActions([
-                self::tableCreateAction()
-                    ->hidden(fn (mixed $livewire = null): bool => $livewire instanceof ListSubscriptions)
-                    /** @phpstan-ignore-next-line */
-                    ->action(fn (SubscriptionService $service, array $data): Subscription => $service->create($data)),
+                self::configureCreateAction()
+                    ->hidden(fn (?Component $livewire = null): bool => $livewire instanceof ListSubscriptions),
             ])
             ->recordActions([
                 self::tableEditAction()
@@ -400,5 +404,13 @@ final class SubscriptionResource extends Resource
             'index' => ListSubscriptions::route('/'),
             'view' => ViewSubscription::route('/{record}'),
         ];
+    }
+
+    public static function configureCreateAction(): CreateAction
+    {
+        return self::createAction()
+            // @phpstan-ignore-next-line
+            ->using(fn (SubscriptionService $service, array $data): Subscription => $service->create($data))
+            ->after(fn (Component $livewire) => $livewire->dispatch('focus-name-field'));
     }
 }

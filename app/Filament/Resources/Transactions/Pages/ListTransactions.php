@@ -10,11 +10,10 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Exports\TransactionExporter;
 use App\Filament\Imports\TransactionImporter;
 use App\Filament\Resources\Transactions\TransactionResource;
-use App\Models\Transaction;
-use App\Services\TransactionService;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Component;
 
 final class ListTransactions extends ListRecords
 {
@@ -73,9 +72,8 @@ final class ListTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            self::createAction()
-                /** @phpstan-ignore-next-line */
-                ->action(fn (TransactionService $service, array $data): Transaction => $service->create($data)),
+            TransactionResource::configureCreateAction()
+                ->after(fn (Component $livewire) => $livewire->dispatch('focus-amount-field')),
 
             self::importAction()
                 ->modalHeading(__('transaction.import.modal_heading'))
