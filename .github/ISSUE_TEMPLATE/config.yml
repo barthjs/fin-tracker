@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 🤝 Contributing Guide
+  - name: Contributing Guide
     url: https://github.com/barthjs/fin-tracker/blob/main/CONTRIBUTING.md
     about: How to set up development, run checks and submit changes

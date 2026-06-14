@@ -1,4 +1,4 @@
-name: "✨ Feature request"
+name: Feature request
 description: Suggest an idea to improve Fin‑Tracker
 title: "[Feature] "
 labels: [ enhancement ]
@@ -11,14 +11,12 @@ body:
       options:
         - label: I searched existing issues and didn’t find a similar request
           required: true
-        - label: This aligns with the project scope
-          required: true
 
   - type: textarea
     id: problem
     attributes:
       label: Problem / use case
-      description: What problem does this feature solve?
+      description: Please describe the problem you are trying to solve
     validations:
       required: true
 
@@ -26,7 +24,7 @@ body:
     id: proposal
     attributes:
       label: Proposed solution
-      description: Describe the behavior.
+      description: What feature are you proposing to solve this problem?
     validations:
       required: true
 

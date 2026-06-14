@@ -2,25 +2,29 @@
 
 Describe what this PR changes and why.
 
-Closes # (issue)
+Closes #
 
 ## Type of change
 
-- [ ] Bug fix
+- [ ] Chore
+- [ ] CI
+- [ ] Docs
 - [ ] Feature
-- [ ] Refactor/cleanup
-- [ ] Documentation
-- [ ] Chore (build/devops)
+- [ ] Fix
+- [ ] Performance
+- [ ] Refactor
+- [ ] Revert
+- [ ] Style
+- [ ] Test
 
 ## Checklist
 
-- [ ] I read and followed CONTRIBUTING.md.
-- [ ] I ran the full suite locally: `composer test`
+- [ ] I read and followed CONTRIBUTING.md
 - [ ] Tests were added/updated when needed
-- [ ] If applicable, I have tested my code on both mobile & desktop devices, using the latest version of major browsers.
-- [ ] Translations were updated if needed.
+- [ ] If applicable, I have tested my code on all platforms, using the latest version of major browsers
+- [ ] Translations were updated if needed
 - [ ] If applicable, I have added corresponding documentation changes.
 
 ## Screenshots
 
-If the UI changes, add before/after screenshots.
+If the UI changes, add screenshots before/after.
