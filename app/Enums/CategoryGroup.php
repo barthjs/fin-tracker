@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use App\Enums\Concerns\HasOrderedCases;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
 enum CategoryGroup: string implements HasColor, HasLabel
 {
+    use HasOrderedCases;
+
     case FixExpenses = 'fix_expenses';
     case VarExpenses = 'var_expenses';
     case FixRevenues = 'fix_revenues';

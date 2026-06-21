@@ -145,6 +145,18 @@ it('can search categories by their group label', function (): void {
         ->assertCanNotSeeTableRecords([$revenue]);
 });
 
+it('sorts categories by group in declaration order', function (): void {
+    $categories = collect(CategoryGroup::cases())
+        ->reverse()
+        ->map(fn (CategoryGroup $group): Category => Category::factory()->create(['group' => $group]));
+
+    livewire(ListCategories::class)
+        ->sortTable('group')
+        ->assertCanSeeTableRecords($categories->reverse(), inOrder: true)
+        ->sortTable('group', 'desc')
+        ->assertCanSeeTableRecords($categories, inOrder: true);
+});
+
 it('filters categories by type via tabs', function (): void {
     $expense = Category::factory()->create(['group' => CategoryGroup::VarExpenses]);
     $revenue = Category::factory()->create(['group' => CategoryGroup::VarRevenues]);

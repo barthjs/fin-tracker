@@ -46,3 +46,15 @@ it('lists statistics scoped to the user and filters by year and type', function 
         ->assertCanSeeTableRecords([$currentRevenue])
         ->assertCanNotSeeTableRecords([$currentExpense]);
 });
+
+it('groups statistics by category group in declaration order', function (): void {
+    $statistics = collect([CategoryGroup::VarRevenues, CategoryGroup::FixRevenues, CategoryGroup::VarExpenses])
+        ->map(fn (CategoryGroup $group): CategoryStatistic => CategoryStatistic::factory()->create([
+            'category_id' => Category::factory()->create(['group' => $group])->id,
+            'year' => now()->year,
+        ]));
+
+    livewire(ListCategoryStatistics::class)
+        ->loadTable()
+        ->assertCanSeeTableRecords($statistics->reverse(), inOrder: true);
+});

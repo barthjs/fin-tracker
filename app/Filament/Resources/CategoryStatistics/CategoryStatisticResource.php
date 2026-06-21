@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\CategoryStatistics;
 
+use App\Enums\CategoryGroup;
 use App\Enums\Currency;
 use App\Enums\TransactionType;
 use App\Filament\Resources\Categories\Pages\ViewCategory;
@@ -20,6 +21,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 final class CategoryStatisticResource extends Resource
@@ -67,7 +69,12 @@ final class CategoryStatisticResource extends Resource
                 Group::make('category.group')
                     ->label('')
                     ->collapsible()
-                    ->getTitleFromRecordUsing(fn (CategoryStatistic $record): string => $record->category->group->getLabel().' '.$record->year),
+                    ->getTitleFromRecordUsing(fn (CategoryStatistic $record): string => $record->category->group->getLabel().' '.$record->year)
+                    ->orderQueryUsing(fn (Builder $query, string $direction): Builder => CategoryGroup::orderQueryUsing(
+                        $query,
+                        DB::raw('(SELECT "group" FROM categories WHERE categories.id = category_statistics.category_id)'),
+                        $direction,
+                    )),
             ])
             ->filters([
                 SelectFilter::make('year')

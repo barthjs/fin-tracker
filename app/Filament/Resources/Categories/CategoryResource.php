@@ -144,7 +144,7 @@ final class CategoryResource extends Resource
 
                     return $query->whereIn('group', $groups);
                 })
-                ->sortable(),
+                ->sortable(query: fn (Builder $query, string $direction): Builder => CategoryGroup::orderQueryUsing($query, 'group', $direction)),
 
             self::statusColumn(),
         ];
