@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Exports;
 
+use App\Enums\Country;
+use App\Enums\SecurityRegion;
+use App\Enums\SecuritySector;
 use App\Enums\SecurityType;
 use App\Filament\Concerns\HasResourceExportColumns;
 use App\Models\Security;
@@ -31,6 +34,27 @@ final class SecurityExporter extends Exporter
 
             self::typeColum()
                 ->formatStateUsing(fn (SecurityType $state): string => $state->getLabel()),
+
+            ExportColumn::make('region')
+                ->label(__('security.fields.region'))
+                ->formatStateUsing(fn (?SecurityRegion $state): string => $state?->getLabel() ?? ''),
+
+            ExportColumn::make('sector')
+                ->label(__('security.fields.sector'))
+                ->formatStateUsing(fn (?SecuritySector $state): string => $state?->getLabel() ?? ''),
+
+            ExportColumn::make('country')
+                ->label(__('security.fields.country'))
+                ->formatStateUsing(fn (?Country $state): string => $state?->getLabel() ?? ''),
+
+            ExportColumn::make('exchange')
+                ->label(__('security.fields.exchange')),
+
+            ExportColumn::make('ter')
+                ->label(__('security.fields.ter')),
+
+            ExportColumn::make('website')
+                ->label(__('security.fields.website')),
 
             self::numericColumn('price', 6)
                 ->label(__('fields.price')),

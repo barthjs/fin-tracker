@@ -11,6 +11,12 @@ return [
         'isin' => 'ISIN',
         'symbol' => 'Symbol',
         'total_quantity' => 'Quantity',
+        'region' => 'Region',
+        'sector' => 'Sector',
+        'country' => 'Country',
+        'exchange' => 'Exchange',
+        'ter' => 'TER (%)',
+        'website' => 'Website',
     ],
 
     'type' => [
@@ -21,6 +27,44 @@ return [
         'stock' => 'Stock',
     ],
 
+    'region' => [
+        'global' => 'Global',
+        'north_america' => 'North America',
+        'latin_america' => 'Latin America',
+        'europe' => 'Europe',
+        'asia_pacific' => 'Asia Pacific',
+        'middle_east_africa' => 'Middle East & Africa',
+    ],
+
+    'sector' => [
+        'energy' => 'Energy',
+        'materials' => 'Materials',
+        'industrials' => 'Industrials',
+        'consumer_discretionary' => 'Consumer Discretionary',
+        'consumer_staples' => 'Consumer Staples',
+        'health_care' => 'Health Care',
+        'financials' => 'Financials',
+        'information_technology' => 'Information Technology',
+        'communication_services' => 'Communication Services',
+        'utilities' => 'Utilities',
+        'real_estate' => 'Real Estate',
+    ],
+
+    'unassigned' => 'Unassigned',
+
+    'sections' => [
+        'general' => 'General',
+        'classification' => 'Classification',
+        'appearance' => 'Appearance',
+    ],
+
+    'buttons' => [
+        'bulk_edit_classification' => 'Edit classification',
+        'bulk_edit_region' => 'Edit region',
+        'bulk_edit_sector' => 'Edit sector',
+        'bulk_edit_country' => 'Edit country',
+    ],
+
     'import' => [
         'modal_heading' => 'Import Securities',
         'failure_heading' => 'Security import failed',
@@ -28,6 +72,10 @@ return [
         'body_heading' => 'The security import has been completed.',
         'body_failure' => 'Failed rows: ',
         'body_success' => 'Successfully imported rows: ',
+
+        'errors' => [
+            'invalid_value' => 'The value ":value" is invalid.',
+        ],
 
         'examples' => [
             'name' => [
@@ -54,6 +102,36 @@ return [
                 '100.00',
                 '200.00',
                 '300.00',
+            ],
+            'region' => [
+                'North America',
+                'North America',
+                'North America',
+            ],
+            'sector' => [
+                '',
+                'Information Technology',
+                'Information Technology',
+            ],
+            'country' => [
+                'US',
+                'US',
+                'US',
+            ],
+            'exchange' => [
+                'NYSE',
+                'NASDAQ',
+                'NASDAQ',
+            ],
+            'ter' => [
+                '0.09',
+                '',
+                '',
+            ],
+            'website' => [
+                'https://www.ssga.com',
+                'https://www.apple.com',
+                'https://www.microsoft.com',
             ],
         ],
     ],

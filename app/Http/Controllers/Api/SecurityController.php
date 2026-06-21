@@ -34,6 +34,10 @@ final class SecurityController
                 AllowedFilter::exact('type'),
                 AllowedFilter::exact('total_quantity'),
                 AllowedFilter::exact('market_value'),
+                AllowedFilter::exact('region'),
+                AllowedFilter::exact('sector'),
+                AllowedFilter::exact('country'),
+                'exchange',
                 'description',
                 'color',
                 AllowedFilter::exact('is_active'),
@@ -46,6 +50,7 @@ final class SecurityController
                 'price',
                 'total_quantity',
                 'market_value',
+                'ter',
             ])
             ->defaultSort('name')
             ->paginate()

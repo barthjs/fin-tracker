@@ -9,10 +9,14 @@ use App\Filament\Exports\SecurityExporter;
 use App\Filament\Imports\SecurityImporter;
 use App\Filament\Resources\Securities\SecurityResource;
 use App\Filament\Resources\Securities\Widgets\SecurityChart;
+use App\Filament\Resources\Securities\Widgets\SecurityRegionChart;
+use App\Filament\Resources\Securities\Widgets\SecuritySectorChart;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 
 final class ListSecurities extends ListRecords
 {
+    use ExposesTableToWidgets;
     use HasResourceActions;
 
     protected static string $resource = SecurityResource::class;
@@ -21,6 +25,8 @@ final class ListSecurities extends ListRecords
     {
         return [
             SecurityChart::class,
+            SecurityRegionChart::class,
+            SecuritySectorChart::class,
         ];
     }
 

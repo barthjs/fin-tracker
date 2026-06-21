@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Securities\Widgets;
 
+use App\Filament\Concerns\HasSecurityFilters;
+use App\Filament\Resources\Securities\Pages\ListSecurities;
 use App\Models\Security;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Illuminate\Support\Collection;
 
 final class SecurityChart extends ChartWidget
 {
+    use HasSecurityFilters;
+    use InteractsWithPageTable;
+
     protected int|string|array $columnSpan = 'full';
 
     protected ?string $pollingInterval = null;
@@ -32,9 +38,8 @@ final class SecurityChart extends ChartWidget
 
     protected function getData(): array
     {
-        $securities = Security::query()->where('is_active', true)
-            ->orderBy('market_value', 'desc')
-            ->get();
+        $query = Security::query()->orderBy('market_value', 'desc');
+        $securities = $this->applyFilters($query)->get();
 
         $labels = [];
         $series = [];
@@ -56,6 +61,14 @@ final class SecurityChart extends ChartWidget
             ],
             'labels' => $labels,
         ];
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    protected function getTablePage(): string
+    {
+        return ListSecurities::class;
     }
 
     protected function getType(): string

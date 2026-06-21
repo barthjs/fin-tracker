@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Enums\CategoryGroup;
+use App\Enums\Country;
 use App\Enums\PeriodUnit;
+use App\Enums\SecurityRegion;
+use App\Enums\SecuritySector;
 use App\Enums\SecurityType;
 use App\Enums\TradeType;
 use App\Enums\TransactionType;
@@ -18,6 +21,7 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Portfolio;
 use App\Models\Security;
+use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 
@@ -187,6 +191,59 @@ it('imports a security with its type and deduplicates on re-import', function ()
         'type' => SecurityType::Stock->value,
         'price' => 150.0,
     ]);
+});
+
+it('imports a security with classification values or labels', function (): void {
+    importRow(SecurityImporter::class, [
+        'name' => 'Allianz',
+        'type' => SecurityType::Stock->getLabel(),
+        'region' => SecurityRegion::Europe->getLabel(),
+        'sector' => SecuritySector::Financials->value,
+        'country' => mb_strtolower(Country::DE->value),
+        'exchange' => 'XETRA',
+        'ter' => '0,20',
+        'website' => 'https://www.allianz.com',
+        'price' => '250',
+    ]);
+
+    assertDatabaseHas('securities', [
+        'name' => 'Allianz',
+        'region' => SecurityRegion::Europe->value,
+        'sector' => SecuritySector::Financials->value,
+        'country' => Country::DE->value,
+        'exchange' => 'XETRA',
+        'ter' => 0.2,
+        'website' => 'https://www.allianz.com',
+    ]);
+});
+
+it('imports a security without classification fields', function (): void {
+    importRow(SecurityImporter::class, [
+        'name' => 'Allianz',
+        'type' => SecurityType::Stock->getLabel(),
+        'region' => '',
+        'sector' => '',
+        'country' => '',
+        'ter' => '',
+        'price' => '250',
+    ]);
+
+    assertDatabaseHas('securities', [
+        'name' => 'Allianz',
+        'region' => null,
+        'sector' => null,
+        'country' => null,
+        'ter' => null,
+    ]);
+});
+
+it('rejects a security import row with an unknown classification value', function (): void {
+    expect(fn () => importRow(SecurityImporter::class, [
+        'name' => 'Allianz',
+        'type' => SecurityType::Stock->getLabel(),
+        'country' => 'ZZ',
+        'price' => '250',
+    ]))->toThrow(RowImportFailedException::class);
 });
 
 it('imports a trade and resolves account, portfolio and security', function (): void {

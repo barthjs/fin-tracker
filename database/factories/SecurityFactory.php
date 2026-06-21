@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\Country;
+use App\Enums\SecurityRegion;
+use App\Enums\SecuritySector;
 use App\Enums\SecurityType;
 use App\Models\Security;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -31,6 +34,12 @@ final class SecurityFactory extends Factory
             'description' => fake()->text(20),
             'color' => fake()->hexColor(),
             'is_active' => true,
+            'region' => fake()->optional(0.7)->randomElement(SecurityRegion::cases()),
+            'sector' => fake()->optional(0.7)->randomElement(SecuritySector::cases()),
+            'country' => fake()->optional(0.7)->randomElement(Country::cases()),
+            'exchange' => fake()->optional(0.5)->randomElement(['XETRA', 'NYSE', 'NASDAQ', 'LSE', 'SIX']),
+            'ter' => fake()->optional(0.5)->randomFloat(2, 0.05, 1.5),
+            'website' => fake()->optional(0.5)->url(),
         ];
     }
 

@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\Country;
+use App\Enums\SecurityRegion;
+use App\Enums\SecuritySector;
+use App\Enums\SecurityType;
 use App\Enums\TradeType;
 use App\Filament\Resources\Securities\Pages\ListSecurities;
 use App\Filament\Resources\Securities\Pages\ViewSecurity;
@@ -40,6 +44,34 @@ it('can filter securities by inactivity', function (): void {
         ->assertCanNotSeeTableRecords([$activeSecurity]);
 });
 
+it('can filter securities by classification', function (): void {
+    $matching = Security::factory()->create([
+        'type' => SecurityType::ETF,
+        'region' => SecurityRegion::Europe,
+        'sector' => SecuritySector::Financials,
+        'country' => Country::DE,
+    ]);
+    $other = Security::factory()->create(['region' => SecurityRegion::AsiaPacific]);
+    $inactive = Security::factory()->create(['region' => SecurityRegion::Europe, 'is_active' => false]);
+
+    livewire(ListSecurities::class)
+        ->filterTable('type', [SecurityType::ETF->value])
+        ->filterTable('region', [SecurityRegion::Europe->value])
+        ->filterTable('sector', [SecuritySector::Financials->value])
+        ->filterTable('country', [Country::DE->value])
+        ->assertCanSeeTableRecords([$matching])
+        ->assertCanNotSeeTableRecords([$other, $inactive]);
+});
+
+it('can group securities by classification', function (string $group): void {
+    $securities = Security::factory()->count(2)->create();
+    $unassigned = Security::factory()->create(['region' => null, 'sector' => null]);
+
+    livewire(ListSecurities::class)
+        ->set('tableGrouping', $group)
+        ->assertCanSeeTableRecords($securities->push($unassigned));
+})->with(['region', 'sector']);
+
 it('can create a security', function (): void {
     $data = Security::factory()->make()->toArray();
 
@@ -62,6 +94,10 @@ it('renders the view page', function (): void {
             'price' => $security->price,
             'total_quantity' => $security->total_quantity,
             'type' => $security->type,
+            'ter' => $security->ter,
+            'region' => $security->region,
+            'sector' => $security->sector,
+            'country' => $security->country,
         ], 'infolist');
 });
 
@@ -77,6 +113,40 @@ it('can edit a security', function (): void {
         ->assertHasNoFormErrors();
 
     assertDatabaseHas('securities', array_merge(['id' => $security->id], $data));
+});
+
+it('can bulk edit the classification of securities', function (string $field, string $value): void {
+    $securities = Security::factory()->count(2)->create();
+
+    livewire(ListSecurities::class)
+        ->callTableBulkAction($field, $securities, [$field => $value])
+        ->assertHasNoTableBulkActionErrors();
+
+    foreach ($securities as $security) {
+        assertDatabaseHas('securities', [
+            'id' => $security->id,
+            $field => $value,
+        ]);
+    }
+})->with([
+    'region' => ['region', SecurityRegion::Europe->value],
+    'sector' => ['sector', SecuritySector::Financials->value],
+    'country' => ['country', Country::DE->value],
+]);
+
+it('can bulk clear the classification of securities', function (): void {
+    $securities = Security::factory()->count(2)->create(['region' => SecurityRegion::Europe]);
+
+    livewire(ListSecurities::class)
+        ->callTableBulkAction('region', $securities, ['region' => null])
+        ->assertHasNoTableBulkActionErrors();
+
+    foreach ($securities as $security) {
+        assertDatabaseHas('securities', [
+            'id' => $security->id,
+            'region' => null,
+        ]);
+    }
 });
 
 it('can delete a security', function (): void {

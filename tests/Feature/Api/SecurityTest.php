@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Enums\ApiAbility;
+use App\Enums\Country;
+use App\Enums\SecurityRegion;
+use App\Enums\SecuritySector;
 use App\Enums\SecurityType;
 use App\Models\Security;
 use App\Models\Trade;
@@ -43,6 +46,12 @@ describe('Security API', function (): void {
                         'price',
                         'total_quantity',
                         'market_value',
+                        'region',
+                        'sector',
+                        'country',
+                        'exchange',
+                        'ter',
+                        'website',
                         'description',
                         'logo',
                         'color',
@@ -78,6 +87,11 @@ describe('Security API', function (): void {
             'symbol' => 'NEWS',
             'type' => SecurityType::Stock->value,
             'price' => 150.50,
+            'region' => SecurityRegion::NorthAmerica->value,
+            'sector' => SecuritySector::InformationTechnology->value,
+            'country' => Country::US->value,
+            'exchange' => 'NASDAQ',
+            'website' => 'https://example.com',
             'description' => 'A new test security',
             'color' => '#ff0000',
             'is_active' => true,
@@ -91,6 +105,9 @@ describe('Security API', function (): void {
             ->assertJsonPath('data.type', $data['type'])
             ->assertJsonPath('data.price', $data['price'])
             ->assertJsonPath('data.total_quantity', 0)
+            ->assertJsonPath('data.region', $data['region'])
+            ->assertJsonPath('data.sector', $data['sector'])
+            ->assertJsonPath('data.country', $data['country'])
             ->assertJsonPath('data.description', $data['description'])
             ->assertJsonPath('data.color', $data['color'])
             ->assertJsonPath('data.is_active', $data['is_active']);
@@ -139,6 +156,8 @@ describe('Security API', function (): void {
             'symbol' => 'UPDT',
             'type' => SecurityType::ETF->value,
             'price' => 200.75,
+            'region' => SecurityRegion::Global->value,
+            'ter' => 0.2,
             'description' => 'Updated description',
             'color' => '#000000',
             'is_active' => false,
@@ -151,6 +170,8 @@ describe('Security API', function (): void {
             ->assertJsonPath('data.symbol', $data['symbol'])
             ->assertJsonPath('data.type', $data['type'])
             ->assertJsonPath('data.price', $data['price'])
+            ->assertJsonPath('data.region', $data['region'])
+            ->assertJsonPath('data.ter', $data['ter'])
             ->assertJsonPath('data.description', $data['description'])
             ->assertJsonPath('data.color', $data['color'])
             ->assertJsonPath('data.is_active', $data['is_active']);

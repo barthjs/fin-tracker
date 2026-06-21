@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Contracts\HasDeletableFiles;
+use App\Enums\Country;
+use App\Enums\SecurityRegion;
+use App\Enums\SecuritySector;
 use App\Enums\SecurityType;
 use App\Models\Scopes\UserScope;
 use App\Observers\FileCleanupObserver;
@@ -37,6 +40,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $user_id
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property SecurityRegion|null $region
+ * @property SecuritySector|null $sector
+ * @property Country|null $country
+ * @property string|null $exchange
+ * @property float|null $ter
+ * @property string|null $website
  * @property-read User $user
  * @property-read Collection<int, Trade> $trades
  */
@@ -72,6 +81,10 @@ final class Security extends Model implements HasDeletableFiles
             'total_quantity' => 'float',
             'market_value' => 'float',
             'is_active' => 'bool',
+            'region' => SecurityRegion::class,
+            'sector' => SecuritySector::class,
+            'country' => Country::class,
+            'ter' => 'float',
         ];
     }
 

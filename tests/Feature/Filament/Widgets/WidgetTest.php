@@ -3,8 +3,14 @@
 declare(strict_types=1);
 
 use App\Enums\CategoryGroup;
+use App\Enums\Country;
+use App\Enums\SecurityRegion;
+use App\Enums\SecuritySector;
+use App\Enums\SecurityType;
 use App\Filament\Resources\CategoryStatistics\Widgets\CategoryStatisticChart;
 use App\Filament\Resources\Securities\Widgets\SecurityChart;
+use App\Filament\Resources\Securities\Widgets\SecurityRegionChart;
+use App\Filament\Resources\Securities\Widgets\SecuritySectorChart;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionsByAccountChart;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionsByCategoryChart;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionStats;
@@ -56,10 +62,38 @@ it('renders the dashboard widgets', function (string $widget): void {
     TotalOverviewTable::class,
 ]);
 
-it('renders the security chart', function (): void {
+it('renders the security widgets', function (string $widget): void {
     seedFinancialData();
 
-    livewire(SecurityChart::class)->assertOk();
+    livewire($widget)->assertOk();
+})->with([
+    SecurityChart::class,
+    SecurityRegionChart::class,
+    SecuritySectorChart::class,
+]);
+
+it('applies the table filters to the security widgets', function (): void {
+    $matching = Security::factory()->create([
+        'type' => SecurityType::Stock,
+        'region' => SecurityRegion::Europe,
+        'sector' => SecuritySector::Financials,
+        'country' => Country::DE,
+        'is_active' => false,
+    ]);
+    Security::factory()->create(['region' => SecurityRegion::AsiaPacific, 'is_active' => false]);
+
+    livewire(SecurityRegionChart::class, [
+        'tableFilters' => [
+            'type' => ['values' => [$matching->type->value]],
+            'region' => ['values' => [SecurityRegion::Europe->value]],
+            'sector' => ['values' => [SecuritySector::Financials->value]],
+            'country' => ['values' => [Country::DE->value]],
+            'inactive' => ['isActive' => true],
+        ],
+    ])
+        ->assertOk()
+        ->assertSee(SecurityRegion::Europe->getLabel())
+        ->assertDontSee(SecurityRegion::AsiaPacific->getLabel());
 });
 
 it('renders the subscription widgets', function (string $widget): void {

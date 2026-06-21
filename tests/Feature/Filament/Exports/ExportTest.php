@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Enums\CategoryGroup;
+use App\Enums\Country;
+use App\Enums\SecurityRegion;
+use App\Enums\SecuritySector;
 use App\Enums\TransactionType;
 use App\Filament\Exports\AccountExporter;
 use App\Filament\Exports\CategoryExporter;
@@ -83,6 +86,19 @@ it('formats a security row', function (): void {
     expect(exportRow(SecurityExporter::class, $security))
         ->toContain('Apple')
         ->toContain('US0378331005');
+});
+
+it('formats a security row with classification labels', function (): void {
+    $security = Security::factory()->create([
+        'region' => SecurityRegion::Europe,
+        'sector' => SecuritySector::Financials,
+        'country' => Country::DE,
+    ]);
+
+    expect(exportRow(SecurityExporter::class, $security))
+        ->toContain(SecurityRegion::Europe->getLabel())
+        ->toContain(SecuritySector::Financials->getLabel())
+        ->toContain(Country::DE->getLabel());
 });
 
 it('formats a trade row with related names', function (): void {
