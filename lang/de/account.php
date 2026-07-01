@@ -10,10 +10,17 @@ return [
     'fields' => [
         'balance' => 'Kontostand',
         'transfer_account_id' => 'Zielkonto',
+        'notify_on_low_balance' => 'Bei niedrigem Kontostand benachrichtigen',
+        'low_balance_threshold' => 'Schwellwert',
     ],
 
     'buttons' => [
         'bulk_edit_account' => 'Konto bearbeiten',
+    ],
+
+    'notifications' => [
+        'low_balance_title' => 'Niedriger Kontostand: :name',
+        'low_balance_body' => 'Das Konto :name ist unter :threshold gefallen (aktueller Kontostand: :balance).',
     ],
 
     'import' => [

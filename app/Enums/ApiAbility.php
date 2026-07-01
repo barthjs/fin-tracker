@@ -7,6 +7,7 @@ namespace App\Enums;
 enum ApiAbility: string
 {
     case ACCOUNT = 'account';
+    case BUDGET = 'budget';
     case CATEGORY = 'category';
     case PORTFOLIO = 'portfolio';
     case SECURITY = 'security';

@@ -10,10 +10,17 @@ return [
     'fields' => [
         'balance' => 'Balance',
         'transfer_account_id' => 'Target account',
+        'notify_on_low_balance' => 'Notify on low balance',
+        'low_balance_threshold' => 'Threshold',
     ],
 
     'buttons' => [
         'bulk_edit_account' => 'Edit account',
+    ],
+
+    'notifications' => [
+        'low_balance_title' => 'Low balance: :name',
+        'low_balance_body' => 'The account :name has fallen below :threshold (current balance: :balance).',
     ],
 
     'import' => [

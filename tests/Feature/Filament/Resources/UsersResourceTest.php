@@ -13,6 +13,7 @@ use App\Filament\Resources\Users\RelationManagers\AccountsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\CategoriesRelationManager;
 use App\Filament\Resources\Users\RelationManagers\PortfoliosRelationManager;
 use App\Filament\Resources\Users\RelationManagers\SecuritiesRelationManager;
+use App\Models\Account;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 
@@ -67,6 +68,26 @@ it('can load the accounts relation manager', function (): void {
     ])
         ->assertOk()
         ->assertCanSeeTableRecords($user->accounts);
+});
+
+it('creates an account for the user without offering low balance notifications in the accounts relation manager', function (): void {
+    $user = User::factory()->create();
+
+    $data = Account::factory()->make()->toArray();
+
+    livewire(AccountsRelationManager::class, [
+        'ownerRecord' => $user,
+        'pageClass' => ViewUser::class,
+    ])
+        ->mountAction(TestAction::make('create')->table())
+        ->assertSchemaComponentDoesNotExist('low_balance_targets')
+        ->fillForm($data)
+        ->callMountedAction()
+        ->assertHasNoFormErrors();
+
+    $account = Account::query()->withoutGlobalScopes()->where('name', $data['name'])->firstOrFail();
+
+    expect($account->user_id)->toBe($user->id);
 });
 
 it('can load the categories relation manager', function (): void {

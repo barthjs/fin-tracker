@@ -2,15 +2,15 @@
 @if (!empty($availableProviders))
     <div class="flex flex-col items-center space-y-4">
         <div class="flex w-full items-center">
-            <div class="grow border-t border-gray-300 dark:border-gray-700"></div>
-            <span class="px-3 text-gray-500">
+            <div class="app-divider grow border-t"></div>
+            <span class="app-text-muted px-3">
                 @if ($mode === 'login')
                     {{ __('or sign in with') }}
                 @else
                     {{ __('or sign up with') }}
                 @endif
             </span>
-            <div class="grow border-t border-gray-300 dark:border-gray-700"></div>
+            <div class="app-divider grow border-t"></div>
         </div>
 
         <div class="grid @if(count($availableProviders) > 1) md:grid-cols-2 @endif gap-4 w-full">

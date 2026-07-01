@@ -27,6 +27,9 @@ final class AccountResource extends JsonResource
             'logo' => $this->logo,
             'color' => $this->color,
             'is_active' => $this->is_active,
+            'notify_on_low_balance' => $this->notify_on_low_balance,
+            'low_balance_threshold' => $this->low_balance_threshold,
+            'low_balance_notified_at' => $this->low_balance_notified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

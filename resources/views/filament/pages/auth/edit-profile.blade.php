@@ -22,10 +22,10 @@
 
     @if (!empty($this->oidcProviders))
         <x-filament::section :heading="__('profile.oidc.heading')">
-            <div class="-mx-6 -my-6 divide-y divide-gray-200 dark:divide-white/5">
+            <div class="app-list -mx-6 -my-6 divide-y">
                 @foreach ($this->oidcProviders as $slug => $provider)
                     <div
-                        class="flex items-center justify-between p-6 transition duration-200 hover:bg-gray-50 dark:hover:bg-white/5"
+                        class="app-list-item flex items-center justify-between p-6 transition duration-200"
                     >
                         <div class="flex items-center gap-4">
                             <div class="flex h-8 w-8 items-center justify-center">
@@ -34,7 +34,7 @@
 
                             <div>
                                 <div class="text-sm font-medium">{{ $provider['label'] }}</div>
-                                <div class="text-xs text-gray-500">
+                                <div class="app-text-muted text-xs">
                                     {{
                                         $provider['is_connected']
                                             ? __('profile.oidc.connected')
@@ -76,7 +76,7 @@
             {{ $this->createApiTokenAction }}
         </x-slot>
 
-        <div class="-mx-6 -my-6 divide-y divide-gray-200 dark:divide-white/5">
+        <div class="app-list -mx-6 -my-6 divide-y">
             @if ($this->apiTokens->isEmpty())
                 <x-filament::empty-state :contained="false">
                     <x-slot name="heading">
@@ -89,7 +89,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col gap-1">
                                 <div class="text-sm font-medium">{{ $token->name }}</div>
-                                <div class="space-y-0.5 text-xs text-gray-500">
+                                <div class="app-text-muted space-y-0.5 text-xs">
                                     <div>
                                         <span class="font-medium"
                                             >{{ __('fields.created_at') }}:</span
@@ -160,23 +160,19 @@
             </x-slot>
         @endif
 
-        <div class="-mx-6 -my-6 divide-y divide-gray-200 dark:divide-white/5">
+        <div class="app-list -mx-6 -my-6 divide-y">
             @foreach ($this->sessions as $session)
-                <div
-                    class="flex items-center gap-4 p-6 transition duration-200 hover:bg-gray-50 dark:hover:bg-white/5"
-                >
-                    <div
-                        class="flex items-center justify-center rounded-lg bg-gray-100 p-2 dark:bg-white/5"
-                    >
+                <div class="app-list-item flex items-center gap-4 p-6 transition duration-200">
+                    <div class="app-icon-tile flex items-center justify-center rounded-lg p-2">
                         @if ($session['device']['is_desktop'])
                             <x-filament::icon
                                 icon="tabler-device-desktop"
-                                class="h-8 w-8 text-gray-500 dark:text-gray-400"
+                                class="app-text-muted h-8 w-8"
                             />
                         @else
                             <x-filament::icon
                                 icon="tabler-device-mobile"
-                                class="h-8 w-8 text-gray-500 dark:text-gray-400"
+                                class="app-text-muted h-8 w-8"
                             />
                         @endif
                     </div>
@@ -192,7 +188,7 @@
                             }}
                         </div>
 
-                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                        <div class="app-text-muted flex items-center gap-2 text-xs">
                             {{ $session['ip_address'] }}
 
                             @if ($session['is_current_device'])
@@ -211,7 +207,7 @@
                                     </span>
                                 </div>
                             @else
-                                <span class="text-gray-300 dark:text-gray-600">•</span>
+                                <span class="app-text-subtle">•</span>
                                 <span>
                                     {{ __('profile.sessions.last_active') }} {{
                                         Carbon::createFromTimestamp(

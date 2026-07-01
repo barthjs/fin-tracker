@@ -9,6 +9,7 @@ use App\Contracts\HasDeletableFiles;
 use App\Enums\Currency;
 use App\Models\Scopes\UserScope;
 use App\Models\Traits\HasChartDefaults;
+use App\Models\Traits\HasNotificationAssignments;
 use App\Observers\AccountObserver;
 use App\Observers\FileCleanupObserver;
 use Carbon\CarbonInterface;
@@ -32,6 +33,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $logo
  * @property string $color
  * @property bool $is_active
+ * @property bool $notify_on_low_balance
+ * @property float $low_balance_threshold
+ * @property CarbonInterface|null $low_balance_notified_at
  * @property string $user_id
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -51,6 +55,7 @@ final class Account extends Model implements Chartable, HasDeletableFiles
     /** @use HasFactory<AccountFactory> */
     use HasFactory;
 
+    use HasNotificationAssignments;
     use HasUlids;
 
     /**
@@ -61,6 +66,8 @@ final class Account extends Model implements Chartable, HasDeletableFiles
     protected $attributes = [
         'balance' => 0.0,
         'is_active' => true,
+        'notify_on_low_balance' => false,
+        'low_balance_threshold' => 0.0,
     ];
 
     /**
@@ -80,6 +87,9 @@ final class Account extends Model implements Chartable, HasDeletableFiles
             'balance' => 'float',
             'currency' => Currency::class,
             'is_active' => 'bool',
+            'notify_on_low_balance' => 'bool',
+            'low_balance_threshold' => 'float',
+            'low_balance_notified_at' => 'datetime',
         ];
     }
 

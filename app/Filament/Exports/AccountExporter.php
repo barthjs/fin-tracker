@@ -6,6 +6,7 @@ namespace App\Filament\Exports;
 
 use App\Filament\Concerns\HasResourceExportColumns;
 use App\Models\Account;
+use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 use Illuminate\Support\Facades\Date;
@@ -28,6 +29,12 @@ final class AccountExporter extends Exporter
             self::descriptionColumn(),
             self::colorColumn(),
             self::statusColumn(),
+
+            ExportColumn::make('notify_on_low_balance')
+                ->label(__('account.fields.notify_on_low_balance')),
+
+            self::numericColumn('low_balance_threshold')
+                ->label(__('account.fields.low_balance_threshold')),
         ];
     }
 

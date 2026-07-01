@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property-read string $id
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read User $user
+ * @property-read Budget|null $budget
  * @property-read Collection<int, CategoryStatistic> $statistics
  * @property-read Collection<int, Subscription> $subscriptions
  * @property-read Collection<int, Transaction> $transactions
@@ -78,6 +80,16 @@ final class Category extends Model implements Chartable
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Budget for this category.
+     *
+     * @return HasOne<Budget, $this>
+     */
+    public function budget(): HasOne
+    {
+        return $this->hasOne(Budget::class, 'category_id');
     }
 
     /**

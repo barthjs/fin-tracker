@@ -15,12 +15,14 @@ use App\Filament\Resources\Subscriptions\Widgets\SubscriptionsByAccountChart;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionsByCategoryChart;
 use App\Filament\Resources\Subscriptions\Widgets\SubscriptionStats;
 use App\Filament\Widgets\AccountChart;
+use App\Filament\Widgets\BudgetOverviewWidget;
 use App\Filament\Widgets\ExpenseChart;
 use App\Filament\Widgets\PortfolioChart;
 use App\Filament\Widgets\RevenueChart;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TotalOverviewTable;
 use App\Models\Account;
+use App\Models\Budget;
 use App\Models\Category;
 use App\Models\CategoryStatistic;
 use App\Models\Portfolio;
@@ -110,4 +112,69 @@ it('renders the category statistic chart', function (): void {
     seedFinancialData();
 
     livewire(CategoryStatisticChart::class)->assertOk();
+});
+
+it('renders active budgets and hides inactive ones', function (): void {
+    $active = Budget::factory()->create([
+        'category_id' => Category::factory()->create(['group' => CategoryGroup::VarExpenses])->id,
+        'is_active' => true,
+    ]);
+
+    $inactive = Budget::factory()->create([
+        'category_id' => Category::factory()->create(['group' => CategoryGroup::VarExpenses])->id,
+        'is_active' => false,
+    ]);
+
+    livewire(BudgetOverviewWidget::class)
+        ->assertOk()
+        ->assertCanSeeTableRecords([$active])
+        ->assertCanNotSeeTableRecords([$inactive]);
+});
+
+it('hides budgets that have not started or have already ended', function (): void {
+    $running = Budget::factory()->create([
+        'category_id' => Category::factory()->create(['group' => CategoryGroup::VarExpenses])->id,
+        'starts_at' => today()->subMonth(),
+        'ends_at' => today(),
+    ]);
+
+    $upcoming = Budget::factory()->create([
+        'category_id' => Category::factory()->create(['group' => CategoryGroup::VarExpenses])->id,
+        'starts_at' => today()->addDay(),
+    ]);
+
+    $ended = Budget::factory()->create([
+        'category_id' => Category::factory()->create(['group' => CategoryGroup::VarExpenses])->id,
+        'starts_at' => today()->subMonths(2),
+        'ends_at' => today()->subDay(),
+    ]);
+
+    livewire(BudgetOverviewWidget::class)
+        ->assertCanSeeTableRecords([$running])
+        ->assertCanNotSeeTableRecords([$upcoming, $ended]);
+});
+
+it('decides which budgets are running by the date in the timezone of the user', function (): void {
+    // UTC+14, so at noon UTC the user's local date is already the next day
+    auth()->user()->update(['timezone' => 'Pacific/Kiritimati']);
+    $this->travelTo(today('UTC')->setTime(12, 0));
+
+    $startingToday = Budget::factory()->create([
+        'category_id' => Category::factory()->create(['group' => CategoryGroup::VarExpenses])->id,
+        'starts_at' => today('UTC')->addDay(),
+    ]);
+
+    livewire(BudgetOverviewWidget::class)
+        ->assertCanSeeTableRecords([$startingToday]);
+});
+
+it('is visible only when active budgets exist', function (): void {
+    expect(BudgetOverviewWidget::canView())->toBeFalse();
+
+    Budget::factory()->create([
+        'category_id' => Category::factory()->create(['group' => CategoryGroup::VarExpenses])->id,
+        'is_active' => true,
+    ]);
+
+    expect(BudgetOverviewWidget::canView())->toBeTrue();
 });

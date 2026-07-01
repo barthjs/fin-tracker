@@ -163,7 +163,12 @@ final readonly class TradeService
      */
     private function refreshContext(array $accountIds, array $portfolioIds, array $securityIds): void
     {
-        foreach (array_unique(array_filter($accountIds)) as $id) {
+        $accountIds = array_values(array_unique(array_filter($accountIds)));
+
+        // A fixed order of the row locks prevents opposite account changes from deadlocking each other
+        sort($accountIds);
+
+        foreach ($accountIds as $id) {
             ($this->recalculateAccountBalance)($id);
         }
 

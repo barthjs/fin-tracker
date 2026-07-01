@@ -6,6 +6,8 @@ namespace App\Filament\Resources\Accounts\Pages;
 
 use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Resources\Accounts\AccountResource;
+use App\Models\Account;
+use App\Services\AccountService;
 use Filament\Resources\Pages\ViewRecord;
 
 final class ViewAccount extends ViewRecord
@@ -17,7 +19,10 @@ final class ViewAccount extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            self::editAction(),
+            self::editAction()
+                /** @phpstan-ignore-next-line */
+                ->action(fn (AccountService $service, Account $record, array $data): Account => $service->update($record, $data)),
+
             self::deleteAction(),
         ];
     }

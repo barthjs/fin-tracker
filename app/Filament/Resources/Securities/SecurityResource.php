@@ -115,7 +115,8 @@ final class SecurityResource extends Resource
                         ->numeric()
                         ->minValue(0)
                         ->maxValue(99.999)
-                        ->step(0.001),
+                        ->step(0.001)
+                        ->suffix('%'),
                 ]),
 
             Section::make(__('security.sections.classification'))
