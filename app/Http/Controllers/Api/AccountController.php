@@ -8,6 +8,7 @@ use App\Enums\ApiError;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Resources\AccountResource;
 use App\Models\Account;
+use App\Services\AccountService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -33,6 +34,7 @@ final class AccountController
                 'description',
                 'color',
                 AllowedFilter::exact('is_active'),
+                AllowedFilter::exact('notify_on_low_balance'),
             ])
             ->allowedSorts([
                 'name',
@@ -50,9 +52,9 @@ final class AccountController
     /**
      * Create a new account
      */
-    public function store(StoreAccountRequest $request): AccountResource
+    public function store(StoreAccountRequest $request, AccountService $service): AccountResource
     {
-        $account = Account::query()->create($request->validated());
+        $account = $service->create($request->validated());
 
         return new AccountResource($account);
     }
@@ -68,9 +70,9 @@ final class AccountController
     /**
      * Update an account
      */
-    public function update(StoreAccountRequest $request, Account $account): AccountResource
+    public function update(StoreAccountRequest $request, Account $account, AccountService $service): AccountResource
     {
-        $account->update($request->validated());
+        $account = $service->update($account, $request->validated());
 
         return new AccountResource($account);
     }

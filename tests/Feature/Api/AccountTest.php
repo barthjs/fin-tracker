@@ -43,6 +43,9 @@ describe('Account API', function (): void {
                         'logo',
                         'color',
                         'is_active',
+                        'notify_on_low_balance',
+                        'low_balance_threshold',
+                        'low_balance_notified_at',
                         'created_at',
                         'updated_at',
                     ],
@@ -85,6 +88,38 @@ describe('Account API', function (): void {
             ->assertJsonPath('data.is_active', $data['is_active']);
 
         assertDatabaseHas('accounts', array_merge($data, ['user_id' => $this->user->id]));
+    });
+
+    test('store creates an account with a low balance notification', function (): void {
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
+
+        $data = [
+            ...Account::factory()->make()->only(['name', 'color']),
+            'currency' => Currency::EUR->value,
+            'notify_on_low_balance' => true,
+            'low_balance_threshold' => 100.5,
+        ];
+
+        postJson(route('api.accounts.store'), $data)
+            ->assertCreated()
+            ->assertJsonPath('data.notify_on_low_balance', true)
+            ->assertJsonPath('data.low_balance_threshold', 100.5);
+
+        assertDatabaseHas('accounts', array_merge($data, ['user_id' => $this->user->id]));
+    });
+
+    test('store requires a threshold when the low balance notification is enabled', function (): void {
+        actingAsWithAbilities($this->user, ApiAbility::ACCOUNT->all());
+
+        $data = [
+            ...Account::factory()->make()->only(['name', 'color']),
+            'currency' => Currency::EUR->value,
+            'notify_on_low_balance' => true,
+        ];
+
+        postJson(route('api.accounts.store'), $data)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['low_balance_threshold']);
     });
 
     test('store fails with invalid data', function (): void {
