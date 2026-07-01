@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\CategoryGroup;
+use App\Enums\NotificationEventType;
 use App\Enums\TransactionType;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\NotificationTarget;
 use App\Models\Transaction;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
@@ -221,4 +223,26 @@ it('recalculates the account balance when creating a transaction', function (): 
         ->assertHasNoFormErrors();
 
     expect($account->fresh()?->balance)->toBe(-100.0);
+});
+
+it('creates an account with low balance notification targets from the account select', function (): void {
+    $target = NotificationTarget::factory()->create();
+
+    $data = array_merge(Account::factory()->make()->toArray(), [
+        'notify_on_low_balance' => true,
+        'low_balance_threshold' => 100.0,
+        'low_balance_targets' => [$target->id],
+    ]);
+
+    livewire(ListTransactions::class)
+        ->callAction([
+            TestAction::make('create'),
+            TestAction::make('createOption')->schemaComponent('account_id'),
+        ], $data)
+        ->assertHasNoFormErrors();
+
+    $account = Account::query()->where('name', $data['name'])->firstOrFail();
+
+    expect($account->getNotificationTargetsForEvent(NotificationEventType::ACCOUNT_LOW_BALANCE)->pluck('id'))
+        ->toContain($target->id);
 });

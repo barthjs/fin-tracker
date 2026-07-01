@@ -68,3 +68,16 @@
         background-color: color-mix(in oklab, white 5%, transparent);
     }
 }
+
+/* Budget usage bar, the fill takes its color from Filament's `fi-color-*` classes */
+.budget-progress-track {
+    background-color: var(--gray-200);
+
+    &:where(.dark, .dark *) {
+        background-color: var(--gray-700);
+    }
+}
+
+.budget-progress-bar {
+    background-color: var(--color-500);
+}

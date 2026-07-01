@@ -17,12 +17,10 @@ use App\Filament\Resources\Subscriptions\Pages\ViewSubscription;
 use App\Filament\Resources\Subscriptions\RelationManagers\TransactionsRelationManager;
 use App\Models\Account;
 use App\Models\Category;
-use App\Models\NotificationTarget;
 use App\Models\Subscription;
 use App\Services\SubscriptionService;
 use BackedEnum;
 use Filament\Actions\CreateAction;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -134,31 +132,7 @@ final class SubscriptionResource extends Resource
                                 ->live()
                                 ->required(),
 
-                            TextInput::make('period_frequency')
-                                ->label(__('subscription.fields.period_frequency'))
-                                ->numeric()
-                                ->default(1)
-                                ->minValue(1)
-                                ->maxValue(365)
-                                ->helperText(function (Get $get): string {
-                                    // @codeCoverageIgnoreStart
-                                    $unit = $get('period_unit');
-                                    $frequency = $get('period_frequency');
-
-                                    $periodUnit = null;
-                                    if ($unit instanceof PeriodUnit) {
-                                        $periodUnit = $unit;
-                                    } elseif (is_string($unit)) {
-                                        $periodUnit = PeriodUnit::tryFrom($unit);
-                                    }
-
-                                    if ($periodUnit && is_numeric($frequency)) {
-                                        return $periodUnit->getLabelByFrequency((int) $frequency);
-                                    }
-
-                                    return '';
-                                    // @codeCoverageIgnoreEnd
-                                }),
+                            self::periodFrequencyField(__('subscription.fields.period_frequency')),
 
                             Toggle::make('auto_generate_transaction')
                                 ->label(__('subscription.fields.auto_generate_transaction'))
@@ -220,11 +194,8 @@ final class SubscriptionResource extends Resource
                 ->schema([
                     Grid::make(2)
                         ->schema([
-                            Toggle::make('remind_before_payment')
-                                ->label(__('subscription.fields.remind_before_payment'))
-                                ->live()
-                                ->default(false)
-                                ->inline(false),
+                            self::notificationToggleField('remind_before_payment', 'reminder_targets')
+                                ->label(__('subscription.fields.remind_before_payment')),
 
                             TextInput::make('reminder_days_before')
                                 ->label(__('subscription.fields.reminder_days_before'))
@@ -232,29 +203,15 @@ final class SubscriptionResource extends Resource
                                 ->numeric()
                                 ->default(3)
                                 ->minValue(1)
-                                ->maxValue(30),
+                                ->maxValue(30)
+                                ->live(onBlur: true)
+                                ->suffix(fn (?string $state): string => trans_choice(
+                                    'subscription.units.day',
+                                    is_numeric($state) ? (int) $state : 2
+                                )),
                         ]),
 
-                    CheckboxList::make('reminder_targets')
-                        ->label(Str::ucfirst(__('notification_target.plural_label')))
-                        ->visible(fn (Get $get): bool => (bool) $get('remind_before_payment'))
-                        ->options(fn (): array => NotificationTarget::query()->where('is_active', true)->pluck('name', 'id')->toArray())
-                        ->columns(3)
-                        ->gridDirection('row')
-                        ->bulkToggleable()
-                        ->default(fn (): array => NotificationTarget::query()->where('is_active', true)
-                            ->where('is_default', true)
-                            ->pluck('id')
-                            ->toArray()
-                        )
-                        ->loadStateFromRelationshipsUsing(function (Subscription $record, CheckboxList $component): void {
-                            $targetIds = $record->notificationAssignments()
-                                ->where('event_type', NotificationEventType::SUBSCRIPTION_REMINDER)
-                                ->pluck('notification_target_id')
-                                ->toArray();
-
-                            $component->state($targetIds);
-                        }),
+                    self::notificationTargetsField('reminder_targets', NotificationEventType::SUBSCRIPTION_REMINDER, 'remind_before_payment'),
                 ]),
         ];
     }

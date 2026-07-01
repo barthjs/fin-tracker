@@ -6,6 +6,9 @@ namespace App\Filament\Imports;
 
 use App\Filament\Concerns\HasResourceImportColumns;
 use App\Models\Account;
+use App\Services\AccountService;
+use App\Tools\Convertor;
+use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,6 +32,15 @@ final class AccountImporter extends Importer
 
             self::colorColumn(),
             self::statusColumn(),
+
+            ImportColumn::make('notify_on_low_balance')
+                ->label(__('account.fields.notify_on_low_balance'))
+                ->castStateUsing(fn (?string $state): bool => (bool) $state),
+
+            ImportColumn::make('low_balance_threshold')
+                ->label(__('account.fields.low_balance_threshold'))
+                ->rules(['nullable', 'max:1e9'])
+                ->castStateUsing(fn (?string $state): float => Convertor::formatNumber($state ?? '0')),
         ];
     }
 
@@ -59,6 +71,25 @@ final class AccountImporter extends Importer
                 'color' => $this->data['color'] ?? mb_strtolower(sprintf('#%06X', random_int(0, 0xFFFFFF))),
                 'user_id' => auth()->id(),
             ]);
+    }
+
+    /**
+     * Saves the account through the service, so low-balance checks run like for accounts created in the panel.
+     */
+    public function saveRecord(): void
+    {
+        $service = resolve(AccountService::class);
+
+        /** @var Account $account */
+        $account = $this->record;
+
+        if ($account->exists) {
+            $this->record = $service->update($account, $account->getDirty());
+
+            return;
+        }
+
+        $this->record = $service->create($account->getAttributes());
     }
 
     /**

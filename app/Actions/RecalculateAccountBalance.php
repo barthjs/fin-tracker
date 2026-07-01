@@ -21,10 +21,19 @@ use App\Models\Transaction;
  * - Trades decrease the balance when assets are bought,
  *   and increase it when assets are sold.
  */
-final class RecalculateAccountBalance
+final readonly class RecalculateAccountBalance
 {
+    public function __construct(
+        private CheckAccountLowBalance $checkAccountLowBalance,
+    ) {}
+
     public function __invoke(string $accountId): void
     {
+        // Serializes concurrent recalculations of the account, so each sum includes the other bookings.
+        // PostgreSQL only: unlike FOR UPDATE, this lock does not conflict with the key share lock that the foreign key
+        // check of the just inserted booking holds on the account, which would deadlock two concurrent bookings.
+        Account::query()->whereKey($accountId)->lock('for no key update')->first(['id']);
+
         $revenue = (float) Transaction::query()->where('account_id', $accountId)
             ->where('type', TransactionType::Revenue)
             ->sum('amount');
@@ -52,5 +61,7 @@ final class RecalculateAccountBalance
         $balance = $revenue - $expense - $outgoingTransfers + $incomingTransfers - $buyTrades + $sellTrades;
 
         Account::query()->whereKey($accountId)->update(['balance' => $balance]);
+
+        ($this->checkAccountLowBalance)($accountId);
     }
 }

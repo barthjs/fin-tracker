@@ -19,7 +19,7 @@ final class ListAccounts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            self::createAction(),
+            AccountResource::configureCreateAction(),
 
             self::importAction()
                 ->modalHeading(__('account.import.modal_heading'))

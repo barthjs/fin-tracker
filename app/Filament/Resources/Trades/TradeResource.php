@@ -83,6 +83,7 @@ final class TradeResource extends Resource
 
                     self::tradeAmountField('price')
                         ->label(__('fields.price'))
+                        ->suffix(fn (Get $get): ?string => self::accountCurrencySuffix($get))
                         ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
                                 self::asFloat($get('quantity')),
@@ -96,6 +97,7 @@ final class TradeResource extends Resource
 
                     self::tradeAmountField('tax')
                         ->label(__('trade.fields.tax'))
+                        ->suffix(fn (Get $get): ?string => self::accountCurrencySuffix($get))
                         ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
                                 self::asFloat($get('quantity')),
@@ -109,6 +111,7 @@ final class TradeResource extends Resource
 
                     self::tradeAmountField('fee')
                         ->label(__('trade.fields.fee'))
+                        ->suffix(fn (Get $get): ?string => self::accountCurrencySuffix($get))
                         ->afterStateUpdated(function (string|float|null $state, Get $get, Set $set): void {
                             $set('total_amount', self::calculateTotalAmount(
                                 self::asFloat($get('quantity')),
@@ -137,7 +140,7 @@ final class TradeResource extends Resource
                         ->label(__('trade.fields.total_amount'))
                         ->numeric()
                         ->default(0)
-                        ->suffix(fn (Get $get): ?string => Account::query()->whereKey($get('account_id'))->first()?->currency->value)
+                        ->suffix(fn (Get $get): ?string => self::accountCurrencySuffix($get))
                         ->dehydrated(false)
                         ->disabled(),
                 ]),

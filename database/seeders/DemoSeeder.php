@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\CategoryGroup;
+use App\Enums\PeriodUnit;
 use App\Enums\TradeType;
 use App\Enums\TransactionType;
 use App\Models\Account;
@@ -12,6 +13,7 @@ use App\Models\Category;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\User;
+use App\Services\BudgetService;
 use App\Services\TradeService;
 use App\Services\TransactionService;
 use Illuminate\Database\Seeder;
@@ -30,6 +32,7 @@ final class DemoSeeder extends Seeder
             $users = User::all();
             foreach ($users as $user) {
                 $this->createTransactions($user);
+                $this->createBudgets($user);
                 $this->createTrades($user);
             }
         }
@@ -162,6 +165,38 @@ final class DemoSeeder extends Seeder
                     ]);
                 }
             }
+        }
+    }
+
+    /**
+     * Generates demo budgets for some of the user's expense categories.
+     */
+    private function createBudgets(User $user): void
+    {
+        $budgetService = resolve(BudgetService::class);
+
+        $demoBudgets = [
+            ['category' => 'Groceries', 'amount' => 400.0, 'period_unit' => PeriodUnit::Month, 'warning_threshold' => 80],
+            ['category' => 'Dining Out', 'amount' => 150.0, 'period_unit' => PeriodUnit::Month, 'warning_threshold' => 80],
+            ['category' => 'Travel', 'amount' => 2000.0, 'period_unit' => PeriodUnit::Year, 'warning_threshold' => null],
+        ];
+
+        foreach ($demoBudgets as $demoBudget) {
+            $category = Category::query()
+                ->where('user_id', $user->id)
+                ->where('name', $demoBudget['category'])
+                ->firstOrFail();
+
+            $budgetService->create([
+                'category_id' => $category->id,
+                'amount' => $demoBudget['amount'],
+                'period_unit' => $demoBudget['period_unit'],
+                'period_frequency' => 1,
+                'starts_at' => $demoBudget['period_unit'] === PeriodUnit::Year
+                    ? Date::now()->startOfYear()
+                    : Date::now()->startOfMonth(),
+                'warning_threshold' => $demoBudget['warning_threshold'],
+            ]);
         }
     }
 

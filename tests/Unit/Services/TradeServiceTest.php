@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\TradeType;
 use App\Models\Account;
 use App\Models\Portfolio;
 use App\Models\Security;
@@ -53,4 +54,24 @@ it('recalculates both old and new context when a trade changes all relations', f
         ->account_id->toBe($accountB->id)
         ->portfolio_id->toBe($portfolioB->id)
         ->security_id->toBe($securityB->id);
+});
+
+it('checks the account balance when a trade recalculates it', function (): void {
+    $account = Account::factory()->create(['notify_on_low_balance' => true, 'low_balance_threshold' => 100.0]);
+    $portfolio = Portfolio::factory()->create();
+    $security = Security::factory()->create();
+
+    resolve(TradeService::class)->create([
+        'account_id' => $account->id,
+        'portfolio_id' => $portfolio->id,
+        'security_id' => $security->id,
+        'type' => TradeType::Buy,
+        'price' => 10.0,
+        'quantity' => 5.0,
+        'tax' => 0.0,
+        'fee' => 0.0,
+        'date_time' => now(),
+    ]);
+
+    expect($account->fresh()?->low_balance_notified_at)->not->toBeNull();
 });

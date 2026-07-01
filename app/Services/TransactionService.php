@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Actions\CheckBudgetThreshold;
 use App\Actions\RecalculateAccountBalance;
 use App\Enums\TransactionType;
 use App\Models\Transaction;
@@ -16,6 +17,7 @@ final readonly class TransactionService
     public function __construct(
         private StatisticService $statisticService,
         private RecalculateAccountBalance $recalculateAccountBalance,
+        private CheckBudgetThreshold $checkBudgetThreshold,
     ) {}
 
     /**
@@ -36,6 +38,10 @@ final readonly class TransactionService
 
             $this->updateAccountBalances($accountIds);
             $this->statisticService->updateCategoryStatistics($transaction->category_id, $transaction->date_time);
+
+            if ($transaction->type === TransactionType::Expense) {
+                ($this->checkBudgetThreshold)($transaction->category_id);
+            }
 
             return $transaction;
         });
@@ -86,6 +92,11 @@ final readonly class TransactionService
             if ($statsRelevantChanged) {
                 $this->statisticService->updateCategoryStatistics($oldCategoryId, $oldDate);
                 $this->statisticService->updateCategoryStatistics($transaction->category_id, $transaction->date_time);
+
+                $this->checkBudgets(array_filter([
+                    $oldType === TransactionType::Expense ? $oldCategoryId : null,
+                    $transaction->type === TransactionType::Expense ? $transaction->category_id : null,
+                ]));
             }
 
             return $transaction;
@@ -181,8 +192,28 @@ final readonly class TransactionService
      */
     private function updateAccountBalances(array $accountIds): void
     {
+        $accountIds = array_values(array_unique($accountIds));
+
+        // A fixed order of the row locks prevents opposite transfers from deadlocking each other
+        sort($accountIds);
+
         foreach ($accountIds as $id) {
             ($this->recalculateAccountBalance)($id);
+        }
+    }
+
+    /**
+     * Checks the budgets of the given expense categories once each, in a fixed lock order.
+     *
+     * @param  array<int, string>  $categoryIds
+     */
+    private function checkBudgets(array $categoryIds): void
+    {
+        $categoryIds = array_values(array_unique($categoryIds));
+        sort($categoryIds);
+
+        foreach ($categoryIds as $categoryId) {
+            ($this->checkBudgetThreshold)($categoryId);
         }
     }
 }

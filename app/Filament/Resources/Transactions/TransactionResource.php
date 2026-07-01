@@ -9,6 +9,7 @@ use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Concerns\HasResourceFormFields;
 use App\Filament\Concerns\HasResourceTableColumns;
 use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager;
+use App\Filament\Resources\Budgets;
 use App\Filament\Resources\Categories;
 use App\Filament\Resources\Subscriptions;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
@@ -157,6 +158,7 @@ final class TransactionResource extends Resource
                     ->hiddenOn([
                         TransactionsRelationManager::class,
                         Subscriptions\RelationManagers\TransactionsRelationManager::class,
+                        Budgets\RelationManagers\TransactionsRelationManager::class,
                     ])
                     ->label(Str::ucfirst(__('category.label'))),
 
@@ -169,6 +171,7 @@ final class TransactionResource extends Resource
                     ->hiddenOn([
                         ListTransactions::class,
                         Subscriptions\RelationManagers\TransactionsRelationManager::class,
+                        Budgets\RelationManagers\TransactionsRelationManager::class,
                     ])
                     ->options(TransactionType::class),
 
@@ -182,6 +185,7 @@ final class TransactionResource extends Resource
                     ->hiddenOn([
                         Categories\RelationManagers\TransactionsRelationManager::class,
                         Subscriptions\RelationManagers\TransactionsRelationManager::class,
+                        Budgets\RelationManagers\TransactionsRelationManager::class,
                     ]),
 
                 self::dateTimeRangeFilter(),

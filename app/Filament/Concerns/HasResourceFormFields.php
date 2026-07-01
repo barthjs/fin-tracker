@@ -6,16 +6,22 @@ namespace App\Filament\Concerns;
 
 use App\Enums\CategoryGroup;
 use App\Enums\Currency;
+use App\Enums\NotificationEventType;
+use App\Enums\PeriodUnit;
 use App\Filament\Resources\Accounts\AccountResource;
 use App\Filament\Resources\Categories\CategoryResource;
 use App\Filament\Resources\Portfolios\PortfolioResource;
 use App\Filament\Resources\Securities\SecurityResource;
 use App\Filament\Resources\Subscriptions\SubscriptionResource;
 use App\Models\Account;
+use App\Models\Budget;
 use App\Models\Category;
+use App\Models\NotificationTarget;
 use App\Models\Portfolio;
 use App\Models\Security;
 use App\Models\Subscription;
+use App\Services\AccountService;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -24,6 +30,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
@@ -120,7 +127,7 @@ trait HasResourceFormFields
             ->step(0.01)
             ->minValue(0.0)
             ->maxValue(1e9)
-            ->suffix(fn (Get $get): ?string => Account::query()->whereKey($get('account_id'))->first()?->currency->value)
+            ->suffix(fn (Get $get): ?string => self::accountCurrencySuffix($get))
             ->required();
     }
 
@@ -162,7 +169,11 @@ trait HasResourceFormFields
             ->preload()
             ->searchable()
             ->required()
-            ->createOptionForm(AccountResource::getFormFields());
+            ->createOptionForm(AccountResource::getFormFields())
+            ->createOptionUsing(function (AccountService $service, array $data): string {
+                /** @var array<string, mixed> $data */
+                return $service->create($data)->id;
+            });
     }
 
     public static function categorySelectField(string $column = 'category_id'): Select
@@ -226,5 +237,111 @@ trait HasResourceFormFields
             ->preload()
             ->searchable()
             ->createOptionForm(SubscriptionResource::getFormFields());
+    }
+
+    /**
+     * Returns the currency of the account selected in the form, as suffix for amounts booked on that account.
+     */
+    public static function accountCurrencySuffix(Get $get): ?string
+    {
+        return Account::query()->whereKey($get('account_id'))->first()?->currency->value;
+    }
+
+    /**
+     * Returns the currency selected in the form itself, as suffix for amounts of the edited record.
+     */
+    public static function formCurrencySuffix(Get $get): ?string
+    {
+        $currency = $get('currency');
+
+        return $currency instanceof Currency ? $currency->value : null;
+    }
+
+    /**
+     * Number of period units between two occurrences, with the selected unit as suffix.
+     */
+    public static function periodFrequencyField(string $label): TextInput
+    {
+        return TextInput::make('period_frequency')
+            ->label($label)
+            ->numeric()
+            ->default(1)
+            ->minValue(1)
+            ->maxValue(365)
+            ->live(onBlur: true)
+            ->suffix(function (Get $get): ?string {
+                $unit = $get('period_unit');
+                $frequency = $get('period_frequency');
+
+                return $unit instanceof PeriodUnit
+                    ? trans_choice('subscription.units.'.$unit->value, is_numeric($frequency) ? (int) $frequency : 1)
+                    : null;
+            });
+    }
+
+    /**
+     * Toggle that enables a notification and preselects the default targets when it is switched on without targets.
+     */
+    public static function notificationToggleField(string $name, string $targetsField): Toggle
+    {
+        return Toggle::make($name)
+            ->default(false)
+            ->inline(false)
+            ->live()
+            ->afterStateUpdated(function (bool $state, Get $get, Set $set) use ($targetsField): void {
+                if (! $state) {
+                    return;
+                }
+
+                $targets = $get($targetsField);
+
+                if (is_array($targets) && $targets !== []) {
+                    return;
+                }
+
+                $set($targetsField, self::defaultNotificationTargetIds());
+            });
+    }
+
+    /**
+     * Active notification targets for one event of the record, shown while the notification toggle is on.
+     */
+    public static function notificationTargetsField(string $name, NotificationEventType $event, string $toggleField): CheckboxList
+    {
+        return CheckboxList::make($name)
+            ->label(Str::ucfirst(__('notification_target.plural_label')))
+            ->visible(fn (Get $get): bool => (bool) $get($toggleField))
+            ->options(fn (): array => NotificationTarget::query()->where('is_active', true)->pluck('name', 'id')->toArray())
+            ->columns(3)
+            ->gridDirection('row')
+            ->bulkToggleable()
+            ->default(fn (): array => self::defaultNotificationTargetIds())
+            ->loadStateFromRelationshipsUsing(
+                function (Account|Budget|Subscription $record, CheckboxList $component) use ($event): void {
+                    $targetIds = $record->notificationAssignments()
+                        ->where('event_type', $event)
+                        ->pluck('notification_target_id')
+                        ->toArray();
+
+                    $component->state($targetIds);
+                }
+            );
+    }
+
+    /**
+     * Returns the ids of the active notification targets that are marked as default.
+     *
+     * @return array<int, string>
+     */
+    private static function defaultNotificationTargetIds(): array
+    {
+        /** @var array<int, string> $targetIds */
+        $targetIds = NotificationTarget::query()
+            ->where('is_active', true)
+            ->where('is_default', true)
+            ->pluck('id')
+            ->all();
+
+        return $targetIds;
     }
 }

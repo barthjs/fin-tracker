@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\NotificationEventType;
 use App\Enums\TransactionType;
 use App\Filament\Resources\Accounts\Pages\ListAccounts;
 use App\Filament\Resources\Accounts\Pages\ViewAccount;
@@ -10,6 +11,7 @@ use App\Filament\Resources\Accounts\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\NotificationTarget;
 use App\Models\Subscription;
 use Filament\Actions\Testing\TestAction;
 
@@ -51,6 +53,27 @@ it('can create an account', function (): void {
     assertDatabaseHas('accounts', $data);
 });
 
+it('can create an account with a low balance notification target', function (): void {
+    $target = NotificationTarget::factory()->create();
+
+    $data = array_merge(Account::factory()->make()->toArray(), [
+        'notify_on_low_balance' => true,
+        'low_balance_threshold' => 100.0,
+        'low_balance_targets' => [$target->id],
+    ]);
+
+    livewire(ListAccounts::class)
+        ->callAction('create', $data)
+        ->assertHasNoFormErrors();
+
+    $account = Account::query()->where('name', $data['name'])->firstOrFail();
+
+    expect($account->notify_on_low_balance)->toBeTrue()
+        ->and($account->low_balance_threshold)->toBe(100.0)
+        ->and($account->getNotificationTargetsForEvent(NotificationEventType::ACCOUNT_LOW_BALANCE)->pluck('id'))
+        ->toContain($target->id);
+});
+
 it('renders the view page', function (): void {
     $account = Account::factory()->create();
 
@@ -62,6 +85,17 @@ it('renders the view page', function (): void {
             'balance' => $account->balance,
             'description' => $account->description,
         ], 'infolist');
+});
+
+it('shows the low balance threshold only when the notification is enabled', function (): void {
+    $notifying = Account::factory()->create(['notify_on_low_balance' => true, 'low_balance_threshold' => 250.0]);
+    $silent = Account::factory()->create(['notify_on_low_balance' => false]);
+
+    livewire(ViewAccount::class, ['record' => $notifying->id])
+        ->assertSchemaComponentVisible('low_balance_threshold', 'infolist');
+
+    livewire(ViewAccount::class, ['record' => $silent->id])
+        ->assertSchemaComponentHidden('low_balance_threshold', 'infolist');
 });
 
 it('can edit an account', function (): void {

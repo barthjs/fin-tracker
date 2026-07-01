@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Accounts;
 
 use App\Enums\Currency;
+use App\Enums\NotificationEventType;
 use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Concerns\HasResourceFormFields;
 use App\Filament\Concerns\HasResourceInfolistEntries;
@@ -16,10 +17,15 @@ use App\Filament\Resources\Accounts\RelationManagers\TradesRelationManager;
 use App\Filament\Resources\Accounts\RelationManagers\TransactionsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AccountsRelationManager;
 use App\Models\Account;
+use App\Services\AccountService;
 use BackedEnum;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Field;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\Summarizers\Sum;
@@ -58,11 +64,13 @@ final class AccountResource extends Resource
     }
 
     /**
-     * @return array<int, Field>
+     * Returns the account form, optionally without the low-balance notification that belongs to the current user.
+     *
+     * @return array<int, Field|Grid|Section>
      */
-    public static function getFormFields(): array
+    public static function getFormFields(bool $withNotifications = true): array
     {
-        return [
+        $fields = [
             self::nameField(),
             self::currencyField(),
             self::colorField(),
@@ -70,6 +78,32 @@ final class AccountResource extends Resource
             self::logoField('accounts'),
             self::descriptionField(),
         ];
+
+        if (! $withNotifications) {
+            return $fields;
+        }
+
+        $fields[] = Section::make()
+            ->columnSpanFull()
+            ->schema([
+                Grid::make(2)
+                    ->schema([
+                        self::notificationToggleField('notify_on_low_balance', 'low_balance_targets')
+                            ->label(__('account.fields.notify_on_low_balance')),
+
+                        TextInput::make('low_balance_threshold')
+                            ->label(__('account.fields.low_balance_threshold'))
+                            ->visible(fn (Get $get): bool => (bool) $get('notify_on_low_balance'))
+                            ->numeric()
+                            ->default(0)
+                            ->suffix(fn (Get $get): ?string => self::formCurrencySuffix($get))
+                            ->required(),
+                    ]),
+
+                self::notificationTargetsField('low_balance_targets', NotificationEventType::ACCOUNT_LOW_BALANCE, 'notify_on_low_balance'),
+            ]);
+
+        return $fields;
     }
 
     public static function infolist(Schema $schema): Schema
@@ -82,6 +116,11 @@ final class AccountResource extends Resource
                         self::numericEntry('balance')
                             ->label(__('account.fields.balance'))
                             ->color(fn (Account $record): string => $record->balanceColor)
+                            ->money(fn (Account $record): string => $record->currency->value),
+
+                        self::numericEntry('low_balance_threshold')
+                            ->label(__('account.fields.low_balance_threshold'))
+                            ->visible(fn (Account $record): bool => $record->notify_on_low_balance)
                             ->money(fn (Account $record): string => $record->currency->value),
 
                         self::descriptionEntry(),
@@ -159,5 +198,12 @@ final class AccountResource extends Resource
             'index' => ListAccounts::route('/'),
             'view' => ViewAccount::route('/{record}'),
         ];
+    }
+
+    public static function configureCreateAction(): CreateAction
+    {
+        return self::createAction()
+            // @phpstan-ignore-next-line
+            ->using(fn (AccountService $service, array $data): Account => $service->create($data));
     }
 }

@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Users\RelationManagers;
 use App\Filament\Concerns\HasResourceActions;
 use App\Filament\Resources\Accounts\AccountResource;
 use App\Models\Account;
+use App\Services\AccountService;
 use BackedEnum;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -39,7 +40,8 @@ final class AccountsRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return AccountResource::form($schema);
+        // Notification targets belong to the current user, so an admin must not assign them to another user's account
+        return $schema->components(AccountResource::getFormFields(withNotifications: false));
     }
 
     public function table(Table $table): Table
@@ -55,7 +57,9 @@ final class AccountsRelationManager extends RelationManager
                         $data['user_id'] = $userId;
 
                         return $data;
-                    }),
+                    })
+                    // @phpstan-ignore-next-line
+                    ->using(fn (AccountService $service, array $data): Account => $service->create($data)),
             ]);
     }
 }
