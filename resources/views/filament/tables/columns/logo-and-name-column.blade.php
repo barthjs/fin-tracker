@@ -4,13 +4,10 @@
             <img
                 src="{{ Storage::url($getState()['logo']) }}"
                 alt="{{ $getState()['name'] }}"
-                style="height: 2.5rem; width: 2.5rem"
-                class="max-w-none rounded-full object-cover object-center ring-white dark:ring-gray-900"
+                class="size-10 max-w-none rounded-full object-cover object-center"
             />
         @endif
-        <span
-            class="fi-ta-text-item-label text-sm leading-6 whitespace-normal text-gray-950 dark:text-white"
-        >
+        <span class="fi-ta-text-item-label app-text-strong text-sm leading-6 whitespace-normal">
             {{ $getState()['name'] }}
         </span>
     </div>

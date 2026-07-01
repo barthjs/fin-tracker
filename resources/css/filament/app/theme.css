@@ -11,3 +11,60 @@
 .fi-sidebar-header {
     margin-top: 1rem;
 }
+
+/* Semantic colors for custom views, derived from Filament's configurable gray palette */
+.app-text-strong {
+    color: var(--gray-950);
+
+    &:where(.dark, .dark *) {
+        color: white;
+    }
+}
+
+.app-text-muted {
+    color: var(--gray-500);
+
+    &:where(.dark, .dark *) {
+        color: var(--gray-400);
+    }
+}
+
+.app-text-subtle {
+    color: var(--gray-300);
+
+    &:where(.dark, .dark *) {
+        color: var(--gray-600);
+    }
+}
+
+.app-divider {
+    border-color: var(--gray-300);
+
+    &:where(.dark, .dark *) {
+        border-color: var(--gray-700);
+    }
+}
+
+.app-list > :not(:last-child) {
+    border-color: var(--gray-200);
+
+    &:where(.dark, .dark *) {
+        border-color: color-mix(in oklab, white 5%, transparent);
+    }
+}
+
+.app-list-item:hover {
+    background-color: var(--gray-50);
+
+    &:where(.dark, .dark *) {
+        background-color: color-mix(in oklab, white 5%, transparent);
+    }
+}
+
+.app-icon-tile {
+    background-color: var(--gray-100);
+
+    &:where(.dark, .dark *) {
+        background-color: color-mix(in oklab, white 5%, transparent);
+    }
+}
