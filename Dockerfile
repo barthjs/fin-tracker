@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7-labs
-FROM php:8.5-fpm-alpine as base
+FROM php:8.5-fpm-alpine AS base
 WORKDIR /app
 
 ENV PUID=1000 \
@@ -23,7 +23,6 @@ RUN set -eux \
     && install-php-extensions \
     intl \
     opcache \
-    pdo_mysql \
     pdo_pgsql \
     zip \
     && rm -f /usr/local/bin/install-php-extensions \

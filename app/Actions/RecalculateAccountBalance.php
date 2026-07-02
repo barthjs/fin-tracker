@@ -30,8 +30,8 @@ final readonly class RecalculateAccountBalance
     public function __invoke(string $accountId): void
     {
         // Serializes concurrent recalculations of the account, so each sum includes the other bookings.
-        // PostgreSQL only: unlike FOR UPDATE, this lock does not conflict with the key share lock that the foreign key
-        // check of the just inserted booking holds on the account, which would deadlock two concurrent bookings.
+        // Unlike FOR UPDATE, this lock does not conflict with the key share lock that the foreign key check
+        // of the just inserted booking holds on the account, which would deadlock two concurrent bookings.
         Account::query()->whereKey($accountId)->lock('for no key update')->first(['id']);
 
         $revenue = (float) Transaction::query()->where('account_id', $accountId)

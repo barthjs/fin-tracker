@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
 
-    'name' => 'Fin-Tracker',
+    'name' => env('APP_NAME', 'Fin-Tracker'),
 
     'version' => env('APP_VERSION', 'dev'),
 

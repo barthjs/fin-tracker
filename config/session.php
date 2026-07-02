@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 return [
 
-    'driver' => env('SESSION_DRIVER', 'database'),
-
     // one month
-    'lifetime' => 43800,
+    'lifetime' => (int) env('SESSION_LIFETIME', 43800),
 
     'table' => env('SESSION_TABLE', 'sys_sessions'),
 
