@@ -82,11 +82,12 @@ COPY --from=composer-builder /app/vendor ./vendor
 COPY --parents \
     public \
     resources \
-    vite.config.js \
+    tsconfig.json \
+    vite.config.ts \
     ./
 RUN npm run build
 
-FROM base as prod
+FROM base AS prod
 
 ARG VERSION=latest
 ENV APP_VERSION=${VERSION}

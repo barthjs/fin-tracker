@@ -2,11 +2,13 @@
 
 @import '../../fonts.css';
 
-@source '../../../../vendor/awcodes/light-switch/resources/**/*.blade.php';
-@source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
+@plugin '@tailwindcss/typography';
 
 @source '../../../../app/Filament';
 @source '../../../../resources/views';
+
+@source '../../../../vendor/awcodes/light-switch/resources/**/*.blade.php';
+@source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
 
 .fi-sidebar-header {
     margin-top: 1rem;
@@ -80,4 +82,57 @@
 
 .budget-progress-bar {
     background-color: var(--color-500);
+}
+
+/*
+ * Paginated tables outside of widgets fit into the viewport and scroll their records internally, so the column
+ * headers, the overall summary row and the pagination stay in view. The table's own content container becomes
+ * the scroll container because Filament already uses it for horizontal overflow, which rules out the viewport.
+ * `resources/js/main.ts` sets the table's top edge, without it the table takes the viewport below the topbar.
+ */
+@variant md {
+    .fi-ta-ctn:has(> .fi-ta-main > .fi-pagination):not(.fi-wi-table .fi-ta-ctn) {
+        & > .fi-ta-main {
+            display: flex;
+            flex-direction: column;
+            max-height: calc(
+                100dvh - var(--app-sticky-table-top, calc(var(--topbar-height) + 2rem)) - 2rem
+            );
+        }
+
+        & .fi-ta-content-ctn {
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        & .fi-ta-table > thead,
+        & .fi-ta-table > tbody > .fi-ta-summary-row:last-child {
+            position: sticky;
+            z-index: 10;
+            background-color: var(--gray-50);
+
+            &:where(.dark, .dark *) {
+                background-color: color-mix(in oklab, var(--gray-900), white 5%);
+            }
+        }
+
+        /* Box shadows replace the borders, which belong to the scrolling rows and would move away */
+        & .fi-ta-table > thead {
+            top: 0;
+            box-shadow: 0 1px 0 var(--gray-200);
+
+            &:where(.dark, .dark *) {
+                box-shadow: 0 1px 0 color-mix(in oklab, white 5%, transparent);
+            }
+        }
+
+        & .fi-ta-table > tbody > .fi-ta-summary-row:last-child {
+            bottom: 0;
+            box-shadow: 0 -1px 0 var(--gray-200);
+
+            &:where(.dark, .dark *) {
+                box-shadow: 0 -1px 0 color-mix(in oklab, white 5%, transparent);
+            }
+        }
+    }
 }
