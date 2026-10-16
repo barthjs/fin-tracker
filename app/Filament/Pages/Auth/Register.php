@@ -34,30 +34,6 @@ final class Register extends \Filament\Auth\Pages\Register
         return $this->getUserModel()::query()->create($data);
     }
 
-    protected function getUsernameFormComponent(): TextInput
-    {
-        return TextInput::make('username')
-            ->label(__('user.fields.username'))
-            ->required()
-            ->maxLength(255)
-            ->autofocus()
-            ->unique($this->getUserModel());
-    }
-
-    protected function getFirstNameComponent(): TextInput
-    {
-        return TextInput::make('first_name')
-            ->label(__('user.fields.first_name'))
-            ->maxLength(255);
-    }
-
-    protected function getLastNameComponent(): TextInput
-    {
-        return TextInput::make('last_name')
-            ->label(__('user.fields.last_name'))
-            ->maxLength(255);
-    }
-
     protected function getEmailFormComponent(): TextInput
     {
         return TextInput::make('email')
@@ -67,7 +43,31 @@ final class Register extends \Filament\Auth\Pages\Register
             ->unique($this->getUserModel());
     }
 
-    protected function getTimezoneFormComponent(): Hidden
+    private function getUsernameFormComponent(): TextInput
+    {
+        return TextInput::make('username')
+            ->label(__('user.fields.username'))
+            ->required()
+            ->maxLength(255)
+            ->autofocus()
+            ->unique($this->getUserModel());
+    }
+
+    private function getFirstNameComponent(): TextInput
+    {
+        return TextInput::make('first_name')
+            ->label(__('user.fields.first_name'))
+            ->maxLength(255);
+    }
+
+    private function getLastNameComponent(): TextInput
+    {
+        return TextInput::make('last_name')
+            ->label(__('user.fields.last_name'))
+            ->maxLength(255);
+    }
+
+    private function getTimezoneFormComponent(): Hidden
     {
         return Hidden::make('timezone')
             ->default('UTC')

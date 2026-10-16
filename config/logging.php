@@ -13,8 +13,9 @@ return [
     'channels' => [
 
         'file' => [
-            'driver' => 'single',
-            'path' => storage_path('logs/fin-tracker.log'),
+            'driver' => 'daily',
+            'path' => storage_path('app/logs/fin-tracker.log'),
+            'days' => 14,
             'level' => env('LOG_LEVEL', 'warning'),
             'replace_placeholders' => true,
         ],

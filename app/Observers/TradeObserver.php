@@ -21,20 +21,14 @@ final readonly class TradeObserver
     {
         // Only needed in importer
         /** @phpstan-ignore-next-line */
-        if ($trade->account_id === null) {
-            $trade->account_id = ($this->getOrCreateDefaultAccount)()->id;
-        }
+        $trade->account_id ??= ($this->getOrCreateDefaultAccount)()->id;
 
         // Only needed in importer
         /** @phpstan-ignore-next-line */
-        if ($trade->portfolio_id === null) {
-            $trade->portfolio_id = ($this->getOrCreateDefaultPortfolio)()->id;
-        }
+        $trade->portfolio_id ??= ($this->getOrCreateDefaultPortfolio)()->id;
 
         // Only needed in importer
         /** @phpstan-ignore-next-line */
-        if ($trade->security_id === null) {
-            $trade->security_id = ($this->getOrCreateDefaultSecurity)()->id;
-        }
+        $trade->security_id ??= ($this->getOrCreateDefaultSecurity)()->id;
     }
 }

@@ -120,5 +120,5 @@ it('succeeds when there is nothing to clean up', function (): void {
 
     expect(DB::table(config()->string('cache.stores.database.table')))->count()->toBe(0)
         ->and(DB::table(config()->string('cache.stores.database.lock_table'))->count())->toBe(0)
-        ->and(Storage::disk('local')->files('livewire-tmp'))->toBe([]);
+        ->and(Storage::disk('local')->files('livewire-tmp'))->toBeEmpty();
 });

@@ -76,38 +76,58 @@ docker exec -it -u application fin-tracker zsh
 The project defines Composer scripts to standardize quality checks and local workflows.
 
 ```shell
-# Fix code style with Laravel Pint
+# Apply Rector refactorings and fix formatting with Pint and Prettier
 composer lint
 
 # Run the full test suite
 composer test
 
 # Individual test phases
-composer test:type-coverage   # Pest type coverage test
-composer test:unit            # Pest feature and unit tests
-composer test:lint            # Pint in --test mode
-composer test:types           # PHPStan static analysis
+composer test:lint            # Pint, Rector and Prettier in check mode
+composer test:type-coverage   # Pest type coverage, requires 100 %
+composer test:types           # PHPStan and TypeScript type check
+composer test:unit            # Pest feature and unit tests with coverage, requires 100 %
+```
 
-# Update PHP & JS dependencies
-composer update:requirements
+Update dependencies:
+
+```shell
+# PHP dependencies, the version constraints in composer.json are raised afterwards
+composer update
+
+# JS dependencies
+npx ncu -u
+npm install
 ```
 
 Notes:
 
-- After `composer update`, hooks will automatically publish Livewire assets, run Filament upgrade, and clear caches.
+- After `composer update`, hooks will automatically publish Livewire assets, run Filament upgrade, clear caches and bump
+  the version constraints.
+- NPM install scripts are disabled via [.npmrc](.npmrc).
 - When running commands, prefer executing them inside the container as the application user to avoid permission issues.
 
 ## Coding style and conventions
 
 - Follow [.editorconfig](.editorconfig).
-- Use Laravel Pint with the rules defined in [pint.json](pint.json).
+- PHP code is formatted with Laravel Pint ([pint.json](pint.json)) and refactored with Rector
+  ([rector.php](rector.php)).
+- Blade, CSS and TypeScript are formatted with Prettier ([.prettierrc](.prettierrc)).
+- TypeScript uses strict mode as defined in [tsconfig.json](tsconfig.json).
 
 ### Static analysis and tests
 
-- Tests use [Pest](https://pestphp.com/). Always run `composer test` locally before opening a PR. This executes all
-  phases defined in [composer.json.](composer.json)
-- Static analysis uses PHPStan with the project rules in [phpstan.neon](phpstan.neon). You can run just this phase via
-  `composer test:types`.
+- Tests use [Pest](https://pestphp.com/) and run against PostgreSQL. Create the test database once:
+
+  ```shell
+  docker exec fin-tracker-db createdb -U postgres fin-tracker_test
+  ```
+
+  Parallel runs additionally create one database per process.
+- Always run `composer test` locally before opening a PR. This executes all phases defined in
+  [composer.json](composer.json). The same checks run in CI for pull requests against `main`.
+- Static analysis uses PHPStan at the highest level with the project rules in [phpstan.neon](phpstan.neon) and the
+  TypeScript compiler. You can run just this phase via `composer test:types`.
 
 ## Frontend
 

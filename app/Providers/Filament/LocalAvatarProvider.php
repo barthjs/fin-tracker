@@ -41,7 +41,7 @@ final class LocalAvatarProvider implements AvatarProvider
         }
 
         if ($initials === '') {
-            $name = mb_trim((string) $record->username);
+            $name = mb_trim($record->username);
             $initials = Str::upper(Str::substr($name, 0, 1));
         }
 

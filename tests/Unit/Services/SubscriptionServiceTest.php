@@ -257,7 +257,7 @@ it('skips zero-frequency subscriptions in the chart allocation', function (): vo
         'category'
     );
 
-    expect($result['labels'])->toBe([]);
+    expect($result['labels'])->toBeEmpty();
 });
 
 it('builds a chart allocation grouped by category', function (): void {

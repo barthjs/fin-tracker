@@ -7,14 +7,15 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
-        "awcodes/light-switch": "^3.0",
+        "awcodes/light-switch": "^3.2",
         "bezhansalleh/filament-language-switch": "^4.3",
-        "dedoc/scramble": "^0.13.28",
-        "filament/filament": "^5.6.7",
+        "dedoc/scramble": "^0.13.48",
+        "filament/filament": "^5.10.2",
         "jenssegers/agent": "^2.6.4",
-        "laravel/framework": "^13.16.1",
-        "laravel/sanctum": "^4.3.2",
-        "laravel/socialite": "^5.28.0",
+        "laravel/framework": "^13.37.0",
+        "laravel/sanctum": "^4.3.3",
+        "laravel/socialite": "^5.31.0",
+        "secondnetwork/blade-tabler-icons": "^3.49.0",
         "socialiteproviders/authelia": "^4.0",
         "socialiteproviders/authentik": "^5.3",
         "socialiteproviders/gitea": "^4.1",
@@ -22,18 +23,23 @@
         "spatie/laravel-query-builder": "^6.4.4"
     },
     "require-dev": {
-        "driftingly/rector-laravel": "^2.5",
+        "driftingly/rector-laravel": "^2.6.2",
         "fakerphp/faker": "^1.24.1",
-        "fruitcake/laravel-debugbar": "^4.3.0",
-        "larastan/larastan": "^3.10.0",
-        "laravel/pint": "^1.29.3",
-        "mockery/mockery": "^1.6.12",
-        "nunomaduro/collision": "^8.9.4",
-        "pestphp/pest": "^4.7.3",
-        "pestphp/pest-plugin-laravel": "^4.1.0",
-        "pestphp/pest-plugin-livewire": "^4.1.0",
-        "pestphp/pest-plugin-type-coverage": "^4.0.4",
-        "rector/rector": "^2.4.5"
+        "fruitcake/laravel-debugbar": "^4.4.4",
+        "larastan/larastan": "^3.13.0",
+        "laravel/boost": "^2.10.3",
+        "laravel/pint": "^1.32.1",
+        "laravel/tinker": "^3.0.2",
+        "laravel/pao": "^1.1.5",
+        "mockery/mockery": "^1.6.15",
+        "nunomaduro/collision": "^8.9.5",
+        "pestphp/pest": "^5.3.2",
+        "pestphp/pest-plugin-laravel": "^5.0.1",
+        "pestphp/pest-plugin-livewire": "^5.0.0",
+        "pestphp/pest-plugin-phpstan": "^5.2.2",
+        "pestphp/pest-plugin-rector": "^5.0.6",
+        "pestphp/pest-plugin-type-coverage": "^5.0.3",
+        "rector/rector": "^2.7.0"
     },
     "autoload": {
         "psr-4": {
@@ -71,7 +77,8 @@
             "@update:requirements"
         ],
         "publish-assets": [
-            "@php artisan livewire:publish --assets"
+            "@php artisan livewire:publish --assets",
+            "@php artisan filament:assets"
         ],
         "update:requirements": [
             "composer bump"
@@ -81,20 +88,23 @@
             "pint --parallel",
             "npm run lint"
         ],
-        "test:type-coverage": "pest --type-coverage --compact --min=100",
-        "test:unit": "pest --parallel --coverage --min=100",
         "test:lint": [
             "pint --parallel --test",
             "rector --dry-run",
             "npm run test:lint"
         ],
-        "test:types": "phpstan",
+        "test:type-coverage": "pest --type-coverage --compact --min=100",
+        "test:types": [
+            "phpstan",
+            "npm run test:types"
+        ],
+        "test:unit": "pest --parallel --coverage --min=100",
         "test": [
             "@php artisan config:clear --ansi",
-            "@test:type-coverage",
-            "@test:unit",
             "@test:lint",
-            "@test:types"
+            "@test:type-coverage",
+            "@test:types",
+            "@test:unit"
         ]
     },
     "extra": {

@@ -108,34 +108,34 @@ Upon the first login, you will be redirected to the profile page to change the d
 The [.env.example](.env.example) contains all supported settings with their production defaults.
 Adjust them in the `.env` file:
 
-| Environment variable     | Default                 | Description                                                                                       |
-|--------------------------|-------------------------|---------------------------------------------------------------------------------------------------|
-| `APP_NAME`               | `Fin-Tracker`           | Application name shown in the interface and used as email sender name                             |
-| `APP_KEY`                | (required)              | Key used to encrypt and decrypt data. Generate with: `echo -n 'base64:'; openssl rand -base64 32` |
-| `APP_DEBUG`              | `false`                 | Show detailed error pages. Enable only temporarily for troubleshooting.                           |
-| `APP_URL`                | `http://localhost:8080` | Base URL of the application                                                                       |
-| `APP_ALLOW_REGISTRATION` | `false`                 | Enable/disable user self-registration                                                             |
-| `APP_DEFAULT_CURRENCY`   | `EUR`                   | Currency to use when creating new users (ISO 4217)                                                |
-| `APP_WEBHOOK_SECRET`     | (optional)              | Secret to sign notifications to the webhook channel                                               |
-| `LOG_CHANNEL`            | `stdout`                | `stdout` logs to Docker, whereas `file` writes to `/app/storage/logs/fin-tracker.log`             |
-| `LOG_LEVEL`              | `warning`               | Log level: `debug`, `info`, `warning`, `error`                                                    |
-| `DB_CONNECTION`          | `pgsql`                 | Database driver, only `pgsql` is supported                                                        |
-| `DB_HOST`                | `database`              | Database host name (service or container name in Docker Compose)                                  |
-| `DB_PORT`                | `5432`                  | Database port                                                                                     |
-| `DB_DATABASE`            | `fin-tracker`           | Database name                                                                                     |
-| `DB_USERNAME`            | `postgres`              | Database username                                                                                 |
-| `DB_PASSWORD`            | (required)              | Database password                                                                                 |
-| `MAIL_MAILER`            | `log`                   | Mail driver: `smtp` sends emails, `log` writes them to the log                                    |
-| `MAIL_SCHEME`            | (empty)                 | `smtps` for TLS, `smtp` for STARTTLS. If empty, port `465` uses `smtps` and any other port `smtp` |
-| `MAIL_HOST`              | (empty)                 | Mail server host, required for `smtp`                                                             |
-| `MAIL_PORT`              | (empty)                 | Mail server port, required for `smtp`                                                             |
-| `MAIL_USERNAME`          | (empty)                 | Mail server username                                                                              |
-| `MAIL_PASSWORD`          | (empty)                 | Mail server password                                                                              |
-| `MAIL_FROM_ADDRESS`      | (empty)                 | Sender email address, required for `smtp`                                                         |
-| `MAIL_FROM_NAME`         | `APP_NAME`              | Sender name                                                                                       |
-| `SESSION_LIFETIME`       | `43800`                 | Minutes of inactivity until a user is logged out                                                  |
-| `PUID`                   | `1000`                  | User id of the user running the app                                                               |
-| `PGID`                   | `1000`                  | Group id of the user running the app                                                              |
+| Environment variable     | Default                 | Description                                                                                          |
+|--------------------------|-------------------------|------------------------------------------------------------------------------------------------------|
+| `APP_NAME`               | `Fin-Tracker`           | Application name shown in the interface and used as email sender name                                |
+| `APP_KEY`                | (required)              | Key used to encrypt and decrypt data. Generate with: `echo -n 'base64:'; openssl rand -base64 32`    |
+| `APP_DEBUG`              | `false`                 | Show detailed error pages. Enable only temporarily for troubleshooting.                              |
+| `APP_URL`                | `http://localhost:8080` | Base URL of the application                                                                          |
+| `APP_ALLOW_REGISTRATION` | `false`                 | Enable/disable user self-registration                                                                |
+| `APP_DEFAULT_CURRENCY`   | `EUR`                   | Currency to use when creating new users (ISO 4217)                                                   |
+| `APP_WEBHOOK_SECRET`     | (optional)              | Secret to sign notifications to the webhook channel                                                  |
+| `LOG_CHANNEL`            | `stdout`                | `stdout` logs to Docker, `file` writes one file per day to `/app/storage/app/logs` and keeps 14 days |
+| `LOG_LEVEL`              | `warning`               | Log level: `debug`, `info`, `warning`, `error`                                                       |
+| `DB_CONNECTION`          | `pgsql`                 | Database driver, only `pgsql` is supported                                                           |
+| `DB_HOST`                | `database`              | Database host name (service or container name in Docker Compose)                                     |
+| `DB_PORT`                | `5432`                  | Database port                                                                                        |
+| `DB_DATABASE`            | `fin-tracker`           | Database name                                                                                        |
+| `DB_USERNAME`            | `postgres`              | Database username                                                                                    |
+| `DB_PASSWORD`            | (required)              | Database password                                                                                    |
+| `MAIL_MAILER`            | `log`                   | Mail driver: `smtp` sends emails, `log` writes them to the log                                       |
+| `MAIL_SCHEME`            | (empty)                 | `smtps` for TLS, `smtp` for STARTTLS. If empty, port `465` uses `smtps` and any other port `smtp`    |
+| `MAIL_HOST`              | (empty)                 | Mail server host, required for `smtp`                                                                |
+| `MAIL_PORT`              | (empty)                 | Mail server port, required for `smtp`                                                                |
+| `MAIL_USERNAME`          | (empty)                 | Mail server username                                                                                 |
+| `MAIL_PASSWORD`          | (empty)                 | Mail server password                                                                                 |
+| `MAIL_FROM_ADDRESS`      | (empty)                 | Sender email address, required for `smtp`                                                            |
+| `MAIL_FROM_NAME`         | `APP_NAME`              | Sender name                                                                                          |
+| `SESSION_LIFETIME`       | `43800`                 | Minutes of inactivity until a user is logged out                                                     |
+| `PUID`                   | `1000`                  | User id of the user running the app                                                                  |
+| `PGID`                   | `1000`                  | Group id of the user running the app                                                                 |
 
 ## OpenID Connect (SSO)
 

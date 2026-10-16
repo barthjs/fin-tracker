@@ -11,8 +11,6 @@ final class NotificationTargetObserver
     public function creating(NotificationTarget $notificationTarget): void
     {
         /** @phpstan-ignore-next-line */
-        if ($notificationTarget->user_id === null) {
-            $notificationTarget->user_id = auth()->user()->id;
-        }
+        $notificationTarget->user_id ??= auth()->user()->id;
     }
 }

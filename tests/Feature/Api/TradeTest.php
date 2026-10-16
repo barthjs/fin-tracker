@@ -103,11 +103,10 @@ describe('Trade API', tests: function (): void {
         assertDatabaseHas('trades', $data);
 
         $trade = Trade::query()->where('account_id', $account->id)->firstOrFail();
-        $this->assertEquals(1007, $trade->total_amount);
-
-        $this->assertEquals(-1007, $account->fresh()?->balance);
-        $this->assertEquals(1000, $portfolio->fresh()?->market_value);
-        $this->assertEquals(10, $security->fresh()?->total_quantity);
+        expect($trade->total_amount)->toEqual(1007)
+            ->and($account->fresh()?->balance)->toEqual(-1007)
+            ->and($portfolio->fresh()?->market_value)->toEqual(1000)
+            ->and($security->fresh()?->total_quantity)->toEqual(10);
     });
 
     test('store fails with invalid data', function (): void {
@@ -163,9 +162,9 @@ describe('Trade API', tests: function (): void {
 
         assertDatabaseHas('trades', $data);
 
-        $this->assertEquals(-2002, $account->fresh()?->balance);
-        $this->assertEquals(2000, $portfolio->fresh()?->market_value);
-        $this->assertEquals(20, $security->fresh()?->total_quantity);
+        expect($account->fresh()?->balance)->toEqual(-2002)
+            ->and($portfolio->fresh()?->market_value)->toEqual(2000)
+            ->and($security->fresh()?->total_quantity)->toEqual(20);
     });
 
     test('destroy deletes a trade', function (): void {
@@ -190,9 +189,9 @@ describe('Trade API', tests: function (): void {
             ->assertNoContent();
 
         assertDatabaseMissing('trades', ['id' => $trade->id]);
-        $this->assertEquals(0, $account->fresh()?->balance);
-        $this->assertEquals(0, $portfolio->fresh()?->market_value);
-        $this->assertEquals(0, $security->fresh()?->total_quantity);
+        expect($account->fresh()?->balance)->toEqual(0)
+            ->and($portfolio->fresh()?->market_value)->toEqual(0)
+            ->and($security->fresh()?->total_quantity)->toEqual(0);
     });
 
     test('show returns a single trade', function (): void {

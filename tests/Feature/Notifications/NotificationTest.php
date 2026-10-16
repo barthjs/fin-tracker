@@ -61,9 +61,9 @@ it('maps webhook config from and to array', function (): void {
         ->and($config->verifySsl)->toBeFalse()
         ->and($config->contentType)->toBe('form')
         ->and($config->toArray())->toMatchArray(['url' => 'https://x.test/hook', 'content_type' => 'form'])
-        ->and(EmailConfig::fromArray([])->email)->toBe('')
+        ->and(EmailConfig::fromArray([])->email)->toBeEmpty()
         ->and(EmailConfig::fromArray(['email' => 'a@b.test'])->toArray())->toBe(['email' => 'a@b.test'])
-        ->and(DatabaseConfig::fromArray([])->toArray())->toBe([]);
+        ->and(DatabaseConfig::fromArray([])->toArray())->toBeEmpty();
 });
 
 it('sends an email notification', function (): void {
@@ -211,7 +211,7 @@ it('exposes the mail envelope, content and attachments', function (): void {
 
     expect($mail->envelope()->subject)->toBe('Subject')
         ->and($mail->content()->markdown)->toBe('mail.notification')
-        ->and($mail->attachments())->toBe([]);
+        ->and($mail->attachments())->toBeEmpty();
 });
 
 /**

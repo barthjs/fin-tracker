@@ -30,6 +30,7 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Vite;
@@ -84,10 +85,16 @@ final class AppServiceProvider extends ServiceProvider
 
     private function configureDefaults(): void
     {
+        DB::prohibitDestructiveCommands(app()->isProduction());
+
         Date::use(CarbonImmutable::class);
+
         Model::shouldBeStrict();
+
         Model::unguard();
+
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
         Vite::useAggressivePrefetching();
 
         // @codeCoverageIgnoreStart

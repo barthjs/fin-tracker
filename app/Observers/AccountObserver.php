@@ -13,9 +13,7 @@ final class AccountObserver
         $account->name = mb_trim($account->name);
 
         /** @phpstan-ignore-next-line */
-        if ($account->user_id === null) {
-            $account->user_id = auth()->user()->id;
-        }
+        $account->user_id ??= auth()->user()->id;
     }
 
     public function updating(Account $account): void

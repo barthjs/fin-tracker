@@ -26,15 +26,11 @@ final readonly class TransactionObserver
 
         // Only needed in importer
         /** @phpstan-ignore-next-line */
-        if ($transaction->account_id === null) {
-            $transaction->account_id = ($this->getOrCreateDefaultAccount)()->id;
-        }
+        $transaction->account_id ??= ($this->getOrCreateDefaultAccount)()->id;
 
         // Only needed in importer
         /** @phpstan-ignore-next-line */
-        if ($transaction->category_id === null) {
-            $transaction->category_id = ($this->getOrCreateDefaultCategory)()->id;
-        }
+        $transaction->category_id ??= ($this->getOrCreateDefaultCategory)()->id;
     }
 
     public function updating(Transaction $transaction): void

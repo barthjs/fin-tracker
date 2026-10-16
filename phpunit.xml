@@ -19,6 +19,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_FAKER_LOCALE" value="en_US"/>
         <env name="APP_ALLOW_REGISTRATION" value="true"/>
         <env name="APP_DEFAULT_CURRENCY" value="EUR"/>
         <env name="APP_WEBHOOK_SECRET" value="test"/>
@@ -30,9 +31,14 @@
         <env name="DB_USERNAME" value="postgres"/>
         <env name="DB_PASSWORD" value="postgres"/>
         <env name="MAIL_MAILER" value="array"/>
+        <env name="MAIL_FROM_ADDRESS" value="noreply@example.com"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <env name="AUTHELIA_OIDC_ENABLED" value="false"/>
+        <env name="AUTHENTIK_OIDC_ENABLED" value="false"/>
+        <env name="GITEA_OIDC_ENABLED" value="false"/>
+        <env name="KEYCLOAK_OIDC_ENABLED" value="false"/>
         <env name="OIDC_ENABLED" value="true"/>
         <env name="OIDC_URL" value="https://auth.example.com"/>
         <env name="OIDC_CLIENT_ID" value="test-id"/>

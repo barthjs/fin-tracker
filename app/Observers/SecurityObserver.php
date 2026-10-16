@@ -13,9 +13,7 @@ final class SecurityObserver
         $this->trimFields($security);
 
         /** @phpstan-ignore-next-line */
-        if ($security->user_id === null) {
-            $security->user_id = auth()->user()->id;
-        }
+        $security->user_id ??= auth()->user()->id;
     }
 
     public function updating(Security $security): void

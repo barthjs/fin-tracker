@@ -66,7 +66,7 @@ it('excludes inactive categories and categories of other types', function (): vo
 it('returns empty arrays when there are no categories', function (): void {
     $data = resolve(GetCategoryChartData::class)(TransactionType::Expense);
 
-    expect($data['labels'])->toBe([])
-        ->and($data['series'])->toBe([])
-        ->and($data['colors'])->toBe([]);
+    expect($data['labels'])->toBeEmpty()
+        ->and($data['series'])->toBeEmpty()
+        ->and($data['colors'])->toBeEmpty();
 });

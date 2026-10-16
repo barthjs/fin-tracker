@@ -13,9 +13,7 @@ final class PortfolioObserver
         $portfolio->name = mb_trim($portfolio->name);
 
         /** @phpstan-ignore-next-line */
-        if ($portfolio->user_id === null) {
-            $portfolio->user_id = auth()->user()->id;
-        }
+        $portfolio->user_id ??= auth()->user()->id;
     }
 
     public function updating(Portfolio $portfolio): void

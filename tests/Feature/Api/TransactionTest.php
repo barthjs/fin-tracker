@@ -91,7 +91,7 @@ describe('Transaction API', function (): void {
 
         assertDatabaseHas('transactions', $data);
 
-        $this->assertEquals(-100.5, $account->fresh()?->balance);
+        expect($account->fresh()?->balance)->toEqual(-100.5);
     });
 
     test('store fails with invalid data', function (): void {
@@ -131,7 +131,7 @@ describe('Transaction API', function (): void {
 
         assertDatabaseHas('transactions', $data);
 
-        $this->assertEquals(75.0, $account->fresh()?->balance);
+        expect($account->fresh()?->balance)->toEqual(75.0);
     });
 
     test('destroy deletes a transaction', function (): void {
@@ -148,7 +148,7 @@ describe('Transaction API', function (): void {
             ->assertNoContent();
 
         assertDatabaseMissing('transactions', ['id' => $transaction->id]);
-        $this->assertEquals(0.0, $account->fresh()?->balance);
+        expect($account->fresh()?->balance)->toEqual(0.0);
     });
 
     test('show returns a single transaction', function (): void {

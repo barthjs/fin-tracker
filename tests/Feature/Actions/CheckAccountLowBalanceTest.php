@@ -200,8 +200,7 @@ it('rolls the alert back together with a failed booking', function (): void {
         ]);
 
         throw new RuntimeException('Booking failed');
-    }))->toThrow(RuntimeException::class);
-
-    expect($account->fresh()?->low_balance_notified_at)->toBeNull()
+    }))->toThrow(RuntimeException::class)
+        ->and($account->fresh()?->low_balance_notified_at)->toBeNull()
         ->and(DB::table('notifications')->count())->toBe(0);
 });

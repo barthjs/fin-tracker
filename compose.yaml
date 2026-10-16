@@ -9,7 +9,7 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./data:/app/storage/app
+      - ./app_data:/app/storage/app
     env_file: .env
 
   database:

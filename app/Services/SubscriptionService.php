@@ -329,13 +329,11 @@ final readonly class SubscriptionService
 
             $key = $relatedModel->getKey();
 
-            if (! isset($grouped[$key])) {
-                $grouped[$key] = [
-                    'label' => $relatedModel->getChartLabel(),
-                    'color' => $relatedModel->getChartColor(),
-                    'sum' => 0.0,
-                ];
-            }
+            $grouped[$key] ??= [
+                'label' => $relatedModel->getChartLabel(),
+                'color' => $relatedModel->getChartColor(),
+                'sum' => 0.0,
+            ];
 
             $grouped[$key]['sum'] += $this->calculateMonthlyEquivalent($sub);
         }

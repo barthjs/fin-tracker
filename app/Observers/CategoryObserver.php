@@ -17,9 +17,7 @@ final class CategoryObserver
         $category->type = $this->typeForGroup($category->group);
 
         /** @phpstan-ignore-next-line */
-        if ($category->user_id === null) {
-            $category->user_id = auth()->user()->id;
-        }
+        $category->user_id ??= auth()->user()->id;
     }
 
     public function updating(Category $category): void

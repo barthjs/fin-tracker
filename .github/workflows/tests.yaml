@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+  workflow_call:
+
+  workflow_dispatch:
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -27,32 +31,32 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.5
-          coverage: xdebug
+          coverage: pcov
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor
-          key: composer-${{ hashFiles('composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts --no-progress
 
       - name: Install NPM dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build assets
         run: npm run build
@@ -64,17 +68,17 @@ jobs:
         run: php artisan key:generate
 
       - name: Cache Rector
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /tmp/rector
-          key: ${{ runner.os }}-rector-${{ hashFiles('composer.lock') }}
+          key: ${{ runner.os }}-rector-${{ github.sha }}
           restore-keys: ${{ runner.os }}-rector-
 
       - name: Cache PHPStan
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: /tmp/phpstan
-          key: ${{ runner.os }}-phpstan-${{ hashFiles('composer.lock') }}
+          key: ${{ runner.os }}-phpstan-${{ github.sha }}
           restore-keys: ${{ runner.os }}-phpstan-
 
       - name: Create cache directories
