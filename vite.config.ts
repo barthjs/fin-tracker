@@ -8,7 +8,7 @@ export default defineConfig({
         laravel({
             input: ['resources/css/filament/app/theme.css', 'resources/js/main.ts'],
             refresh: true,
-            assets: ['resources/fonts', 'resources/images'],
+            assets: ['resources/images'],
         }),
         tailwindcss(),
     ],

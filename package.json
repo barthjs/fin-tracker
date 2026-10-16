@@ -5,20 +5,24 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite --host",
-        "lint": "prettier --write resources/",
-        "test:lint": "prettier --check resources/"
+        "lint": "prettier --write resources/ vite.config.ts",
+        "test:lint": "prettier --check resources/ vite.config.ts",
+        "test:types": "tsc"
     },
     "dependencies": {
-        "@tailwindcss/vite": "^4.3.1",
-        "laravel-vite-plugin": "^3.1",
-        "tailwindcss": "^4.3.1",
-        "vite": "^8.0.16"
+        "@fontsource/poppins": "^5.3.0",
+        "@tailwindcss/typography": "^0.5.20",
+        "@tailwindcss/vite": "^4.3.3",
+        "laravel-vite-plugin": "^3.2",
+        "tailwindcss": "^4.3.3",
+        "vite": "^8.3.4"
     },
     "devDependencies": {
-        "@prettier/plugin-php": "^0.24.0",
-        "npm-check-updates": "^22.2.3",
-        "prettier": "^3.8.4",
-        "prettier-plugin-blade": "^3.1.6",
-        "prettier-plugin-tailwindcss": "^0.7.2"
+        "@prettier/plugin-php": "^0.25.0",
+        "npm-check-updates": "^23.1.1",
+        "prettier": "^3.9.10",
+        "prettier-plugin-blade": "^3.3.3",
+        "prettier-plugin-tailwindcss": "^0.8.1",
+        "typescript": "^7.0.2"
     }
 }

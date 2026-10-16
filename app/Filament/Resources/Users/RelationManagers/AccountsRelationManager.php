@@ -25,7 +25,7 @@ final class AccountsRelationManager extends RelationManager
 
     protected static string $relationship = 'accounts';
 
-    protected static string|BackedEnum|null $icon = 'tabler-bank-building';
+    protected static string|BackedEnum|null $icon = 'tabler-building-bank';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {

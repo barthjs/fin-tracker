@@ -44,7 +44,7 @@ final class AccountResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-    protected static string|BackedEnum|null $navigationIcon = 'tabler-bank-building';
+    protected static string|BackedEnum|null $navigationIcon = 'tabler-building-bank';
 
     protected static ?string $recordTitleAttribute = 'name';
 

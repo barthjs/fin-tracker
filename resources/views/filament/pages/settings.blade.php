@@ -20,7 +20,7 @@
                     href="https://github.com/barthjs/fin-tracker/issues"
                     target="_blank"
                     color="info"
-                    icon="github"
+                    icon="tabler-brand-github"
                 >
                     {{ __('settings.report_bug') }}
                 </x-filament::button>

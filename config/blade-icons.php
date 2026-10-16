@@ -6,10 +6,11 @@ return [
 
     'sets' => [
 
+        // Named default so OIDC provider slugs resolve to their icon without a prefix
         'default' => [
 
-            'path' => 'resources/icons/svg',
-            'prefix' => 'tabler',
+            'path' => 'resources/icons/brand',
+            'prefix' => 'brand',
 
         ],
 
