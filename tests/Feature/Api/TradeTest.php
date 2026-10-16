@@ -79,10 +79,10 @@ describe('Trade API', tests: function (): void {
         $data = [
             'date_time' => now()->toDateTimeString(),
             'type' => TradeType::Buy->value,
-            'quantity' => 10,
-            'price' => 100,
-            'fee' => 5,
-            'tax' => 2,
+            'quantity' => 10.0,
+            'price' => 100.0,
+            'fee' => 5.0,
+            'tax' => 2.0,
             'notes' => 'Test',
             'account_id' => $account->id,
             'portfolio_id' => $portfolio->id,
@@ -138,10 +138,10 @@ describe('Trade API', tests: function (): void {
         $data = [
             'date_time' => $trade->date_time->toDateTimeString(),
             'type' => TradeType::Buy->value,
-            'quantity' => 20,
-            'price' => 100,
-            'tax' => 1,
-            'fee' => 1,
+            'quantity' => 20.0,
+            'price' => 100.0,
+            'tax' => 1.0,
+            'fee' => 1.0,
             'notes' => 'Test',
             'account_id' => $account->id,
             'portfolio_id' => $portfolio->id,
@@ -150,7 +150,7 @@ describe('Trade API', tests: function (): void {
 
         putJson(route('api.trades.update', $trade), $data)
             ->assertOk()
-            ->assertJsonPath('data.total_amount', 2002)
+            ->assertJsonPath('data.total_amount', 2002.0)
             ->assertJsonPath('data.quantity', $data['quantity'])
             ->assertJsonPath('data.price', $data['price'])
             ->assertJsonPath('data.tax', $data['tax'])

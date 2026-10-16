@@ -139,7 +139,7 @@ describe('Account API', function (): void {
             ->assertOk()
             ->assertJsonPath('data.id', $account->id)
             ->assertJsonPath('data.name', $account->name)
-            ->assertJsonPath('data.balance', 0)
+            ->assertJsonPath('data.balance', 0.0)
             ->assertJsonPath('data.currency', $account->currency->value)
             ->assertJsonPath('data.description', $account->description)
             ->assertJsonPath('data.color', $account->color)

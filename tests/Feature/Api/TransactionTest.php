@@ -115,7 +115,7 @@ describe('Transaction API', function (): void {
         $data = [
             'date_time' => $transaction->date_time->toDateTimeString(),
             'type' => TransactionType::Revenue->value,
-            'amount' => 75,
+            'amount' => 75.0,
             'payee' => 'Updated Payee',
             'account_id' => $account->id,
             'category_id' => $transaction->category_id,

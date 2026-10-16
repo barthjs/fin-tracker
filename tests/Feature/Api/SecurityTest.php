@@ -104,7 +104,7 @@ describe('Security API', function (): void {
             ->assertJsonPath('data.symbol', $data['symbol'])
             ->assertJsonPath('data.type', $data['type'])
             ->assertJsonPath('data.price', $data['price'])
-            ->assertJsonPath('data.total_quantity', 0)
+            ->assertJsonPath('data.total_quantity', 0.0)
             ->assertJsonPath('data.region', $data['region'])
             ->assertJsonPath('data.sector', $data['sector'])
             ->assertJsonPath('data.country', $data['country'])
@@ -136,7 +136,7 @@ describe('Security API', function (): void {
             ->assertJsonPath('data.symbol', $security->symbol)
             ->assertJsonPath('data.type', $security->type->value)
             ->assertJsonPath('data.price', $security->price)
-            ->assertJsonPath('data.total_quantity', 0)
+            ->assertJsonPath('data.total_quantity', 0.0)
             ->assertJsonPath('data.description', $security->description)
             ->assertJsonPath('data.color', $security->color)
             ->assertJsonPath('data.is_active', $security->is_active);

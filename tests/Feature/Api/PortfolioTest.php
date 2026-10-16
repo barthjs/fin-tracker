@@ -104,7 +104,7 @@ describe('Portfolio API', function (): void {
             ->assertOk()
             ->assertJsonPath('data.id', $portfolio->id)
             ->assertJsonPath('data.name', $portfolio->name)
-            ->assertJsonPath('data.market_value', 0)
+            ->assertJsonPath('data.market_value', 0.0)
             ->assertJsonPath('data.currency', $portfolio->currency->value)
             ->assertJsonPath('data.description', $portfolio->description)
             ->assertJsonPath('data.color', $portfolio->color)
