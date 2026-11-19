@@ -12,6 +12,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -76,7 +77,7 @@ final class AppCleanupTempDataCommand extends Command
             // Delete the file immediately if completed
             // @codeCoverageIgnoreStart
             if (file_exists($import->file_path)) {
-                unlink($import->file_path);
+                File::delete($import->file_path);
             }
 
             // @codeCoverageIgnoreEnd

@@ -54,7 +54,7 @@ it('handles a github response without a tag name', function (): void {
 });
 
 it('handles a github connection exception', function (): void {
-    Http::fake(fn () => throw new ConnectionException('connection refused'));
+    Http::fake(fn (): never => throw new ConnectionException('connection refused'));
 
     livewire(Settings::class)
         ->assertOk()
