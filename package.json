@@ -4,7 +4,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite --host",
+        "dev": "vite",
         "lint": "prettier --write resources/ vite.config.ts",
         "test:lint": "prettier --check resources/ vite.config.ts",
         "test:types": "tsc"

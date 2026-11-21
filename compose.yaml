@@ -3,6 +3,8 @@ services:
     image: barthjs/fin-tracker:latest
     container_name: fin-tracker
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       database:
         condition: service_healthy
@@ -11,11 +13,16 @@ services:
     volumes:
       - ./app_data:/app/storage/app
     env_file: .env
+    networks:
+      - default
+      - backend
 
   database:
     image: postgres:18-alpine
     container_name: fin-tracker-db
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d $DB_DATABASE -U $DB_USERNAME" ]
       interval: 30s
@@ -28,3 +35,9 @@ services:
       - POSTGRES_DB=${DB_DATABASE}
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - backend
+
+networks:
+  backend:
+    internal: true

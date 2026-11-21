@@ -7,6 +7,7 @@ use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector;
 use Rector\Config\RectorConfig;
 use Rector\Php85\Rector\Property\AddOverrideAttributeToOverriddenPropertiesRector;
+use Rector\Privatization\Rector\ClassMethod\PrivatizeFinalClassMethodRector;
 use RectorLaravel\Set\LaravelSetList;
 
 try {
@@ -42,6 +43,11 @@ try {
         ->withSkip([
             AddOverrideAttributeToOverriddenPropertiesRector::class,
             MakeInheritedMethodVisibilitySameAsParentRector::class,
+            // Filament calls hooks such as afterCreate and the action methods from its parent classes,
+            // which cannot reach private methods of a child class.
+            PrivatizeFinalClassMethodRector::class => [
+                __DIR__.'/app/Filament',
+            ],
         ])
         ->withPreparedSets(
             deadCode: true,

@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Main" type="PestRunConfigurationType" singleton="false">
-    <PestRunner directory="$PROJECT_DIR$" method="" scope="ConfigurationFile" parallel_testing_enabled="true" />
-    <method v="2" />
-  </configuration>
-</component>
