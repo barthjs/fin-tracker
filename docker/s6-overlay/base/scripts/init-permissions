@@ -1,15 +1,15 @@
 #!/command/with-contenv sh
 set -e
 
-CURRENT_GID=$(getent group application | cut -d: -f3)
-CURRENT_UID=$(id -u application)
+CURRENT_GID=$(getent group "${APP_USER}" | cut -d: -f3)
+CURRENT_UID=$(id -u "${APP_USER}")
 
 if [ "$PGID" != "$CURRENT_GID" ]; then
-    groupmod -o -g "$PGID" application
+    groupmod -o -g "$PGID" "${APP_USER}"
 fi
 
 if [ "$PUID" != "$CURRENT_UID" ]; then
-    usermod -o -u "$PUID" application
+    usermod -o -u "$PUID" "${APP_USER}"
 fi
 
 chown -R "${PUID}:${PGID}" /app/bootstrap/cache /app/storage

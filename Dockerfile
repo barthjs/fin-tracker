@@ -2,16 +2,16 @@
 FROM php:8.5-fpm-alpine AS base
 WORKDIR /app
 
-ENV PUID=1000 \
+ENV APP_USER=application \
+    PUID=1000 \
     PGID=1000 \
     S6_OVERLAY_VERSION=3.2.3.0 \
-    S6_VERBOSITY=1 \
-    USER=application
+    S6_VERBOSITY=1
 
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 RUN set -eux \
-    && addgroup -g ${PGID} ${USER} \
-    && adduser -D -u ${PUID} -G ${USER} -h /home/${USER} -s /bin/sh ${USER} \
+    && addgroup -g ${PGID} ${APP_USER} \
+    && adduser -D -u ${PUID} -G ${APP_USER} -h /home/${APP_USER} -s /bin/sh ${APP_USER} \
     && apk add --no-cache \
     nginx \
     shadow \
@@ -28,6 +28,9 @@ RUN set -eux \
     && rm -f /usr/local/bin/install-php-extensions \
     && rm -rf /usr/local/etc/php-fpm.d/*.conf
 
+COPY docker/php/php.ini $PHP_INI_DIR/conf.d/
+
+COPY docker/nginx/snippets /etc/nginx/snippets
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 
 COPY docker/s6-overlay/base /etc/s6-overlay
@@ -39,7 +42,7 @@ ENV PHP_IDE_CONFIG="serverName=fin-tracker"
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY --from=mlocati/php-extension-installer:latest /usr/bin/install-php-extensions /usr/local/bin/
 RUN set -eux \
-    && usermod -s /bin/zsh ${USER} \
+    && usermod -s /bin/zsh ${APP_USER} \
     && apk add --no-cache \
     bash \
     curl \
@@ -52,14 +55,12 @@ RUN set -eux \
     xdebug \
     && mv $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini
 
-COPY docker/php/php.ini docker/php/php-dev.ini $PHP_INI_DIR/conf.d/
+COPY docker/php/php-dev.ini $PHP_INI_DIR/conf.d/
 COPY docker/php/application.conf /usr/local/etc/php-fpm.d/application.conf
 
-COPY docker/nginx/nginx-dev.conf /etc/nginx/conf.d/dev.conf
-
-USER ${USER}
+USER ${APP_USER}
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-COPY docker/.zshrc /home/${USER}/.zshrc
+COPY docker/.zshrc /home/${APP_USER}/.zshrc
 USER root
 
 EXPOSE 8080
@@ -94,10 +95,8 @@ ENV APP_VERSION=${VERSION}
 
 RUN mv $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini
 
-COPY docker/php/php.ini docker/php/php-prod.ini $PHP_INI_DIR/conf.d/
+COPY docker/php/php-prod.ini $PHP_INI_DIR/conf.d/
 COPY docker/php/application.conf /usr/local/etc/php-fpm.d/application.conf
-
-COPY docker/nginx/nginx-prod.conf /etc/nginx/conf.d/prod.conf
 
 COPY docker/s6-overlay/prod /etc/s6-overlay
 
