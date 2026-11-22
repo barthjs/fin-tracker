@@ -1,0 +1,10 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "lib": ["ES2024", "WebWorker"],
+        "types": []
+    },
+    "include": ["resources/js/pwa/serviceWorker.ts", "resources/js/lib/pwa/offline.ts"],
+    "exclude": []
+}

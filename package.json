@@ -7,7 +7,7 @@
         "dev": "vite",
         "lint": "prettier --write resources/ vite.config.ts",
         "test:lint": "prettier --check resources/ vite.config.ts",
-        "test:types": "tsc"
+        "test:types": "tsc && tsc -p tsconfig.worker.json"
     },
     "dependencies": {
         "@fontsource/poppins": "^5.3.0",

@@ -7,10 +7,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
-        "awcodes/light-switch": "^3.2",
+        "awcodes/light-switch": "^3.2.1",
         "bezhansalleh/filament-language-switch": "^4.3",
         "dedoc/scramble": "^0.13.55",
-        "filament/filament": "^5.11.4",
+        "filament/filament": "^5.12.0",
         "jenssegers/agent": "^2.6.4",
         "laravel/framework": "^13.43.0",
         "laravel/sanctum": "^4.5.0",
@@ -37,7 +37,7 @@
         "pestphp/pest-plugin-laravel": "^5.0.1",
         "pestphp/pest-plugin-livewire": "^5.0.0",
         "pestphp/pest-plugin-phpstan": "^5.3.1",
-        "pestphp/pest-plugin-rector": "^5.0.6",
+        "pestphp/pest-plugin-rector": "^5.0.7",
         "pestphp/pest-plugin-type-coverage": "^5.1.1",
         "rector/rector": "^2.8.5"
     },

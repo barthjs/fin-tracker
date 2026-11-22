@@ -1,0 +1,9 @@
+{
+    "pwa": {
+        "offline": {
+            "title": "Keine Verbindung",
+            "message": "Der Server ist nicht erreichbar. Die Seite versucht es von selbst erneut.",
+            "retry": "Erneut versuchen"
+        }
+    }
+}

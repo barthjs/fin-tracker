@@ -125,7 +125,7 @@ final class AppServiceProvider extends ServiceProvider
             // @codeCoverageIgnoreEnd
 
             FilamentAsset::register([
-                Js::make('main', Vite::asset('resources/js/main.ts')),
+                Js::make('main', Vite::asset('resources/js/main.ts'))->module(),
             ]);
 
             FilamentView::registerRenderHook(
